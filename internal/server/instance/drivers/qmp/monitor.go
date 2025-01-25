@@ -51,6 +51,7 @@ type Monitor struct {
 	serialCharDev     string
 	onDisconnectEvent bool
 	logFile           string
+	IName             string
 }
 
 // start handles the background goroutines for event handling and monitoring the ringbuffer.
@@ -330,6 +331,16 @@ func Connect(path string, serialCharDev string, eventHandler func(name string, d
 	monitors[path] = monitor
 
 	return monitor, nil
+}
+
+// ConnectSetName calls Connect and set name field to instance.
+func ConnectSetName(path string, serialCharDev string, eventHandler func(name string, data map[string]any), logFile string, name string) (*Monitor, error) {
+	Mon, err := Connect(path, serialCharDev, eventHandler, logFile)
+	if err == nil {
+		Mon.IName = name
+	}
+
+	return Mon, err
 }
 
 // AgenStarted indicates whether an agent has been detected.

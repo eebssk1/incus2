@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/lxc/incus/v6/shared/api"
+	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/revert"
 )
 
@@ -72,6 +73,26 @@ type HotpluggableCPU struct {
 type CPUModel struct {
 	Name  string         `json:"name"`
 	Flags map[string]any `json:"props"`
+}
+
+// QSlet is a Interface to access qemu scriptlet functions.
+type QSlet interface {
+	QEMUAdHook(device map[string]any, name string) (map[string]any, error)
+}
+
+type qmpcmd struct {
+	QSLet QSlet
+}
+
+var qmpInstance qmpcmd
+
+// New bind the qemu scriptlet instance to us.
+func New(QSlet QSlet) *qmpcmd {
+	qmpInstance = qmpcmd{
+		QSLet: QSlet,
+	}
+
+	return &qmpInstance
 }
 
 // QueryCPUs returns a list of CPUs.
@@ -623,9 +644,22 @@ func (m *Monitor) RemoveCharDevice(deviceID string) error {
 	return nil
 }
 
+func (q *qmpcmd) runADhook(device map[string]any, name string) (map[string]any, error) {
+	res, err := q.QSLet.QEMUAdHook(device, name)
+	if err != nil && err.Error() != "" {
+		logger.Log.Error(fmt.Sprintf("Qemu AD Hook: %s: %s", name, err.Error()))
+	}
+
+	return res, err
+}
+
 // AddDevice adds a new device.
 func (m *Monitor) AddDevice(device map[string]any) error {
 	if device != nil {
+		if dev, err := qmpInstance.runADhook(device, m.IName); err == nil {
+			device = dev
+		}
+
 		err := m.Run("device_add", device, nil)
 		if err != nil {
 			return err

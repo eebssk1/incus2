@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	SLjson "go.starlark.net/lib/json"
 	"go.starlark.net/starlark"
 
 	"github.com/lxc/incus/v6/internal/server/instance/drivers/cfg"
@@ -24,6 +25,22 @@ type qemuCfgSection struct {
 	Name    string            `json:"name"`
 	Comment string            `json:"comment"`
 	Entries map[string]string `json:"entries"`
+}
+
+// QSLet is our instance for use with qmp command interface.
+type QSLet struct{}
+
+func newQS() *QSLet {
+	return &QSLet{}
+}
+
+var isBind bool = false
+
+func (q *QSLet) bindToQMP() {
+	if !isBind {
+		qmp.New(q)
+		isBind = true
+	}
 }
 
 // marshalQEMUConf marshals a configuration into a []map[string]any.
@@ -61,6 +78,8 @@ func unmarshalQEMUConf(conf any) ([]qemuCfgSection, error) {
 // QEMURun runs the QEMU scriptlet.
 func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[]cfg.Section, m *qmp.Monitor, stage string) error {
 	logFunc := log.CreateLogger(l, "QEMU scriptlet ("+stage+")")
+	// Bind our instance to the qemu scriptlet interface
+	newQS().bindToQMP()
 
 	// We first convert from []cfg.Section to []qemuCfgSection. This conversion is temporary.
 	var cfgSectionMaps []qemuCfgSection
@@ -449,4 +468,72 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	*conf = newConf
 
 	return nil
+}
+
+func (q *QSLet) QEMUAdHook(device map[string]any, name string) (map[string]any, error) {
+	if name == "" {
+		return nil, fmt.Errorf("No instance name associated with Monitor.")
+	}
+
+	prog, thread, err := scriptletLoad.QEMUProgram(name)
+	if err != nil {
+		return nil, errors.New("")
+	}
+
+	globals, err := prog.Init(thread, SLjson.Module.Members)
+	if err != nil {
+		return nil, fmt.Errorf("Failed initializing: %w", err)
+	}
+
+	globals.Freeze()
+
+	// Retrieve a global variable from starlark environment.
+	qemuHook := globals["qemu_ad_hook"]
+	if qemuHook == nil {
+		return nil, errors.New("")
+	}
+
+	s, err := json.Marshal(device)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to convert device to json: %w", err)
+	}
+
+	v, err := starlark.Call(thread, qemuHook, nil, []starlark.Tuple{
+		{
+			starlark.String("name"),
+			starlark.String(name),
+		},
+		{
+			starlark.String("device"),
+			starlark.String(s),
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to run: %w", err)
+	}
+
+	if v.Type() == "NoneType" {
+		return nil, errors.New("")
+	}
+
+	if v.Type() != "string" {
+		return nil, fmt.Errorf("Failed with unexpected return value: %v", v)
+	}
+
+	var rs map[string]any
+
+	res := v.String()
+	// The following lossly converts starlark string to a normal one.
+	res = strings.TrimPrefix(res, "\"")
+	res = strings.TrimSuffix(res, "\"")
+	res = strings.ReplaceAll(res,"\\\"","\"")
+	if err := json.Unmarshal([]byte(res), &rs); err != nil {
+		return nil, fmt.Errorf("Failed to convert json to device: %w. The input is %s", err, res)
+	}
+
+	if rs["id"] != device["id"] {
+		return nil, fmt.Errorf("Device id does not match the original one: %s => %s", device["id"], rs["id"])
+	}
+
+	return rs, nil
 }

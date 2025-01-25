@@ -1805,7 +1805,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 	})
 
 	// Start QMP monitoring.
-	monitor, err := qmp.Connect(d.monitorPath(), qemuSerialChardevName, d.getMonitorEventHandler(), d.QMPLogFilePath())
+	monitor, err := qmp.ConnectSetName(d.monitorPath(), qemuSerialChardevName, d.getMonitorEventHandler(), d.QMPLogFilePath(), d.name)
 	if err != nil {
 		op.Done(err)
 		return err

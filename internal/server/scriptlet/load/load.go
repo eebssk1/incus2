@@ -81,14 +81,28 @@ func QEMUCompile(name string, src string) (*starlark.Program, error) {
 		"set_qemu_cmdline",
 		"get_qemu_conf",
 		"set_qemu_conf",
+
+		"encode",
+		"decode",
+		"indent",
 	})
 }
 
 // QEMUValidate validates the QEMU scriptlet.
 func QEMUValidate(src string) error {
-	return validate(QEMUCompile, prefixQEMU, src, declaration{
+	if err := validate(QEMUCompile, prefixQEMU, src, declaration{
 		required("qemu_hook"): {"instance", "stage"},
-	})
+	}); err != nil {
+		return err
+	}
+
+	if err := validate(QEMUCompile, prefixQEMU, src, declaration{
+		optional("qemu_ad_hook"): {"name", "device"},
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // QEMUSet compiles the QEMU scriptlet into memory for use with QEMURun.
