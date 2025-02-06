@@ -575,6 +575,11 @@ func (c *cmdFilePull) Run(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf(i18n.G("Invalid source %s"), resource.name)
 		}
 
+		// Make sure we have a leading / for the path.
+		if !strings.HasPrefix(pathSpec[1], "/") {
+			pathSpec[1] = "/" + pathSpec[1]
+		}
+
 		sftpConn, ok := sftpClients[pathSpec[0]]
 		if !ok {
 			sftpConn, err = resource.server.GetInstanceFileSFTP(pathSpec[0])
@@ -681,10 +686,17 @@ func (c *cmdFilePull) Run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		} else {
-			_, err = io.Copy(writer, src)
-			if err != nil {
-				progress.Done("")
-				return err
+			for {
+				// Read 1MB at a time.
+				_, err = io.CopyN(writer, src, 1024*1024)
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+
+					progress.Done("")
+					return err
+				}
 			}
 		}
 
