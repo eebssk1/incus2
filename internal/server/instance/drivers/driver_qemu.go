@@ -1205,9 +1205,9 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 
 	defer op.Done(err)
 
-	// Assign a NUMA node if needed.
+	// Assign NUMA node(s) if needed.
 	if d.expandedConfig["limits.cpu.nodes"] == "balanced" {
-		err := d.setNUMANode()
+		err := d.balanceNUMANodes()
 		if err != nil {
 			op.Done(err)
 			return err
@@ -1627,6 +1627,14 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 	// SMBIOS only on x86_64 and aarch64.
 	if d.architectureSupportsUEFI(d.architecture) {
 		qemuArgs = append(qemuArgs, "-smbios", "type=2,manufacturer=LinuxContainers,product=Incus")
+
+		for k, v := range d.expandedConfig {
+			if !strings.HasPrefix(k, "smbios11.") {
+				continue
+			}
+
+			qemuArgs = append(qemuArgs, "-smbios", fmt.Sprintf("type=11,value=%s=%s", strings.TrimPrefix(k, "smbios11."), qemuEscapeCmdline(v)))
+		}
 	}
 
 	// Attempt to drop privileges (doesn't work when restoring state).
@@ -3391,6 +3399,19 @@ func (d *qemu) generateQemuConfig(cpuInfo *cpuTopology, mountInfo *storagePools.
 
 	// Setup the bus allocator.
 	bus := qemuNewBus(busName, &conf)
+
+	// Windows doesn't support virtio-iommu.
+	if !strings.Contains(strings.ToLower(d.expandedConfig["image.os"]), "windows") && d.architectureSupportsUEFI(d.architecture) {
+		devBus, devAddr, multi := bus.allocateDirect()
+		iommuOpts := qemuDevOpts{
+			busName:       bus.name,
+			devBus:        devBus,
+			devAddr:       devAddr,
+			multifunction: multi,
+		}
+
+		conf = append(conf, qemuIOMMU(&iommuOpts)...)
+	}
 
 	// Now add the fixed set of devices. The multi-function groups used for these fixed internal devices are
 	// specifically chosen to ensure that we consume exactly 4 PCI bus ports (on PCIe bus). This ensures that
@@ -7028,6 +7049,11 @@ func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName str
 			return fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
+		// Check that we're on shared storage.
+		if !diskPool.Driver().Info().Remote {
+			continue
+		}
+
 		// Setup the volume entry.
 		extraSourceArgs := &localMigration.VolumeSourceArgs{
 			ClusterMove: true,
@@ -7546,6 +7572,11 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
 			if err != nil {
 				return fmt.Errorf("Failed loading storage pool: %w", err)
+			}
+
+			// Check that we're on shared storage.
+			if !diskPool.Driver().Info().Remote {
+				continue
 			}
 
 			// Setup the volume entry.
@@ -8800,7 +8831,7 @@ func (d *qemu) checkFeatures(hostArch int, qemuPath string) (map[string]any, err
 		"-nographic",
 		"-nodefaults",
 		"-no-user-config",
-		"-chardev", fmt.Sprintf("socket,id=monitor,path=%s,server=on,wait=off", monitorPath.Name()),
+		"-chardev", fmt.Sprintf("socket,id=monitor,path=%s,server=on,wait=off", qemuEscapeCmdline(monitorPath.Name())),
 		"-mon", "chardev=monitor,mode=control",
 		"-machine", qemuMachineType(hostArch),
 	}
@@ -8827,7 +8858,7 @@ func (d *qemu) checkFeatures(hostArch int, qemuPath string) (map[string]any, err
 			return nil, fmt.Errorf("Unable to locate a UEFI firmware")
 		}
 
-		qemuArgs = append(qemuArgs, "-drive", fmt.Sprintf("if=pflash,format=raw,readonly=on,file=%s", efiPath))
+		qemuArgs = append(qemuArgs, "-drive", fmt.Sprintf("if=pflash,format=raw,readonly=on,file=%s", qemuEscapeCmdline(efiPath)))
 	}
 
 	var stderr bytes.Buffer

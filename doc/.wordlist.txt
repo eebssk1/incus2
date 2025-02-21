@@ -83,6 +83,7 @@ ES
 ESA
 ETag
 failover
+frontend
 FQDNs
 Furo
 gapped
@@ -326,6 +327,7 @@ VMs
 VPD
 VPN
 VPS
+VRF
 vSwitch
 VXLAN
 WebSocket

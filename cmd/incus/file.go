@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -50,35 +49,6 @@ type cmdFile struct {
 
 	flagMkdir     bool
 	flagRecursive bool
-}
-
-func fileGetWrapper(server incus.InstanceServer, inst string, path string) (buf io.ReadCloser, resp *incus.InstanceFileResponse, err error) {
-	// Signal handling
-	chSignal := make(chan os.Signal, 1)
-	signal.Notify(chSignal, os.Interrupt)
-
-	// Operation handling
-	chDone := make(chan bool)
-	go func() {
-		buf, resp, err = server.GetInstanceFile(inst, path)
-		close(chDone)
-	}()
-
-	count := 0
-	for {
-		select {
-		case <-chDone:
-			return buf, resp, err
-		case <-chSignal:
-			count++
-
-			if count == 3 {
-				return nil, nil, fmt.Errorf(i18n.G("User signaled us three times, exiting. The remote operation will keep running"))
-			}
-
-			fmt.Println(i18n.G("Early server side processing of file transfer requests cannot be canceled (interrupt two more times to force)"))
-		}
-	}
 }
 
 func (c *cmdFile) Command() *cobra.Command {
@@ -195,7 +165,7 @@ func (c *cmdFileCreate) Run(cmd *cobra.Command, args []string) error {
 	resource := resources[0]
 
 	// re-add leading / that got stripped by the SplitN
-	targetPath := path.Clean("/" + pathSpec[1])
+	targetPath := filepath.Clean("/" + pathSpec[1])
 
 	// normalization may reveal that path is still a dir, e.g. /.
 	if strings.HasSuffix(targetPath, "/") {
@@ -245,7 +215,7 @@ func (c *cmdFileCreate) Run(cmd *cobra.Command, args []string) error {
 
 	// Create needed paths if requested
 	if c.file.flagMkdir {
-		err = c.file.recursiveMkdir(resource.server, resource.name, path.Dir(targetPath), nil, int64(uid), int64(gid))
+		err = c.file.recursiveMkdir(resource.server, resource.name, filepath.Dir(targetPath), nil, int64(uid), int64(gid))
 		if err != nil {
 			return err
 		}
@@ -629,7 +599,7 @@ func (c *cmdFilePull) Run(cmd *cobra.Command, args []string) error {
 
 		var targetPath string
 		if targetIsDir {
-			targetPath = path.Join(target, path.Base(pathSpec[1]))
+			targetPath = filepath.Join(target, filepath.Base(pathSpec[1]))
 		} else {
 			targetPath = target
 		}
@@ -763,7 +733,7 @@ func (c *cmdFilePush) Run(cmd *cobra.Command, args []string) error {
 	// re-add leading / that got stripped by the SplitN
 	targetPath := "/" + pathSpec[1]
 	// clean various /./, /../, /////, etc. that users add (#2557)
-	targetPath = path.Clean(targetPath)
+	targetPath = filepath.Clean(targetPath)
 
 	// normalization may reveal that path is still a dir, e.g. /.
 	if strings.HasSuffix(targetPath, "/") {
@@ -875,7 +845,7 @@ func (c *cmdFilePush) Run(cmd *cobra.Command, args []string) error {
 	for _, f := range files {
 		fpath := targetPath
 		if targetIsDir {
-			fpath = path.Join(fpath, path.Base(f.Name()))
+			fpath = filepath.Join(fpath, filepath.Base(f.Name()))
 		}
 
 		// Create needed paths if requested
@@ -897,7 +867,7 @@ func (c *cmdFilePush) Run(cmd *cobra.Command, args []string) error {
 				}
 			}
 
-			err = c.file.recursiveMkdir(resource.server, resource.name, path.Dir(fpath), nil, int64(uid), int64(gid))
+			err = c.file.recursiveMkdir(resource.server, resource.name, filepath.Dir(fpath), nil, int64(uid), int64(gid))
 			if err != nil {
 				return err
 			}
@@ -1082,7 +1052,7 @@ func (c *cmdFile) recursivePullFile(d incus.InstanceServer, inst string, p strin
 		}
 
 		for _, ent := range resp.Entries {
-			nextP := path.Join(p, ent)
+			nextP := filepath.Join(p, ent)
 
 			err := c.recursivePullFile(d, inst, nextP, target)
 			if err != nil {
@@ -1165,7 +1135,7 @@ func (c *cmdFile) recursivePushFile(d incus.InstanceServer, inst string, source 
 		}
 
 		// Prepare for file transfer
-		targetPath := path.Join(target, filepath.ToSlash(p[sourceLen:]))
+		targetPath := filepath.Join(target, filepath.ToSlash(p[sourceLen:]))
 		mode, uid, gid := internalIO.GetOwnerMode(fInfo)
 		args := incus.InstanceFileArgs{
 			UID:  int64(uid),
