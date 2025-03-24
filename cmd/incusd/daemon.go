@@ -30,7 +30,6 @@ import (
 	internalIO "github.com/lxc/incus/v6/internal/io"
 	"github.com/lxc/incus/v6/internal/linux"
 	"github.com/lxc/incus/v6/internal/rsync"
-	"github.com/lxc/incus/v6/internal/server/acme"
 	"github.com/lxc/incus/v6/internal/server/apparmor"
 	"github.com/lxc/incus/v6/internal/server/auth"
 	"github.com/lxc/incus/v6/internal/server/auth/oidc"
@@ -156,9 +155,6 @@ type Daemon struct {
 
 	lokiClient *loki.Client
 
-	// HTTP-01 challenge provider for ACME
-	http01Provider acme.HTTP01Provider
-
 	// Authorization.
 	authorizer auth.Authorizer
 
@@ -198,7 +194,6 @@ func newDaemon(config *DaemonConfig, os *sys.OS) *Daemon {
 		devIncusEvents: devIncusEvents,
 		events:         incusEvents,
 		db:             &db.DB{},
-		http01Provider: acme.NewHTTP01Provider(),
 		os:             os,
 		setupChan:      make(chan struct{}),
 		waitReady:      cancel.New(context.Background()),
@@ -458,7 +453,6 @@ func (d *Daemon) getTrustedCertificates() (map[certificate.Type]map[string]x509.
 				Roots:     certPool,
 				KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 			})
-
 			if err != nil {
 				// Skip certificates that aren't signed by the PKI.
 				delete(certs[certType], name)
@@ -860,7 +854,6 @@ func (d *Daemon) Init() error {
 	d.startTime = time.Now()
 
 	err := d.init()
-
 	// If an error occurred synchronously while starting up, let's try to
 	// cleanup any state we produced so far. Errors happening here will be
 	// ignored.
@@ -1155,7 +1148,7 @@ func (d *Daemon) init() error {
 	testDev := internalUtil.VarPath("devices", ".test")
 	testDevNum := int(unix.Mkdev(0, 0))
 	_ = os.Remove(testDev)
-	err = unix.Mknod(testDev, 0600|unix.S_IFCHR, testDevNum)
+	err = unix.Mknod(testDev, 0o600|unix.S_IFCHR, testDevNum)
 	if err == nil {
 		fd, err := os.Open(testDev)
 		if err != nil && os.IsPermission(err) {
@@ -1525,7 +1518,7 @@ func (d *Daemon) init() error {
 	// Setup BGP listener.
 	d.bgp = bgp.NewServer()
 	if bgpAddress != "" && bgpASN != 0 && bgpRouterID != "" {
-		err := d.bgp.Start(bgpAddress, uint32(bgpASN), net.ParseIP(bgpRouterID))
+		err := d.bgp.Configure(bgpAddress, uint32(bgpASN), net.ParseIP(bgpRouterID))
 		if err != nil {
 			return err
 		}
@@ -1579,7 +1572,7 @@ func (d *Daemon) init() error {
 	}
 
 	// Setup the networks.
-	if !d.db.Cluster.LocalNodeIsEvacuated() {
+	if !d.serverClustered || !d.db.Cluster.LocalNodeIsEvacuated() {
 		logger.Infof("Initializing networks")
 
 		err = networkStartup(d.State())
@@ -1846,7 +1839,7 @@ func (d *Daemon) Stop(ctx context.Context, sig os.Signal) error {
 	if sig == unix.SIGPWR || sig == unix.SIGTERM {
 		if d.db.Cluster != nil {
 			// waitForOperations will block until all operations are done, or it's forced to shut down.
-			// For the latter case, we re-use the shutdown channel which is filled when a shutdown is
+			// For the latter case, we reuse the shutdown channel which is filled when a shutdown is
 			// initiated using `shutdown`.
 			waitForOperations(ctx, d.db.Cluster, s.GlobalConfig.ShutdownTimeout())
 		}
@@ -2036,7 +2029,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 		var resources auth.Resources
 
 		err = d.db.Cluster.Transaction(d.shutdownCtx, func(ctx context.Context, tx *db.ClusterTx) error {
-			err := query.Scan(ctx, tx.Tx(), "SELECT certificates.fingerprint from certificates", func(scan func(dest ...any) error) error {
+			err := query.Scan(ctx, tx.Tx(), "SELECT certificates.fingerprint FROM certificates", func(scan func(dest ...any) error) error {
 				var fingerprint string
 				err := scan(&fingerprint)
 				if err != nil {
@@ -2050,7 +2043,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 				return err
 			}
 
-			err = query.Scan(ctx, tx.Tx(), "SELECT name from storage_pools", func(scan func(dest ...any) error) error {
+			err = query.Scan(ctx, tx.Tx(), "SELECT name FROM storage_pools", func(scan func(dest ...any) error) error {
 				var storagePoolName string
 				err := scan(&storagePoolName)
 				if err != nil {
@@ -2064,7 +2057,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 				return err
 			}
 
-			err = query.Scan(ctx, tx.Tx(), "SELECT name from projects", func(scan func(dest ...any) error) error {
+			err = query.Scan(ctx, tx.Tx(), "SELECT name FROM projects", func(scan func(dest ...any) error) error {
 				var projectName string
 				err := scan(&projectName)
 				if err != nil {
@@ -2078,7 +2071,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 				return err
 			}
 
-			err = query.Scan(ctx, tx.Tx(), "SELECT images.fingerprint, projects.name from images JOIN projects ON projects.id=images.project_id", func(scan func(dest ...any) error) error {
+			err = query.Scan(ctx, tx.Tx(), "SELECT images.fingerprint, projects.name FROM images JOIN projects ON projects.id=images.project_id", func(scan func(dest ...any) error) error {
 				var imageFingerprint string
 				var projectName string
 				err := scan(&imageFingerprint, &projectName)
@@ -2093,7 +2086,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 				return err
 			}
 
-			err = query.Scan(ctx, tx.Tx(), "SELECT images_aliases.name, projects.name from images_aliases JOIN projects ON projects.id=images_aliases.project_id", func(scan func(dest ...any) error) error {
+			err = query.Scan(ctx, tx.Tx(), "SELECT images_aliases.name, projects.name FROM images_aliases JOIN projects ON projects.id=images_aliases.project_id", func(scan func(dest ...any) error) error {
 				var imageAliasName string
 				var projectName string
 				err := scan(&imageAliasName, &projectName)
@@ -2108,7 +2101,7 @@ func (d *Daemon) setupOpenFGA(apiURL string, apiToken string, storeID string) er
 				return err
 			}
 
-			err = query.Scan(ctx, tx.Tx(), "SELECT instances.name, projects.name from instances JOIN projects ON projects.id=instances.project_id", func(scan func(dest ...any) error) error {
+			err = query.Scan(ctx, tx.Tx(), "SELECT instances.name, projects.name FROM instances JOIN projects ON projects.id=instances.project_id", func(scan func(dest ...any) error) error {
 				var instanceName string
 				var projectName string
 				err := scan(&instanceName, &projectName)
@@ -2498,7 +2491,7 @@ func (d *Daemon) heartbeatHandler(w http.ResponseWriter, r *http.Request, isLead
 				return
 			}
 
-			err = os.WriteFile(resourcesPath, data, 0600)
+			err = os.WriteFile(resourcesPath, data, 0o600)
 			if err != nil {
 				return
 			}

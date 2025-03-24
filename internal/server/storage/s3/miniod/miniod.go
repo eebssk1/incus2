@@ -68,14 +68,18 @@ func (p *Process) AdminUser() string {
 
 // AdminClient returns admin client for the minio process.
 func (p *Process) AdminClient() (*AdminClient, error) {
-	binaryName := "mc"
-	_, err := exec.LookPath(binaryName)
-	if err != nil {
-		binaryName = "mcli"
-		_, err = exec.LookPath(binaryName)
-		if err != nil {
-			return nil, err
+	var binaryName string
+
+	for _, name := range []string{"miniocli", "minioc", "mcli", "minio-client", "mc"} {
+		_, err := exec.LookPath(name)
+		if err == nil {
+			binaryName = name
+			break
 		}
+	}
+
+	if binaryName == "" {
+		return nil, fmt.Errorf("Couldn't find the MinIO client tool")
 	}
 
 	// Encode the bucketName with base64url as only certain characters with alpha prefix are allowed
@@ -181,8 +185,10 @@ func (p *Process) WaitReady(ctx context.Context) error {
 	}
 }
 
-var miniosMu sync.Mutex
-var minios = make(map[string]*Process)
+var (
+	miniosMu sync.Mutex
+	minios   = make(map[string]*Process)
+)
 
 // EnsureRunning starts a MinIO process for the bucket (if not already running) and returns running Process.
 func EnsureRunning(s *state.State, bucketVol storageDrivers.Volume) (*Process, error) {
@@ -256,7 +262,7 @@ func EnsureRunning(s *state.State, bucketVol storageDrivers.Volume) (*Process, e
 		err := bucketVol.MountTask(func(mountPath string, op *operations.Operation) error {
 			l.Debug("MinIO bucket starting")
 
-			var newDirMode os.FileMode = os.ModeDir | 0700
+			var newDirMode os.FileMode = os.ModeDir | 0o700
 
 			if !util.PathExists(bucketPath) {
 				err = os.Mkdir(bucketPath, newDirMode)

@@ -83,6 +83,7 @@ For block devices (disks), this is one of:
 - `nvme`
 - `virtio-blk`
 - `virtio-scsi` (default)
+- `usb`
 
 For file systems (shared directories or custom volumes), this is one of:
 - `9p`
@@ -1014,7 +1015,7 @@ Set this option to `true` to prevent the instance's file system from being UID/G
 :condition: "virtual machine"
 :defaultdesc: "`true`"
 :liveupdate: "no"
-:shortdesc: "Whether UEFI secure boot is enabled with the default Microsoft keys"
+:shortdesc: "Whether UEFI secure boot is enforced with the default Microsoft keys"
 :type: "bool"
 When disabling this option, consider enabling {config:option}`instance-security:security.csm`.
 ```
@@ -1458,6 +1459,12 @@ The instance generation UUID changes whenever the instance's place in time moves
 It is globally unique across all servers and projects.
 ```
 
+```{config:option} volatile.vm.definition instance-volatile
+:shortdesc: "QEMU VM definition name (used for migration between versions)"
+:type: "string"
+
+```
+
 ```{config:option} volatile.vsock_id instance-volatile
 :shortdesc: "Instance `vsock ID` used as of last start"
 :type: "string"
@@ -1857,7 +1864,7 @@ When set to `allow`, {config:option}`instance-security:security.nesting` can be 
 :type: "string"
 Possible values are `unprivileged`, `isolated`, and `allow`.
 
-- When set to `unpriviliged`, this option prevents setting {config:option}`instance-security:security.privileged` to `true`.
+- When set to `unprivileged`, this option prevents setting {config:option}`instance-security:security.privileged` to `true`.
 - When set to `isolated`, this option prevents setting {config:option}`instance-security:security.privileged` and {config:option}`instance-security:security.idmap.isolated` to `true`.
 - When set to `allow`, there is no restriction.
 ```
@@ -2095,6 +2102,14 @@ Possible values are `DNS-01` and `HTTP-01`.
 :shortdesc: "Email address used for the account registration"
 :type: "string"
 
+```
+
+```{config:option} acme.http.port server-acme
+:defaultdesc: "`:80`"
+:scope: "global"
+:shortdesc: "Port and interface for HTTP server (used by HTTP-01)"
+:type: "string"
+Set the port and interface to use for HTTP-01 based challenges to listen on
 ```
 
 ```{config:option} acme.provider server-acme

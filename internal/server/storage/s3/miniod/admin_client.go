@@ -74,14 +74,14 @@ func (c *AdminClient) runClientCommand(ctx context.Context, workDir string, extr
 
 // writePolicy writes policy data to the file.
 func (c *AdminClient) writePolicy(policy []byte) error {
-	err := os.MkdirAll(c.policyDir(), 0755)
+	err := os.MkdirAll(c.policyDir(), 0o755)
 	if err != nil {
 		return err
 	}
 
 	policyPath := filepath.Join(c.policyDir(), c.alias)
 
-	err = os.WriteFile(policyPath, policy, 0644)
+	err = os.WriteFile(policyPath, policy, 0o644)
 	if err != nil {
 		return err
 	}
@@ -101,11 +101,13 @@ func (c *AdminClient) isMinIOClient() bool {
 		return false
 	}
 
-	if !strings.Contains(lines[0], "mc version") && !strings.Contains(lines[0], "mcli version") {
-		return false
+	for _, name := range []string{"miniocli", "minioc", "mcli", "minio-client", "mc"} {
+		if strings.Contains(lines[0], name+" version") {
+			return true
+		}
 	}
 
-	return true
+	return false
 }
 
 // ServiceStop stops the MinIO cluster.
@@ -249,7 +251,7 @@ func (c *AdminClient) UpdateServiceAccount(ctx context.Context, account, secretK
 func (c *AdminClient) ExportIAM(ctx context.Context) ([]byte, error) {
 	iamDir := filepath.Join(c.varPath, "mc", "iam", uuid.NewString())
 
-	err := os.MkdirAll(iamDir, 0755)
+	err := os.MkdirAll(iamDir, 0o755)
 	if err != nil {
 		return nil, err
 	}

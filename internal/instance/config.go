@@ -1028,7 +1028,7 @@ var InstanceConfigKeysVM = map[string]func(value string) error{
 	//  defaultdesc: `true`
 	//  liveupdate: no
 	//  condition: virtual machine
-	//  shortdesc: Whether UEFI secure boot is enabled with the default Microsoft keys
+	//  shortdesc: Whether UEFI secure boot is enforced with the default Microsoft keys
 	"security.secureboot": validate.Optional(validate.IsBool),
 
 	// gendoc:generate(entity=instance, group=security, key=security.sev)
@@ -1088,6 +1088,13 @@ var InstanceConfigKeysVM = map[string]func(value string) error{
 	//  type: bool
 	//  shortdesc: Whether to regenerate VM NVRAM the next time the instance starts
 	"volatile.apply_nvram": validate.Optional(validate.IsBool),
+
+	// gendoc:generate(entity=instance, group=volatile, key=volatile.vm.definition)
+	//
+	// ---
+	//  type: string
+	//  shortdesc: QEMU VM definition name (used for migration between versions)
+	"volatile.vm.definition": validate.Optional(validate.IsAny),
 
 	// gendoc:generate(entity=instance, group=volatile, key=volatile.vsock_id)
 	//

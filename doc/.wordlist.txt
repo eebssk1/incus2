@@ -65,6 +65,7 @@ Diátaxis
 Diffie
 Distrobuilder
 DNS
+dnsmasq
 DNSSEC
 DoS
 DRM
@@ -225,6 +226,7 @@ qgroups
 RADOS
 RBAC
 RBD
+RDNSS
 README
 reconfiguring
 requestor
@@ -233,6 +235,7 @@ RESTful
 RHEL
 rootfs
 RSA
+RTC
 rST
 runtime
 SATA

@@ -466,6 +466,14 @@ var APIExtensions = []string{
 	"api_filtering_extended",
 	"acme_dns01",
 	"security_iommu",
+	"network_ipv4_dhcp_routes",
+	"network_state_ovn_ls",
+	"network_dns_nameservers",
+	"acme_http01_port",
+	"network_ovn_ipv4_dhcp_expiry",
+	"instance_state_cpu_time",
+	"network_io_bus",
+	"disk_io_bus_usb",
 }
 
 // APIExtensionsCount returns the number of available API extensions.
