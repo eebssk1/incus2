@@ -665,6 +665,40 @@ The specified version expression is used to set `libnvidia-container NVIDIA_REQU
 ```
 
 <!-- config group instance-nvidia end -->
+<!-- config group instance-oci start -->
+```{config:option} oci.cwd instance-oci
+:condition: "OCI container"
+:liveupdate: "no"
+:shortdesc: "OCI container working directory"
+:type: "string"
+Override the working directory of an OCI container.
+```
+
+```{config:option} oci.entrypoint instance-oci
+:condition: "OCI container"
+:liveupdate: "no"
+:shortdesc: "OCI container entrypoint"
+:type: "string"
+Override the entrypoint of an OCI container.
+```
+
+```{config:option} oci.gid instance-oci
+:condition: "OCI container"
+:liveupdate: "no"
+:shortdesc: "OCI container GID"
+:type: "string"
+Override the GID of the process run in an OCI container.
+```
+
+```{config:option} oci.uid instance-oci
+:condition: "OCI container"
+:liveupdate: "no"
+:shortdesc: "OCI container UID"
+:type: "string"
+Override the UID of the process run in an OCI container.
+```
+
+<!-- config group instance-oci end -->
 <!-- config group instance-raw start -->
 ```{config:option} raw.apparmor instance-raw
 :liveupdate: "yes"
@@ -2601,6 +2635,41 @@ Specify the volume using the syntax `POOL/VOLUME`.
 :shortdesc: "Volume to use to store the image tarballs"
 :type: "string"
 Specify the volume using the syntax `POOL/VOLUME`.
+```
+
+```{config:option} storage.linstor.ca_cert server-miscellaneous
+:scope: "global"
+:shortdesc: "LINSTOR SSL certificate authority"
+:type: "string"
+
+```
+
+```{config:option} storage.linstor.client_cert server-miscellaneous
+:scope: "global"
+:shortdesc: "LINSTOR SSL client certificate"
+:type: "string"
+
+```
+
+```{config:option} storage.linstor.client_key server-miscellaneous
+:scope: "global"
+:shortdesc: "LINSTOR SSL client key"
+:type: "string"
+
+```
+
+```{config:option} storage.linstor.controller_connection server-miscellaneous
+:scope: "global"
+:shortdesc: "LINSTOR controller connection string"
+:type: "string"
+
+```
+
+```{config:option} storage.linstor.satellite.name server-miscellaneous
+:scope: "global"
+:shortdesc: "LINSTOR satellite node name override"
+:type: "string"
+Set this option to the name of the local LINSTOR satellite node, should it be different from the Incus server name.
 ```
 
 <!-- config group server-miscellaneous end -->

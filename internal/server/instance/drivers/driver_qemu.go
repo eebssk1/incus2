@@ -254,15 +254,18 @@ func qemuCreate(s *state.State, args db.InstanceArgs, p api.Project, op *operati
 		return nil, nil, fmt.Errorf("Failed to expand config: %w", err)
 	}
 
-	// Validate expanded config (allows mixed instance types for profiles).
-	err = instance.ValidConfig(s.OS, d.expandedConfig, true, instancetype.Any)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Invalid config: %w", err)
-	}
+	// When not a snapshot, perform full validation.
+	if !args.Snapshot {
+		// Validate expanded config (allows mixed instance types for profiles).
+		err = instance.ValidConfig(s.OS, d.expandedConfig, true, instancetype.Any)
+		if err != nil {
+			return nil, nil, fmt.Errorf("Invalid config: %w", err)
+		}
 
-	err = instance.ValidDevices(s, d.project, d.Type(), d.localDevices, d.expandedDevices)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Invalid devices: %w", err)
+		err = instance.ValidDevices(s, d.project, d.Type(), d.localDevices, d.expandedDevices)
+		if err != nil {
+			return nil, nil, fmt.Errorf("Invalid devices: %w", err)
+		}
 	}
 
 	// Retrieve the instance's storage pool.
@@ -6702,11 +6705,15 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
+	clusterMove := args.ClusterMoveSourceName != ""
+	storageMove := args.StoragePool != ""
+
 	// The refresh argument passed to MigrationTypes() is always set
 	// to false here. The migration source/sender doesn't need to care whether
 	// or not it's doing a refresh as the migration sink/receiver will know
 	// this, and adjust the migration types accordingly.
-	poolMigrationTypes := pool.MigrationTypes(storagePools.InstanceContentType(d), false, args.Snapshots)
+	// The same applies for clusterMove and storageMove, which are set to the most optimized defaults.
+	poolMigrationTypes := pool.MigrationTypes(storagePools.InstanceContentType(d), false, args.Snapshots, true, false)
 	if len(poolMigrationTypes) == 0 {
 		err := fmt.Errorf("No source migration types available")
 		op.Done(err)
@@ -6804,8 +6811,8 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		AllowInconsistent:  args.AllowInconsistent,
 		VolumeOnly:         !args.Snapshots,
 		Info:               &localMigration.Info{Config: srcConfig},
-		ClusterMove:        args.ClusterMoveSourceName != "",
-		StorageMove:        args.StoragePool != "",
+		ClusterMove:        clusterMove,
+		StorageMove:        storageMove,
 	}
 
 	// Only send the snapshots that the target requests when refreshing.
@@ -7345,10 +7352,13 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	// However, to determine the correct migration type Refresh needs to be set.
 	offerHeader.Refresh = &args.Refresh
 
+	clusterMove := args.ClusterMoveSourceName != ""
+	storageMove := args.StoragePool != ""
+
 	// Extract the source's migration type and then match it against our pool's supported types and features.
 	// If a match is found the combined features list will be sent back to requester.
 	contentType := storagePools.InstanceContentType(d)
-	respTypes, err := localMigration.MatchTypes(offerHeader, storagePools.FallbackMigrationType(contentType), pool.MigrationTypes(contentType, args.Refresh, args.Snapshots))
+	respTypes, err := localMigration.MatchTypes(offerHeader, storagePools.FallbackMigrationType(contentType), pool.MigrationTypes(contentType, args.Refresh, args.Snapshots, clusterMove, storageMove))
 	if err != nil {
 		return err
 	}
@@ -7657,7 +7667,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 		// Only delete all instance volumes on error if the pool volume creation has succeeded to
 		// avoid deleting an existing conflicting volume.
-		isRemoteClusterMove := args.ClusterMoveSourceName != "" && poolInfo.Remote
+		isRemoteClusterMove := clusterMove && poolInfo.Remote
 		if !volTargetArgs.Refresh && !isRemoteClusterMove {
 			revert.Add(func() {
 				snapshots, _ := d.Snapshots()
