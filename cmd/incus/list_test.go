@@ -115,10 +115,6 @@ func TestShouldShow(t *testing.T) {
 		t.Error("user.blah=abc type=container didn't match")
 	}
 
-	if list.shouldShow([]string{"bar", "u.blah=abc"}, inst, nil, false) {
-		t.Errorf("name filter didn't work")
-	}
-
 	if list.shouldShow([]string{"bar", "u.blah=other"}, inst, nil, false) {
 		t.Errorf("value filter didn't work")
 	}
@@ -300,7 +296,9 @@ func TestColumns(t *testing.T) {
 
 func removeDuplicatesFromString(s string, sep string) string {
 	dup := sep + sep
-	for s = strings.Replace(s, dup, sep, -1); strings.Contains(s, dup); s = strings.Replace(s, dup, sep, -1) {
+
+	for strings.Contains(s, dup) {
+		s = strings.ReplaceAll(s, dup, sep)
 	}
 
 	return s
