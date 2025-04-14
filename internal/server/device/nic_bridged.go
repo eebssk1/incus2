@@ -32,6 +32,7 @@ import (
 	"github.com/lxc/incus/v6/internal/server/ip"
 	"github.com/lxc/incus/v6/internal/server/network"
 	"github.com/lxc/incus/v6/internal/server/network/acl"
+	addressSet "github.com/lxc/incus/v6/internal/server/network/address-set"
 	"github.com/lxc/incus/v6/internal/server/project"
 	"github.com/lxc/incus/v6/internal/server/resources"
 	localUtil "github.com/lxc/incus/v6/internal/server/util"
@@ -1087,6 +1088,12 @@ func (d *nicBridged) removeFilters(m deviceConfig.Device) {
 	if err != nil {
 		logger.Errorf("Failed to remove DHCP network assigned filters  for %q: %v", d.name, err)
 	}
+
+	d.logger.Debug("Clearing instance firewall unused address sets")
+	err = d.state.Firewall.NetworkDeleteAddressSetsIfUnused("bridge")
+	if err != nil {
+		logger.Errorf("Failed to remove network address set for %q: %v", d.name, err)
+	}
 }
 
 // setFilters sets up any network level filters defined for the instance.
@@ -1175,21 +1182,68 @@ func (d *nicBridged) setFilters() (err error) {
 	defer revert.Fail()
 	revert.Add(func() { d.removeFilters(config) })
 
-	IPv4Nets, IPv6Nets, err := allowedIPNets(config)
+	ipv4Nets, ipv6Nets, err := allowedIPNets(config)
 	if err != nil {
 		return err
 	}
 
-	var aclRules []firewallDrivers.ACLRule
+	var ipv4DNS []string
+	var ipv6DNS []string
 
+	if d.network != nil {
+		netConfig := d.network.Config()
+
+		ipv4DNS = []string{}
+		ipv6DNS = []string{}
+
+		// Pull directly configured DNS name servers (if any).
+		nsList := util.SplitNTrimSpace(netConfig["dns.nameservers"], ",", -1, false)
+		for _, ns := range nsList {
+			if ns == "" {
+				continue
+			}
+
+			nsIP := net.ParseIP(ns)
+			if nsIP == nil {
+				return fmt.Errorf("Invalid DNS nameserver")
+			}
+
+			if nsIP.To4() == nil {
+				ipv4DNS = append(ipv4DNS, ns)
+			} else {
+				ipv6DNS = append(ipv6DNS, ns)
+			}
+		}
+
+		// Add IPv4 router.
+		if netConfig["ipv4.address"] != "" && netConfig["ipv4.address"] != "none" {
+			ipv4DNS = append(ipv4DNS, strings.Split(netConfig["ipv4.address"], "/")[0])
+		}
+
+		// Add IPv6 router.
+		if netConfig["ipv6.address"] != "" && netConfig["ipv6.address"] != "none" {
+			ipv6DNS = append(ipv6DNS, strings.Split(netConfig["ipv6.address"], "/")[0])
+		}
+	}
+
+	var aclRules []firewallDrivers.ACLRule
+	var aclNames []string
 	if config["security.acls"] != "" {
+		aclNames = util.SplitNTrimSpace(config["security.acls"], ",", -1, false)
 		aclRules, err = acl.FirewallACLRules(d.state, d.name, d.inst.Project().Name, d.config)
+		if err != nil {
+			return err
+		}
+
+		// Ensure address sets for ACL, we state bridge because
+		// this is the table firewall driver will use for this kind of NIC.
+		err = addressSet.FirewallApplyAddressSetsForACLRules(d.state, "bridge", d.inst.Project().Name, aclNames)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = d.state.Firewall.InstanceSetupBridgeFilter(d.inst.Project().Name, d.inst.Name(), d.name, d.config["parent"], d.config["host_name"], d.config["hwaddr"], IPv4Nets, IPv6Nets, d.network != nil, util.IsTrue(config["security.mac_filtering"]), aclRules)
+	err = d.state.Firewall.InstanceSetupBridgeFilter(d.inst.Project().Name, d.inst.Name(), d.name, d.config["parent"], d.config["host_name"], d.config["hwaddr"], ipv4Nets, ipv6Nets, ipv4DNS, ipv6DNS, d.network != nil, util.IsTrue(config["security.mac_filtering"]), aclRules)
 	if err != nil {
 		return err
 	}
