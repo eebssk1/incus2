@@ -1043,7 +1043,7 @@ func (d *qemu) validateStartup(stateful bool, statusCode api.StatusCode) error {
 
 	// Cannot perform stateful start unless config is appropriately set.
 	if stateful && util.IsFalseOrEmpty(d.expandedConfig["migration.stateful"]) {
-		return fmt.Errorf("Stateful start requires migration.stateful to be set to true")
+		fmt.Printf("Stateful start requires migration.stateful to be set to true")
 	}
 
 	// gendoc:generate(entity=image, group=requirements, key=requirements.secureboot)
@@ -5079,7 +5079,7 @@ func (d *qemu) Stop(stateful bool) error {
 	if stateful {
 		// Confirm the instance has stateful migration enabled.
 		if util.IsFalseOrEmpty(d.expandedConfig["migration.stateful"]) {
-			return fmt.Errorf("Stateful stop requires migration.stateful to be set to true")
+			fmt.Printf("Stateful stop requires migration.stateful to be set to true")
 		}
 
 		// Confirm the instance has sufficient reserved state space.
