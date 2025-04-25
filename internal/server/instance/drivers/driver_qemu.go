@@ -3243,8 +3243,8 @@ func (d *qemu) templateApplyNow(trigger instance.TemplateTrigger, path string) e
 		return fmt.Errorf("Failed to read metadata: %w", err)
 	}
 
-	metadata := new(api.ImageMetadata)
-	err = yaml.Unmarshal(content, &metadata)
+	metadata := &api.ImageMetadata{}
+	err = yaml.Unmarshal(content, metadata)
 	if err != nil {
 		return fmt.Errorf("Could not parse %s: %w", fname, err)
 	}
@@ -3996,8 +3996,17 @@ func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, cpuInfo *cpuTopology) err
 
 	cpuPinning := cpuInfo.vcpus != nil
 
+	maxMemoryBytes, err := linux.DeviceTotalMemory()
+	if err != nil {
+		return err
+	}
+
+	if maxMemoryBytes < memSizeBytes {
+		maxMemoryBytes = memSizeBytes
+	}
+
 	if conf != nil {
-		*conf = append(*conf, qemuMemory(&qemuMemoryOpts{memSizeBytes / 1024 / 1024})...)
+		*conf = append(*conf, qemuMemory(&qemuMemoryOpts{memSizeBytes / 1024 / 1024, maxMemoryBytes / 1024 / 1024})...)
 		*conf = append(*conf, qemuCPU(cpuOpts, cpuPinning)...)
 	}
 
