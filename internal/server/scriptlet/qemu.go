@@ -18,15 +18,6 @@ import (
 	"github.com/lxc/incus/v6/shared/logger"
 )
 
-// qemuCfgSection is a temporary struct to hold QEMU configuration sections with Entries of type
-// map[string]string instead of []cfg.Entry. This type should be moved to the cfg package in the
-// future.
-type qemuCfgSection struct {
-	Name    string            `json:"name"`
-	Comment string            `json:"comment"`
-	Entries map[string]string `json:"entries"`
-}
-
 // QSLet is our instance for use with qmp command interface.
 type QSLet struct{}
 
@@ -59,14 +50,14 @@ func marshalQEMUConf(conf any) ([]map[string]any, error) {
 	return newConf, nil
 }
 
-// unmarshalQEMUConf unmarshals a configuration into a []qemuCfgSection.
-func unmarshalQEMUConf(conf any) ([]qemuCfgSection, error) {
+// unmarshalQEMUConf unmarshals a configuration into a []cfg.Section.
+func unmarshalQEMUConf(conf any) ([]cfg.Section, error) {
 	jsonConf, err := json.Marshal(conf)
 	if err != nil {
 		return nil, err
 	}
 
-	var newConf []qemuCfgSection
+	var newConf []cfg.Section
 	err = json.Unmarshal(jsonConf, &newConf)
 	if err != nil {
 		return nil, err
@@ -81,19 +72,8 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	// Bind our instance to the qemu scriptlet interface
 	newQS().bindToQMP()
 
-	// We first convert from []cfg.Section to []qemuCfgSection. This conversion is temporary.
-	var cfgSectionMaps []qemuCfgSection
-	for _, section := range *conf {
-		entries := map[string]string{}
-		for _, entry := range section.Entries {
-			entries[entry.Key] = entry.Value
-		}
-
-		cfgSectionMaps = append(cfgSectionMaps, qemuCfgSection{Name: section.Name, Comment: section.Comment, Entries: entries})
-	}
-
 	// We do not want to handle a qemuCfgSection object within our scriptlet, for simplicity.
-	cfgSections, err := marshalQEMUConf(cfgSectionMaps)
+	cfgSections, err := marshalQEMUConf(conf)
 	if err != nil {
 		return err
 	}
@@ -366,7 +346,7 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 		}
 
 		// We want to further check the configuration structure, by trying to unmarshal it to a
-		// []qemuCfgSection.
+		// []cfg.Section.
 		_, err = unmarshalQEMUConf(confAny)
 		if err != nil {
 			return nil, fmt.Errorf("%s requires a valid configuration", b.Name())
@@ -449,23 +429,10 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	}
 
 	// We need to convert the configuration back to a suitable format
-	cfgSectionMaps, err = unmarshalQEMUConf(cfgSections)
+	*conf, err = unmarshalQEMUConf(cfgSections)
 	if err != nil {
 		return err
 	}
-
-	// We convert back from []qemuCfgSection to []cfg.Section. This conversion is temporary.
-	var newConf []cfg.Section
-	for _, section := range cfgSectionMaps {
-		entries := []cfg.Entry{}
-		for key, value := range section.Entries {
-			entries = append(entries, cfg.Entry{Key: key, Value: value})
-		}
-
-		newConf = append(newConf, cfg.Section{Name: section.Name, Comment: section.Comment, Entries: entries})
-	}
-
-	*conf = newConf
 
 	return nil
 }
