@@ -1803,26 +1803,36 @@ func (d *lxc) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 
 	// Generate uevent inside container if requested.
 	if len(runConf.Uevents) > 0 {
-		pidFdNr, pidFd := d.inheritInitPidFd()
-		if pidFdNr >= 0 {
+		pidFd := d.inheritInitPidFd()
+		pidFdNr := "-1"
+		if pidFd != nil {
 			defer func() { _ = pidFd.Close() }()
+			pidFdNr = "3"
 		}
 
 		for _, eventParts := range runConf.Uevents {
-			ueventArray := make([]string, 6)
-			ueventArray[0] = "forkuevent"
-			ueventArray[1] = "inject"
-			ueventArray[2] = "--"
-			ueventArray[3] = fmt.Sprintf("%d", d.InitPID())
-			ueventArray[4] = fmt.Sprintf("%d", pidFdNr)
 			length := 0
 			for _, part := range eventParts {
 				length = length + len(part) + 1
 			}
 
-			ueventArray[5] = fmt.Sprintf("%d", length)
-			ueventArray = append(ueventArray, eventParts...)
-			_, _, err := subprocess.RunCommandSplit(context.TODO(), nil, []*os.File{pidFd}, d.state.OS.ExecPath, ueventArray...)
+			args := []string{
+				"forkuevent",
+				"inject",
+				"--",
+				fmt.Sprintf("%d", d.InitPID()),
+				pidFdNr,
+				fmt.Sprintf("%d", length),
+			}
+
+			args = append(args, eventParts...)
+
+			_, _, err := subprocess.RunCommandSplit(
+				context.TODO(),
+				nil,
+				[]*os.File{pidFd},
+				d.state.OS.ExecPath,
+				args...)
 			if err != nil {
 				return err
 			}
@@ -5297,7 +5307,7 @@ func (d *lxc) Update(args db.InstanceArgs, userRequested bool) error {
 }
 
 // Export backs up the instance.
-func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error) {
+func (d *lxc) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error) {
 	ctxMap := logger.Ctx{
 		"created":   d.creationDate,
 		"ephemeral": d.ephemeral,
@@ -5327,26 +5337,50 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 	}
 
 	// Create the tarball.
-	tarWriter := instancewriter.NewInstanceTarWriter(w, idmap)
+	metaTarWriter := instancewriter.NewInstanceTarWriter(metaWriter, idmap)
+
+	var rootfsTarWriter *instancewriter.InstanceTarWriter
+	if rootfsWriter != nil {
+		rootfsTarWriter = instancewriter.NewInstanceTarWriter(rootfsWriter, idmap)
+	}
 
 	// Keep track of the first path we saw for each path with nlink>1.
 	cDir := d.Path()
 
 	// Path inside the tar image is the pathname starting after cDir.
-	offset := len(cDir) + 1
+	// For the rootfs tarball in a split image, the path inside is the pathname starting after rootfs/
+	metaOffset := len(cDir) + 1
+	rootfsOffset := len(d.RootfsPath())
 
-	writeToTar := func(path string, fi os.FileInfo, err error) error {
+	writeToMetaTar := func(fPath string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		err = tarWriter.WriteFile(path[offset:], path, fi, false)
+		err = metaTarWriter.WriteFile(fPath[metaOffset:], fPath, fi, false)
 		if err != nil {
-			d.logger.Debug("Error tarring up", logger.Ctx{"path": path, "err": err})
+			d.logger.Debug("Error tarring up", logger.Ctx{"path": fPath, "err": err})
 			return err
 		}
 
 		return nil
+	}
+
+	var writeToRootfsTar func(string, os.FileInfo, error) error
+	if rootfsWriter != nil {
+		writeToRootfsTar = func(path string, fi os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			err = rootfsTarWriter.WriteFile(path[rootfsOffset:], path, fi, false)
+			if err != nil {
+				d.logger.Debug("Error tarring up", logger.Ctx{"path": path, "err": err})
+				return err
+			}
+
+			return nil
+		}
 	}
 
 	// Get the instance's architecture.
@@ -5355,7 +5389,11 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 		parentName, _, _ := api.GetParentAndSnapshotName(d.name)
 		parent, err := instance.LoadByProjectAndName(d.state, d.project.Name, parentName)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
+			if rootfsTarWriter != nil {
+				_ = rootfsTarWriter.Close()
+			}
+
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
@@ -5381,14 +5419,22 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 		// Parse the metadata.
 		content, err := os.ReadFile(fnam)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
+			if rootfsTarWriter != nil {
+				_ = rootfsTarWriter.Close()
+			}
+
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
 
 		err = yaml.Unmarshal(content, &meta)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
+			if rootfsTarWriter != nil {
+				_ = rootfsTarWriter.Close()
+			}
+
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
@@ -5413,7 +5459,11 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 	// Write the new metadata.yaml.
 	tempDir, err := os.MkdirTemp("", "incus_metadata_")
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
+		if rootfsTarWriter != nil {
+			_ = rootfsTarWriter.Close()
+		}
+
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -5422,7 +5472,11 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 
 	data, err := yaml.Marshal(&meta)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
+		if rootfsTarWriter != nil {
+			_ = rootfsTarWriter.Close()
+		}
+
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -5430,7 +5484,11 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 	fnam = filepath.Join(tempDir, "metadata.yaml")
 	err = os.WriteFile(fnam, data, 0o644)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
+		if rootfsTarWriter != nil {
+			_ = rootfsTarWriter.Close()
+		}
+
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -5438,15 +5496,23 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 	// Add metadata.yaml to the tarball.
 	fi, err := os.Lstat(fnam)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
+		if rootfsTarWriter != nil {
+			_ = rootfsTarWriter.Close()
+		}
+
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
 
 	tmpOffset := len(filepath.Dir(fnam)) + 1
-	err = tarWriter.WriteFile(fnam[tmpOffset:], fnam, fi, false)
+	err = metaTarWriter.WriteFile(fnam[tmpOffset:], fnam, fi, false)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
+		if rootfsTarWriter != nil {
+			_ = rootfsTarWriter.Close()
+		}
+
 		d.logger.Debug("Error writing to tarfile", logger.Ctx{"err": err})
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
@@ -5454,26 +5520,42 @@ func (d *lxc) Export(w io.Writer, properties map[string]string, expiration time.
 
 	// Include all the rootfs files.
 	fnam = d.RootfsPath()
-	err = filepath.Walk(fnam, writeToTar)
-	if err != nil {
-		d.logger.Error("Failed exporting instance", ctxMap)
-		return nil, err
-	}
-
-	// Include all the templates.
-	fnam = d.TemplatesPath()
-	if util.PathExists(fnam) {
-		err = filepath.Walk(fnam, writeToTar)
+	if rootfsWriter == nil {
+		err = filepath.Walk(fnam, writeToMetaTar)
+		if err != nil {
+			d.logger.Error("Failed exporting instance", ctxMap)
+			return nil, err
+		}
+	} else {
+		err = filepath.Walk(fnam, writeToRootfsTar)
 		if err != nil {
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
 	}
 
-	err = tarWriter.Close()
+	// Include all the templates.
+	fnam = d.TemplatesPath()
+	if util.PathExists(fnam) {
+		err = filepath.Walk(fnam, writeToMetaTar)
+		if err != nil {
+			d.logger.Error("Failed exporting instance", ctxMap)
+			return nil, err
+		}
+	}
+
+	err = metaTarWriter.Close()
 	if err != nil {
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
+	}
+
+	if rootfsTarWriter != nil {
+		err = rootfsTarWriter.Close()
+		if err != nil {
+			d.logger.Error("Failed exporting instance", ctxMap)
+			return nil, err
+		}
 	}
 
 	d.logger.Info("Exported instance", ctxMap)
@@ -7149,17 +7231,17 @@ func (d *lxc) templateApplyNow(trigger instance.TemplateTrigger) error {
 	return nil
 }
 
-func (d *lxc) inheritInitPidFd() (int, *os.File) {
+func (d *lxc) inheritInitPidFd() *os.File {
 	if d.state.OS.PidFds {
 		pidFdFile, err := d.InitPidFd()
 		if err != nil {
-			return -1, nil
+			return nil
 		}
 
-		return 3, pidFdFile
+		return pidFdFile
 	}
 
-	return -1, nil
+	return nil
 }
 
 // FileSFTPConn returns a connection to the forkfile handler.
@@ -7284,8 +7366,8 @@ func (d *lxc) FileSFTPConn() (net.Conn, error) {
 		extraFiles = append(extraFiles, rootfsFile)
 
 		// Get the pidfd.
-		pidFdNr, pidFd := d.inheritInitPidFd()
-		if pidFdNr >= 0 {
+		pidFd := d.inheritInitPidFd()
+		if pidFd != nil {
 			defer func() { _ = pidFd.Close() }()
 			args = append(args, "5")
 			extraFiles = append(extraFiles, pidFd)
@@ -7828,9 +7910,11 @@ func (d *lxc) networkState(hostInterfaces []net.Interface) map[string]api.Instan
 	}
 
 	if !couldUseNetnsGetifaddrs {
-		pidFdNr, pidFd := d.inheritInitPidFd()
-		if pidFdNr >= 0 {
+		pidFd := d.inheritInitPidFd()
+		pidFdNr := "-1"
+		if pidFd != nil {
 			defer func() { _ = pidFd.Close() }()
+			pidFdNr = "3"
 		}
 
 		// Get the network state from the container
@@ -7843,7 +7927,7 @@ func (d *lxc) networkState(hostInterfaces []net.Interface) map[string]api.Instan
 			"info",
 			"--",
 			fmt.Sprintf("%d", pid),
-			fmt.Sprintf("%d", pidFdNr))
+			pidFdNr)
 		// Process forkgetnet response
 		if err != nil {
 			d.logger.Error("Error calling 'forknet", logger.Ctx{"err": err, "pid": pid})
@@ -8195,9 +8279,11 @@ func (d *lxc) removeMount(mount string) error {
 		}
 	} else {
 		// Remove the mount from the container
-		pidFdNr, pidFd := d.inheritInitPidFd()
-		if pidFdNr >= 0 {
+		pidFd := d.inheritInitPidFd()
+		pidFdNr := "-1"
+		if pidFd != nil {
 			defer func() { _ = pidFd.Close() }()
+			pidFdNr = "3"
 		}
 
 		_, err := subprocess.RunCommandInheritFds(
@@ -8208,7 +8294,7 @@ func (d *lxc) removeMount(mount string) error {
 			"go-umount",
 			"--",
 			fmt.Sprintf("%d", pid),
-			fmt.Sprintf("%d", pidFdNr),
+			pidFdNr,
 			mount)
 		if err != nil {
 			return err

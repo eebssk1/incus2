@@ -129,6 +129,7 @@ var api10 = []APIEndpoint{
 	storagePoolVolumeSnapshotTypeCmd,
 	storagePoolVolumesTypeCmd,
 	storagePoolVolumeTypeCmd,
+	storagePoolVolumeTypeSFTPCmd,
 	storagePoolVolumeTypeCustomBackupsCmd,
 	storagePoolVolumeTypeCustomBackupCmd,
 	storagePoolVolumeTypeCustomBackupExportCmd,
@@ -644,7 +645,7 @@ func doApi10Update(d *Daemon, r *http.Request, req api.ServerPut, patch bool) re
 		return err
 	})
 	if err != nil {
-		var errorList config.ErrorList
+		var errorList *config.ErrorList
 		switch {
 		case errors.As(err, &errorList):
 			return response.BadRequest(err)
@@ -708,7 +709,7 @@ func doApi10Update(d *Daemon, r *http.Request, req api.ServerPut, patch bool) re
 		return err
 	})
 	if err != nil {
-		var errorList config.ErrorList
+		var errorList *config.ErrorList
 		switch {
 		case errors.As(err, &errorList):
 			return response.BadRequest(err)

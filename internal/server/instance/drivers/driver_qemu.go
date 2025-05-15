@@ -365,6 +365,63 @@ type qemu struct {
 // Callers should check that the instance is running (and therefore mounted) before calling this function,
 // otherwise the qmp.Connect call will fail to use the monitor socket file.
 func (d *qemu) getAgentClient() (*http.Client, error) {
+	if d.isWindows() {
+		// Get known network details.
+		networks, err := d.getNetworkState()
+		if err != nil {
+			return nil, errQemuAgentOffline
+		}
+
+		// The connection uses mutual authentication, so use the server's key & cert for client.
+		agentCert, _, clientCert, clientKey, err := d.generateAgentCert()
+		if err != nil {
+			return nil, err
+		}
+
+		// Get the TLS configuration.
+		tlsConfig, err := localtls.GetTLSConfigMem(clientCert, clientKey, "", agentCert, false)
+		if err != nil {
+			return nil, err
+		}
+
+		// Setup an HTTPS client.
+		client := &http.Client{}
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			// Replicate the headers.
+			req.Header = via[len(via)-1].Header
+
+			return nil
+		}
+
+		for _, netInterface := range networks {
+			for _, address := range netInterface.Addresses {
+				if address.Scope != "global" {
+					continue
+				}
+
+				networkAddress := net.JoinHostPort(address.Address, strconv.Itoa(ports.HTTPSDefaultPort))
+
+				client.Transport = &http.Transport{
+					TLSClientConfig: tlsConfig,
+					DialContext: func(_ context.Context, network, addr string) (net.Conn, error) {
+						return net.DialTimeout("tcp", networkAddress, 100*time.Millisecond)
+					},
+					DisableKeepAlives:     true,
+					ExpectContinueTimeout: time.Second * 3,
+					ResponseHeaderTimeout: time.Second * 3600,
+					TLSHandshakeTimeout:   time.Second * 3,
+				}
+
+				_, err := client.Get("https://agent/")
+				if err == nil {
+					return client, nil
+				}
+			}
+		}
+
+		return nil, errQemuAgentOffline
+	}
+
 	// Check if the agent is running.
 	monitor, err := qmp.Connect(d.monitorPath(), qemuSerialChardevName, d.getMonitorEventHandler(), d.QMPLogFilePath())
 	if err != nil {
@@ -2973,6 +3030,7 @@ func (d *qemu) spiceCmdlineConfig() string {
 // inside the VM's config volume so that it can be restricted by quota.
 // Requires the instance be mounted before calling this function.
 func (d *qemu) generateConfigShare() error {
+	isWindows := d.isWindows()
 	configDrivePath := filepath.Join(d.Path(), "config")
 
 	// Create config drive dir if doesn't exist, if it does exist, leave it around so we don't regenerate all
@@ -2982,88 +3040,92 @@ func (d *qemu) generateConfigShare() error {
 		return err
 	}
 
-	// Add the VM agent.
-	agentSrcPath, _ := exec.LookPath("incus-agent")
-	if util.PathExists(os.Getenv("INCUS_AGENT_PATH")) {
-		// Install incus-agent script (loads from agent share).
-		agentFile, err := incusAgentLoader.ReadFile("agent-loader/incus-agent")
-		if err != nil {
-			return err
-		}
-
-		err = os.WriteFile(filepath.Join(configDrivePath, "incus-agent"), agentFile, 0o700)
-		if err != nil {
-			return err
-		}
-
-		// Legacy support.
-		_ = os.Remove(filepath.Join(configDrivePath, "lxd-agent"))
-		err = os.Symlink("incus-agent", filepath.Join(configDrivePath, "lxd-agent"))
-		if err != nil {
-			return err
-		}
-	} else if agentSrcPath != "" {
-		// Install agent into config drive dir if found.
-		agentSrcPath, err = filepath.EvalSymlinks(agentSrcPath)
-		if err != nil {
-			return err
-		}
-
-		agentSrcInfo, err := os.Stat(agentSrcPath)
-		if err != nil {
-			return fmt.Errorf("Failed getting info for incus-agent source %q: %w", agentSrcPath, err)
-		}
-
-		agentInstallPath := filepath.Join(configDrivePath, "incus-agent")
-		agentNeedsInstall := true
-
-		if util.PathExists(agentInstallPath) {
-			agentInstallInfo, err := os.Stat(agentInstallPath)
-			if err != nil {
-				return fmt.Errorf("Failed getting info for existing incus-agent install %q: %w", agentInstallPath, err)
-			}
-
-			if agentInstallInfo.ModTime() == agentSrcInfo.ModTime() && agentInstallInfo.Size() == agentSrcInfo.Size() {
-				agentNeedsInstall = false
-			}
-		}
-
-		// Only install the agent into config drive if the existing one is different to the source one.
-		// Otherwise we would end up copying it again and this can cause unnecessary snapshot usage.
-		if agentNeedsInstall {
-			d.logger.Debug("Installing incus-agent", logger.Ctx{"srcPath": agentSrcPath, "installPath": agentInstallPath})
-			err = internalUtil.FileCopy(agentSrcPath, agentInstallPath)
+	if !isWindows {
+		// Add the VM agent loader.
+		agentSrcPath, _ := exec.LookPath("incus-agent")
+		if util.PathExists(os.Getenv("INCUS_AGENT_PATH")) {
+			// Install incus-agent script (loads from agent share).
+			agentFile, err := incusAgentLoader.ReadFile("agent-loader/incus-agent")
 			if err != nil {
 				return err
 			}
 
-			err = os.Chmod(agentInstallPath, 0o500)
+			err = os.WriteFile(filepath.Join(configDrivePath, "incus-agent"), agentFile, 0o700)
 			if err != nil {
 				return err
 			}
 
-			err = os.Chown(agentInstallPath, 0, 0)
+			if !isWindows {
+				// Legacy support.
+				_ = os.Remove(filepath.Join(configDrivePath, "lxd-agent"))
+				err = os.Symlink("incus-agent", filepath.Join(configDrivePath, "lxd-agent"))
+				if err != nil {
+					return err
+				}
+			}
+		} else if agentSrcPath != "" {
+			// Install agent into config drive dir if found.
+			agentSrcPath, err = filepath.EvalSymlinks(agentSrcPath)
 			if err != nil {
 				return err
 			}
 
-			// Ensure we copy the source file's timestamps so they can be used for comparison later.
-			err = os.Chtimes(agentInstallPath, agentSrcInfo.ModTime(), agentSrcInfo.ModTime())
+			agentSrcInfo, err := os.Stat(agentSrcPath)
 			if err != nil {
-				return fmt.Errorf("Failed setting incus-agent timestamps: %w", err)
+				return fmt.Errorf("Failed getting info for incus-agent source %q: %w", agentSrcPath, err)
+			}
+
+			agentInstallPath := filepath.Join(configDrivePath, "incus-agent")
+			agentNeedsInstall := true
+
+			if util.PathExists(agentInstallPath) {
+				agentInstallInfo, err := os.Stat(agentInstallPath)
+				if err != nil {
+					return fmt.Errorf("Failed getting info for existing incus-agent install %q: %w", agentInstallPath, err)
+				}
+
+				if agentInstallInfo.ModTime().Equal(agentSrcInfo.ModTime()) && agentInstallInfo.Size() == agentSrcInfo.Size() {
+					agentNeedsInstall = false
+				}
+			}
+
+			// Only install the agent into config drive if the existing one is different to the source one.
+			// Otherwise we would end up copying it again and this can cause unnecessary snapshot usage.
+			if agentNeedsInstall {
+				d.logger.Debug("Installing incus-agent", logger.Ctx{"srcPath": agentSrcPath, "installPath": agentInstallPath})
+				err = internalUtil.FileCopy(agentSrcPath, agentInstallPath)
+				if err != nil {
+					return err
+				}
+
+				err = os.Chmod(agentInstallPath, 0o500)
+				if err != nil {
+					return err
+				}
+
+				err = os.Chown(agentInstallPath, 0, 0)
+				if err != nil {
+					return err
+				}
+
+				// Ensure we copy the source file's timestamps so they can be used for comparison later.
+				err = os.Chtimes(agentInstallPath, agentSrcInfo.ModTime(), agentSrcInfo.ModTime())
+				if err != nil {
+					return fmt.Errorf("Failed setting incus-agent timestamps: %w", err)
+				}
+			} else {
+				d.logger.Debug("Skipping incus-agent install as unchanged", logger.Ctx{"srcPath": agentSrcPath, "installPath": agentInstallPath})
+			}
+
+			// Legacy support.
+			_ = os.Remove(filepath.Join(configDrivePath, "lxd-agent"))
+			err = os.Symlink("incus-agent", filepath.Join(configDrivePath, "lxd-agent"))
+			if err != nil {
+				return err
 			}
 		} else {
-			d.logger.Debug("Skipping incus-agent install as unchanged", logger.Ctx{"srcPath": agentSrcPath, "installPath": agentInstallPath})
+			d.logger.Warn("incus-agent not found, skipping its inclusion in the VM config drive", logger.Ctx{"err": err})
 		}
-
-		// Legacy support.
-		_ = os.Remove(filepath.Join(configDrivePath, "lxd-agent"))
-		err = os.Symlink("incus-agent", filepath.Join(configDrivePath, "lxd-agent"))
-		if err != nil {
-			return err
-		}
-	} else {
-		d.logger.Warn("incus-agent not found, skipping its inclusion in the VM config drive", logger.Ctx{"err": err})
 	}
 
 	agentCert, agentKey, clientCert, _, err := d.generateAgentCert()
@@ -3086,63 +3148,65 @@ func (d *qemu) generateConfigShare() error {
 		return err
 	}
 
-	// Systemd units.
-	err = os.MkdirAll(filepath.Join(configDrivePath, "systemd"), 0o500)
-	if err != nil {
-		return err
-	}
+	if !isWindows {
+		// Systemd units.
+		err = os.MkdirAll(filepath.Join(configDrivePath, "systemd"), 0o500)
+		if err != nil {
+			return err
+		}
 
-	// Systemd unit for incus-agent. It ensures the incus-agent is copied from the shared filesystem before it is
-	// started. The service is triggered dynamically via udev rules when certain virtio-ports are detected,
-	// rather than being enabled at boot.
-	agentFile, err := incusAgentLoader.ReadFile("agent-loader/systemd/incus-agent.service")
-	if err != nil {
-		return err
-	}
+		// Systemd unit for incus-agent. It ensures the incus-agent is copied from the shared filesystem before it is
+		// started. The service is triggered dynamically via udev rules when certain virtio-ports are detected,
+		// rather than being enabled at boot.
+		agentFile, err := incusAgentLoader.ReadFile("agent-loader/systemd/incus-agent.service")
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(filepath.Join(configDrivePath, "systemd", "incus-agent.service"), agentFile, 0o400)
-	if err != nil {
-		return err
-	}
+		err = os.WriteFile(filepath.Join(configDrivePath, "systemd", "incus-agent.service"), agentFile, 0o400)
+		if err != nil {
+			return err
+		}
 
-	// Setup script for incus-agent that is executed by the incus-agent systemd unit before incus-agent is started.
-	// The script sets up a temporary mount point, copies data from the mount (including incus-agent binary),
-	// and then unmounts it. It also ensures appropriate permissions for the Incus agent's runtime directory.
-	agentFile, err = incusAgentLoader.ReadFile("agent-loader/incus-agent-setup")
-	if err != nil {
-		return err
-	}
+		// Setup script for incus-agent that is executed by the incus-agent systemd unit before incus-agent is started.
+		// The script sets up a temporary mount point, copies data from the mount (including incus-agent binary),
+		// and then unmounts it. It also ensures appropriate permissions for the Incus agent's runtime directory.
+		agentFile, err = incusAgentLoader.ReadFile("agent-loader/incus-agent-setup")
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(filepath.Join(configDrivePath, "systemd", "incus-agent-setup"), agentFile, 0o500)
-	if err != nil {
-		return err
-	}
+		err = os.WriteFile(filepath.Join(configDrivePath, "systemd", "incus-agent-setup"), agentFile, 0o500)
+		if err != nil {
+			return err
+		}
 
-	err = os.MkdirAll(filepath.Join(configDrivePath, "udev"), 0o500)
-	if err != nil {
-		return err
-	}
+		err = os.MkdirAll(filepath.Join(configDrivePath, "udev"), 0o500)
+		if err != nil {
+			return err
+		}
 
-	// Udev rules to start the incus-agent.service when QEMU serial devices (symlinks in virtio-ports) appear.
-	agentFile, err = incusAgentLoader.ReadFile("agent-loader/systemd/incus-agent.rules")
-	if err != nil {
-		return err
-	}
+		// Udev rules to start the incus-agent.service when QEMU serial devices (symlinks in virtio-ports) appear.
+		agentFile, err = incusAgentLoader.ReadFile("agent-loader/systemd/incus-agent.rules")
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(filepath.Join(configDrivePath, "udev", "99-incus-agent.rules"), agentFile, 0o400)
-	if err != nil {
-		return err
-	}
+		err = os.WriteFile(filepath.Join(configDrivePath, "udev", "99-incus-agent.rules"), agentFile, 0o400)
+		if err != nil {
+			return err
+		}
 
-	// Install script for manual installs.
-	agentFile, err = incusAgentLoader.ReadFile("agent-loader/install.sh")
-	if err != nil {
-		return err
-	}
+		// Install script for manual installs.
+		agentFile, err = incusAgentLoader.ReadFile("agent-loader/install.sh")
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(filepath.Join(configDrivePath, "install.sh"), agentFile, 0o700)
-	if err != nil {
-		return err
+		err = os.WriteFile(filepath.Join(configDrivePath, "install.sh"), agentFile, 0o700)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Templated files.
@@ -3187,45 +3251,47 @@ func (d *qemu) generateConfigShare() error {
 		}
 	}
 
-	// Clear NICConfigDir to ensure that no leftover configuration is erroneously applied by the agent.
-	nicConfigPath := filepath.Join(configDrivePath, deviceConfig.NICConfigDir)
-	_ = os.RemoveAll(nicConfigPath)
-	err = os.MkdirAll(nicConfigPath, 0o500)
-	if err != nil {
-		return err
-	}
+	if !isWindows {
+		// Clear NICConfigDir to ensure that no leftover configuration is erroneously applied by the agent.
+		nicConfigPath := filepath.Join(configDrivePath, deviceConfig.NICConfigDir)
+		_ = os.RemoveAll(nicConfigPath)
+		err = os.MkdirAll(nicConfigPath, 0o500)
+		if err != nil {
+			return err
+		}
 
-	// Add the NIC config.
-	if util.IsTrue(d.expandedConfig["agent.nic_config"]) {
-		sortedDevices := d.expandedDevices.Sorted()
-		for _, entry := range sortedDevices {
-			if entry.Config["type"] != "nic" {
-				continue // Only keep NIC devices.
+		// Add the NIC config.
+		if util.IsTrue(d.expandedConfig["agent.nic_config"]) {
+			sortedDevices := d.expandedDevices.Sorted()
+			for _, entry := range sortedDevices {
+				if entry.Config["type"] != "nic" {
+					continue // Only keep NIC devices.
+				}
+
+				dev, err := d.FillNetworkDevice(entry.Name, entry.Config)
+				if err != nil {
+					return err
+				}
+
+				err = d.writeNICDevConfig(dev["mtu"], entry.Name, dev["name"], dev["hwaddr"])
+				if err != nil {
+					return fmt.Errorf("Failed writing NIC config for device %q: %w", entry.Name, err)
+				}
 			}
+		}
 
-			dev, err := d.FillNetworkDevice(entry.Name, entry.Config)
+		// Writing the connection info the config drive allows the agent to start /dev/incus very
+		// early. This is important for systemd services which want or require /dev/incus/sock.
+		connInfo, err := d.getAgentConnectionInfo()
+		if err != nil {
+			return err
+		}
+
+		if connInfo != nil {
+			err = d.saveConnectionInfo(connInfo)
 			if err != nil {
 				return err
 			}
-
-			err = d.writeNICDevConfig(dev["mtu"], entry.Name, dev["name"], dev["hwaddr"])
-			if err != nil {
-				return fmt.Errorf("Failed writing NIC config for device %q: %w", entry.Name, err)
-			}
-		}
-	}
-
-	// Writing the connection info the config drive allows the agent to start /dev/incus very
-	// early. This is important for systemd services which want or require /dev/incus/sock.
-	connInfo, err := d.getAgentConnectionInfo()
-	if err != nil {
-		return err
-	}
-
-	if connInfo != nil {
-		err = d.saveConnectionInfo(connInfo)
-		if err != nil {
-			return err
 		}
 	}
 
@@ -3837,20 +3903,31 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuInfo *cpuTopology
 		bus.allocate(busFunctionGroupNone)
 	}
 
-	// Write the agent mount config.
-	agentMountJSON, err := json.Marshal(agentMounts)
-	if err != nil {
-		return nil, fmt.Errorf("Failed marshalling agent mounts to JSON: %w", err)
-	}
+	if !d.isWindows() {
+		// Write the agent mount config.
+		agentMountJSON, err := json.Marshal(agentMounts)
+		if err != nil {
+			return nil, fmt.Errorf("Failed marshalling agent mounts to JSON: %w", err)
+		}
 
-	agentMountFile := filepath.Join(d.Path(), "config", "agent-mounts.json")
-	err = os.WriteFile(agentMountFile, agentMountJSON, 0o400)
-	if err != nil {
-		return nil, fmt.Errorf("Failed writing agent mounts file: %w", err)
+		agentMountFile := filepath.Join(d.Path(), "config", "agent-mounts.json")
+		err = os.WriteFile(agentMountFile, agentMountJSON, 0o400)
+		if err != nil {
+			return nil, fmt.Errorf("Failed writing agent mounts file: %w", err)
+		}
 	}
 
 	// process any user-specified overrides
-	d.conf = qemuRawCfgOverride(conf, d.expandedConfig)
+	confOverride, ok := d.expandedConfig["raw.qemu.conf"]
+	if ok {
+		d.conf, err = qemuRawCfgOverride(conf, confOverride)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		d.conf = conf
+	}
+
 	return monHooks, nil
 }
 
@@ -6558,7 +6635,7 @@ func (d *qemu) delete(force bool) error {
 }
 
 // Export publishes the instance.
-func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error) {
+func (d *qemu) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error) {
 	ctxMap := logger.Ctx{
 		"created":   d.creationDate,
 		"ephemeral": d.ephemeral,
@@ -6581,18 +6658,18 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 	defer func() { _ = d.unmount() }()
 
 	// Create the tarball.
-	tarWriter := instancewriter.NewInstanceTarWriter(w, nil)
+	metaTarWriter := instancewriter.NewInstanceTarWriter(metaWriter, nil)
 
 	// Path inside the tar image is the pathname starting after cDir.
 	cDir := d.Path()
 	offset := len(cDir) + 1
 
-	writeToTar := func(path string, fi os.FileInfo, err error) error {
+	writeToMetaTar := func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		err = tarWriter.WriteFile(path[offset:], path, fi, false)
+		err = metaTarWriter.WriteFile(path[offset:], path, fi, false)
 		if err != nil {
 			d.logger.Debug("Error tarring up", logger.Ctx{"path": path, "err": err})
 			return err
@@ -6607,7 +6684,7 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 		parentName, _, _ := api.GetParentAndSnapshotName(d.name)
 		parent, err := instance.LoadByProjectAndName(d.state, d.project.Name, parentName)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
@@ -6633,14 +6710,14 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 		// Parse the metadata.
 		content, err := os.ReadFile(fnam)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
 
 		err = yaml.Unmarshal(content, &meta)
 		if err != nil {
-			_ = tarWriter.Close()
+			_ = metaTarWriter.Close()
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
@@ -6665,7 +6742,7 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 	// Write the new metadata.yaml.
 	tempDir, err := os.MkdirTemp("", "incus_metadata_")
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -6674,7 +6751,7 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 
 	data, err := yaml.Marshal(&meta)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -6682,7 +6759,7 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 	fnam = filepath.Join(tempDir, "metadata.yaml")
 	err = os.WriteFile(fnam, data, 0o644)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
@@ -6690,15 +6767,15 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 	// Add metadata.yaml to the tarball.
 	fi, err := os.Lstat(fnam)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
 	}
 
 	tmpOffset := len(filepath.Dir(fnam)) + 1
-	err = tarWriter.WriteFile(fnam[tmpOffset:], fnam, fi, false)
+	err = metaTarWriter.WriteFile(fnam[tmpOffset:], fnam, fi, false)
 	if err != nil {
-		_ = tarWriter.Close()
+		_ = metaTarWriter.Close()
 		d.logger.Debug("Error writing to tarfile", logger.Ctx{"err": err})
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
@@ -6749,29 +6826,43 @@ func (d *qemu) Export(w io.Writer, properties map[string]string, expiration time
 		return nil, fmt.Errorf("Failed converting instance to qcow2: %w", err)
 	}
 
-	// Read converted file info and write file to tarball.
-	fi, err = os.Lstat(fPath)
-	if err != nil {
-		return nil, err
-	}
+	// Read converted file info and write file to tarball in the case of unified image
+	// For split images, just write as a qcow2 file
+	if rootfsWriter == nil {
+		imgOffset := len(tmpPath) + 1
+		fi, err = os.Lstat(fPath)
+		if err != nil {
+			return nil, err
+		}
 
-	imgOffset := len(tmpPath) + 1
-	err = tarWriter.WriteFile(fPath[imgOffset:], fPath, fi, false)
-	if err != nil {
-		return nil, err
+		err = metaTarWriter.WriteFile(fPath[imgOffset:], fPath, fi, false)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		f, err := os.Open(fPath)
+		if err != nil {
+			return nil, err
+		}
+
+		r := io.Reader(f)
+		_, err = io.Copy(rootfsWriter, r)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Include all the templates.
 	fnam = d.TemplatesPath()
 	if util.PathExists(fnam) {
-		err = filepath.Walk(fnam, writeToTar)
+		err = filepath.Walk(fnam, writeToMetaTar)
 		if err != nil {
 			d.logger.Error("Failed exporting instance", ctxMap)
 			return nil, err
 		}
 	}
 
-	err = tarWriter.Close()
+	err = metaTarWriter.Close()
 	if err != nil {
 		d.logger.Error("Failed exporting instance", ctxMap)
 		return nil, err
@@ -8291,7 +8382,9 @@ func (d *qemu) renderState(statusCode api.StatusCode) (*api.InstanceState, error
 				// Fallback data if agent is not reachable.
 				status = &api.InstanceState{}
 				status.Processes = -1
+			}
 
+			if len(status.Network) == 0 {
 				status.Network, err = d.getNetworkState()
 				if err != nil {
 					return nil, err
@@ -9413,9 +9506,9 @@ func (d *qemu) blockNodeName(name string) string {
 		// If the name is too long, hash it as SHA-256 (32 bytes).
 		// Then encode the SHA-256 binary hash as Base64 Raw URL format and trim down to 25 chars.
 		// Raw URL avoids the use of "+" character and the padding "=" character which QEMU doesn't allow.
-		hash := sha256.New()
-		hash.Write([]byte(name))
-		binaryHash := hash.Sum(nil)
+		hash256 := sha256.New()
+		hash256.Write([]byte(name))
+		binaryHash := hash256.Sum(nil)
 		name = base64.RawURLEncoding.EncodeToString(binaryHash)
 		name = name[0:25]
 	}

@@ -143,7 +143,7 @@ func OVNEnsureACLs(s *state.State, l logger.Logger, client *ovn.NB, aclProjectNa
 
 			err := s.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 				// Load the config we'll need to create the port group with ACL rules.
-				_, aclInfo, err = tx.GetNetworkACL(ctx, aclProjectName, aclName)
+				_, aclInfo, err = cluster.GetNetworkACLAPI(ctx, tx.Tx(), aclProjectName, aclName)
 
 				return err
 			})
@@ -177,7 +177,7 @@ func OVNEnsureACLs(s *state.State, l logger.Logger, client *ovn.NB, aclProjectNa
 			// new per-ACL-per-network port groups.
 			if reapplyRules || !portGroupHasACLs || len(addACLNets) > 0 {
 				err = s.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-					_, aclInfo, err = tx.GetNetworkACL(ctx, aclProjectName, aclName)
+					_, aclInfo, err = cluster.GetNetworkACLAPI(ctx, tx.Tx(), aclProjectName, aclName)
 
 					return err
 				})
@@ -195,7 +195,7 @@ func OVNEnsureACLs(s *state.State, l logger.Logger, client *ovn.NB, aclProjectNa
 	// We will create port groups (without ACL rules) for any missing referenced ACL OVN port groups so that
 	// when we add the rules for the new ACL port groups this doesn't trigger an OVN log error about missing
 	// port groups.
-	referencedACLs := make(map[string]struct{}, 0)
+	referencedACLs := make(map[string]struct{})
 	for _, aclStatus := range createACLPortGroups {
 		ovnAddReferencedACLs(aclStatus.aclInfo, referencedACLs)
 	}
@@ -842,16 +842,16 @@ func OVNPortGroupDeleteIfUnused(s *state.State, l logger.Logger, client *ovn.NB,
 	err := s.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 		var err error
 
-		// Get map of ACL names to DB IDs (used for generating OVN port group names).
-		aclNameIDs, err = tx.GetNetworkACLIDsByNames(ctx, aclProjectName)
+		// Get all the ACLs.
+		acls, err := cluster.GetNetworkACLs(ctx, tx.Tx(), cluster.NetworkACLFilter{Project: &aclProjectName})
 		if err != nil {
-			return fmt.Errorf("Failed getting network ACL IDs for security ACL port group removal: %w", err)
+			return err
 		}
 
-		// Convert aclNameIDs to aclNames slice for use with UsedBy.
-		aclNames = make([]string, 0, len(aclNameIDs))
-		for aclName := range aclNameIDs {
-			aclNames = append(aclNames, aclName)
+		// Convert acls to aclNames slice for use with UsedBy.
+		aclNames = make([]string, 0, len(acls))
+		for _, acl := range acls {
+			aclNames = append(aclNames, acl.Name)
 		}
 
 		// Get project ID.
@@ -887,7 +887,7 @@ func OVNPortGroupDeleteIfUnused(s *state.State, l logger.Logger, client *ovn.NB,
 
 	// Filter project port group list by ACL related ones, and store them in a map keyed by port group name.
 	// This contains the initial candidates for removal. But any found to be in use will be removed from list.
-	removeACLPortGroups := make(map[ovn.OVNPortGroup]struct{}, 0)
+	removeACLPortGroups := make(map[ovn.OVNPortGroup]struct{})
 	for _, portGroup := range portGroups {
 		// If port group is related to an ACL and is not related to one of keepACLs, then add it as a
 		// candidate for removal.
@@ -905,7 +905,7 @@ func OVNPortGroupDeleteIfUnused(s *state.State, l logger.Logger, client *ovn.NB,
 	}
 
 	// Map to record ACLs being referenced by other ACLs. Need to check later if they are in use with OVN ACLs.
-	aclUsedACLS := make(map[string][]string, 0)
+	aclUsedACLS := make(map[string][]string)
 
 	// Find all ACLs that are either directly referred to by OVN entities (networks, instance/profile NICs)
 	// or indirectly by being referred to by a ruleset of another ACL that is itself in use by OVN entities.

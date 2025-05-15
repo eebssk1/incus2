@@ -193,8 +193,7 @@ func (n *common) validateZoneNames(config map[string]string) error {
 			return fmt.Errorf("Invalid %q must contain only single DNS zone name", keyName)
 		}
 
-		zoneProjectsUsed := make(map[string]struct{}, 0)
-
+		zoneProjectsUsed := make(map[string]struct{})
 		for _, keyZoneName := range keyZoneNames {
 			zoneProjectName, found := zoneProjects[keyZoneName]
 			if !found {
@@ -1528,12 +1527,19 @@ func (n *common) peerUsedBy(peerName string, firstOnly bool) ([]string, error) {
 	var aclNames []string
 
 	err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		var err error
+		projectName := n.Project()
 
-		// Find ACLs that have rules that reference the peer connection.
-		aclNames, err = tx.GetNetworkACLs(ctx, n.Project())
+		acls, err := dbCluster.GetNetworkACLs(ctx, tx.Tx(), dbCluster.NetworkACLFilter{Project: &projectName})
+		if err != nil {
+			return err
+		}
 
-		return err
+		aclNames = make([]string, len(acls))
+		for i, acl := range acls {
+			aclNames[i] = acl.Name
+		}
+
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -1543,7 +1549,7 @@ func (n *common) peerUsedBy(peerName string, firstOnly bool) ([]string, error) {
 		var aclInfo *api.NetworkACL
 
 		err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-			_, aclInfo, err = tx.GetNetworkACL(ctx, n.Project(), aclName)
+			_, aclInfo, err = dbCluster.GetNetworkACLAPI(ctx, tx.Tx(), n.Project(), aclName)
 
 			return err
 		})

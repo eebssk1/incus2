@@ -1321,7 +1321,7 @@ func (m *Monitor) RingbufRead(device string) (string, error) {
 		return "", err
 	}
 
-	deviceFound := true
+	deviceFound := false
 	for _, qemuDevice := range queryResp.Return {
 		if qemuDevice.Label == device {
 			deviceFound = true
@@ -1333,6 +1333,7 @@ func (m *Monitor) RingbufRead(device string) (string, error) {
 			break
 		}
 	}
+
 	if !deviceFound {
 		return "", fmt.Errorf("Specified qemu device %q doesn't exist", device)
 	}
