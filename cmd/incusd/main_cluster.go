@@ -65,8 +65,8 @@ func (c *cmdCluster) Command() *cobra.Command {
 	cmd.AddCommand(listDatabase.Command())
 
 	// Recover
-	recover := cmdClusterRecoverFromQuorumLoss{global: c.global}
-	cmd.AddCommand(recover.Command())
+	recoverFromQuorumLoss := cmdClusterRecoverFromQuorumLoss{global: c.global}
+	cmd.AddCommand(recoverFromQuorumLoss.Command())
 
 	// Remove a raft node.
 	removeRaftNode := cmdClusterRemoveRaftNode{global: c.global}
@@ -564,9 +564,9 @@ func textEditor(inPath string, inContent []byte) ([]byte, error) {
 			return []byte{}, err
 		}
 
-		revert := revert.New()
-		defer revert.Fail()
-		revert.Add(func() {
+		reverter := revert.New()
+		defer reverter.Fail()
+		reverter.Add(func() {
 			_ = f.Close()
 			_ = os.Remove(f.Name())
 		})
@@ -592,8 +592,8 @@ func textEditor(inPath string, inContent []byte) ([]byte, error) {
 			return []byte{}, err
 		}
 
-		revert.Success()
-		revert.Add(func() { _ = os.Remove(path) })
+		reverter.Success()
+		reverter.Add(func() { _ = os.Remove(path) })
 	} else {
 		path = inPath
 	}

@@ -679,8 +679,8 @@ func (m *Monitor) AddObject(args map[string]any) error {
 
 // AddBlockDevice adds a block device.
 func (m *Monitor) AddBlockDevice(blockDev map[string]any, device map[string]any) error {
-	revert := revert.New()
-	defer revert.Fail()
+	reverter := revert.New()
+	defer reverter.Fail()
 
 	nodeName, ok := blockDev["node-name"].(string)
 	if !ok {
@@ -693,7 +693,7 @@ func (m *Monitor) AddBlockDevice(blockDev map[string]any, device map[string]any)
 			return fmt.Errorf("Failed adding block device: %w", err)
 		}
 
-		revert.Add(func() {
+		reverter.Add(func() {
 			_ = m.RemoveBlockDevice(nodeName)
 		})
 	}
@@ -703,7 +703,8 @@ func (m *Monitor) AddBlockDevice(blockDev map[string]any, device map[string]any)
 		return fmt.Errorf("Failed adding device: %w", err)
 	}
 
-	revert.Success()
+	reverter.Success()
+
 	return nil
 }
 
@@ -810,8 +811,8 @@ func (m *Monitor) RemoveDevice(deviceID string) error {
 
 // AddNIC adds a NIC device.
 func (m *Monitor) AddNIC(netDev map[string]any, device map[string]any) error {
-	revert := revert.New()
-	defer revert.Fail()
+	reverter := revert.New()
+	defer reverter.Fail()
 
 	if netDev != nil {
 		err := m.Run("netdev_add", netDev, nil)
@@ -819,7 +820,7 @@ func (m *Monitor) AddNIC(netDev map[string]any, device map[string]any) error {
 			return fmt.Errorf("Failed adding NIC netdev: %w", err)
 		}
 
-		revert.Add(func() {
+		reverter.Add(func() {
 			netDevDel := map[string]any{
 				"id": netDev["id"],
 			}
@@ -836,7 +837,8 @@ func (m *Monitor) AddNIC(netDev map[string]any, device map[string]any) error {
 		return fmt.Errorf("Failed adding NIC device: %w", err)
 	}
 
-	revert.Success()
+	reverter.Success()
+
 	return nil
 }
 

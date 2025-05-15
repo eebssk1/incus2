@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"slices"
@@ -154,17 +155,17 @@ func (n *physical) Rename(newName string) error {
 func (n *physical) Start() error {
 	n.logger.Debug("Start")
 
-	revert := revert.New()
-	defer revert.Fail()
+	reverter := revert.New()
+	defer reverter.Fail()
 
-	revert.Add(func() { n.setUnavailable() })
+	reverter.Add(func() { n.setUnavailable() })
 
 	err := n.setup(nil)
 	if err != nil {
 		return err
 	}
 
-	revert.Success()
+	reverter.Success()
 
 	// Ensure network is marked as available now its started.
 	n.setAvailable()
@@ -173,8 +174,8 @@ func (n *physical) Start() error {
 }
 
 func (n *physical) setup(oldConfig map[string]string) error {
-	revert := revert.New()
-	defer revert.Fail()
+	reverter := revert.New()
+	defer reverter.Fail()
 
 	if !InterfaceExists(n.config["parent"]) {
 		return fmt.Errorf("Parent interface %q not found", n.config["parent"])
@@ -188,7 +189,7 @@ func (n *physical) setup(oldConfig map[string]string) error {
 	}
 
 	if created {
-		revert.Add(func() { _ = InterfaceRemove(hostName) })
+		reverter.Add(func() { _ = InterfaceRemove(hostName) })
 	}
 
 	// Set the MTU.
@@ -223,7 +224,7 @@ func (n *physical) setup(oldConfig map[string]string) error {
 		return err
 	}
 
-	revert.Success()
+	reverter.Success()
 	return nil
 }
 
@@ -290,8 +291,8 @@ func (n *physical) Update(newNetwork api.NetworkPut, targetNode string, clientTy
 		return n.common.update(newNetwork, targetNode, clientType)
 	}
 
-	revert := revert.New()
-	defer revert.Fail()
+	reverter := revert.New()
+	defer reverter.Fail()
 
 	hostNameChanged := slices.Contains(changedKeys, "vlan") || slices.Contains(changedKeys, "parent")
 
@@ -325,7 +326,7 @@ func (n *physical) Update(newNetwork api.NetworkPut, targetNode string, clientTy
 	}
 
 	// Define a function which reverts everything.
-	revert.Add(func() {
+	reverter.Add(func() {
 		// Reset changes to all nodes and database.
 		_ = n.common.update(oldNetwork, targetNode, clientType)
 	})
@@ -355,18 +356,18 @@ func (n *physical) Update(newNetwork api.NetworkPut, targetNode string, clientTy
 			ovsBridge := fmt.Sprintf("incusovn%d", n.id)
 
 			err := vswitch.DeleteBridgePort(context.TODO(), ovsBridge, oldNetwork.Config["parent"])
-			if err != nil && err != ovs.ErrNotFound {
+			if err != nil && !errors.Is(err, ovs.ErrNotFound) {
 				return err
 			}
 
 			err = vswitch.CreateBridgePort(context.TODO(), ovsBridge, newNetwork.Config["parent"], true)
-			if err != nil && err != ovs.ErrNotFound {
+			if err != nil && !errors.Is(err, ovs.ErrNotFound) {
 				return err
 			}
 		}
 	}
 
-	revert.Success()
+	reverter.Success()
 
 	// Notify dependent networks (those using this network as their uplink) of the changes.
 	// Do this after the network has been successfully updated so that a failure to notify a dependent network
