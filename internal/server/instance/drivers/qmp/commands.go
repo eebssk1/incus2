@@ -85,7 +85,9 @@ type qmpcmd struct {
 	QSLet QSlet
 }
 
-var qmpInstance qmpcmd
+var qmpInstance qmpcmd = qmpcmd{
+		QSLet: nil,
+}
 
 // New bind the qemu scriptlet instance to us.
 func New(QSlet QSlet) *qmpcmd {
@@ -689,6 +691,9 @@ func (m *Monitor) AddBlockDevice(blockDev map[string]any, device map[string]any)
 	}
 
 	if blockDev != nil {
+		if bdev, err := qmpInstance.runADhook(blockDev, m.IName); err == nil {
+			blockDev = bdev
+		}
 		err := m.Run("blockdev-add", blockDev, nil)
 		if err != nil {
 			return fmt.Errorf("Failed adding block device: %w", err)
@@ -766,6 +771,7 @@ func (m *Monitor) RemoveCharDevice(deviceID string) error {
 }
 
 func (q *qmpcmd) runADhook(device map[string]any, name string) (map[string]any, error) {
+	if q.QSLet == nil { return nil,errors.New("QSLet not binded"); }
 	res, err := q.QSLet.QEMUAdHook(device, name)
 	if err != nil && err.Error() != "" {
 		logger.Log.Error(fmt.Sprintf("Qemu AD Hook: %s: %s", name, err.Error()))
@@ -816,6 +822,10 @@ func (m *Monitor) AddNIC(netDev map[string]any, device map[string]any) error {
 	defer reverter.Fail()
 
 	if netDev != nil {
+		if ndev, err := qmpInstance.runADhook(netDev, m.IName); err == nil {
+			netDev = ndev
+		}
+
 		err := m.Run("netdev_add", netDev, nil)
 		if err != nil {
 			return fmt.Errorf("Failed adding NIC netdev: %w", err)
