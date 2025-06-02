@@ -484,6 +484,8 @@ var APIExtensions = []string{
 	"instance_publish_split",
 	"init_preseed_certificates",
 	"custom_volume_sftp",
+	"network_ovn_external_nic_address",
+	"network_physical_gateway_hwaddr",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

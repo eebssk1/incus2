@@ -1430,6 +1430,15 @@ func (d *common) devicesUpdate(inst instance.Instance, removeDevices deviceConfi
 
 			reverter.Add(func() { _ = dm.deviceStop(dev, instanceRunning, "") })
 		}
+
+		// For the root disk, call Update as its size may change.
+		// Update will invoke applyQuota, which resizes the disk if necessary.
+		if internalInstance.IsRootDiskDevice(dev.Config()) {
+			err = dev.Update(oldExpandedDevices, instanceRunning)
+			if err != nil {
+				return fmt.Errorf("Failed to update device %q: %w", dev.Name(), err)
+			}
+		}
 	}
 
 	for _, entry := range updateDevices.Sorted() {
@@ -1667,4 +1676,18 @@ func (d *common) ETag() []any {
 	}
 
 	return etag
+}
+
+// ClearLimitsCPUNodes clears the "volatile.cpu.nodes" configuration if necessary.
+func (d *common) ClearLimitsCPUNodes(changedConfig []string) {
+	if !slices.Contains(changedConfig, "limits.cpu.nodes") {
+		return
+	}
+
+	value := d.expandedConfig["limits.cpu.nodes"]
+	if value == "balanced" {
+		return
+	}
+
+	d.localConfig["volatile.cpu.nodes"] = ""
 }

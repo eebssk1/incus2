@@ -959,6 +959,14 @@
 						}
 					},
 					{
+						"ipv4.address.external": {
+							"longdesc": "",
+							"managed": "no",
+							"shortdesc": "Select a specific external address (typically from a network forward)",
+							"type": "string"
+						}
+					},
+					{
 						"ipv4.routes": {
 							"longdesc": "",
 							"managed": "no",
@@ -979,6 +987,14 @@
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "An IPv6 address to assign to the instance through DHCP, `none` can be used to disable IP allocation",
+							"type": "string"
+						}
+					},
+					{
+						"ipv6.address.external": {
+							"longdesc": "",
+							"managed": "no",
+							"shortdesc": "Select a specific external address (typically from a network forward)",
 							"type": "string"
 						}
 					},
@@ -3095,6 +3111,20 @@
 						}
 					},
 					{
+						"volatile.vm.rtc_adjustment": {
+							"longdesc": "Real Time Clock adjustment time to allow virtual machines to run on a different base than the host.",
+							"shortdesc": "Real Time Clock change adjustment",
+							"type": "int64"
+						}
+					},
+					{
+						"volatile.vm.rtc_offset": {
+							"longdesc": "Real Time Clock offset to allow virtual machines to run on a different base than the host.",
+							"shortdesc": "Real Time Clock change offset",
+							"type": "int64"
+						}
+					},
+					{
 						"volatile.vsock_id": {
 							"longdesc": "",
 							"shortdesc": "Instance `vsock ID` used as of last start",
@@ -4279,6 +4309,13 @@
 						}
 					},
 					{
+						"ipv4.gateway.hwaddr": {
+							"longdesc": "",
+							"shortdesc": "MAC address of the gateway (to avoid discovery)",
+							"type": "string"
+						}
+					},
+					{
 						"ipv4.ovn.ranges": {
 							"condition": "-",
 							"longdesc": "",
@@ -4312,6 +4349,13 @@
 							"condition": "standard mode",
 							"longdesc": "",
 							"shortdesc": "IPv6 address for the gateway and network (CIDR)",
+							"type": "string"
+						}
+					},
+					{
+						"ipv6.gateway.hwaddr": {
+							"longdesc": "",
+							"shortdesc": "MAC address of the gateway (to avoid discovery)",
 							"type": "string"
 						}
 					},

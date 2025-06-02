@@ -847,6 +847,13 @@ For file systems (shared directories or custom volumes), this is one of:
 
 ```
 
+```{config:option} ipv4.address.external devices-nic_ovn
+:managed: "no"
+:shortdesc: "Select a specific external address (typically from a network forward)"
+:type: "string"
+
+```
+
 ```{config:option} ipv4.routes devices-nic_ovn
 :managed: "no"
 :shortdesc: "Comma-delimited list of IPv4 static routes to route to the NIC"
@@ -864,6 +871,13 @@ For file systems (shared directories or custom volumes), this is one of:
 ```{config:option} ipv6.address devices-nic_ovn
 :managed: "no"
 :shortdesc: "An IPv6 address to assign to the instance through DHCP, `none` can be used to disable IP allocation"
+:type: "string"
+
+```
+
+```{config:option} ipv6.address.external devices-nic_ovn
+:managed: "no"
+:shortdesc: "Select a specific external address (typically from a network forward)"
 :type: "string"
 
 ```
@@ -2756,6 +2770,18 @@ It is globally unique across all servers and projects.
 
 ```
 
+```{config:option} volatile.vm.rtc_adjustment instance-volatile
+:shortdesc: "Real Time Clock change adjustment"
+:type: "int64"
+Real Time Clock adjustment time to allow virtual machines to run on a different base than the host.
+```
+
+```{config:option} volatile.vm.rtc_offset instance-volatile
+:shortdesc: "Real Time Clock change offset"
+:type: "int64"
+Real Time Clock offset to allow virtual machines to run on a different base than the host.
+```
+
 ```{config:option} volatile.vsock_id instance-volatile
 :shortdesc: "Instance `vsock ID` used as of last start"
 :type: "string"
@@ -3767,6 +3793,12 @@ User keys can be used in search.
 
 ```
 
+```{config:option} ipv4.gateway.hwaddr network_physical-ipv4
+:shortdesc: "MAC address of the gateway (to avoid discovery)"
+:type: "string"
+
+```
+
 ```{config:option} ipv4.ovn.ranges network_physical-ipv4
 :condition: "-"
 :shortdesc: "Comma-separated list of IPv4 ranges to use for child OVN network routers (FIRST-LAST format)"
@@ -3794,6 +3826,12 @@ User keys can be used in search.
 ```{config:option} ipv6.gateway network_physical-ipv6
 :condition: "standard mode"
 :shortdesc: "IPv6 address for the gateway and network (CIDR)"
+:type: "string"
+
+```
+
+```{config:option} ipv6.gateway.hwaddr network_physical-ipv6
+:shortdesc: "MAC address of the gateway (to avoid discovery)"
 :type: "string"
 
 ```

@@ -170,11 +170,17 @@ func (n *common) validateZoneNames(config map[string]string) error {
 	}
 
 	var err error
-	var zoneProjects map[string]string
+	var zones []dbCluster.NetworkZone
+	zoneProjects := make(map[string]string)
+
 	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		zoneProjects, err = tx.GetNetworkZones(ctx)
+		zones, err = dbCluster.GetNetworkZones(ctx, tx.Tx())
 		if err != nil {
 			return fmt.Errorf("Failed to load all network zones: %w", err)
+		}
+
+		for _, zone := range zones {
+			zoneProjects[zone.Name] = zone.Project
 		}
 
 		return nil
@@ -1131,19 +1137,61 @@ func (n *common) forwardBGPSetupPrefixes() error {
 // getExternalSubnetInUse returns information about usage of external subnets by networks connected to, or used by,
 // the specified uplinkNetworkName.
 func (n *common) getExternalSubnetInUse(ctx context.Context, tx *db.ClusterTx, uplinkNetworkName string, memberSpecific bool) ([]externalSubnetUsage, error) {
-	var err error
-	var projectNetworksForwardsOnUplink, projectNetworksLoadBalancersOnUplink map[string]map[string][]string
+	// Get a list of related networks.
+	relatedNetworks := map[int64]*api.Network{}
+
+	networksByProject, err := tx.GetNetworksAllProjects(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Failed loading network load balancer listen addresses: %w", err)
+	}
+
+	for projectName, networks := range networksByProject {
+		for _, networkName := range networks {
+			// Load the network.
+			networkID, apiNetwork, _, err := tx.GetNetworkInAnyState(ctx, projectName, networkName)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to load network: %w", err)
+			}
+
+			// Check if we're looking at our uplink.
+			if projectName == api.ProjectDefaultName && uplinkNetworkName == networkName {
+				relatedNetworks[networkID] = apiNetwork
+				continue
+			}
+
+			// Check if the network shares the same uplink.
+			if apiNetwork.Config["network"] == uplinkNetworkName {
+				relatedNetworks[networkID] = apiNetwork
+				continue
+			}
+		}
+	}
 
 	// Get all network forward listen addresses for all networks (of any type) connected to our uplink.
-	projectNetworksForwardsOnUplink, err = tx.GetProjectNetworkForwardListenAddressesByUplink(ctx, uplinkNetworkName, memberSpecific)
+	projectNetworksForwardsOnUplink, err := tx.GetProjectNetworkForwardListenAddressesByUplink(ctx, uplinkNetworkName, memberSpecific)
 	if err != nil {
 		return nil, fmt.Errorf("Failed loading network forward listen addresses: %w", err)
 	}
 
 	// Get all network load balancer listen addresses for all networks (of any type) connected to our uplink.
-	projectNetworksLoadBalancersOnUplink, err = tx.GetProjectNetworkLoadBalancerListenAddressesByUplink(ctx, uplinkNetworkName, memberSpecific)
-	if err != nil {
-		return nil, fmt.Errorf("Failed loading network forward listen addresses: %w", err)
+	projectNetworksLoadBalancersOnUplink := map[string]map[string][]string{}
+
+	for networkID, relatedNetwork := range relatedNetworks {
+		// Get all load balancers associated with this network.
+		loadBalancers, err := dbCluster.GetNetworkLoadBalancers(ctx, tx.Tx(), dbCluster.NetworkLoadBalancerFilter{
+			NetworkID: &networkID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Failed getting list of network load balancer: %w", err)
+		}
+
+		for _, lb := range loadBalancers {
+			if projectNetworksLoadBalancersOnUplink[relatedNetwork.Project] == nil {
+				projectNetworksLoadBalancersOnUplink[relatedNetwork.Project] = map[string][]string{}
+			}
+
+			projectNetworksLoadBalancersOnUplink[relatedNetwork.Project][relatedNetwork.Name] = append(projectNetworksLoadBalancersOnUplink[relatedNetwork.Project][relatedNetwork.Name], lb.ListenAddress)
+		}
 	}
 
 	externalSubnets := make([]externalSubnetUsage, 0, len(projectNetworksForwardsOnUplink)+len(projectNetworksLoadBalancersOnUplink))
