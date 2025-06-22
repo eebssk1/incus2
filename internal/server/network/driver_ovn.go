@@ -3,6 +3,7 @@ package network
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"maps"
@@ -891,14 +892,27 @@ func (n *ovn) Validate(config map[string]string) error {
 	}
 
 	// Check any existing network forward target addresses are suitable for this network's subnet.
-	memberSpecific := false // OVN doesn't support per-member forwards.
-
 	var forwards map[int64]*api.NetworkForward
-
 	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		forwards, err = tx.GetNetworkForwards(ctx, n.ID(), memberSpecific)
+		networkID := n.ID()
+		dbRecords, err := dbCluster.GetNetworkForwards(ctx, tx.Tx(), dbCluster.NetworkForwardFilter{
+			NetworkID: &networkID,
+		})
+		if err != nil {
+			return err
+		}
 
-		return err
+		forwards = make(map[int64]*api.NetworkForward)
+		for _, dbRecord := range dbRecords {
+			forward, err := dbRecord.ToAPI(ctx, tx.Tx())
+			if err != nil {
+				return err
+			}
+
+			forwards[dbRecord.ID] = forward
+		}
+
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("Failed loading network forwards: %w", err)
@@ -3416,16 +3430,16 @@ func (n *ovn) Delete(clientType request.ClientType) error {
 		}
 
 		// Delete any network forwards and load balancers.
-		memberSpecific := false // OVN doesn't support per-member forwards.
-
-		var forwardListenAddresses map[int64]string
+		forwardListenAddresses := map[int64]string{}
 		loadBalancerListenAddresses := map[int64]string{}
 
 		err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 			networkID := n.ID()
 
 			// Get the forward addresses.
-			forwardListenAddresses, err = tx.GetNetworkForwardListenAddresses(ctx, networkID, memberSpecific)
+			dbForwards, err := dbCluster.GetNetworkForwards(ctx, tx.Tx(), dbCluster.NetworkForwardFilter{
+				NetworkID: &networkID,
+			})
 			if err != nil {
 				return fmt.Errorf("Failed loading network forwards: %w", err)
 			}
@@ -3436,6 +3450,10 @@ func (n *ovn) Delete(clientType request.ClientType) error {
 			})
 			if err != nil {
 				return fmt.Errorf("Failed loading network load balancers: %w", err)
+			}
+
+			for _, fwd := range dbForwards {
+				forwardListenAddresses[fwd.ID] = fwd.ListenAddress
 			}
 
 			for _, lb := range dbLoadBalancers {
@@ -5480,7 +5498,7 @@ func (n *ovn) ForwardCreate(forward api.NetworkForwardsPost, clientType request.
 
 		err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 			// Check if there is an existing forward using the same listen address.
-			_, _, err := tx.GetNetworkForward(ctx, n.ID(), memberSpecific, forward.ListenAddress)
+			_, err := dbCluster.GetNetworkForward(ctx, tx.Tx(), n.ID(), forward.ListenAddress)
 
 			return err
 		})
@@ -5566,9 +5584,34 @@ func (n *ovn) ForwardCreate(forward api.NetworkForwardsPost, clientType request.
 
 		err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 			// Create forward DB record.
-			forwardID, err = tx.CreateNetworkForward(ctx, n.ID(), memberSpecific, &forward)
+			nodeID := sql.NullInt64{
+				Valid: memberSpecific,
+				Int64: tx.GetNodeID(),
+			}
 
-			return err
+			dbRecord := dbCluster.NetworkForward{
+				NetworkID:     n.ID(),
+				NodeID:        nodeID,
+				ListenAddress: forward.ListenAddress,
+				Description:   forward.Description,
+				Ports:         forward.Ports,
+			}
+
+			if forward.Ports == nil {
+				dbRecord.Ports = []api.NetworkForwardPort{}
+			}
+
+			forwardID, err = dbCluster.CreateNetworkForward(ctx, tx.Tx(), dbRecord)
+			if err != nil {
+				return err
+			}
+
+			err = dbCluster.CreateNetworkForwardConfig(ctx, tx.Tx(), forwardID, forward.Config)
+			if err != nil {
+				return err
+			}
+
+			return nil
 		})
 		if err != nil {
 			return err
@@ -5576,7 +5619,7 @@ func (n *ovn) ForwardCreate(forward api.NetworkForwardsPost, clientType request.
 
 		reverter.Add(func() {
 			_ = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-				return tx.DeleteNetworkForward(ctx, n.ID(), forwardID)
+				return dbCluster.DeleteNetworkForward(ctx, tx.Tx(), n.ID(), forwardID)
 			})
 
 			_ = n.ovnnb.DeleteLoadBalancer(context.TODO(), n.getLoadBalancerName(forward.ListenAddress))
@@ -5645,17 +5688,25 @@ func (n *ovn) ForwardUpdate(listenAddress string, req api.NetworkForwardPut, cli
 	defer reverter.Fail()
 
 	if clientType == request.ClientTypeNormal {
-		memberSpecific := false // OVN doesn't support per-member forwards.
-
 		var curForwardID int64
 		var curForward *api.NetworkForward
 
 		err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 			var err error
 
-			curForwardID, curForward, err = tx.GetNetworkForward(ctx, n.ID(), memberSpecific, listenAddress)
+			// No memberSpecific filtering needed because OVN doesn't support per-member-forwards
+			dbRecord, err := dbCluster.GetNetworkForward(ctx, tx.Tx(), n.ID(), listenAddress)
+			if err != nil {
+				return err
+			}
 
-			return err
+			curForwardID = dbRecord.ID
+			curForward, err = dbRecord.ToAPI(ctx, tx.Tx())
+			if err != nil {
+				return err
+			}
+
+			return nil
 		})
 		if err != nil {
 			return err
@@ -5702,7 +5753,24 @@ func (n *ovn) ForwardUpdate(listenAddress string, req api.NetworkForwardPut, cli
 		})
 
 		err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-			return tx.UpdateNetworkForward(ctx, n.ID(), curForwardID, &newForward.NetworkForwardPut)
+			fwd := dbCluster.NetworkForward{
+				NetworkID:     n.ID(),
+				ListenAddress: listenAddress,
+				Description:   newForward.Description,
+				Ports:         newForward.Ports,
+			}
+
+			err = dbCluster.UpdateNetworkForward(ctx, tx.Tx(), n.ID(), listenAddress, fwd)
+			if err != nil {
+				return err
+			}
+
+			err = dbCluster.UpdateNetworkForwardConfig(ctx, tx.Tx(), curForwardID, newForward.Config)
+			if err != nil {
+				return err
+			}
+
+			return nil
 		})
 		if err != nil {
 			return err
@@ -5710,7 +5778,24 @@ func (n *ovn) ForwardUpdate(listenAddress string, req api.NetworkForwardPut, cli
 
 		reverter.Add(func() {
 			_ = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-				return tx.UpdateNetworkForward(ctx, n.ID(), curForwardID, &curForward.NetworkForwardPut)
+				fwd := dbCluster.NetworkForward{
+					NetworkID:     n.ID(),
+					ListenAddress: listenAddress,
+					Description:   curForward.Description,
+					Ports:         curForward.Ports,
+				}
+
+				err = dbCluster.UpdateNetworkForward(ctx, tx.Tx(), n.ID(), listenAddress, fwd)
+				if err != nil {
+					return err
+				}
+
+				err = dbCluster.UpdateNetworkForwardConfig(ctx, tx.Tx(), curForwardID, curForward.Config)
+				if err != nil {
+					return err
+				}
+
+				return nil
 			})
 		})
 
@@ -5741,17 +5826,25 @@ func (n *ovn) ForwardUpdate(listenAddress string, req api.NetworkForwardPut, cli
 // ForwardDelete deletes a network forward.
 func (n *ovn) ForwardDelete(listenAddress string, clientType request.ClientType) error {
 	if clientType == request.ClientTypeNormal {
-		memberSpecific := false // OVN doesn't support per-member forwards.
-
 		var forwardID int64
 		var forward *api.NetworkForward
 
 		err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 			var err error
 
-			forwardID, forward, err = tx.GetNetworkForward(ctx, n.ID(), memberSpecific, listenAddress)
+			// No memberSpecific filtering needed because OVN doesn't support per-member-forwards
+			dbRecord, err := dbCluster.GetNetworkForward(ctx, tx.Tx(), n.ID(), listenAddress)
+			if err != nil {
+				return err
+			}
 
-			return err
+			forwardID = dbRecord.ID
+			forward, err = dbRecord.ToAPI(ctx, tx.Tx())
+			if err != nil {
+				return err
+			}
+
+			return nil
 		})
 		if err != nil {
 			return err
@@ -5773,7 +5866,7 @@ func (n *ovn) ForwardDelete(listenAddress string, clientType request.ClientType)
 
 		// Delete the database records.
 		err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-			return tx.DeleteNetworkForward(ctx, n.ID(), forwardID)
+			return dbCluster.DeleteNetworkForward(ctx, tx.Tx(), n.ID(), forwardID)
 		})
 		if err != nil {
 			return err
@@ -6471,9 +6564,18 @@ func (n *ovn) localPeerCreate(peer api.NetworkPeersPost) error {
 		var err error
 
 		// Load peering to get mutual peering info.
-		_, peerInfo, err = tx.GetNetworkPeer(ctx, n.ID(), peer.Name)
+		dbPeer, err := dbCluster.GetNetworkPeer(ctx, tx.Tx(), n.id, peer.Name)
+		if err != nil {
+			return fmt.Errorf("Failed getting network peer DB object: %w", err)
+		}
 
-		return err
+		var apiErr error
+		peerInfo, apiErr = dbPeer.ToAPI(ctx, tx.Tx())
+		if apiErr != nil {
+			return fmt.Errorf("Failed converting network peer DB object to API object: %w", apiErr)
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
@@ -6765,11 +6867,26 @@ func (n *ovn) PeerCreate(peer api.NetworkPeersPost) error {
 	err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 		var err error
 
-		// Check if there is an existing peer using the same name, or whether there is already a peering (in any
-		// state) to the target network.
-		peers, err = tx.GetNetworkPeers(ctx, n.ID())
+		// Use generated function to get peers.
+		netID := n.ID()
+		filter := dbCluster.NetworkPeerFilter{NetworkID: &netID}
+		dbPeers, err := dbCluster.GetNetworkPeers(ctx, tx.Tx(), filter)
+		if err != nil {
+			return fmt.Errorf("Failed loading network peer DB objects: %w", err)
+		}
 
-		return err
+		// Convert DB objects to API objects and build the map.
+		peers = make(map[int64]*api.NetworkPeer, len(dbPeers))
+		for _, dbPeer := range dbPeers {
+			peer, err := dbPeer.ToAPI(ctx, tx.Tx())
+			if err != nil {
+				return fmt.Errorf("Failed converting network peer DB object to API object: %w", err)
+			}
+
+			peers[dbPeer.ID] = peer
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
@@ -6795,16 +6912,110 @@ func (n *ovn) PeerCreate(peer api.NetworkPeersPost) error {
 	var mutualExists bool
 
 	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error { // Create peer DB record.
-		peerID, mutualExists, err = tx.CreateNetworkPeer(ctx, n.ID(), &peer)
+		record := dbCluster.NetworkPeer{
+			NetworkID:   n.ID(),
+			Name:        peer.Name,
+			Description: peer.Description,
+			Type:        dbCluster.NetworkPeerTypes[peer.Type],
+		}
 
-		return err
+		switch peer.Type {
+		case "remote":
+			integrationID, err := dbCluster.GetNetworkIntegrationID(ctx, tx.Tx(), peer.TargetIntegration)
+			if err != nil {
+				return err
+			}
+
+			id := sql.NullInt64{}
+			err = id.Scan(integrationID)
+			if err != nil {
+				return err
+			}
+
+			record.TargetNetworkIntegrationID = id
+
+		case "local":
+			// Check if target peer already exists.
+			peers, err := dbCluster.GetNetworkPeers(ctx, tx.Tx(), dbCluster.NetworkPeerFilter{
+				Type:                 &record.Type,
+				TargetNetworkProject: &n.project,
+				TargetNetworkName:    &n.name,
+			})
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+
+			if len(peers) == 1 {
+				// Update the target peer.
+				peer := peers[0]
+
+				empty := sql.NullString{}
+				peer.TargetNetworkProject = empty
+				peer.TargetNetworkName = empty
+
+				targetID := sql.NullInt64{}
+				err = targetID.Scan(n.id)
+				if err != nil {
+					return err
+				}
+
+				peer.TargetNetworkID = targetID
+
+				err = dbCluster.UpdateNetworkPeer(ctx, tx.Tx(), peer.NetworkID, peer.Name, peer)
+				if err != nil {
+					return err
+				}
+
+				// Set our target network ID to match.
+				id := sql.NullInt64{}
+				err = id.Scan(peer.NetworkID)
+				if err != nil {
+					return err
+				}
+
+				record.TargetNetworkID = id
+
+				mutualExists = true
+			} else if len(peers) == 0 {
+				networkProjectName := sql.NullString{}
+				err = networkProjectName.Scan(peer.TargetProject)
+				if err != nil {
+					return err
+				}
+
+				networkName := sql.NullString{}
+				err = networkName.Scan(peer.TargetNetwork)
+				if err != nil {
+					return err
+				}
+
+				record.TargetNetworkProject = networkProjectName
+				record.TargetNetworkName = networkName
+			} else {
+				return errors.New("More than one matching network peer was found")
+			}
+		}
+
+		peerID, err = dbCluster.CreateNetworkPeer(ctx, tx.Tx(), record)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
 	}
 
 	reverter.Add(func() {
-		_ = n.state.DB.Cluster.DeleteNetworkPeer(n.ID(), peerID)
+		_ = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
+			err := dbCluster.DeleteNetworkPeer(ctx, tx.Tx(), n.ID(), peerID)
+			if errors.Is(err, dbCluster.ErrNotFound) {
+				return nil
+			}
+
+			return err
+		})
 	})
 
 	// Apply the OVN configuration.
@@ -6961,15 +7172,23 @@ func (n *ovn) PeerUpdate(peerName string, req api.NetworkPeerPut) error {
 	reverter := revert.New()
 	defer reverter.Fail()
 
-	var curPeerID int64
 	var curPeer *api.NetworkPeer
+	var dbCurPeer *dbCluster.NetworkPeer
 
 	err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 		var err error
 
-		curPeerID, curPeer, err = tx.GetNetworkPeer(ctx, n.ID(), peerName)
+		dbCurPeer, err = dbCluster.GetNetworkPeer(ctx, tx.Tx(), n.id, peerName)
+		if err != nil {
+			return fmt.Errorf("Failed getting network peer DB object: %w", err)
+		}
 
-		return err
+		curPeer, err = dbCurPeer.ToAPI(ctx, tx.Tx())
+		if err != nil {
+			return fmt.Errorf("Failed converting network peer DB object to API object: %w", err)
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
@@ -7000,7 +7219,22 @@ func (n *ovn) PeerUpdate(peerName string, req api.NetworkPeerPut) error {
 	}
 
 	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		return tx.UpdateNetworkPeer(ctx, n.ID(), curPeerID, &newPeer.NetworkPeerPut)
+		// Update the description field from the input.
+		dbCurPeer.Description = newPeer.Description
+
+		// Update the main peer object.
+		err = dbCluster.UpdateNetworkPeer(ctx, tx.Tx(), n.id, dbCurPeer.Name, *dbCurPeer)
+		if err != nil {
+			return fmt.Errorf("Failed to update network peer: %w", err)
+		}
+
+		// Update the peer configuration.
+		err = dbCluster.UpdateNetworkPeerConfig(ctx, tx.Tx(), dbCurPeer.ID, newPeer.Config)
+		if err != nil {
+			return fmt.Errorf("Failed to update network peer config: %w", err)
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
@@ -7155,11 +7389,18 @@ func (n *ovn) PeerDelete(peerName string) error {
 	var peer *api.NetworkPeer
 
 	err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		var err error
+		dbPeer, err := dbCluster.GetNetworkPeer(ctx, tx.Tx(), n.id, peerName)
+		if err != nil {
+			return fmt.Errorf("Failed getting network peer DB object: %w", err)
+		}
 
-		peerID, peer, err = tx.GetNetworkPeer(ctx, n.ID(), peerName)
+		peerID = dbPeer.ID
+		peer, err = dbPeer.ToAPI(ctx, tx.Tx())
+		if err != nil {
+			return fmt.Errorf("Failed converting network peer DB object to API object: %w", err)
+		}
 
-		return err
+		return nil
 	})
 	if err != nil {
 		return err
@@ -7171,7 +7412,7 @@ func (n *ovn) PeerDelete(peerName string) error {
 	}
 
 	if isUsed {
-		return errors.New("Cannot delete a Peer that is in use")
+		return errors.New("Cannot delete a peer that is in use")
 	}
 
 	if peer.Status == api.NetworkStatusCreated {
@@ -7188,7 +7429,32 @@ func (n *ovn) PeerDelete(peerName string) error {
 		}
 	}
 
-	err = n.state.DB.Cluster.DeleteNetworkPeer(n.ID(), peerID)
+	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
+		// Deactivate any existing peer.
+		if peer.Type == "local" {
+			peers, err := dbCluster.GetNetworkPeers(ctx, tx.Tx(), dbCluster.NetworkPeerFilter{TargetNetworkID: &n.id})
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+
+			for _, peer := range peers {
+				peer.TargetNetworkID = sql.NullInt64{}
+
+				err = dbCluster.UpdateNetworkPeer(ctx, tx.Tx(), peer.NetworkID, peer.Name, peer)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// Delete the peer.
+		err := dbCluster.DeleteNetworkPeer(ctx, tx.Tx(), n.id, peerID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return err
 	}
@@ -7203,9 +7469,26 @@ func (n *ovn) forPeers(f func(targetOVNNet *ovn) error) error {
 	err := n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 		var err error
 
-		peers, err = tx.GetNetworkPeers(ctx, n.ID())
+		// Use generated function to get peers.
+		netID := n.ID()
+		filter := dbCluster.NetworkPeerFilter{NetworkID: &netID}
+		dbPeers, err := dbCluster.GetNetworkPeers(ctx, tx.Tx(), filter)
+		if err != nil {
+			return fmt.Errorf("Failed loading network peer DB objects: %w", err)
+		}
 
-		return err
+		// Convert DB objects to API objects and build the map.
+		peers = make(map[int64]*api.NetworkPeer, len(dbPeers))
+		for _, dbPeer := range dbPeers {
+			peer, err := dbPeer.ToAPI(ctx, tx.Tx())
+			if err != nil {
+				return fmt.Errorf("Failed converting network peer DB object to API object: %w", err)
+			}
+
+			peers[dbPeer.ID] = peer
+		}
+
+		return nil
 	})
 	if err != nil {
 		return err
