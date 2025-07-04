@@ -4183,11 +4183,8 @@ func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, cpuType string, cpuInfo *
 			}
 		}
 
-		if cpuType == "host" && lowestPhysBits > 0 {
-			// Line up cpuPhysBits with the lowest physical CPU value.
-			cpuPhysBits = lowestPhysBits
-		} else if lowestPhysBits < cpuPhysBits {
-			// Reduce curPhysBits below the default of 39 if a physical CPU uses a lower value.
+		// If a physical address size was detected, either align it with the VM (CPU passthrough) or use it as an upper bound.
+		if lowestPhysBits > 0 && (cpuType == "host" || lowestPhysBits < cpuPhysBits) {
 			cpuPhysBits = lowestPhysBits
 		}
 
@@ -4200,6 +4197,16 @@ func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, cpuType string, cpuInfo *
 		// Cap to 1TB.
 		if maxMemoryBytes > 1024*1024*1024*1024 {
 			maxMemoryBytes = 1024 * 1024 * 1024 * 1024
+		}
+
+		// On standalone systems, further cap to the system's total memory.
+		if !d.state.ServerClustered {
+			totalMemory, err := linux.DeviceTotalMemory()
+			if err != nil {
+				return err
+			}
+
+			maxMemoryBytes = totalMemory
 		}
 
 		// Allow the user to go past any expected limit.
