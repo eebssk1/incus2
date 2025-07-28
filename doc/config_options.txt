@@ -42,6 +42,14 @@ User keys can be used in search.
 
 <!-- config group cluster_group-common end -->
 <!-- config group devices-disk start -->
+```{config:option} attached devices-disk
+:default: "`true`"
+:required: "no"
+:shortdesc: "Only for VMs: Whether the disk is attached or ejected"
+:type: "bool"
+
+```
+
 ```{config:option} boot.priority devices-disk
 :required: "no"
 :shortdesc: "Boot priority for VMs (higher value boots first)"
@@ -208,6 +216,14 @@ For file systems (shared directories or custom volumes), this is one of:
 :required: "yes"
 :shortdesc: "Source of a file system or block device (see {ref}`devices-disk-types` for details)"
 :type: "string"
+
+```
+
+```{config:option} wwn devices-disk
+:default: "``"
+:required: "no"
+:shortdesc: "Only for VMs: Set the disk World Wide Name (only supported on `virtio-scsi` bus)"
+:type: "bool"
 
 ```
 
@@ -2169,6 +2185,17 @@ See {ref}`instances-limit-units` for details.
 :type: "string"
 If the instance's memory limit is `hard`, the instance cannot exceed its limit.
 If it is `soft`, the instance can exceed its memory limit when extra host memory is available.
+```
+
+```{config:option} limits.memory.hotplug instance-resource-limits
+:condition: "virtual machine"
+:defaultdesc: "`true`"
+:liveupdate: "yes"
+:shortdesc: "Control upper limit for hotplugged memory or disable memory hotplug."
+:type: "string"
+If this option is set to `false`, disable memory hotplug entirely.
+Alternatively, it can be set to a bytes value which will define an upper limit for hotplugged memory.
+The value must be greater than or equal to limits.memory.
 ```
 
 ```{config:option} limits.memory.hugepages instance-resource-limits

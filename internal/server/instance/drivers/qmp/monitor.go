@@ -54,6 +54,7 @@ type Monitor struct {
 	eventHandler      func(name string, data map[string]any)
 	serialCharDev     string
 	onDisconnectEvent bool
+	detachDisk        func(name string) error
 	IName             string
 }
 
@@ -122,12 +123,16 @@ func (m *Monitor) start() error {
 				if e.Event == EventDiskEjected {
 					id, ok := e.Data["id"].(string)
 					if ok {
-						go func() {
-							err = m.Eject(id)
-							if err != nil {
-								logger.Warnf("Unable to eject media %q: %v", id, err)
-							}
-						}()
+						// Only handle events that result in the tray being open.
+						trayOpen, ok := e.Data["tray-open"].(bool)
+						if ok && trayOpen {
+							go func() {
+								err = m.detachDisk(id)
+								if err != nil {
+									logger.Warnf("Unable to eject media %q: %v", id, err)
+								}
+							}()
+						}
 					}
 				}
 
@@ -270,7 +275,7 @@ func (m *Monitor) Run(cmd string, args any, resp any) error {
 }
 
 // Connect creates or retrieves an existing QMP monitor for the path.
-func Connect(path string, serialCharDev string, eventHandler func(name string, data map[string]any), logFile string) (*Monitor, error) {
+func Connect(path string, serialCharDev string, eventHandler func(name string, data map[string]any), logFile string, detachDisk func(name string) error, name string) (*Monitor, error) {
 	monitorsLock.Lock()
 	defer monitorsLock.Unlock()
 
@@ -326,6 +331,8 @@ func Connect(path string, serialCharDev string, eventHandler func(name string, d
 	monitor.chDisconnect = make(chan struct{}, 1)
 	monitor.eventHandler = eventHandler
 	monitor.serialCharDev = serialCharDev
+	monitor.detachDisk = detachDisk
+	monitor.IName = name
 
 	// Default to generating a shutdown event when the monitor disconnects so that devices can be
 	// cleaned up. This will be disabled after a shutdown event is received from QEMU itself to avoid
@@ -342,16 +349,6 @@ func Connect(path string, serialCharDev string, eventHandler func(name string, d
 	monitors[path] = monitor
 
 	return monitor, nil
-}
-
-// ConnectSetName calls Connect and set name field to instance.
-func ConnectSetName(path string, serialCharDev string, eventHandler func(name string, data map[string]any), logFile string, name string) (*Monitor, error) {
-	Mon, err := Connect(path, serialCharDev, eventHandler, logFile)
-	if err == nil {
-		Mon.IName = name
-	}
-
-	return Mon, err
 }
 
 // AgenStarted indicates whether an agent has been detected.

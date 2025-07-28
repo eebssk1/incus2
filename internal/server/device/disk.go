@@ -363,6 +363,24 @@ func (d *disk) validateConfig(instConf instance.ConfigReader) error {
 		//  required: no
 		//  shortdesc: Only for VMs: Override the bus for the device
 		"io.bus": validate.Optional(validate.IsOneOf("nvme", "virtio-blk", "virtio-scsi", "auto", "9p", "virtiofs", "usb")),
+
+		// gendoc:generate(entity=devices, group=disk, key=attached)
+		//
+		// ---
+		//  type: bool
+		//  default: `true`
+		//  required: no
+		//  shortdesc: Only for VMs: Whether the disk is attached or ejected
+		"attached": validate.Optional(validate.IsBool),
+
+		// gendoc:generate(entity=devices, group=disk, key=wwn)
+		//
+		// ---
+		//  type: bool
+		//  default: ``
+		//  required: no
+		//  shortdesc: Only for VMs: Set the disk World Wide Name (only supported on `virtio-scsi` bus)
+		"wwn": validate.Optional(validate.IsWWN),
 	}
 
 	err := d.config.Validate(rules)
@@ -376,6 +394,14 @@ func (d *disk) validateConfig(instConf instance.ConfigReader) error {
 
 	if instConf.Type() == instancetype.Container && d.config["io.cache"] != "" {
 		return errors.New("IO cache configuration cannot be applied to containers")
+	}
+
+	if instConf.Type() == instancetype.Container && d.config["wwn"] != "" {
+		return errors.New("WWN cannot be applied to containers")
+	}
+
+	if d.config["wwn"] != "" && !slices.Contains([]string{"", "virtio-scsi"}, d.config["io.bus"]) {
+		return errors.New("WWN can only be set on virtio-scsi disks")
 	}
 
 	if d.config["required"] != "" && d.config["optional"] != "" {
@@ -568,6 +594,16 @@ func (d *disk) validateConfig(instConf instance.ConfigReader) error {
 				contentType, err := storagePools.VolumeContentTypeNameToContentType(dbVolume.ContentType)
 				if err != nil {
 					return err
+				}
+
+				if d.config["attached"] != "" {
+					if instConf.Type() == instancetype.Container {
+						return errors.New("Attached configuration cannot be applied to containers")
+					} else if instConf.Type() == instancetype.Any {
+						return errors.New("Attached configuration cannot be applied to profiles")
+					} else if contentType != db.StoragePoolVolumeContentTypeISO {
+						return errors.New("Attached configuration can only be applied to ISO volumes")
+					}
 				}
 
 				if contentType == db.StoragePoolVolumeContentTypeBlock {
@@ -1038,6 +1074,14 @@ func (d *disk) startVM() (*deviceConfig.RunConfig, error) {
 		opts = append(opts, fmt.Sprintf("cache=%s", d.config["io.cache"]))
 	}
 
+	// Apply the WWN if provided.
+	if d.config["wwn"] != "" {
+		opts = append(opts, fmt.Sprintf("wwn=%s", d.config["wwn"]))
+	}
+
+	// Setup the attached status.
+	attached := util.IsTrueOrEmpty(d.config["attached"])
+
 	// Add I/O limits if set.
 	var diskLimits *deviceConfig.DiskLimits
 	if d.config["limits.read"] != "" || d.config["limits.write"] != "" || d.config["limits.max"] != "" {
@@ -1094,10 +1138,11 @@ func (d *disk) startVM() (*deviceConfig.RunConfig, error) {
 		// Encode the file descriptor and original isoPath into the DevPath field.
 		runConf.Mounts = []deviceConfig.MountEntryItem{
 			{
-				DevPath: fmt.Sprintf("%s:%d:%s", DiskFileDescriptorMountPrefix, f.Fd(), isoPath),
-				DevName: d.name,
-				FSType:  "iso9660",
-				Opts:    opts,
+				DevPath:  fmt.Sprintf("%s:%d:%s", DiskFileDescriptorMountPrefix, f.Fd(), isoPath),
+				DevName:  d.name,
+				FSType:   "iso9660",
+				Opts:     opts,
+				Attached: attached,
 			},
 		}
 
@@ -1124,10 +1169,11 @@ func (d *disk) startVM() (*deviceConfig.RunConfig, error) {
 		// Encode the file descriptor and original isoPath into the DevPath field.
 		runConf.Mounts = []deviceConfig.MountEntryItem{
 			{
-				DevPath: fmt.Sprintf("%s:%d:%s", DiskFileDescriptorMountPrefix, f.Fd(), isoPath),
-				DevName: d.name,
-				FSType:  "iso9660",
-				Opts:    opts,
+				DevPath:  fmt.Sprintf("%s:%d:%s", DiskFileDescriptorMountPrefix, f.Fd(), isoPath),
+				DevName:  d.name,
+				FSType:   "iso9660",
+				Opts:     opts,
+				Attached: attached,
 			},
 		}
 
@@ -1142,19 +1188,21 @@ func (d *disk) startVM() (*deviceConfig.RunConfig, error) {
 			clusterName, userName := d.cephCreds()
 			runConf.Mounts = []deviceConfig.MountEntryItem{
 				{
-					DevPath: DiskGetRBDFormat(clusterName, userName, fields[0], fields[1]),
-					DevName: d.name,
-					Opts:    opts,
-					Limits:  diskLimits,
+					DevPath:  DiskGetRBDFormat(clusterName, userName, fields[0], fields[1]),
+					DevName:  d.name,
+					Opts:     opts,
+					Limits:   diskLimits,
+					Attached: attached,
 				},
 			}
 		} else {
 			// Default to block device or image file passthrough first.
 			mount := deviceConfig.MountEntryItem{
-				DevPath: d.config["source"],
-				DevName: d.name,
-				Opts:    opts,
-				Limits:  diskLimits,
+				DevPath:  d.config["source"],
+				DevName:  d.name,
+				Opts:     opts,
+				Limits:   diskLimits,
+				Attached: attached,
 			}
 
 			// Mount the pool volume and update srcPath to mount path so it can be recognised as dir
@@ -1208,10 +1256,11 @@ func (d *disk) startVM() (*deviceConfig.RunConfig, error) {
 					}
 
 					mount := deviceConfig.MountEntryItem{
-						DevPath: DiskGetRBDFormat(clusterName, userName, poolName, d.config["source"]),
-						DevName: d.name,
-						Opts:    opts,
-						Limits:  diskLimits,
+						DevPath:  DiskGetRBDFormat(clusterName, userName, poolName, d.config["source"]),
+						DevName:  d.name,
+						Opts:     opts,
+						Limits:   diskLimits,
+						Attached: attached,
 					}
 
 					if contentType == db.StoragePoolVolumeContentTypeISO {
@@ -1410,9 +1459,10 @@ func (d *disk) postStart() error {
 
 // Update applies configuration changes to a started device.
 func (d *disk) Update(oldDevices deviceConfig.Devices, isRunning bool) error {
+	expandedDevices := d.inst.ExpandedDevices()
+
 	if internalInstance.IsRootDiskDevice(d.config) {
 		// Make sure we have a valid root disk device (and only one).
-		expandedDevices := d.inst.ExpandedDevices()
 		newRootDiskDeviceKey, _, err := internalInstance.GetRootDiskDevice(expandedDevices.CloneNative())
 		if err != nil {
 			return fmt.Errorf("Detect root disk device: %w", err)
@@ -1486,7 +1536,7 @@ func (d *disk) Update(oldDevices deviceConfig.Devices, isRunning bool) error {
 		}
 	}
 
-	// Only apply IO limits if instance is running.
+	// Only apply IO limits and attach/detach logic if instance is running.
 	if isRunning {
 		runConf := deviceConfig.RunConfig{}
 
@@ -1498,25 +1548,41 @@ func (d *disk) Update(oldDevices deviceConfig.Devices, isRunning bool) error {
 		}
 
 		if d.inst.Type() == instancetype.VM {
-			// Parse the limits into usable values.
-			readBps, readIops, writeBps, writeIops, err := d.parseLimit(d.config)
-			if err != nil {
-				return err
-			}
+			var diskLimits *deviceConfig.DiskLimits
+			runConf.Mounts = []deviceConfig.MountEntryItem{}
+			if d.config["limits.read"] != "" || d.config["limits.write"] != "" || d.config["limits.max"] != "" {
+				// Parse the limits into usable values.
+				readBps, readIops, writeBps, writeIops, err := d.parseLimit(d.config)
+				if err != nil {
+					return err
+				}
 
-			// Apply the limits to a minimal mount entry.
-			diskLimits := &deviceConfig.DiskLimits{
-				ReadBytes:  readBps,
-				ReadIOps:   readIops,
-				WriteBytes: writeBps,
-				WriteIOps:  writeIops,
-			}
+				// Apply the limits to a minimal mount entry.
+				diskLimits = &deviceConfig.DiskLimits{
+					ReadBytes:  readBps,
+					ReadIOps:   readIops,
+					WriteBytes: writeBps,
+					WriteIOps:  writeIops,
+				}
 
-			runConf.Mounts = []deviceConfig.MountEntryItem{
-				{
+				runConf.Mounts = append(runConf.Mounts, deviceConfig.MountEntryItem{
 					DevName: d.name,
 					Limits:  diskLimits,
-				},
+				})
+			}
+
+			oldAttached := util.IsTrueOrEmpty(oldDevices[d.name]["attached"])
+			newAttached := util.IsTrueOrEmpty(expandedDevices[d.name]["attached"])
+			if !oldAttached && newAttached {
+				runConf.Mounts = append(runConf.Mounts, deviceConfig.MountEntryItem{
+					DevName:  d.name,
+					Attached: true,
+				})
+			} else if oldAttached && !newAttached {
+				runConf.Mounts = append(runConf.Mounts, deviceConfig.MountEntryItem{
+					DevName:  d.name,
+					Attached: false,
+				})
 			}
 		}
 

@@ -2838,3 +2838,18 @@ on schedule.
 This adds tracking of CPU address sizes in the resources API.
 The main use of this is within clusters to calculate a cluster-wide
 maximum memory amount for hotplugging into virtual machines.
+
+## `disk_attached`
+
+This introduces a new `attached` property to disk devices describing whether disks are attached or ejected.
+
+## `limits_memory_hotplug`
+
+The `limits.memory.hotplug` option controls how memory hotplug is handled for the virtual machine.
+It can be set to `false` to completely disable memory hotplugging.
+Alternatively, it can be set to a value that defines the maximum amount of memory the VM can reach through hotplug.
+This value must be greater than or equal to `limits.memory`.
+
+## `disk_wwn`
+
+Add support for setting the disk World Wide Name property through the new `wwn` disk configuration option.
