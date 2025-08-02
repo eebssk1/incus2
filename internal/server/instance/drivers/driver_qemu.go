@@ -741,10 +741,12 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Log and emit lifecycle if not user triggered.
-	if target != "reboot" && !autoRestart && op.GetInstanceInitiated() {
-		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceShutdown.Event(d, nil))
-	} else if !autoRestart && op.Action() != operationlock.ActionMigrate {
-		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceStopped.Event(d, nil))
+	if target != "reboot" && !autoRestart && op.Action() != operationlock.ActionMigrate {
+		if op.GetInstanceInitiated() {
+			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceShutdown.Event(d, nil))
+		} else {
+			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceStopped.Event(d, nil))
+		}
 	}
 
 	// Reboot the instance.
@@ -2254,7 +2256,11 @@ func (d *qemu) advertiseVsockAddress() error {
 		return fmt.Errorf("Failed getting agent client handle: %w", err)
 	}
 
-	agentArgs := &incus.ConnectionArgs{SkipGetServer: true}
+	agentArgs := &incus.ConnectionArgs{
+		SkipGetEvents: true,
+		SkipGetServer: true,
+	}
+
 	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
 	if err != nil {
 		return fmt.Errorf("Failed connecting to the agent: %w", err)
@@ -5891,33 +5897,8 @@ func qemuDetachDisk(s *state.State, id int) func(string) error {
 // Detach a disk from the instance.
 func (d *qemu) detachDisk(name string) error {
 	diskName := strings.TrimPrefix(name, qemuDeviceIDPrefix)
-	var id int
-	var devices map[string]dbCluster.Device
-	err := d.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		object, err := dbCluster.GetInstance(ctx, tx.Tx(), d.project.Name, d.name)
-		if err != nil {
-			return err
-		}
 
-		id = object.ID
-		devices, err = dbCluster.GetInstanceDevices(ctx, tx.Tx(), id)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	disk, ok := devices[diskName]
-	if !ok {
-		return fmt.Errorf("Device %s not found", diskName)
-	}
-
-	disk.Config["attached"] = "false"
-
+	// Load and detach the disk.
 	config, ok := d.expandedDevices[diskName]
 	if !ok {
 		return fmt.Errorf("Couldn't find device %s", diskName)
@@ -5933,8 +5914,27 @@ func (d *qemu) detachDisk(name string) error {
 		return err
 	}
 
+	// Check if it's a special device (we don't store detached state on those).
+	if slices.Contains([]string{"agent:config", "cloud-init:config"}, config["source"]) {
+		return nil
+	}
+
+	// Find the disk device.
+	_, ok = d.localDevices[diskName]
+	if !ok {
+		// Device came from a profile, we can't save its state.
+		return nil
+	}
+
+	d.localDevices[diskName]["attached"] = "false"
+
 	return d.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-		return dbCluster.UpdateInstanceDevices(ctx, tx.Tx(), int64(id), devices)
+		devices, err := dbCluster.APIToDevices(d.localDevices.CloneNative())
+		if err != nil {
+			return err
+		}
+
+		return dbCluster.UpdateInstanceDevices(ctx, tx.Tx(), int64(d.id), devices)
 	})
 }
 
@@ -9169,8 +9169,10 @@ func (d *qemu) FillNetworkDevice(name string, m deviceConfig.Device) (deviceConf
 		return nil, err
 	}
 
+	isPhysicalWithBridge := device.IsPhysicalNICWithBridge(d.state, d.Project().Name, m)
+
 	// Fill in the MAC address.
-	if !slices.Contains([]string{"physical", "ipvlan"}, nicType) && m["hwaddr"] == "" {
+	if (!slices.Contains([]string{"physical", "ipvlan"}, nicType) || isPhysicalWithBridge) && m["hwaddr"] == "" {
 		configKey := fmt.Sprintf("volatile.%s.hwaddr", name)
 		volatileHwaddr := d.localConfig[configKey]
 		if volatileHwaddr == "" {
@@ -9389,7 +9391,11 @@ func (d *qemu) devIncusEventSend(eventType string, eventMessage map[string]any) 
 		return err
 	}
 
-	agentArgs := &incus.ConnectionArgs{SkipGetServer: true}
+	agentArgs := &incus.ConnectionArgs{
+		SkipGetEvents: true,
+		SkipGetServer: true,
+	}
+
 	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
 	if err != nil {
 		d.logger.Error("Failed to connect to the agent", logger.Ctx{"err": err})
@@ -9740,7 +9746,11 @@ func (d *qemu) getAgentMetrics() (*metrics.MetricSet, error) {
 		return nil, err
 	}
 
-	agentArgs := &incus.ConnectionArgs{SkipGetServer: true}
+	agentArgs := &incus.ConnectionArgs{
+		SkipGetEvents: true,
+		SkipGetServer: true,
+	}
+
 	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
 	if err != nil {
 		d.logger.Error("Failed to connect to the agent", logger.Ctx{"project": d.Project().Name, "instance": d.Name(), "err": err})

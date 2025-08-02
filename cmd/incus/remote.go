@@ -113,6 +113,7 @@ type cmdRemoteAdd struct {
 	flagAuthType   string
 	flagProject    string
 	flagKeepAlive  int
+	flagCredHelper string
 }
 
 // Command returns a cobra.Command for use with (*cobra.Command).AddCommand.
@@ -137,6 +138,7 @@ Basic authentication can be used when combined with the "simplestreams" protocol
 	cmd.Flags().BoolVar(&c.flagPublic, "public", false, i18n.G("Public image server"))
 	cmd.Flags().StringVar(&c.flagProject, "project", "", i18n.G("Project to use for the remote")+"``")
 	cmd.Flags().IntVar(&c.flagKeepAlive, "keepalive", 0, i18n.G("Maintain remote connection for faster commands")+"``")
+	cmd.Flags().StringVar(&c.flagCredHelper, "credentials-helper", "", i18n.G("Binary helper for retrieving credentials")+"``")
 
 	return cmd
 }
@@ -238,7 +240,12 @@ func (c *cmdRemoteAdd) addRemoteFromToken(addr string, server string, token stri
 	var certificate *x509.Certificate
 	var err error
 
-	conf.Remotes[server] = config.Remote{Addr: addr, Protocol: c.flagProtocol, AuthType: c.flagAuthType, KeepAlive: c.flagKeepAlive}
+	conf.Remotes[server] = config.Remote{
+		Addr:      addr,
+		Protocol:  c.flagProtocol,
+		AuthType:  c.flagAuthType,
+		KeepAlive: c.flagKeepAlive,
+	}
 
 	_, err = conf.GetInstanceServer(server)
 	if err != nil {
@@ -362,7 +369,14 @@ func (c *cmdRemoteAdd) Run(cmd *cobra.Command, args []string) error {
 			return errors.New(i18n.G("Only https URLs are supported for oci and simplestreams"))
 		}
 
-		conf.Remotes[server] = config.Remote{Addr: addr, Public: true, Protocol: c.flagProtocol, KeepAlive: c.flagKeepAlive}
+		conf.Remotes[server] = config.Remote{
+			Addr:       addr,
+			Public:     true,
+			Protocol:   c.flagProtocol,
+			KeepAlive:  c.flagKeepAlive,
+			CredHelper: c.flagCredHelper,
+		}
+
 		return conf.SaveConfig(c.global.confPath)
 	} else if c.flagProtocol != "incus" {
 		return fmt.Errorf(i18n.G("Invalid protocol: %s"), c.flagProtocol)
@@ -432,7 +446,12 @@ func (c *cmdRemoteAdd) Run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	conf.Remotes[server] = config.Remote{Addr: addr, Protocol: c.flagProtocol, AuthType: c.flagAuthType, KeepAlive: c.flagKeepAlive}
+	conf.Remotes[server] = config.Remote{
+		Addr:      addr,
+		Protocol:  c.flagProtocol,
+		AuthType:  c.flagAuthType,
+		KeepAlive: c.flagKeepAlive,
+	}
 
 	// Attempt to connect
 	var d incus.ImageServer
@@ -531,7 +550,12 @@ func (c *cmdRemoteAdd) Run(cmd *cobra.Command, args []string) error {
 
 	// Handle public remotes
 	if c.flagPublic {
-		conf.Remotes[server] = config.Remote{Addr: addr, Public: true, KeepAlive: c.flagKeepAlive}
+		conf.Remotes[server] = config.Remote{
+			Addr:      addr,
+			Public:    true,
+			KeepAlive: c.flagKeepAlive,
+		}
+
 		return conf.SaveConfig(c.global.confPath)
 	}
 
@@ -743,12 +767,12 @@ func (c *cmdRemoteGetClientCertificate) Run(cmd *cobra.Command, args []string) e
 	}
 
 	// Read the certificate.
-	content, err := os.ReadFile(conf.ConfigPath("client.crt"))
+	tlsClientCert, _, _, err := conf.GetClientCertificate("")
 	if err != nil {
-		return fmt.Errorf("Failed to read certificate: %w", err)
+		return fmt.Errorf("Failed to get certificate: %w", err)
 	}
 
-	fmt.Print(string(content))
+	fmt.Print(tlsClientCert)
 	return nil
 }
 
@@ -798,18 +822,13 @@ func (c *cmdRemoteGetClientToken) Run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Read the key pair.
-	cert, err := os.ReadFile(conf.ConfigPath("client.crt"))
+	// Read the certificate.
+	tlsClientCert, tlsClientKey, _, err := conf.GetClientCertificate("")
 	if err != nil {
-		return fmt.Errorf("Failed to read certificate: %w", err)
+		return fmt.Errorf("Failed to get certificate: %w", err)
 	}
 
-	key, err := os.ReadFile(conf.ConfigPath("client.key"))
-	if err != nil {
-		return fmt.Errorf("Failed to read private key: %w", err)
-	}
-
-	keypair, err := tls.X509KeyPair(cert, key)
+	keypair, err := tls.X509KeyPair([]byte(tlsClientCert), []byte(tlsClientKey))
 	if err != nil {
 		return err
 	}
