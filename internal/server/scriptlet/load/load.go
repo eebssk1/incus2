@@ -1,9 +1,9 @@
 package load
 
 import (
-	"sync"
-
 	"go.starlark.net/starlark"
+
+	"github.com/lxc/incus/v6/shared/scriptlet"
 )
 
 // nameInstancePlacement is the name used in Starlark for the instance placement scriptlet.
@@ -15,14 +15,11 @@ const prefixQEMU = "qemu"
 // nameAuthorization is the name used in Starlark for the Authorization scriptlet.
 const nameAuthorization = "authorization"
 
-var (
-	programsMu sync.Mutex
-	programs   = make(map[string]*starlark.Program)
-)
+var loader = scriptlet.NewLoader()
 
 // InstancePlacementCompile compiles the instance placement scriptlet.
 func InstancePlacementCompile(name string, src string) (*starlark.Program, error) {
-	return compile(name, src, []string{
+	return scriptlet.Compile(name, src, []string{
 		"log_info",
 		"log_warn",
 		"log_error",
@@ -39,25 +36,25 @@ func InstancePlacementCompile(name string, src string) (*starlark.Program, error
 
 // InstancePlacementValidate validates the instance placement scriptlet.
 func InstancePlacementValidate(src string) error {
-	return validate(InstancePlacementCompile, nameInstancePlacement, src, declaration{
-		required("instance_placement"): {"request", "candidate_members"},
+	return scriptlet.Validate(InstancePlacementCompile, nameInstancePlacement, src, scriptlet.Declaration{
+		scriptlet.Required("instance_placement"): {"request", "candidate_members"},
 	})
 }
 
 // InstancePlacementSet compiles the instance placement scriptlet into memory for use with InstancePlacementRun.
 // If empty src is provided the current program is deleted.
 func InstancePlacementSet(src string) error {
-	return set(InstancePlacementCompile, nameInstancePlacement, src)
+	return loader.Set(InstancePlacementCompile, nameInstancePlacement, src)
 }
 
 // InstancePlacementProgram returns the precompiled instance placement scriptlet program.
 func InstancePlacementProgram() (*starlark.Program, *starlark.Thread, error) {
-	return program("Instance placement", nameInstancePlacement)
+	return loader.Program("Instance placement", nameInstancePlacement)
 }
 
 // QEMUCompile compiles the QEMU scriptlet.
 func QEMUCompile(name string, src string) (*starlark.Program, error) {
-	return compile(name, src, []string{
+	return scriptlet.Compile(name, src, []string{
 		"log_info",
 		"log_warn",
 		"log_error",
@@ -92,14 +89,14 @@ func QEMUCompile(name string, src string) (*starlark.Program, error) {
 
 // QEMUValidate validates the QEMU scriptlet.
 func QEMUValidate(src string) error {
-	if err := validate(QEMUCompile, prefixQEMU, src, declaration{
-		required("qemu_hook"): {"instance", "stage"},
+	if err := scriptlet.Validate(QEMUCompile, prefixQEMU, src, scriptlet.Declaration{
+		scriptlet.Required("qemu_hook"): {"instance", "stage"},
 	}); err != nil {
 		return err
 	}
 
-	if err := validate(QEMUCompile, prefixQEMU, src, declaration{
-		optional("qemu_ad_hook"): {"name", "device"},
+	if err := scriptlet.Validate(QEMUCompile, prefixQEMU, src, scriptlet.Declaration{
+		scriptlet.Optional("qemu_ad_hook"): {"name", "device"},
 	}); err != nil {
 		return err
 	}
@@ -110,17 +107,17 @@ func QEMUValidate(src string) error {
 // QEMUSet compiles the QEMU scriptlet into memory for use with QEMURun.
 // If empty src is provided the current program is deleted.
 func QEMUSet(src string, instance string) error {
-	return set(QEMUCompile, prefixQEMU+"/"+instance, src)
+	return loader.Set(QEMUCompile, prefixQEMU+"/"+instance, src)
 }
 
 // QEMUProgram returns the precompiled QEMU scriptlet program.
 func QEMUProgram(instance string) (*starlark.Program, *starlark.Thread, error) {
-	return program("QEMU", prefixQEMU+"/"+instance)
+	return loader.Program("QEMU", prefixQEMU+"/"+instance)
 }
 
 // AuthorizationCompile compiles the authorization scriptlet.
 func AuthorizationCompile(name string, src string) (*starlark.Program, error) {
-	return compile(name, src, []string{
+	return scriptlet.Compile(name, src, []string{
 		"log_info",
 		"log_warn",
 		"log_error",
@@ -129,20 +126,20 @@ func AuthorizationCompile(name string, src string) (*starlark.Program, error) {
 
 // AuthorizationValidate validates the authorization scriptlet.
 func AuthorizationValidate(src string) error {
-	return validate(AuthorizationCompile, nameAuthorization, src, declaration{
-		required("authorize"):           {"details", "object", "entitlement"},
-		optional("get_instance_access"): {"project_name", "instance_name"},
-		optional("get_project_access"):  {"project_name"},
+	return scriptlet.Validate(AuthorizationCompile, nameAuthorization, src, scriptlet.Declaration{
+		scriptlet.Required("authorize"):           {"details", "object", "entitlement"},
+		scriptlet.Optional("get_instance_access"): {"project_name", "instance_name"},
+		scriptlet.Optional("get_project_access"):  {"project_name"},
 	})
 }
 
 // AuthorizationSet compiles the authorization scriptlet into memory for use with AuthorizationRun.
 // If empty src is provided the current program is deleted.
 func AuthorizationSet(src string) error {
-	return set(AuthorizationCompile, nameAuthorization, src)
+	return loader.Set(AuthorizationCompile, nameAuthorization, src)
 }
 
 // AuthorizationProgram returns the precompiled authorization scriptlet program.
 func AuthorizationProgram() (*starlark.Program, *starlark.Thread, error) {
-	return program("Authorization", nameAuthorization)
+	return loader.Program("Authorization", nameAuthorization)
 }
