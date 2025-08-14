@@ -69,7 +69,6 @@ import (
 	"github.com/lxc/incus/v6/internal/server/network"
 	"github.com/lxc/incus/v6/internal/server/operations"
 	"github.com/lxc/incus/v6/internal/server/project"
-	"github.com/lxc/incus/v6/internal/server/resources"
 	"github.com/lxc/incus/v6/internal/server/response"
 	"github.com/lxc/incus/v6/internal/server/scriptlet"
 	scriptletLoad "github.com/lxc/incus/v6/internal/server/scriptlet/load"
@@ -86,6 +85,7 @@ import (
 	"github.com/lxc/incus/v6/shared/ioprogress"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/osarch"
+	"github.com/lxc/incus/v6/shared/resources"
 	"github.com/lxc/incus/v6/shared/revert"
 	"github.com/lxc/incus/v6/shared/subprocess"
 	localtls "github.com/lxc/incus/v6/shared/tls"
@@ -5274,9 +5274,15 @@ func (d *qemu) addTPMDeviceConfig(conf *[]cfg.Section, tpmConfig []deviceConfig.
 
 	tpmFD := d.addFileDescriptor(fdFiles, os.NewFile(uintptr(fd), socketPath))
 
+	tpmDriver := "tpm-tis-device"
+	if d.architecture == osarch.ARCH_64BIT_INTEL_X86 {
+		tpmDriver = "tpm-crb"
+	}
+
 	tpmOpts := qemuTPMOpts{
 		devName: devName,
 		path:    fmt.Sprintf("/proc/self/fd/%d", tpmFD),
+		driver:  tpmDriver,
 	}
 	*conf = append(*conf, qemuTPM(&tpmOpts)...)
 
