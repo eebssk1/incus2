@@ -1196,8 +1196,8 @@ func (d *lxc) initLXC(config bool) (*liblxc.Container, error) {
 					return nil, err
 				}
 
-				// Maximum priority (10) should be default swappiness (60).
-				err = cg.SetMemorySwappiness(int64(70 - priority))
+				// Maximum priority (10) should be default swappiness (100) plus 1.
+				err = cg.SetMemorySwappiness(int64(111 - priority))
 				if err != nil {
 					return nil, err
 				}
