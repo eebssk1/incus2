@@ -76,6 +76,7 @@ profile "{{ .name }}" flags=(attach_disconnected,mediate_deleted) {
   # Needed for the fork sub-commands
   {{ .exePath }} mr,
   @{PROC}/@{pid}/cmdline r,
+  @{PROC}/@{pid}/mountinfo r,
   /{etc,lib,usr/lib}/os-release r,
 
   # Things that we definitely don't need
@@ -83,7 +84,7 @@ profile "{{ .name }}" flags=(attach_disconnected,mediate_deleted) {
   deny /sys/module/apparmor/parameters/enabled r,
   deny /sys/kernel/mm/transparent_hugepage/hpage_pmd_size r,
   deny /etc/gss/mech.d/ r,
-  deny /etc/ssl/openssl.cnf r,
+  deny /etc/ssl/openssl.cnf w,
 
 {{if .agentPath -}}
   {{ .agentPath }}/ r,
