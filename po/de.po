@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LXD\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2025-09-04 17:20-0400\n"
+"POT-Creation-Date: 2025-09-16 21:42-0400\n"
 "PO-Revision-Date: 2025-08-02 15:02+0000\n"
 "Last-Translator: Stéphane Graber <stgraber@stgraber.org>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/incus/cli/de/>\n"
@@ -1209,7 +1209,7 @@ msgstr ""
 msgid "Backend health:"
 msgstr "Backend Status:"
 
-#: cmd/incus/export.go:87
+#: cmd/incus/export.go:100
 #, fuzzy, c-format
 msgid "Backing up instance: %s"
 msgstr "Herunterfahren des Containers erzwingen."
@@ -1224,7 +1224,7 @@ msgstr "Kein Zertifikat für diese Verbindung"
 msgid "Backing up storage volume: %s"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/export.go:193 cmd/incus/storage_bucket.go:1624
+#: cmd/incus/export.go:199 cmd/incus/storage_bucket.go:1624
 #: cmd/incus/storage_volume.go:3375
 msgid "Backup exported successfully!"
 msgstr "Backup erfolgreich exportiert!"
@@ -1692,11 +1692,11 @@ msgstr ""
 msgid "Compression algorithm to use (`none` for uncompressed)"
 msgstr ""
 
-#: cmd/incus/export.go:44
+#: cmd/incus/export.go:45
 msgid "Compression algorithm to use (none for uncompressed)"
 msgstr ""
 
-#: cmd/incus/copy.go:56 cmd/incus/create.go:58
+#: cmd/incus/copy.go:56 cmd/incus/create.go:58 cmd/incus/import.go:38
 #, fuzzy
 msgid "Config key/value to apply to the new instance"
 msgstr "kann nicht zum selben Container Namen kopieren"
@@ -1946,7 +1946,7 @@ msgstr ""
 msgid "Create files and directories in instances"
 msgstr "kann nicht zum selben Container Namen kopieren"
 
-#: cmd/incus/export.go:82
+#: cmd/incus/export.go:95
 #, fuzzy, c-format
 msgid "Create instance backup: %w"
 msgstr "Herunterfahren des Containers erzwingen."
@@ -2317,7 +2317,7 @@ msgstr ""
 #: cmd/incus/config_trust.go:775 cmd/incus/config_trust.go:823
 #: cmd/incus/config_trust.go:896 cmd/incus/console.go:42 cmd/incus/copy.go:44
 #: cmd/incus/create.go:47 cmd/incus/debug.go:24 cmd/incus/debug.go:45
-#: cmd/incus/delete.go:34 cmd/incus/exec.go:42 cmd/incus/export.go:33
+#: cmd/incus/delete.go:34 cmd/incus/exec.go:42 cmd/incus/export.go:34
 #: cmd/incus/file.go:53 cmd/incus/file.go:100 cmd/incus/file.go:295
 #: cmd/incus/file.go:379 cmd/incus/file.go:459 cmd/incus/file.go:696
 #: cmd/incus/file.go:1365 cmd/incus/image.go:44 cmd/incus/image.go:153
@@ -2327,7 +2327,7 @@ msgstr ""
 #: cmd/incus/image.go:1666 cmd/incus/image.go:1732 cmd/incus/image_alias.go:32
 #: cmd/incus/image_alias.go:72 cmd/incus/image_alias.go:141
 #: cmd/incus/image_alias.go:197 cmd/incus/image_alias.go:387
-#: cmd/incus/import.go:28 cmd/incus/info.go:37 cmd/incus/launch.go:25
+#: cmd/incus/import.go:30 cmd/incus/info.go:37 cmd/incus/launch.go:25
 #: cmd/incus/list.go:52 cmd/incus/main.go:102 cmd/incus/manpage.go:25
 #: cmd/incus/monitor.go:35 cmd/incus/move.go:38 cmd/incus/network.go:41
 #: cmd/incus/network.go:153 cmd/incus/network.go:252 cmd/incus/network.go:354
@@ -3141,11 +3141,11 @@ msgstr ""
 msgid "Export custom storage volume"
 msgstr "Storage Volume exportieren"
 
-#: cmd/incus/export.go:32
+#: cmd/incus/export.go:33
 msgid "Export instance backups"
 msgstr "Backups einer Instanz exportieren"
 
-#: cmd/incus/export.go:33
+#: cmd/incus/export.go:34
 #, fuzzy
 msgid "Export instances as backup tarballs."
 msgstr "Instanzen als Backup Dateien (.tar) exportieren."
@@ -3175,7 +3175,7 @@ msgstr "Storage Volume ohne Snapshots exportieren"
 msgid "Exporting backup of storage bucket: %s"
 msgstr "Backup des Storage Bucket %s wird exportiert"
 
-#: cmd/incus/export.go:153 cmd/incus/storage_volume.go:3358
+#: cmd/incus/export.go:159 cmd/incus/storage_volume.go:3358
 #, fuzzy, c-format
 msgid "Exporting the backup: %s"
 msgstr "Backup %s wird exportiert"
@@ -3342,7 +3342,7 @@ msgstr "Akzeptiere Zertifikat"
 msgid "Failed to check if the daemon is ready (attempt %d): %v"
 msgstr ""
 
-#: cmd/incus/export.go:190
+#: cmd/incus/export.go:196
 #, fuzzy, c-format
 msgid "Failed to close export file: %w"
 msgstr "Akzeptiere Zertifikat"
@@ -3477,7 +3477,7 @@ msgstr "kann nicht zum selben Container Namen kopieren"
 msgid "Failed to remove alias %s: %w"
 msgstr "Akzeptiere Zertifikat"
 
-#: cmd/incus/export.go:184
+#: cmd/incus/export.go:190
 #, fuzzy, c-format
 msgid "Failed to rename export file: %w"
 msgstr "Akzeptiere Zertifikat"
@@ -3564,7 +3564,7 @@ msgstr ""
 msgid "Fast mode (same as --columns=nsacPt)"
 msgstr ""
 
-#: cmd/incus/export.go:167
+#: cmd/incus/export.go:173
 #, fuzzy, c-format
 msgid "Fetch instance backup file: %w"
 msgstr "Herunterfahren des Containers erzwingen."
@@ -4155,7 +4155,7 @@ msgstr ""
 msgid "Immediately attach to the console"
 msgstr "Herunterfahren des Containers erzwingen."
 
-#: cmd/incus/import.go:28
+#: cmd/incus/import.go:30
 msgid "Import backups of instances including their snapshots."
 msgstr ""
 
@@ -4185,7 +4185,7 @@ msgstr ""
 msgid "Import images into the image store"
 msgstr ""
 
-#: cmd/incus/import.go:27
+#: cmd/incus/import.go:29
 #, fuzzy
 msgid "Import instance backups"
 msgstr "Herunterfahren des Containers erzwingen."
@@ -4217,7 +4217,7 @@ msgstr "Herunterfahren des Containers erzwingen."
 msgid "Importing custom volume: %s"
 msgstr "Herunterfahren des Containers erzwingen."
 
-#: cmd/incus/import.go:95
+#: cmd/incus/import.go:99
 #, fuzzy, c-format
 msgid "Importing instance: %s"
 msgstr "Herunterfahren des Containers erzwingen."
@@ -4293,7 +4293,7 @@ msgstr ""
 msgid "Invalid IP address or DNS name"
 msgstr "Ungültige Quelle %s"
 
-#: cmd/incus/export.go:115 cmd/incus/storage_bucket.go:1575
+#: cmd/incus/export.go:128 cmd/incus/storage_bucket.go:1575
 #: cmd/incus/storage_volume.go:3326
 #, fuzzy, c-format
 msgid "Invalid URL %q: %w"
@@ -4314,7 +4314,7 @@ msgstr "Ungültiges Ziel %s"
 msgid "Invalid arguments"
 msgstr "Ungültiges Ziel %s"
 
-#: cmd/incus/export.go:120 cmd/incus/storage_bucket.go:1580
+#: cmd/incus/export.go:133 cmd/incus/storage_bucket.go:1580
 #: cmd/incus/storage_volume.go:3331
 #, c-format
 msgid "Invalid backup name segment in path %q: %w"
@@ -6537,7 +6537,8 @@ msgstr ""
 msgid "New aliases to add to the image"
 msgstr ""
 
-#: cmd/incus/copy.go:57 cmd/incus/create.go:60 cmd/incus/move.go:60
+#: cmd/incus/copy.go:57 cmd/incus/create.go:60 cmd/incus/import.go:39
+#: cmd/incus/move.go:60
 #, fuzzy
 msgid "New key/value to apply to a specific device"
 msgstr "kann nicht zum selben Container Namen kopieren"
@@ -8447,7 +8448,7 @@ msgstr "Profil %s erstellt\n"
 msgid "Storage pool description"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/copy.go:63 cmd/incus/create.go:64 cmd/incus/import.go:35
+#: cmd/incus/copy.go:63 cmd/incus/create.go:64 cmd/incus/import.go:37
 #: cmd/incus/move.go:66
 #, fuzzy
 msgid "Storage pool name"
@@ -8551,6 +8552,11 @@ msgstr ""
 #: cmd/incus/info.go:832 cmd/incus/info.go:883 cmd/incus/storage_volume.go:1565
 msgid "Taken at"
 msgstr ""
+
+#: cmd/incus/export.go:80
+#, fuzzy, c-format
+msgid "Target path %q already exists"
+msgstr "entfernte Instanz %s existiert bereits"
 
 #: cmd/incus/file.go:1425 cmd/incus/storage_volume.go:2458
 #, fuzzy
@@ -9339,7 +9345,7 @@ msgstr "kann nicht zum selben Container Namen kopieren"
 msgid "Usage: %s"
 msgstr "Erstellt: %s"
 
-#: cmd/incus/export.go:43 cmd/incus/storage_volume.go:3230
+#: cmd/incus/export.go:44 cmd/incus/storage_volume.go:3230
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool)"
 msgstr ""
@@ -9503,7 +9509,7 @@ msgstr ""
 msgid "Where should this storage pool store its data?"
 msgstr "entfernte Instanz %s existiert bereits"
 
-#: cmd/incus/export.go:41
+#: cmd/incus/export.go:42
 #, fuzzy
 msgid "Whether or not to only backup the instance (without snapshots)"
 msgstr "Zustand des laufenden Containers sichern oder nicht"
@@ -9661,7 +9667,7 @@ msgstr ""
 "\n"
 "lxd %s <Name>\n"
 
-#: cmd/incus/import.go:26
+#: cmd/incus/import.go:28
 #, fuzzy
 msgid "[<remote>:] <backup file> [<instance name>]"
 msgstr ""
@@ -10157,7 +10163,7 @@ msgstr ""
 "Entfernt einen Container (oder Sicherungspunkt) und alle dazugehörigen\n"
 "Daten (Konfiguration, Sicherungspunkte, ...).\n"
 
-#: cmd/incus/export.go:31
+#: cmd/incus/export.go:32
 #, fuzzy
 msgid "[<remote>:]<instance> [target] [--instance-only] [--optimized-storage]"
 msgstr ""
@@ -11184,11 +11190,15 @@ msgid ""
 "\tRun the \"ls -lh /\" command in instance \"c1\""
 msgstr ""
 
-#: cmd/incus/export.go:35
+#: cmd/incus/export.go:36
+#, fuzzy
 msgid ""
 "incus export u1 backup0.tar.gz\n"
-"    Download a backup tarball of the u1 instance."
+"\tDownload a backup tarball of the u1 instance."
 msgstr ""
+"incus storage bucket export default b1\n"
+"    Erstellen einer Sicherungsdatei (backup) vom storage bucket namens "
+"\"b1\" im pool \"default\"."
 
 #: cmd/incus/file.go:102
 msgid ""
@@ -11235,7 +11245,7 @@ msgid ""
 "    Load the image properties from a YAML file"
 msgstr ""
 
-#: cmd/incus/import.go:30
+#: cmd/incus/import.go:32
 msgid ""
 "incus import backup0.tar.gz\n"
 "    Create a new instance using backup0.tar.gz as the source."

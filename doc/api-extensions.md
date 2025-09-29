@@ -2880,3 +2880,22 @@ This adds tmpfs support for disk devices.
 
 * `source=tmpfs:` mounts a tmpfs file system, respecting `size`, `uid`, `gid` and `mode` options
 * `source=tmpfs-overlay:` same as tmpfs but with additional overlayfs behavior
+
+## `instance_limits_oom`
+
+This adds a new `limits.memory.oom_priority` configuration option to
+configure the Out Of Memory score for the container or virtual-machine.
+
+## `backup_override_config`
+
+This adds support for overriding both configuration and devices during
+backup import by using the `X-Incus-config` and `X-Incus-devices` HTTP
+headers.
+
+## `network_ovn_tunnels`
+
+This adds support for network tunnels to OVN networks.
+
+## `init_preseed_cluster_groups`
+
+This API extension provides the ability to configure cluster groups in preseed init.

@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2025-09-04 17:20-0400\n"
-"PO-Revision-Date: 2025-09-07 08:02+0000\n"
+"POT-Creation-Date: 2025-09-16 21:42-0400\n"
+"PO-Revision-Date: 2025-09-16 23:58+0000\n"
 "Last-Translator: Américo Monteiro <a_monteiro@gmx.com>\n"
-"Language-Team: Portuguese <https://hosted.weblate.org/projects/incus/cli/pt/>"
-"\n"
+"Language-Team: Portuguese <https://hosted.weblate.org/projects/incus/cli/pt/"
+">\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1179,7 +1179,7 @@ msgstr "Descrição do backend"
 msgid "Backend health:"
 msgstr "Saúde de backend:"
 
-#: cmd/incus/export.go:87
+#: cmd/incus/export.go:100
 #, c-format
 msgid "Backing up instance: %s"
 msgstr "A salvaguardar instância: %s"
@@ -1194,7 +1194,7 @@ msgstr "A salvaguardar bucket de armazenamento: %s"
 msgid "Backing up storage volume: %s"
 msgstr "A salvaguardar volume de armazenamento: %s"
 
-#: cmd/incus/export.go:193 cmd/incus/storage_bucket.go:1624
+#: cmd/incus/export.go:199 cmd/incus/storage_bucket.go:1624
 #: cmd/incus/storage_volume.go:3375
 msgid "Backup exported successfully!"
 msgstr "Salvaguarda exportada com sucesso!"
@@ -1652,11 +1652,11 @@ msgstr ""
 msgid "Compression algorithm to use (`none` for uncompressed)"
 msgstr "Algoritmo de compressão a usar (`none` para não comprimido)"
 
-#: cmd/incus/export.go:44
+#: cmd/incus/export.go:45
 msgid "Compression algorithm to use (none for uncompressed)"
 msgstr "Algoritmo de compressão a usar (nenhum para não comprimido)"
 
-#: cmd/incus/copy.go:56 cmd/incus/create.go:58
+#: cmd/incus/copy.go:56 cmd/incus/create.go:58 cmd/incus/import.go:38
 msgid "Config key/value to apply to the new instance"
 msgstr "Configurar chave/valor para aplicar à nova instância"
 
@@ -1911,7 +1911,7 @@ msgstr "Cria quaisquer directórios necessários"
 msgid "Create files and directories in instances"
 msgstr "Cria ficheiros e directórios em instâncias"
 
-#: cmd/incus/export.go:82
+#: cmd/incus/export.go:95
 #, c-format
 msgid "Create instance backup: %w"
 msgstr "Cria salvaguarda da instância: %w"
@@ -2253,7 +2253,7 @@ msgstr "Apaga aviso"
 #: cmd/incus/config_trust.go:775 cmd/incus/config_trust.go:823
 #: cmd/incus/config_trust.go:896 cmd/incus/console.go:42 cmd/incus/copy.go:44
 #: cmd/incus/create.go:47 cmd/incus/debug.go:24 cmd/incus/debug.go:45
-#: cmd/incus/delete.go:34 cmd/incus/exec.go:42 cmd/incus/export.go:33
+#: cmd/incus/delete.go:34 cmd/incus/exec.go:42 cmd/incus/export.go:34
 #: cmd/incus/file.go:53 cmd/incus/file.go:100 cmd/incus/file.go:295
 #: cmd/incus/file.go:379 cmd/incus/file.go:459 cmd/incus/file.go:696
 #: cmd/incus/file.go:1365 cmd/incus/image.go:44 cmd/incus/image.go:153
@@ -2263,7 +2263,7 @@ msgstr "Apaga aviso"
 #: cmd/incus/image.go:1666 cmd/incus/image.go:1732 cmd/incus/image_alias.go:32
 #: cmd/incus/image_alias.go:72 cmd/incus/image_alias.go:141
 #: cmd/incus/image_alias.go:197 cmd/incus/image_alias.go:387
-#: cmd/incus/import.go:28 cmd/incus/info.go:37 cmd/incus/launch.go:25
+#: cmd/incus/import.go:30 cmd/incus/info.go:37 cmd/incus/launch.go:25
 #: cmd/incus/list.go:52 cmd/incus/main.go:102 cmd/incus/manpage.go:25
 #: cmd/incus/monitor.go:35 cmd/incus/move.go:38 cmd/incus/network.go:41
 #: cmd/incus/network.go:153 cmd/incus/network.go:252 cmd/incus/network.go:354
@@ -3066,11 +3066,11 @@ msgstr ""
 msgid "Export custom storage volume"
 msgstr "Exporta volume de armazenamento personalizado"
 
-#: cmd/incus/export.go:32
+#: cmd/incus/export.go:33
 msgid "Export instance backups"
 msgstr "Exporta salvaguardas da instância"
 
-#: cmd/incus/export.go:33
+#: cmd/incus/export.go:34
 msgid "Export instances as backup tarballs."
 msgstr "Exporta instâncias como tarballs de salvaguarda."
 
@@ -3101,7 +3101,7 @@ msgstr "Exporta o volume sem seus instantâneos"
 msgid "Exporting backup of storage bucket: %s"
 msgstr "A exportar salvaguarda do bucket de armazenamento: %s"
 
-#: cmd/incus/export.go:153 cmd/incus/storage_volume.go:3358
+#: cmd/incus/export.go:159 cmd/incus/storage_volume.go:3358
 #, c-format
 msgid "Exporting the backup: %s"
 msgstr "A exportar a salvaguarda: %s"
@@ -3269,7 +3269,7 @@ msgstr "Falhou a adicionar certificado de servidor ao agrupamento: %w"
 msgid "Failed to check if the daemon is ready (attempt %d): %v"
 msgstr "Falhou ao verificar se o daemon está pronto (tentativa %d): %v"
 
-#: cmd/incus/export.go:190
+#: cmd/incus/export.go:196
 #, c-format
 msgid "Failed to close export file: %w"
 msgstr "Falhou ao fechar ficheiro de exportação: %w"
@@ -3405,7 +3405,7 @@ msgstr "Falhou ao refrescar instância alvo: '%s': %v"
 msgid "Failed to remove alias %s: %w"
 msgstr "Falhou ao remover alias %s: %w"
 
-#: cmd/incus/export.go:184
+#: cmd/incus/export.go:190
 #, c-format
 msgid "Failed to rename export file: %w"
 msgstr "Falhou ao renomear ficheiro de exportação: %w"
@@ -3493,7 +3493,7 @@ msgstr "Família: %v"
 msgid "Fast mode (same as --columns=nsacPt)"
 msgstr "Modo rápido (mesmo que --columns=nsacPt)"
 
-#: cmd/incus/export.go:167
+#: cmd/incus/export.go:173
 #, c-format
 msgid "Fetch instance backup file: %w"
 msgstr "Procura ficheiro de salvaguarda de instância: %w"
@@ -4085,7 +4085,7 @@ msgstr "Imagem refrescada com sucesso!"
 msgid "Immediately attach to the console"
 msgstr "Anexar imediatamente à consola"
 
-#: cmd/incus/import.go:28
+#: cmd/incus/import.go:30
 msgid "Import backups of instances including their snapshots."
 msgstr "Importa backups de instâncias incluindo seus instantâneos."
 
@@ -4116,7 +4116,7 @@ msgstr ""
 msgid "Import images into the image store"
 msgstr "Importa imagem para a loja de imagens"
 
-#: cmd/incus/import.go:27
+#: cmd/incus/import.go:29
 msgid "Import instance backups"
 msgstr "Importa salvaguardas da instância"
 
@@ -4146,7 +4146,7 @@ msgstr "A importar bucket: %s"
 msgid "Importing custom volume: %s"
 msgstr "A importar volume personalizado: %s"
 
-#: cmd/incus/import.go:95
+#: cmd/incus/import.go:99
 #, c-format
 msgid "Importing instance: %s"
 msgstr "A importar instância: %s"
@@ -4219,7 +4219,7 @@ msgstr "Tipo de instância"
 msgid "Invalid IP address or DNS name"
 msgstr "Endereço IP ou nome DNS inválido"
 
-#: cmd/incus/export.go:115 cmd/incus/storage_bucket.go:1575
+#: cmd/incus/export.go:128 cmd/incus/storage_bucket.go:1575
 #: cmd/incus/storage_volume.go:3326
 #, c-format
 msgid "Invalid URL %q: %w"
@@ -4239,7 +4239,7 @@ msgstr "Argumento inválido %q"
 msgid "Invalid arguments"
 msgstr "Argumentos inválidos"
 
-#: cmd/incus/export.go:120 cmd/incus/storage_bucket.go:1580
+#: cmd/incus/export.go:133 cmd/incus/storage_bucket.go:1580
 #: cmd/incus/storage_volume.go:3331
 #, c-format
 msgid "Invalid backup name segment in path %q: %w"
@@ -7045,7 +7045,8 @@ msgstr "Novo alias para definir no alvo"
 msgid "New aliases to add to the image"
 msgstr "Novos aliases para adicionar à imagem"
 
-#: cmd/incus/copy.go:57 cmd/incus/create.go:60 cmd/incus/move.go:60
+#: cmd/incus/copy.go:57 cmd/incus/create.go:60 cmd/incus/import.go:39
+#: cmd/incus/move.go:60
 msgid "New key/value to apply to a specific device"
 msgstr "Nova chave/valor para aplicar a um dispositivo específico"
 
@@ -8943,7 +8944,7 @@ msgstr "Pool de armazenamento %s pendente de membro %s"
 msgid "Storage pool description"
 msgstr "Descrição de pool de armazenamento"
 
-#: cmd/incus/copy.go:63 cmd/incus/create.go:64 cmd/incus/import.go:35
+#: cmd/incus/copy.go:63 cmd/incus/create.go:64 cmd/incus/import.go:37
 #: cmd/incus/move.go:66
 msgid "Storage pool name"
 msgstr "Nome de pool de armazenamento"
@@ -9042,6 +9043,11 @@ msgstr "TIPO"
 #: cmd/incus/info.go:832 cmd/incus/info.go:883 cmd/incus/storage_volume.go:1565
 msgid "Taken at"
 msgstr "Tomado em"
+
+#: cmd/incus/export.go:80
+#, c-format
+msgid "Target path %q already exists"
+msgstr "Caminho alvo %q já existe"
 
 #: cmd/incus/file.go:1425 cmd/incus/storage_volume.go:2458
 msgid "Target path and --listen flag cannot be used together"
@@ -9852,7 +9858,7 @@ msgstr "Dispositivos de cima"
 msgid "Usage: %s"
 msgstr "Utilização: %s"
 
-#: cmd/incus/export.go:43 cmd/incus/storage_volume.go:3230
+#: cmd/incus/export.go:44 cmd/incus/storage_volume.go:3230
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool)"
 msgstr ""
@@ -10032,7 +10038,7 @@ msgstr "Como deve ser chamada a nova ponte?"
 msgid "Where should this storage pool store its data?"
 msgstr "Onde deve este pool de armazenamento guardar os seus dados?"
 
-#: cmd/incus/export.go:41
+#: cmd/incus/export.go:42
 msgid "Whether or not to only backup the instance (without snapshots)"
 msgstr ""
 "Se é ou não para apenas fazer salvaguarda da instância (sem os instantâneos)"
@@ -10175,7 +10181,7 @@ msgstr "[<remoto:>]<pool> <volume> <perfil> [<nome dispositivo>] [<caminho>]"
 msgid "[<remote>:]"
 msgstr "[<remoto>:]"
 
-#: cmd/incus/import.go:26
+#: cmd/incus/import.go:28
 msgid "[<remote>:] <backup file> [<instance name>]"
 msgstr "[<remoto>:] <ficheiro salvaguarda> [<nome instância>]"
 
@@ -10420,7 +10426,7 @@ msgstr "[<remoto>:]<instância> [bandeiras] [--] <linha de comandos>"
 msgid "[<remote>:]<instance> [target] [--format]"
 msgstr "[<remoto>:]<instância> [alvo] [--format]"
 
-#: cmd/incus/export.go:31
+#: cmd/incus/export.go:32
 msgid "[<remote>:]<instance> [target] [--instance-only] [--optimized-storage]"
 msgstr "[<remoto>:]<instância> [alvo] [--instance-only] [--optimized-storage]"
 
@@ -11084,13 +11090,13 @@ msgstr ""
 "incus exec c1 -- ls -lh /\n"
 "\tCorre o comando \"ls -lh /\" na instância \"c1\""
 
-#: cmd/incus/export.go:35
+#: cmd/incus/export.go:36
 msgid ""
 "incus export u1 backup0.tar.gz\n"
-"    Download a backup tarball of the u1 instance."
+"\tDownload a backup tarball of the u1 instance."
 msgstr ""
 "incus export u1 backup0.tar.gz\n"
-"    Descarrega o tarball de salvaguarda da instância u1."
+"\tDescarrega um tarball de salvaguarda da instância u1."
 
 #: cmd/incus/file.go:102
 msgid ""
@@ -11160,7 +11166,7 @@ msgstr ""
 "incus image edit <imagem> < image.yaml\n"
 "    Carrega as propriedades da imagem a partir dum ficheiro YAML"
 
-#: cmd/incus/import.go:30
+#: cmd/incus/import.go:32
 msgid ""
 "incus import backup0.tar.gz\n"
 "    Create a new instance using backup0.tar.gz as the source."
