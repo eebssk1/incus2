@@ -101,7 +101,7 @@ endif
 
 .PHONY: update-ovsdb
 update-ovsdb:
-	go install github.com/ovn-org/libovsdb/cmd/modelgen@main
+	go install github.com/ovn-kubernetes/libovsdb/cmd/modelgen@main
 
 	rm -Rf internal/server/network/ovs/schema
 	mkdir internal/server/network/ovs/schema
@@ -312,6 +312,10 @@ ifeq ($(shell command -v flake8),)
 endif
 ifeq ($(shell command -v codespell),)
 	echo "Please install codespell"
+	exit 1
+endif
+ifeq ($(shell command -v run-parts),)
+	echo "Please install run-parts"
 	exit 1
 endif
 	flake8 test/deps/import-busybox

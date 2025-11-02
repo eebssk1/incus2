@@ -45,7 +45,7 @@ jobs:
         if: github.event_name == 'pull_request' && matrix.go == 'stable'
 
       - name: Upload artifact with ShellCheck defects in SARIF format
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Differential ShellCheck SARIF
           path: ${{ steps.ShellCheck.outputs.sarif }}
@@ -140,6 +140,7 @@ jobs:
           - lvm
           - zfs
           - ceph
+          - linstor
           - random
         os:
           - ubuntu-24.04
@@ -270,6 +271,7 @@ jobs:
             libcap-dev \
             libdbus-1-dev \
             libcowsql-dev \
+            libelf-dev \
             liblxc-dev \
             libseccomp-dev \
             libselinux-dev \
@@ -277,6 +279,7 @@ jobs:
             libtool \
             libudev-dev \
             linux-modules-extra-$(uname -r) \
+            llvm \
             make \
             pkg-config\
             acl \
@@ -548,7 +551,7 @@ jobs:
 
       - name: Upload incus client artifacts
         if: matrix.go == 'stable'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         continue-on-error: true
         with:
           name: ${{ runner.os }}
@@ -597,7 +600,7 @@ jobs:
 
       - name: Upload documentation artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: documentation
           path: doc/html
