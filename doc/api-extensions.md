@@ -2929,3 +2929,28 @@ Implements `DELETE`, `GET`, `HEAD`, `POST` operations on the `/1.0/storage-pools
 ## `network_hwaddr_pattern`
 
 This adds `network.hwaddr_pattern` global and per-project configuration keys to customize MAC address allocation.
+
+## `storage_volume_full`
+
+This adds `?recursion=1` support to `/1.0/storage-pools/POOL/volumes/VOLUME` and `?recursion=2` support to `/1.0/storage-pools/POOL/volumes`.
+
+As well as a matching `StorageVolumeFull` struct.
+
+## `storage_bucket_full`
+
+This adds `?recursion=1` support to `/1.0/storage-pools/POOL/buckets/VOLUME` and `?recursion=2` support to `/1.0/storage-pools/POOL/buckets`.
+
+As well as a matching `StorageBucketFull` struct.
+
+## `device_pci_firmware`
+
+This extension introduces a new boolean `firmware` option for PCI devices.
+When set to `false`, Incus tells QEMU to disable the ROM-BAR (`rombar=0`) for the device.
+
+## `resources_serial`
+
+This adds serial device tracking to the resources API.
+
+## `ovn_nic_limits`
+
+This adds support for `limits.egress`, `limits.ingress`, `limits.max` and `limits.priority` on `ovn` type network devices.
