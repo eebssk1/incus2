@@ -1331,6 +1331,14 @@
 							"shortdesc": "The VLAN ID to attach to",
 							"type": "integer"
 						}
+					},
+					{
+						"vlan.tagged": {
+							"longdesc": "",
+							"managed": "no",
+							"shortdesc": "Comma-delimited list of VLAN IDs or VLAN ranges to join for tagged traffic",
+							"type": "integer"
+						}
 					}
 				]
 			},
@@ -2007,7 +2015,7 @@
 					{
 						"boot.autostart": {
 							"liveupdate": "no",
-							"longdesc": "If set to `false`, restore the last state.",
+							"longdesc": "If unset or set to `last-state`, restores the last state.",
 							"shortdesc": "Whether to always start the instance when the daemon starts",
 							"type": "bool"
 						}
@@ -4527,6 +4535,14 @@
 							"condition": "-",
 							"longdesc": "",
 							"shortdesc": "The VLAN ID to attach to",
+							"type": "integer"
+						}
+					},
+					{
+						"vlan.tagged": {
+							"condition": "Parent must be an existing bridge",
+							"longdesc": "",
+							"shortdesc": "Comma-delimited list of VLAN IDs or VLAN ranges to join for tagged traffic",
 							"type": "integer"
 						}
 					}
