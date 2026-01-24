@@ -2966,3 +2966,18 @@ This indicates support by Incus for the custom `incus.allowed_subnets` OIDC clai
 ## `file_delete_force`
 
 This adds a new `X-Incus-force` HTTP header that when set to `true` allows for recursive deletion of instance or custom volume files.
+
+## `nic_sriov_select_ext`
+
+Adds support for selecting an SR-IOV network interface by vendor ID, product ID, or PCI address.
+
+## `network_zones_dns_contact`
+
+Adds a `dns.contact` configuration key to network zones.
+
+## `nic_attached_connected`
+
+This introduces two new properties for NICs:
+
+* `attached`, behaving like the `attached` key for disk and USB devices;
+* `connected`, setting the up/down link state for the NIC (when supported).

@@ -4766,7 +4766,15 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 
 	qemuDev["id"] = fmt.Sprintf("%s%s", qemuDeviceIDPrefix, escapedDeviceName)
 	qemuDev["drive"] = blockDev["node-name"].(string)
-	qemuDev["serial"] = fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, escapedDeviceName)
+
+	// Max serial length is 36 characters: prefix + 30 chars.
+	// For nvme and virtio-blk, the maximum serial length is 20 characters: prefix + 14 chars.
+	serialMaxLength := 30
+	if slices.Contains([]string{"nvme", "virtio-blk"}, bus) {
+		serialMaxLength = 14
+	}
+
+	qemuDev["serial"] = fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, hashValue(escapedDeviceName, serialMaxLength))
 
 	if wwn != "" {
 		wwnID, err := strconv.ParseUint(strings.TrimPrefix(wwn, "0x"), 16, 64)
@@ -4921,6 +4929,7 @@ func (d *qemu) addNetDevConfig(busName string, qemuDev map[string]any, bootIndex
 	defer reverter.Fail()
 
 	var devName, nicName, devHwaddr, pciSlotName, pciIOMMUGroup, vDPADevName, vhostVDPAPath, maxVQP string
+	var connected bool
 	for _, nicItem := range nicConfig {
 		if nicItem.Key == "devName" {
 			devName = nicItem.Value
@@ -4938,6 +4947,8 @@ func (d *qemu) addNetDevConfig(busName string, qemuDev map[string]any, bootIndex
 			vhostVDPAPath = nicItem.Value
 		} else if nicItem.Key == "maxVQP" {
 			maxVQP = nicItem.Value
+		} else if nicItem.Key == "connected" {
+			connected = util.IsTrueOrEmpty(nicItem.Value)
 		}
 	}
 
@@ -5054,7 +5065,7 @@ func (d *qemu) addNetDevConfig(busName string, qemuDev map[string]any, bootIndex
 			qemuDev["netdev"] = qemuNetDev["id"].(string)
 			qemuDev["mac"] = devHwaddr
 
-			err = m.AddNIC(qemuNetDev, qemuDev)
+			err = m.AddNIC(qemuNetDev, qemuDev, connected)
 			if err != nil {
 				return fmt.Errorf("Failed setting up device %q: %w", devName, err)
 			}
@@ -5163,7 +5174,7 @@ func (d *qemu) addNetDevConfig(busName string, qemuDev map[string]any, bootIndex
 			qemuDev["iommu_platform"] = true
 			qemuDev["disable-legacy"] = true
 
-			err = m.AddNIC(qemuNetDev, qemuDev)
+			err = m.AddNIC(qemuNetDev, qemuDev, connected)
 			if err != nil {
 				return fmt.Errorf("Failed setting up device %q: %w", devName, err)
 			}
@@ -5196,7 +5207,7 @@ func (d *qemu) addNetDevConfig(busName string, qemuDev map[string]any, bootIndex
 		}
 
 		monHook = func(m *qmp.Monitor) error {
-			err := m.AddNIC(nil, qemuDev)
+			err := m.AddNIC(nil, qemuDev, connected)
 			if err != nil {
 				return fmt.Errorf("Failed setting up device %q: %w", devName, err)
 			}
@@ -5264,7 +5275,7 @@ func (d *qemu) addPCIDevConfig(conf *[]cfg.Section, bus *qemuBus, pciConfig []de
 		} else if pciItem.Key == "pciSlotName" {
 			pciSlotName = pciItem.Value
 		} else if pciItem.Key == "firmware" {
-			firmware = util.IsTrue(pciItem.Value)
+			firmware = util.IsTrueOrEmpty(pciItem.Value)
 		}
 	}
 
@@ -6319,6 +6330,12 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 			return []string{} // Couldn't create Device, so this cannot be an update.
 		}
 
+		// Detached devices need to be fully recreated on update so that the update logic doesn't
+		// try to access non-existing QEMU devices.
+		if !util.IsTrueOrEmpty(oldDevice["attached"]) {
+			return []string{}
+		}
+
 		return newDevType.UpdatableFields(oldDevType)
 	})
 
@@ -7340,6 +7357,11 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 	}
 
 	// Setup a new operation.
+	op := operationlock.Get(d.Project().Name, d.Name())
+	if op != nil && op.ActionMatch(operationlock.ActionMigrate) {
+		return errors.New("The instance is already being migrated")
+	}
+
 	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionMigrate, nil, false, true)
 	if err != nil {
 		return err
@@ -9151,6 +9173,34 @@ func (d *qemu) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 		}
 	}
 
+	// Handle NIC reconfiguration.
+	var devName string
+	var connected bool
+	for _, dev := range runConf.NetworkInterface {
+		switch dev.Key {
+		case "devName":
+			devName = dev.Value
+		case "connected":
+			connected = util.IsTrueOrEmpty(dev.Value)
+		}
+	}
+
+	if devName != "" {
+		// Get the QMP monitor.
+		m, err := d.qmpConnect()
+		if err != nil {
+			return err
+		}
+
+		// Figure out the QEMU device ID.
+		devID := fmt.Sprintf("%s%s", qemuDeviceIDPrefix, linux.PathNameEncode(devName))
+
+		err = m.SetNICLink(devID, connected)
+		if err != nil {
+			return fmt.Errorf("Failed setting NIC device link status: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -10070,13 +10120,13 @@ func (d *qemu) deviceDetachUSB(usbDev deviceConfig.USBDeviceItem) error {
 // Block node names may only be up to 31 characters long, so use a hash if longer.
 func (d *qemu) blockNodeName(name string) string {
 	// Apply the prefix.
-	return fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, hashName(name, 25))
+	return fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, hashValue(name, 25))
 }
 
 // Mount tag names may only be up to 31 or 36 characters long, so use a hash if longer.
 func (d *qemu) mountTagName(name string, maxLength int) string {
 	// Apply the prefix.
-	return fmt.Sprintf("%s%s", qemuMountTagPrefix, hashName(name, maxLength))
+	return fmt.Sprintf("%s%s", qemuMountTagPrefix, hashValue(name, maxLength))
 }
 
 func (d *qemu) setCPUs(monitor *qmp.Monitor, count int) error {

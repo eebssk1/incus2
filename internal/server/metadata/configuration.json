@@ -485,11 +485,29 @@
 			"nic_bridged": {
 				"keys": [
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"boot.priority": {
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network",
+							"type": "bool"
 						}
 					},
 					{
@@ -742,6 +760,15 @@
 			"nic_ipvlan": {
 				"keys": [
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"gvrp": {
 							"default": "false",
 							"longdesc": "",
@@ -844,11 +871,29 @@
 			"nic_macvlan": {
 				"keys": [
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"boot.priority": {
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network (VM only)",
+							"type": "bool"
 						}
 					},
 					{
@@ -943,11 +988,29 @@
 						}
 					},
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"boot.priority": {
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network (container support requires setting `acceleration` to `none`)",
+							"type": "bool"
 						}
 					},
 					{
@@ -1165,10 +1228,28 @@
 			"nic_p2p": {
 				"keys": [
 					{
-						"boot.priotiry": {
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
+						"boot.priority": {
 							"longdesc": "",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network",
+							"type": "bool"
 						}
 					},
 					{
@@ -1265,11 +1346,29 @@
 			"nic_physical": {
 				"keys": [
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"boot.priority": {
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network (VM only)",
+							"type": "bool"
 						}
 					},
 					{
@@ -1344,6 +1443,24 @@
 			},
 			"nic_routed": {
 				"keys": [
+					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network",
+							"type": "bool"
+						}
+					},
 					{
 						"gvrp": {
 							"default": "false",
@@ -1559,11 +1676,29 @@
 			"nic_sriov": {
 				"keys": [
 					{
+						"attached": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is plugged in or not",
+							"type": "bool"
+						}
+					},
+					{
 						"boot.priority": {
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Boot priority for VMs (higher value boots first)",
 							"type": "integer"
+						}
+					},
+					{
+						"connected": {
+							"default": "`true`",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Whether the NIC is connected to the host network (VM only)",
+							"type": "bool"
 						}
 					},
 					{
@@ -1610,12 +1745,36 @@
 						}
 					},
 					{
+						"pci": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The PCI address of the parent host device",
+							"type": "string"
+						}
+					},
+					{
+						"productid": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The product ID of the parent host device",
+							"type": "string"
+						}
+					},
+					{
 						"security.mac_filtering": {
 							"default": "false",
 							"longdesc": "",
 							"managed": "no",
 							"shortdesc": "Prevent the instance from spoofing another instance's MAC address",
 							"type": "bool"
+						}
+					},
+					{
+						"vendorid": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The vendor ID of the parent host device",
+							"type": "string"
 						}
 					},
 					{
@@ -4704,6 +4863,14 @@
 			"common": {
 				"keys": [
 					{
+						"dns.contact": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Admin contact email for DNS server",
+							"type": "string"
+						}
+					},
+					{
 						"dns.nameservers": {
 							"longdesc": "",
 							"required": "no",
@@ -6450,6 +6617,15 @@
 							"longdesc": "",
 							"scope": "global",
 							"shortdesc": "The prefix to use for the internal names of LINSTOR-managed volumes. Cannot be updated after the storage pool is created",
+							"type": "string"
+						}
+					},
+					{
+						"source": {
+							"default": "`incus`",
+							"longdesc": "",
+							"scope": "global",
+							"shortdesc": "LINSTOR storage pool name. Alias for `linstor.resource_group.name`. Use either either one or the other or make sure they have the same value.",
 							"type": "string"
 						}
 					},
