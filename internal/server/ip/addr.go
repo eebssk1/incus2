@@ -5,6 +5,8 @@ import (
 	"net"
 
 	"github.com/vishvananda/netlink"
+
+	"golang.org/x/sys/unix"
 )
 
 // Addr represents arguments for address protocol manipulation.
@@ -85,6 +87,56 @@ func (a *Addr) Flush() error {
 		if err != nil {
 			return fmt.Errorf("Failed to delete address %v: %w", addr, err)
 		}
+	}
+
+	return nil
+}
+
+// Find and replace the default local route if CC need reset
+func (a *Addr) SetRouteCC() error {
+	link, err := netlink.LinkByName(a.DevName)
+	if err != nil {
+		return fmt.Errorf("Failed to change CC (Device): %w", err)
+	}
+
+	_, dstNet, err := net.ParseCIDR(a.Address.String())
+	if err != nil {
+		return fmt.Errorf("Failed to change CC (ParseCIDR): %w", err)
+	}
+
+	filter := &netlink.Route{
+		LinkIndex: link.Attrs().Index,
+		Dst:       dstNet,
+		// Skip if it is changed externally during our process(which may remove kernel mark)
+		Protocol: unix.RTPROT_KERNEL,
+	}
+
+	routes, err := netlink.RouteListFiltered(int(a.Family), filter, netlink.RT_FILTER_OIF|netlink.RT_FILTER_DST|netlink.RT_FILTER_PROTOCOL)
+	if err != nil {
+		return fmt.Errorf("Failed to change CC (FilterRouteList): %w", err)
+	}
+
+	// This is normal if the change called multiple times without reset.
+	if len(routes) == 0 {
+		return nil
+	}
+
+	route := routes[0]
+	if int(a.Family) == unix.AF_INET6 {
+		_ = netlink.RouteDel(&route)
+		route.Priority = 1
+	}
+	route.Congctl = "highspeed"
+	// Mark this is a modified one ?
+	route.Protocol = unix.RTPROT_BOOT
+
+	if int(a.Family) == unix.AF_INET6 {
+		err = netlink.RouteAdd(&route)
+	} else {
+		err = netlink.RouteChange(&route)
+	}
+	if err != nil {
+		return fmt.Errorf("Failed to change CC (Change): %w", err)
 	}
 
 	return nil
