@@ -229,6 +229,15 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//  shortdesc: Bridge MTU (default varies if tunnel in use)
 		"bridge.mtu": validate.Optional(validate.IsNetworkMTU),
 
+		// gendoc:generate(entity=network_bridge, group=common, key=bridge.resetcc)
+		//
+		// ---
+		//  type: bool
+		//  condition: -
+		//  default: ``
+		//  shortdesc: Should we override the CC of this interface to linux common default(cubic)?
+		"bridge.resetcc": validate.Optional(validate.IsBool),
+
 		// gendoc:generate(entity=network_bridge, group=common, key=ipv4.address)
 		//
 		// ---
@@ -1383,6 +1392,15 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 		}
 	}
 
+	// For keep bridge up if CC need change
+	keepup := &ip.Dummy{
+		Link: ip.Link{
+			Name: fmt.Sprintf("%s_keepup", bridge.Name),
+		},
+	}
+	var addr4 *ip.Addr
+	var addr6 *ip.Addr
+
 	// Configure IPv4.
 	if !util.IsNoneOrEmpty(n.config["ipv4.address"]) {
 		// Parse the subnet.
@@ -1452,6 +1470,8 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 		if err != nil {
 			return err
 		}
+
+		addr4 = addr
 
 		// Configure NAT.
 		if util.IsTrue(n.config["ipv4.nat"]) {
@@ -1677,6 +1697,8 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 			return err
 		}
 
+		addr6 = addr
+
 		// Configure NAT.
 		if util.IsTrue(n.config["ipv6.nat"]) {
 			// If a SNAT source address is specified, use that, otherwise default to MASQUERADE mode.
@@ -1840,6 +1862,36 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	resetcc := func(addr *ip.Addr) error {
+		if n.config["bridge.resetcc"] == "true" {
+			br, _ := ip.LinkByName(bridge.Name)
+			if br.OperationalState == "down" {
+				n.logger.Debug("Adding keepUp dummy interface to bridge to change route")
+				// Needed to change route
+				_ = keepup.Add()
+				_ = keepup.SetUp()
+				_ = AttachInterface(n.state, bridge.Name, fmt.Sprintf("%s_keepup", bridge.Name))
+				_ = br.SetUp()
+			}
+			time.Sleep(120 * time.Millisecond)
+			err = addr.SetRouteCC()
+			_ = DetachInterface(n.state, n.name, fmt.Sprintf("%s_keepup", n.name))
+			_ = keepup.Delete()
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	if err = resetcc(addr4); err != nil {
+		return err
+	}
+
+	if err = resetcc(addr6); err != nil {
+		return err
 	}
 
 	// Generate and load apparmor profiles.
