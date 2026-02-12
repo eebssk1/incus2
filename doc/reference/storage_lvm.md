@@ -55,6 +55,14 @@ To use this with Incus, you must:
 - Set a unique (within your cluster) `host_id` value in `/etc/lvm/lvmlocal.conf`
 - Ensure that both `lvmlockd` and `sanlock` daemons are running
 
+```{warning}
+`lvmcluster` has the following limitations:
+
+   - Snapshots for shared custom storage volumes are not supported.
+   - Snapshots of raw block volumes are not supported.
+   - Only VM block volumes support the `QCOW2` format.
+```
+
 ## Configuration options
 
 The following configuration options are available for storage pools that use the `lvm` driver and for storage volumes in these pools.

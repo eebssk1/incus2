@@ -974,7 +974,7 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 				_ = monitor.NBDServerStop()
 			}()
 
-			err = monitor.NBDBlockExportAdd(qemuMigrationNBDExportName)
+			err = monitor.NBDBlockExportAdd(qemuMigrationNBDExportName, true)
 			if err != nil {
 				return fmt.Errorf("Failed adding root disk to NBD server: %w", err)
 			}
@@ -3054,6 +3054,10 @@ func (d *qemu) spicePath() string {
 	return filepath.Join(d.RunPath(), "qemu.spice")
 }
 
+func (d *qemu) migrateSockPath() string {
+	return filepath.Join(d.RunPath(), "migrate.sock")
+}
+
 func (d *qemu) spiceCmdlineConfig() string {
 	return fmt.Sprintf("unix=on,disable-ticketing=on,addr=%s", d.spicePath())
 }
@@ -4893,7 +4897,7 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 				if len(driveConf.BackingPath) > 0 {
 					backingBlockDev, err := d.qcow2BlockDev(m, nodeName, aioMode, directCache, noFlushCache, permissions, readonly, driveConf.BackingPath, 0)
 					if err != nil {
-						return nil
+						return err
 					}
 
 					blockDev["backing"] = backingBlockDev
@@ -5775,7 +5779,7 @@ func (d *qemu) Snapshot(name string, expiry time.Time, stateful bool) error {
 }
 
 // Restore restores an instance snapshot.
-func (d *qemu) Restore(source instance.Instance, stateful bool) error {
+func (d *qemu) Restore(source instance.Instance, stateful bool, diskOnly bool) error {
 	op, err := operationlock.Create(d.Project().Name, d.Name(), d.op, operationlock.ActionRestore, false, false)
 	if err != nil {
 		return fmt.Errorf("Failed to create instance restore operation: %w", err)
@@ -5857,17 +5861,34 @@ func (d *qemu) Restore(source instance.Instance, stateful bool) error {
 		return err
 	}
 
-	// Restore the configuration.
-	args := db.InstanceArgs{
-		Architecture: source.Architecture(),
-		Config:       source.LocalConfig(),
-		Description:  source.Description(),
-		Devices:      source.LocalDevices(),
-		Ephemeral:    source.IsEphemeral(),
-		Profiles:     source.Profiles(),
-		Project:      source.Project().Name,
-		Type:         source.Type(),
-		Snapshot:     source.IsSnapshot(),
+	args := db.InstanceArgs{}
+	if !diskOnly {
+		// Restore the configuration.
+		args = db.InstanceArgs{
+			Architecture: source.Architecture(),
+			Config:       source.LocalConfig(),
+			Description:  source.Description(),
+			Devices:      source.LocalDevices(),
+			Ephemeral:    source.IsEphemeral(),
+			Profiles:     source.Profiles(),
+			Project:      source.Project().Name,
+			Type:         source.Type(),
+			Snapshot:     source.IsSnapshot(),
+		}
+	} else {
+		args = db.InstanceArgs{
+			Architecture: d.Architecture(),
+			Config:       d.LocalConfig(),
+			Description:  d.Description(),
+			Devices:      d.LocalDevices(),
+			Ephemeral:    d.IsEphemeral(),
+			Profiles:     d.Profiles(),
+			Project:      d.Project().Name,
+			Type:         d.Type(),
+			Snapshot:     d.IsSnapshot(),
+		}
+
+		args.Config["volatile.uuid.generation"] = source.LocalConfig()["volatile.uuid.generation"]
 	}
 
 	// Don't pass as user-requested as there's no way to fix a bad config.
@@ -7634,7 +7655,13 @@ func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName str
 		return err
 	}
 
-	rootDiskName := "incus_root"                  // Name of source disk device to sync from
+	// Selects all block devices related to this instance (backing, root disk, overlays).
+	blockDevs, err := d.fetchQcow2Blockdevs(monitor)
+	if err != nil {
+		return err
+	}
+
+	rootDiskName := blockDevs[len(blockDevs)-1]   // Name of source disk device to sync from. Last block device is the current root disk.
 	nbdTargetDiskName := "incus_root_nbd"         // Name of NBD disk device added to local VM to sync to.
 	rootSnapshotDiskName := "incus_root_snapshot" // Name of snapshot disk device to use.
 
@@ -8298,9 +8325,9 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			IndexHeaderVersion:    respHeader.GetIndexHeaderVersion(),
 			Name:                  d.Name(),
 			MigrationType:         respTypes[0],
-			Refresh:               args.Refresh,                // Indicate to receiver volume should exist.
-			TrackProgress:         true,                        // Use a progress tracker on receiver to get in-cluster progress information.
-			Live:                  false,                       // Indicates we won't get a final rootfs sync.
+			Refresh:               args.Refresh, // Indicate to receiver volume should exist.
+			TrackProgress:         true,         // Use a progress tracker on receiver to get in-cluster progress information.
+			Live:                  args.Live,
 			VolumeSize:            offerHeader.GetVolumeSize(), // Block size setting override.
 			VolumeOnly:            !args.Snapshots,
 			ClusterMoveSourceName: args.ClusterMoveSourceName,
@@ -10697,6 +10724,67 @@ func (d *qemu) DeleteQcow2Snapshot(snapshotIndex int, backingFilename string) er
 	}
 
 	return nil
+}
+
+// ExportQcow2Block exports a qcow2 block device by exposing it through a QEMU NBD server.
+func (d *qemu) ExportQcow2Block(blockIndex int) (func(), string, error) {
+	monitor, err := d.qmpConnect()
+	if err != nil {
+		return nil, "", err
+	}
+
+	socketPath := d.migrateSockPath()
+
+	addr, err := net.ResolveUnixAddr("unix", socketPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	migrationSock, err := net.ListenUnix("unix", addr)
+	if err != nil {
+		return nil, "", fmt.Errorf("Error connecting to migration socket %q: %w", socketPath, err)
+	}
+
+	migrationFile, err := migrationSock.File()
+	if err != nil {
+		return nil, "", fmt.Errorf("Error opening migration socket %q: %w", socketPath, err)
+	}
+
+	err = monitor.SendFile(socketPath, migrationFile)
+	if err != nil {
+		return nil, "", fmt.Errorf("Failed to send migration file descriptor: %w", err)
+	}
+
+	err = monitor.NBDUnixServerStart(socketPath)
+	if err != nil {
+		return nil, "", fmt.Errorf("Failed starting NBD server: %w", err)
+	}
+
+	// Selects all block devices related to this instance (backing, root disk, overlays).
+	blockDevs, err := d.fetchQcow2Blockdevs(monitor)
+	if err != nil {
+		return nil, "", err
+	}
+
+	d.logger.Debug("Instance block devices:", logger.Ctx{"blockdev": blockDevs, "blockIndex": blockIndex})
+
+	if blockIndex < 0 || blockIndex >= len(blockDevs) {
+		return nil, "", fmt.Errorf("Incorrect block device index: %d", blockIndex)
+	}
+
+	exportBlockName := blockDevs[blockIndex]
+
+	exportDiskPath := fmt.Sprintf("nbd+unix:///%s?socket=%s", exportBlockName, socketPath)
+
+	err = monitor.NBDBlockExportAdd(exportBlockName, false)
+	if err != nil {
+		return nil, "", fmt.Errorf("Failed adding disk to NBD server: %w", err)
+	}
+
+	return func() {
+		_ = monitor.NBDServerStop()
+		_ = migrationSock.Close()
+	}, exportDiskPath, nil
 }
 
 func (d *qemu) isQCOW2(devPath string) (bool, error) {

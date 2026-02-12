@@ -2981,3 +2981,17 @@ This introduces two new properties for NICs:
 
 * `attached`, behaving like the `attached` key for disk and USB devices;
 * `connected`, setting the up/down link state for the NIC (when supported).
+
+## `nic_sriov_security_trusted`
+
+This introduces a new property for SR-IOV NICs:
+
+* `security.trusted` allows setting the `trusted` flag for the virtual function if the parent NIC supports it.
+
+## `direct_backup`
+
+This allows to perform backups of instances, custom storage volumes and storage buckets without disk buffering when the `Accept` header is set to `application/octet-stream` in the respective POST API endpoints. Doing so, said POST endpoints return the data stream instead of creating a backup entry in the database.
+
+## `instance_snapshot_disk_only_restore`
+
+This adds support for only restoring the disk of a snapshotted instance.
