@@ -477,7 +477,7 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 	state := d.state
 
 	return func(event string, data map[string]any) {
-		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventAgentStarted, qmp.EventRTCChange}, event) {
+		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventVMReset, qmp.EventAgentStarted, qmp.EventRTCChange}, event) {
 			return // Don't bother loading the instance from DB if we aren't going to handle the event.
 		}
 
@@ -512,6 +512,23 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 				return
 			}
 
+		case qmp.EventVMReset:
+			monitor, err := d.qmpConnect()
+			if err == nil {
+				if !monitor.IsInitialized() {
+					// If the VM isn't fully initialized yet, we want system_reset to be treated internally within QEMU.
+					break
+				}
+
+				if !d.needsFullRestart() {
+					// If a quick restart is possible, let QEMU handle it.
+					d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceRestarted.Event(d, nil))
+
+					break
+				}
+			}
+
+			fallthrough
 		case qmp.EventVMShutdown:
 			target := "stop"
 			entry, ok := data["reason"]
@@ -695,6 +712,12 @@ func (d *qemu) onStop(target string) error {
 	// Set operation if missing.
 	if d.op == nil {
 		d.op = op.GetOperation()
+	}
+
+	// If QEMU is still running, stop it (handles reboot).
+	monitor, err := qmp.Connect(d.monitorPath(), qemuSerialChardevName, nil, d.QMPLogFilePath(), qemuDetachDisk(d.state, d.id))
+	if err == nil {
+		_ = monitor.Quit()
 	}
 
 	// Wait for QEMU process to end (to avoiding racing start when restarting).
@@ -945,6 +968,15 @@ func (d *qemu) restoreStateHandle(ctx context.Context, monitor *qmp.Monitor, f *
 
 	err = monitor.MigrateIncoming(ctx, "migration")
 	if err != nil {
+		if errors.Is(err, qmp.ErrMonitorDisconnect) && util.PathExists(d.LogFilePath()) {
+			qemuError, err := os.ReadFile(d.LogFilePath())
+			if err != nil {
+				return err
+			}
+
+			return fmt.Errorf("QEMU crashed on VM restore: %s", string(qemuError))
+		}
+
 		return err
 	}
 
@@ -1117,7 +1149,7 @@ func (d *qemu) saveState(monitor *qmp.Monitor) error {
 		return fmt.Errorf("Failed initializing state save to %q: %w", stateFile.Name(), err)
 	}
 
-	err = monitor.MigrateWait("completed")
+	err = monitor.MigrateWait(context.Background(), "completed")
 	if err != nil {
 		return fmt.Errorf("Failed saving state to %q: %w", stateFile.Name(), err)
 	}
@@ -1382,6 +1414,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 	vsockFD := d.addFileDescriptor(&fdFiles, vsockF)
 
 	volatileSet := make(map[string]string)
+	volatileSet["volatile.vm.needs_reset"] = ""
 
 	// Update vsock ID in volatile if needed for recovery (do this before UpdateBackupFile() call).
 	oldVsockID := d.localConfig["volatile.vsock_id"]
@@ -1405,7 +1438,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 	}
 
 	// Generate the config drive.
-	err = d.generateConfigShare()
+	err = d.generateConfigShare(volatileSet)
 	if err != nil {
 		op.Done(err)
 		return err
@@ -2005,7 +2038,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 
 	// Don't allow the monitor to trigger a disconnection shutdown event until cleanly started so that the
 	// onStop hook isn't triggered prematurely (as this function's reverter will clean up on failure to start).
-	monitor.SetOnDisconnectEvent(false)
+	monitor.SetInitialized(false)
 
 	// Early startup hook
 	err = d.startupHook(monitor, "early")
@@ -2089,14 +2122,11 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 		return fmt.Errorf("Failed resetting VM: %w", err)
 	}
 
-	// Set the equivalent of the -no-reboot flag (which we can't set because of the reset bug above) via QMP.
-	// This ensures that if the guest initiates a reboot that the SHUTDOWN event is generated instead with the
-	// reason set to "guest-reset" so that the event handler returned from getMonitorEventHandler() can restart
-	// the guest instead.
+	// Set our default actions. Those can still be overridden in the event handler when Incus is running.
 	actions := map[string]string{
 		"shutdown": "poweroff",
-		"reboot":   "shutdown", // Don't reset on reboot. Let us handle reboots.
-		"panic":    "pause",    // Pause on panics to allow investigation.
+		"reboot":   "reset",
+		"panic":    "exit-failure",
 	}
 
 	err = monitor.SetAction(actions)
@@ -2182,7 +2212,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 
 	// The VM started cleanly so now enable the unexpected disconnection event to ensure the onStop hook is
 	// run if QMP unexpectedly disconnects.
-	monitor.SetOnDisconnectEvent(true)
+	monitor.SetInitialized(true)
 	op.Done(nil)
 	return nil
 }
@@ -3066,7 +3096,7 @@ func (d *qemu) spiceCmdlineConfig() string {
 // a 9P share. Due to the unknown size of templates inside the images this directory is created
 // inside the VM's config volume so that it can be restricted by quota.
 // Requires the instance be mounted before calling this function.
-func (d *qemu) generateConfigShare() error {
+func (d *qemu) generateConfigShare(volatileSet map[string]string) error {
 	configDrivePath := filepath.Join(d.Path(), "config")
 
 	// Create config drive dir if doesn't exist, if it does exist, leave it around so we don't regenerate all
@@ -3337,13 +3367,9 @@ func (d *qemu) generateConfigShare() error {
 			return err
 		}
 
-		err := d.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
-			// Remove the volatile key from the DB.
-			return tx.DeleteInstanceConfigKey(ctx, int64(d.id), key)
-		})
-		if err != nil {
-			return err
-		}
+		// Record that the instance devices got modified and a full reset will be needed to get a consistent state.
+		volatileSet[key] = ""
+		volatileSet["volatile.vm.needs_reset"] = "true"
 	}
 
 	err = d.templateApplyNow("start", templateFilesPath)
@@ -6137,18 +6163,21 @@ func (d *qemu) detachDisk(name string) error {
 		return err
 	}
 
-	// Check if it's a special device (we don't store detached state on those).
-	if slices.Contains([]string{"agent:config", "cloud-init:config"}, config["source"]) {
-		return nil
-	}
-
-	// Find the disk device.
+	// Check if it's a special device or an inherited device for which we can't save state.
 	_, ok = d.localDevices[diskName]
-	if !ok {
-		// Device came from a profile, we can't save its state.
+	if !ok || slices.Contains([]string{"agent:config", "cloud-init:config"}, config["source"]) {
+		// Record that the instance devices got modified and a full reset will be needed to get a consistent state.
+		err = d.VolatileSet(map[string]string{
+			"volatile.vm.needs_reset": "true",
+		})
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 
+	// Record the device as detached.
 	d.localDevices[diskName]["attached"] = "false"
 
 	return d.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
@@ -6487,6 +6516,14 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 			if !isLiveUpdatable(key) {
 				return fmt.Errorf("Key %q cannot be updated when VM is running", key)
 			}
+		}
+
+		// Mark the VM as needing a full reset on next reboot.
+		err = d.VolatileSet(map[string]string{
+			"volatile.vm.needs_reset": "true",
+		})
+		if err != nil {
+			return err
 		}
 
 		// Apply live update for each key.
@@ -7610,7 +7647,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 				defer instanceRefClear(d)
 			}
 
-			err = d.migrateSendLive(pool, args.ClusterMoveSourceName, args.StoragePool, blockSize, filesystemConn, stateConn, volSourceArgs)
+			err = d.migrateSendLive(ctx, pool, args.ClusterMoveSourceName, args.StoragePool, blockSize, filesystemConn, stateConn, volSourceArgs)
 			if err != nil {
 				return err
 			}
@@ -7649,7 +7686,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 }
 
 // migrateSendLive performs live migration send process.
-func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName string, storagePool string, rootDiskSize int64, filesystemConn io.ReadWriteCloser, stateConn io.ReadWriteCloser, volSourceArgs *localMigration.VolumeSourceArgs) error {
+func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clusterMoveSourceName string, storagePool string, rootDiskSize int64, filesystemConn io.ReadWriteCloser, stateConn io.ReadWriteCloser, volSourceArgs *localMigration.VolumeSourceArgs) error {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return err
@@ -7828,34 +7865,37 @@ func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName str
 		return err
 	}
 
-	// Notify the shared disks that they're going to be accessed from another system.
-	for _, dev := range d.expandedDevices.Sorted() {
-		if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
-			continue
-		}
+	// Notify the shared disks that they're going to be accessed from another system,
+	// but only when performing a move within the same storage pool.
+	if storagePool == "" {
+		for _, dev := range d.expandedDevices.Sorted() {
+			if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
+				continue
+			}
 
-		// Load the pool for the disk.
-		diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
-		if err != nil {
-			return fmt.Errorf("Failed loading storage pool: %w", err)
-		}
+			// Load the pool for the disk.
+			diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
+			if err != nil {
+				return fmt.Errorf("Failed loading storage pool: %w", err)
+			}
 
-		// Check that we're on shared storage.
-		if !diskPool.Driver().Info().Remote {
-			continue
-		}
+			// Check that we're on shared storage.
+			if !diskPool.Driver().Info().Remote {
+				continue
+			}
 
-		// Setup the volume entry.
-		extraSourceArgs := &localMigration.VolumeSourceArgs{
-			ClusterMove: true,
-		}
+			// Setup the volume entry.
+			extraSourceArgs := &localMigration.VolumeSourceArgs{
+				ClusterMove: true,
+			}
 
-		vol := diskPool.GetVolume(storageDrivers.VolumeTypeCustom, storageDrivers.ContentTypeBlock, project.StorageVolume(storageProjectName, dev.Config["source"]), nil)
+			vol := diskPool.GetVolume(storageDrivers.VolumeTypeCustom, storageDrivers.ContentTypeBlock, project.StorageVolume(storageProjectName, dev.Config["source"]), nil)
 
-		// Call MigrateVolume on the source.
-		err = diskPool.Driver().MigrateVolume(vol, nil, extraSourceArgs, nil)
-		if err != nil {
-			return fmt.Errorf("Failed to prepare device %q for migration: %w", dev.Name, err)
+			// Call MigrateVolume on the source.
+			err = diskPool.Driver().MigrateVolume(vol, nil, extraSourceArgs, nil)
+			if err != nil {
+				return fmt.Errorf("Failed to prepare device %q for migration: %w", dev.Name, err)
+			}
 		}
 	}
 
@@ -7995,7 +8035,7 @@ func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName str
 	// Non-shared storage snapshot transfer finalization.
 	if !sameSharedStorage {
 		// Wait until state transfer has reached pre-switchover state (the guest OS will remain paused).
-		err = monitor.MigrateWait("pre-switchover")
+		err = monitor.MigrateWait(ctx, "pre-switchover")
 		if err != nil {
 			return fmt.Errorf("Failed waiting for state transfer to reach pre-switchover stage: %w", err)
 		}
@@ -8021,7 +8061,7 @@ func (d *qemu) migrateSendLive(pool storagePools.Pool, clusterMoveSourceName str
 	}
 
 	// Wait until the migration state transfer has completed (the guest OS will remain paused).
-	err = monitor.MigrateWait("completed")
+	err = monitor.MigrateWait(ctx, "completed")
 	if err != nil {
 		return fmt.Errorf("Failed waiting for state transfer to reach completed stage: %w", err)
 	}
@@ -8399,47 +8439,57 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			return fmt.Errorf("Failed creating instance on target: %w", err)
 		}
 
+		isRemoteClusterMove := clusterMove && poolInfo.Remote
+		reverter.Add(func() {
+			// Delete the instance unless it is moved within the same cluster on a shared pool.
+			if (!isRemoteClusterMove && !storageMove) || storageMove {
+				_ = pool.DeleteInstance(d, d.op)
+			}
+		})
+
 		// Derive the effective storage project name from the instance config's project.
 		storageProjectName, err := project.StorageVolumeProject(d.state.DB.Cluster, d.project.Name, db.StoragePoolVolumeTypeCustom)
 		if err != nil {
 			return err
 		}
 
-		// Notify the shared disks that they're going to be accessed from another system.
-		for _, dev := range d.expandedDevices.Sorted() {
-			if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
-				continue
-			}
+		// Notify the shared disks that they're going to be accessed from another system,
+		// but only when performing a move within the same storage pool.
+		if !storageMove {
+			for _, dev := range d.expandedDevices.Sorted() {
+				if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
+					continue
+				}
 
-			// Load the pool for the disk.
-			diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
-			if err != nil {
-				return fmt.Errorf("Failed loading storage pool: %w", err)
-			}
+				// Load the pool for the disk.
+				diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
+				if err != nil {
+					return fmt.Errorf("Failed loading storage pool: %w", err)
+				}
 
-			// Check that we're on shared storage.
-			if !diskPool.Driver().Info().Remote {
-				continue
-			}
+				// Check that we're on shared storage.
+				if !diskPool.Driver().Info().Remote {
+					continue
+				}
 
-			// Setup the volume entry.
-			extraTargetArgs := localMigration.VolumeTargetArgs{
-				ClusterMoveSourceName: args.ClusterMoveSourceName,
-				StoragePool:           args.StoragePool,
-			}
+				// Setup the volume entry.
+				extraTargetArgs := localMigration.VolumeTargetArgs{
+					ClusterMoveSourceName: args.ClusterMoveSourceName,
+					StoragePool:           args.StoragePool,
+				}
 
-			vol := diskPool.GetVolume(storageDrivers.VolumeTypeCustom, storageDrivers.ContentTypeBlock, project.StorageVolume(storageProjectName, dev.Config["source"]), nil)
+				vol := diskPool.GetVolume(storageDrivers.VolumeTypeCustom, storageDrivers.ContentTypeBlock, project.StorageVolume(storageProjectName, dev.Config["source"]), nil)
 
-			// Call MigrateVolume on the source.
-			err = diskPool.Driver().CreateVolumeFromMigration(vol, nil, extraTargetArgs, nil, nil)
-			if err != nil {
-				return fmt.Errorf("Failed to prepare device %q for migration: %w", dev.Name, err)
+				// Call CreateVolumeFromMigration on the target.
+				err = diskPool.Driver().CreateVolumeFromMigration(vol, nil, extraTargetArgs, nil, nil)
+				if err != nil {
+					return fmt.Errorf("Failed to prepare device %q for migration: %w", dev.Name, err)
+				}
 			}
 		}
 
 		// Only delete all instance volumes on error if the pool volume creation has succeeded to
 		// avoid deleting an existing conflicting volume.
-		isRemoteClusterMove := clusterMove && poolInfo.Remote
 		if !volTargetArgs.Refresh && !isRemoteClusterMove {
 			reverter.Add(func() {
 				snapshots, _ := d.Snapshots()
@@ -10863,4 +10913,41 @@ func currentQcow2OverlayIndex(names []string, prefix string) int {
 	}
 
 	return maxIndex
+}
+
+func (d *qemu) needsFullRestart() bool {
+	// Check if we have a pending change.
+	if d.localConfig["volatile.vm.needs_reset"] != "" {
+		return true
+	}
+
+	// Check if the QEMU binary has changed.
+	pid, _ := d.pid()
+	if pid <= 0 {
+		return true
+	}
+
+	exePath, _, err := d.qemuArchConfig(d.architecture)
+	if err != nil {
+		return true
+	}
+
+	var curExe unix.Stat_t
+	err = unix.Stat(fmt.Sprintf("/proc/%d/exe", pid), &curExe)
+	if err != nil {
+		return true
+	}
+
+	var nextExe unix.Stat_t
+	err = unix.Stat(exePath, &nextExe)
+	if err != nil {
+		return true
+	}
+
+	if curExe.Size != nextExe.Size || curExe.Ino != nextExe.Ino || curExe.Dev != nextExe.Dev {
+		return true
+	}
+
+	// Full restart isn't required.
+	return false
 }
