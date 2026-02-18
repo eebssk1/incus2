@@ -715,7 +715,7 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// If QEMU is still running, stop it (handles reboot).
-	monitor, err := qmp.Connect(d.monitorPath(), qemuSerialChardevName, nil, d.QMPLogFilePath(), qemuDetachDisk(d.state, d.id))
+	monitor, err := qmp.Connect(d.monitorPath(), qemuSerialChardevName, nil, d.QMPLogFilePath(), qemuDetachDisk(d.state, d.id), d.Name())
 	if err == nil {
 		_ = monitor.Quit()
 	}
