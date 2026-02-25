@@ -2007,6 +2007,13 @@
 						}
 					},
 					{
+						"pci": {
+							"longdesc": "",
+							"shortdesc": "The PCI address of a USB controller to monitor",
+							"type": "string"
+						}
+					},
+					{
 						"productid": {
 							"longdesc": "",
 							"shortdesc": "The product ID of the USB device",
@@ -5216,6 +5223,13 @@
 						"restricted.idmap.uid": {
 							"longdesc": "This option specifies the host UID ranges that are allowed in the instance's {config:option}`instance-raw:raw.idmap` setting.",
 							"shortdesc": "Which host UID ranges are allowed in `raw.idmap`",
+							"type": "string"
+						}
+					},
+					{
+						"restricted.images.servers": {
+							"longdesc": "Specify a comma-delimited list of image servers domains that are allowed for use in this project.\nIf this option is not set, all image servers are accessible.",
+							"shortdesc": "Which image servers (HTTP host) are allowed for us in this project",
 							"type": "string"
 						}
 					},

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lxc/incus/v6/internal/linux"
 	"github.com/lxc/incus/v6/internal/server/operations"
@@ -337,6 +338,20 @@ func Qcow2DeleteConfigSnapshot(vol Volume, snapVol Volume, op *operations.Operat
 		return err
 	}
 
+	// Remove the snapshot mount path from the storage device.
+	snapPath := snapVol.MountPath()
+	err = os.RemoveAll(snapPath)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("Error removing snapshot mount path %q: %w", snapPath, err)
+	}
+
+	// Remove the parent snapshot directory if this is the last snapshot being removed.
+	parentName, _, _ := api.GetParentAndSnapshotName(snapVol.name)
+	err = deleteParentSnapshotDirIfEmpty(snapVol.pool, snapVol.volType, parentName)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -403,6 +418,29 @@ func ConnectQemuNbd(devPath string, format string, detectZeroes string, readOnly
 	_, err = subprocess.RunCommand("qemu-nbd", args...)
 	if err != nil {
 		return "", err
+	}
+
+	// It can take a little while before the /dev/nbdX device is fully mapped.
+	var sz int64
+	for range 20 {
+		sz, err = BlockDiskSizeBytes(nbdPath)
+		if err != nil {
+			_ = DisconnectQemuNbd(nbdPath)
+
+			return "", err
+		}
+
+		if sz > 0 {
+			break
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	if sz == 0 {
+		_ = DisconnectQemuNbd(nbdPath)
+
+		return "", fmt.Errorf("NBD device %q not correctly mapped after 2s", nbdPath)
 	}
 
 	return nbdPath, nil
