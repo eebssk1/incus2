@@ -42,6 +42,7 @@ profile "{{ .name }}" flags=(attach_disconnected,mediate_deleted) {
   /sys/class/                               r,
   /sys/devices/**                           r,
   /sys/module/vhost/**                      r,
+  /sys/kernel/mm/transparent_hugepage/**    r,
   /tmp/incus_sev_*                          r,
 {{- range $index, $element := .edk2Paths }}
   {{ $element }}/**                         kr,
@@ -83,7 +84,7 @@ profile "{{ .name }}" flags=(attach_disconnected,mediate_deleted) {
   # Things that we definitely don't need
   deny @{PROC}/@{pid}/cgroup r,
   deny /sys/module/apparmor/parameters/enabled r,
-  deny /sys/kernel/mm/transparent_hugepage/hpage_pmd_size r,
+  deny /sys/kernel/mm/transparent_hugepage/hpage_pmd_size w,
   deny /etc/gss/mech.d/ r,
   deny /etc/ssl/openssl.cnf w,
 
