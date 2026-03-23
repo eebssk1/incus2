@@ -2435,7 +2435,7 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 		initCmd = strings.ReplaceAll(initCmd, "\\(", "(")
 		initCmd = strings.ReplaceAll(initCmd, "\\)", ")")
 
-		if len(entrypoint) > 0 && slices.Contains([]string{"/init", "/sbin/init", "/s6-init"}, entrypoint[0]) {
+		if len(entrypoint) > 0 && slices.Contains([]string{"/init", "/sbin/init", "/s6-init", "/usr/bin/init"}, entrypoint[0]) {
 			// For regular init systems, call them directly as PID1.
 			err = lxcSetConfigItem(cc, "lxc.init.cmd", initCmd)
 			if err != nil {
@@ -5847,6 +5847,11 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
+	// If not running, stop any forkfile instance.
+	if !d.IsRunning() {
+		d.stopForkfile(false)
+	}
+
 	// Wait for essential migration connections before negotiation.
 	connectionsCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -5932,7 +5937,7 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 		}
 	}
 
-	srcConfig, err := pool.GenerateInstanceBackupConfig(d, args.Snapshots, d.op)
+	srcConfig, err := pool.GenerateInstanceBackupConfig(d, args.Snapshots, true, d.op)
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance migration config: %w", err)
 		op.Done(err)
@@ -9521,12 +9526,12 @@ func (d *lxc) GuestOS() string {
 }
 
 // CreateQcow2Snapshot creates a qcow2 snapshot for a running instance. Not supported by containers.
-func (d *lxc) CreateQcow2Snapshot(snapName string, backingFilename string) error {
+func (d *lxc) CreateQcow2Snapshot(devPath string, devName string, snapName string, backingFilename string) error {
 	return nil
 }
 
 // DeleteQcow2Snapshot deletes a qcow2 snapshot for a running instance. Not supported by containers.
-func (d *lxc) DeleteQcow2Snapshot(snapshotIndex int, backingFilename string) error {
+func (d *lxc) DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFilename string) error {
 	return nil
 }
 

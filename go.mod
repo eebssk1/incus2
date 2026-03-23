@@ -12,6 +12,7 @@ require (
 	github.com/cowsql/go-cowsql v1.22.0
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e
 	github.com/dustinkirkland/golang-petname v0.0.0-20260215035315-f0c533e9ce9b
+	github.com/fatih/color v1.18.0
 	github.com/flosch/pongo2/v6 v6.0.0
 	github.com/fvbommel/sortorder v1.1.0
 	github.com/go-chi/chi/v5 v5.2.5
@@ -30,6 +31,7 @@ require (
 	github.com/lxc/go-lxc v0.0.0-20240606200241-27b3d116511f
 	github.com/lxc/incus-os/incus-osd v0.0.0-20260226232910-49577f11d95c
 	github.com/mattn/go-colorable v0.1.14
+	github.com/mattn/go-runewidth v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.34
 	github.com/mdlayher/arp v0.0.0-20220512170110-6706a2966875
 	github.com/mdlayher/ndp v1.1.0
@@ -94,7 +96,6 @@ require (
 	github.com/eapache/channels v1.1.0 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
@@ -120,7 +121,6 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260216142805-b3301c5f2a88 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.20 // indirect
 	github.com/mdlayher/ethernet v0.0.0-20220221185849-529eae5b6118 // indirect
 	github.com/mdlayher/packet v1.1.2 // indirect
 	github.com/mdlayher/socket v0.5.1 // indirect

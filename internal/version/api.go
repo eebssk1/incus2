@@ -527,6 +527,9 @@ var APIExtensions = []string{
 	"authorization_scriptlet_cert",
 	"lvmcluster_remove_snapshots",
 	"daemon_storage_logs",
+	"instances_debug_repair",
+	"network_io_bus_ovn",
+	"dependent",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

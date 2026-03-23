@@ -388,7 +388,7 @@ func (d *qemu) getAgentClient() (*http.Client, error) {
 	}
 
 	// Only Linux and Windows support VirtIO vsock.
-	if d.GuestOS() == "darwin" {
+	if slices.Contains([]string{"darwin", "freebsd"}, d.GuestOS()) {
 		// Get known network details.
 		networks, err := d.getNetworkState()
 		if err != nil {
@@ -483,7 +483,7 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 	state := d.state
 
 	return func(event string, data map[string]any) {
-		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventVMReset, qmp.EventAgentStarted, qmp.EventRTCChange}, event) {
+		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventVMReset, qmp.EventAgentStarted, qmp.EventAgentStopped, qmp.EventRTCChange}, event) {
 			return // Don't bother loading the instance from DB if we aren't going to handle the event.
 		}
 
@@ -517,6 +517,12 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 				d.logger.Warn("Failed to advertise vsock address to instance agent", logger.Ctx{"err": err})
 				return
 			}
+
+			state.Events.SendLifecycle(instProject.Name, lifecycle.InstanceAgentStarted.Event(d, nil))
+
+		case qmp.EventAgentStopped:
+			d.logger.Debug("Instance agent stopped")
+			state.Events.SendLifecycle(instProject.Name, lifecycle.InstanceAgentStopped.Event(d, nil))
 
 		case qmp.EventVMReset:
 			monitor, err := d.qmpConnect()
@@ -792,6 +798,8 @@ func (d *qemu) onStop(target string) error {
 		} else {
 			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceStopped.Event(d, nil))
 		}
+		// agent stopped when shutdown
+		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceAgentStopped.Event(d, nil))
 	}
 
 	// Reboot the instance.
@@ -3268,6 +3276,48 @@ func (d *qemu) generateConfigShare(volatileSet map[string]string) error {
 
 	// OS-specific configuration.
 	switch guestOS {
+	case "freebsd":
+		// rc.d service.
+		err = os.MkdirAll(filepath.Join(configDrivePath, "rc.d"), 0o500)
+		if err != nil {
+			return err
+		}
+
+		// rc.d service for incus-agent.
+		agentFile, err := incusAgentLoader.ReadFile("agent-loader/rc.d/incus-agent")
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(configDrivePath, "rc.d", "incus-agent"), agentFile, 0o500)
+		if err != nil {
+			return err
+		}
+
+		// Setup script for incus-agent that is executed by the incus-agent service before starting.
+		// The script sets up a temporary mount point, copies data from the mount (including incus-agent binary),
+		// and then unmounts it. It also ensures appropriate permissions for the Incus agent's runtime directory.
+		agentFile, err = incusAgentLoader.ReadFile("agent-loader/incus-agent-setup-freebsd")
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(configDrivePath, "incus-agent-setup"), agentFile, 0o500)
+		if err != nil {
+			return err
+		}
+
+		// Install script for manual installs.
+		agentFile, err = incusAgentLoader.ReadFile("agent-loader/install-freebsd.sh")
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(configDrivePath, "install.sh"), agentFile, 0o500)
+		if err != nil {
+			return err
+		}
+
 	case "linux":
 		// Systemd units.
 		err = os.MkdirAll(filepath.Join(configDrivePath, "systemd"), 0o500)
@@ -4328,6 +4378,15 @@ func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, cpuType string, cpuInfo *
 
 	limitsMemoryHotplug := d.expandedConfig["limits.memory.hotplug"]
 	memoryHotplugEnabled := !util.IsFalse(limitsMemoryHotplug)
+
+	if d.GuestOS() == "freebsd" {
+		memoryHotplugEnabled = false
+
+		// We handle the empty value a bit differently here, as FreeBSD doesn’t have memory hotplug.
+		if !util.IsFalseOrEmpty(limitsMemoryHotplug) {
+			return errors.New("FreeBSD doesn't support setting 'limits.memory.hotplug'")
+		}
+	}
 
 	if (cpuType == "host" || cpuType == "kvm64") && memoryHotplugEnabled {
 		if !util.IsTrueOrEmpty(limitsMemoryHotplug) {
@@ -6855,7 +6914,7 @@ func (d *qemu) updateMemoryLimit(newLimit string) error {
 	if curSizeMB == newSizeMB {
 		return nil
 	} else if baseSizeMB < newSizeMB {
-		if util.IsFalse(d.expandedConfig["limits.memory.hotplug"]) {
+		if util.IsFalse(d.expandedConfig["limits.memory.hotplug"]) || d.GuestOS() == "freebsd" {
 			return fmt.Errorf("Memory hotplug feature is disabled")
 		}
 
@@ -7602,7 +7661,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 	d.logger.Debug("Set migration offer volume size", logger.Ctx{"blockSize": blockSize})
 	offerHeader.VolumeSize = &blockSize
 
-	srcConfig, err := pool.GenerateInstanceBackupConfig(d, args.Snapshots, d.op)
+	srcConfig, err := pool.GenerateInstanceBackupConfig(d, args.Snapshots, true, d.op)
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance migration config: %w", err)
 		op.Done(err)
@@ -10090,7 +10149,7 @@ func (d *qemu) checkFeatures(hostArch int, qemuPath string) (map[string]any, err
 		parts := strings.Split(string(cmdline), " ")
 
 		// Check if SME is enabled in the kernel command line.  // codespell:ignore sme
-		if slices.Contains(parts, "mem_encrypt=on") {
+		if slices.Contains(parts, "mem_encrypt=on") || util.PathExists("/dev/sev") {
 			features["sme"] = struct{}{} // codespell:ignore sme
 		}
 
@@ -10729,58 +10788,38 @@ func (d *qemu) GuestOS() string {
 		return "windows"
 	} else if strings.Contains(imageOS, "darwin") || strings.Contains(imageOS, "macos") || strings.Contains(imageOS, "mac os") {
 		return "macos"
+	} else if strings.Contains(imageOS, "freebsd") {
+		return "freebsd"
 	}
 
 	return "unknown"
 }
 
 // CreateQcow2Snapshot creates a qcow2 snapshot for a running instance.
-func (d *qemu) CreateQcow2Snapshot(snapshotName string, backingFilename string) error {
+func (d *qemu) CreateQcow2Snapshot(devPath string, devName string, snapshotName string, backingFilename string) error {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return err
 	}
 
-	snap, err := instance.LoadByProjectAndName(d.state, d.project.Name, fmt.Sprintf("%s/%s", d.name, snapshotName))
+	f, err := os.OpenFile(devPath, unix.O_RDWR, 0)
 	if err != nil {
-		return fmt.Errorf("Load by project and name: %w", err)
-	}
-
-	pool, err := storagePools.LoadByInstance(d.state, snap)
-	if err != nil {
-		return fmt.Errorf("Load by instance: %w", err)
-	}
-
-	mountInfoRoot, err := pool.MountInstance(d, d.op)
-	if err != nil {
-		return fmt.Errorf("Mount instance: %w", err)
-	}
-
-	defer func() { _ = pool.UnmountInstance(d, d.op) }()
-
-	f, err := os.OpenFile(mountInfoRoot.DiskPath, unix.O_RDWR, 0)
-	if err != nil {
-		return fmt.Errorf("Failed opening file descriptor for disk device %s: %w", mountInfoRoot.DiskPath, err)
+		return fmt.Errorf("Failed opening file descriptor for disk device %s: %w", devPath, err)
 	}
 
 	defer func() { _ = f.Close() }()
 
+	devName = d.blockNodeName(linux.PathNameEncode(devName))
+
 	// Select all block devices related to a qcow2 backing chain.
-	blockDevs, err := d.fetchRootBlockDeviceChain(monitor)
+	blockDevs, err := d.fetchBlockDeviceChain(monitor, devName)
 	if err != nil {
 		return err
 	}
 
-	rootDiskName, _, err := internalInstance.GetRootDiskDevice(d.expandedDevices.CloneNative())
-	if err != nil {
-		return fmt.Errorf("Failed getting instance root disk: %w", err)
-	}
-
-	rootDiskName = d.blockNodeName(linux.PathNameEncode(rootDiskName))
-
 	// Fetch the current maximum overlay index.
-	overlayNodeIndex := currentQcow2OverlayIndex(blockDevs, rootDiskName)
-	nextOverlayName := fmt.Sprintf("%s_overlay%d", rootDiskName, overlayNodeIndex+1)
+	overlayNodeIndex := currentQcow2OverlayIndex(blockDevs, devName)
+	nextOverlayName := fmt.Sprintf("%s_overlay%d", devName, overlayNodeIndex+1)
 
 	currentRootNode := blockDevs[len(blockDevs)-1]
 
@@ -10848,19 +10887,21 @@ func (d *qemu) fetchRootBlockDeviceChain(m *qmp.Monitor) ([]string, error) {
 }
 
 // DeleteQcow2Snapshot deletes a qcow2 snapshot for a running instance.
-func (d *qemu) DeleteQcow2Snapshot(snapshotIndex int, backingFilename string) error {
+func (d *qemu) DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFilename string) error {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return err
 	}
 
+	devName = d.blockNodeName(linux.PathNameEncode(devName))
+
 	// Select all block devices related to a qcow2 backing chain.
-	blockDevs, err := d.fetchRootBlockDeviceChain(monitor)
+	blockDevs, err := d.fetchBlockDeviceChain(monitor, devName)
 	if err != nil {
 		return err
 	}
 
-	d.logger.Debug("QCOW2 blockdev chain:", logger.Ctx{"blockdev": blockDevs, "snapshotIndex": snapshotIndex})
+	d.logger.Debug("QCOW2 blockdev chain:", logger.Ctx{"blockdev": blockDevs, "snapshotIndex": snapshotIndex, "devName": devName})
 
 	if snapshotIndex < 0 || (snapshotIndex+1) >= len(blockDevs) {
 		return fmt.Errorf("Incorrect snapshot index: %d", snapshotIndex)

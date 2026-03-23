@@ -42,10 +42,11 @@ jobs:
           SHELLCHECK_OPTS: --shell sh
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          exclude-path: internal/server/instance/drivers/agent-loader/rc.d/incus-agent
         if: github.event_name == 'pull_request' && matrix.go == 'stable'
 
       - name: Upload artifact with ShellCheck defects in SARIF format
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Differential ShellCheck SARIF
           path: ${{ steps.ShellCheck.outputs.sarif }}
@@ -555,7 +556,7 @@ jobs:
 
       - name: Upload incus client artifacts
         if: matrix.go == 'stable'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         continue-on-error: true
         with:
           name: ${{ runner.os }}
@@ -604,7 +605,7 @@ jobs:
 
       - name: Upload documentation artifacts
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: documentation
           path: doc/html
