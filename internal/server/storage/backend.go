@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -273,6 +274,10 @@ func (b *backend) Update(clientType request.ClientType, newDesc string, newConfi
 		return err
 	}
 
+	// Keep old config.
+	oldConfig := api.ConfigMap{}
+	maps.Copy(oldConfig, b.db.Config)
+
 	// Diff the configurations.
 	changedConfig, userOnly := b.detectChangedConfig(b.db.Config, newConfig)
 
@@ -284,7 +289,7 @@ func (b *backend) Update(clientType request.ClientType, newDesc string, newConfi
 
 	// Prevent shrinking the storage pool.
 	newSize, sizeChanged := changedConfig["size"]
-	if sizeChanged {
+	if sizeChanged && newSize != "" && newSize != drivers.MaxValue {
 		oldSizeBytes, _ := units.ParseByteSizeString(b.db.Config["size"])
 		newSizeBytes, _ := units.ParseByteSizeString(newSize)
 
@@ -301,6 +306,10 @@ func (b *backend) Update(clientType request.ClientType, newDesc string, newConfi
 			return err
 		}
 	}
+
+	// Check if anything was changed by Update.
+	updateChanges, _ := b.detectChangedConfig(oldConfig, b.driver.Config())
+	maps.Copy(newConfig, updateChanges)
 
 	// Update the database if something changed and we're in ClientTypeNormal mode.
 	if clientType == request.ClientTypeNormal && (len(changedConfig) > 0 || newDesc != b.db.Description) {
@@ -3445,10 +3454,50 @@ func (b *backend) RestoreInstanceSnapshot(inst instance.Instance, src instance.I
 		})
 	}
 
+	deleteSnapshots := func(snapshots []string, inst instance.Instance) error {
+		// We need to delete some snapshots and try again.
+		snaps, err := inst.Snapshots()
+		if err != nil {
+			return err
+		}
+
+		// Go through all the snapshots.
+		for _, snap := range snaps {
+			_, snapName, _ := api.GetParentAndSnapshotName(snap.Name())
+			if !slices.Contains(snapshots, snapName) {
+				continue
+			}
+
+			// Delete snapshot instance if listed in the error as one that needs removing.
+			err := snap.Delete(true)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
 	if dbVol.Config["block.type"] == drivers.BlockVolumeTypeQcow2 {
 		snapVol := b.GetVolume(volType, contentType, project.Instance(inst.Project().Name, src.Name()), srcDBVol.Config)
 		err = b.qcow2RestoreSnapshot(vol, snapVol, inst.Project().Name, op)
 		if err != nil {
+			var snapErr drivers.ErrDeleteSnapshots
+			if errors.As(err, &snapErr) {
+				err = deleteSnapshots(snapErr.Snapshots, inst)
+				if err != nil {
+					return err
+				}
+
+				// Now try restoring again.
+				err = b.qcow2RestoreSnapshot(vol, snapVol, inst.Project().Name, op)
+				if err != nil {
+					return err
+				}
+
+				return nil
+			}
+
 			return err
 		}
 
@@ -3459,24 +3508,9 @@ func (b *backend) RestoreInstanceSnapshot(inst instance.Instance, src instance.I
 	if err != nil {
 		var snapErr drivers.ErrDeleteSnapshots
 		if errors.As(err, &snapErr) {
-			// We need to delete some snapshots and try again.
-			snaps, err := inst.Snapshots()
+			err = deleteSnapshots(snapErr.Snapshots, inst)
 			if err != nil {
 				return err
-			}
-
-			// Go through all the snapshots.
-			for _, snap := range snaps {
-				_, snapName, _ := api.GetParentAndSnapshotName(snap.Name())
-				if !slices.Contains(snapErr.Snapshots, snapName) {
-					continue
-				}
-
-				// Delete snapshot instance if listed in the error as one that needs removing.
-				err := snap.Delete(true)
-				if err != nil {
-					return err
-				}
 			}
 
 			// Now try restoring again.
@@ -6468,11 +6502,36 @@ func (b *backend) RestoreCustomVolume(projectName, volName string, snapshotName 
 	volStorageName := project.StorageVolume(projectName, volName)
 	vol := b.GetVolume(drivers.VolumeTypeCustom, contentType, volStorageName, curVol.Config)
 
+	deleteSnapshots := func(snapshots []string) error {
+		for _, snapName := range snapshots {
+			err := b.DeleteCustomVolumeSnapshot(projectName, fmt.Sprintf("%s/%s", volName, snapName), op)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
 	if curVol.Config["block.type"] == drivers.BlockVolumeTypeQcow2 {
 		fullSnapName := fmt.Sprintf("%s/%s", volName, snapshotName)
 		snapVol := b.GetVolume(drivers.VolumeTypeCustom, contentType, project.StorageVolume(projectName, fullSnapName), curVol.Config)
 		err = b.qcow2RestoreSnapshot(vol, snapVol, projectName, op)
 		if err != nil {
+			var snapErr drivers.ErrDeleteSnapshots
+			if errors.As(err, &snapErr) {
+				err = deleteSnapshots(snapErr.Snapshots)
+				if err != nil {
+					return err
+				}
+
+				// Now try again.
+				err = b.qcow2RestoreSnapshot(vol, snapVol, projectName, op)
+				if err != nil {
+					return err
+				}
+			}
+
 			return err
 		}
 
@@ -6483,12 +6542,9 @@ func (b *backend) RestoreCustomVolume(projectName, volName string, snapshotName 
 	if err != nil {
 		var snapErr drivers.ErrDeleteSnapshots
 		if errors.As(err, &snapErr) {
-			// We need to delete some snapshots and try again.
-			for _, snapName := range snapErr.Snapshots {
-				err := b.DeleteCustomVolumeSnapshot(projectName, fmt.Sprintf("%s/%s", volName, snapName), op)
-				if err != nil {
-					return err
-				}
+			err = deleteSnapshots(snapErr.Snapshots)
+			if err != nil {
+				return err
 			}
 
 			// Now try again.
@@ -7970,6 +8026,13 @@ func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volum
 		return err
 	}
 
+	// Get snapshots.
+	_, volName := project.StorageVolumeParts(vol.Name())
+	volSnaps, err := VolumeDBSnapshotsGet(b, projectName, volName, vol.Type())
+	if err != nil {
+		return err
+	}
+
 	err = vol.MountWithSnapshotsTask(func(_ string, _ map[string]string, op *operations.Operation) error {
 		parentDiskPath, err := b.driver.GetVolumeDiskPath(vol)
 		if err != nil {
@@ -7983,7 +8046,39 @@ func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volum
 
 		// Restoring is allowed only for the most recent snapshot.
 		if imgInfo.BackingFilename != snapVolDevPath {
-			return fmt.Errorf("Snapshot %q cannot be restored due to subsequent snapshot(s).", snapVol.Name())
+			if util.IsFalseOrEmpty(vol.ExpandedConfig("lvmcluster.remove_snapshots")) {
+				return fmt.Errorf("Snapshot %q cannot be restored due to subsequent snapshot(s). Set lvmcluster.remove_snapshots to override", snapVol.Name())
+			}
+
+			snapshots := []string{}
+			for i := len(volSnaps); i > 0; i-- {
+				snap := volSnaps[i-1]
+				currentSnapVol := b.GetVolume(vol.Type(), vol.ContentType(), ProjectVolume(projectName, snap.Name, vol.Type()), nil)
+				currentSnapVolDiskPath, err := b.driver.GetQcow2BackingFilePath(currentSnapVol)
+				if err != nil {
+					return err
+				}
+
+				_, snapName, _ := api.GetParentAndSnapshotName(snap.Name)
+				snapshots = append(snapshots, snapName)
+				imgInfo, err := drivers.Qcow2Info(currentSnapVolDiskPath)
+				if err != nil {
+					return err
+				}
+
+				if imgInfo.BackingFilename == snapVolDevPath {
+					break
+				}
+
+				if imgInfo.BackingFilename == "" {
+					return fmt.Errorf("Snapshot %q not found while restoring", snapVol.Name())
+				}
+			}
+
+			// Setup custom error to tell the backend what to delete.
+			err := drivers.ErrDeleteSnapshots{}
+			err.Snapshots = snapshots
+			return err
 		}
 
 		err = drivers.Qcow2Create(parentDiskPath, snapVolDevPath, 0)

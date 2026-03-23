@@ -3456,6 +3456,13 @@
 						}
 					},
 					{
+						"volatile.vm.hotplug.memory": {
+							"longdesc": "",
+							"shortdesc": "Memory setup of the VM as needed for state restoration",
+							"type": "string"
+						}
+					},
+					{
 						"volatile.vm.needs_reset": {
 							"longdesc": "",
 							"shortdesc": "Indicates that the VM needs a full reset on next reboot",
@@ -6097,6 +6104,14 @@
 							"shortdesc": "LINSTOR satellite node name override",
 							"type": "string"
 						}
+					},
+					{
+						"storage.logs_volume": {
+							"longdesc": "Specify the volume using the syntax `POOL/VOLUME`.",
+							"scope": "local",
+							"shortdesc": "Volume to use to store instance log directories",
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -6735,10 +6750,10 @@
 					},
 					{
 						"size": {
-							"default": "auto (20% of free disk space, \u003e= 5 GiB and \u003c= 30 GiB)",
+							"default": "auto (20% of free disk space, \u003e= 5 GiB and \u003c= 30 GiB) for `lvm`.",
 							"longdesc": "",
 							"scope": "local",
-							"shortdesc": "Size of the storage pool when creating loop-based pools (in bytes, suffixes supported, can be increased to grow storage pool). Not usable with `lvmcluster`.",
+							"shortdesc": "Storage pool size (in bytes, suffixes supported, can be increased to grow storage pool). `lvmcluster` pools: cannot set at creation, but can be updated.",
 							"type": "string"
 						}
 					},
@@ -7520,6 +7535,15 @@
 							"longdesc": "",
 							"shortdesc": "Size of stripes to use (at least 4096 bytes and multiple of 512 bytes)",
 							"type": "string"
+						}
+					},
+					{
+						"lvmcluster.remove_snapshots": {
+							"condition": "-",
+							"default": "same as `volume.lvmcluster.remove_snapshots` or `false`",
+							"longdesc": "",
+							"shortdesc": "Remove snapshots as needed",
+							"type": "bool"
 						}
 					},
 					{

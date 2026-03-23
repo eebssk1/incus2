@@ -963,6 +963,7 @@ func clusterInitMember(d incus.InstanceServer, client incus.InstanceServer, memb
 		delete(post.Config, "zfs.pool_name")
 
 		// Apply the node-specific config supplied by the user.
+		nodeSpecificConfig := db.NodeSpecificStorageConfig(pool.Driver)
 		for _, config := range memberConfig {
 			if config.Entity != "storage-pool" {
 				continue
@@ -972,7 +973,7 @@ func clusterInitMember(d incus.InstanceServer, client incus.InstanceServer, memb
 				continue
 			}
 
-			if !slices.Contains(db.NodeSpecificStorageConfig, config.Key) {
+			if !slices.Contains(nodeSpecificConfig, config.Key) {
 				logger.Warnf("Ignoring config key %q for storage pool %q", config.Key, config.Name)
 				continue
 			}
@@ -1788,38 +1789,40 @@ func updateClusterNode(s *state.State, gateway *cluster.Gateway, r *http.Request
 	}
 
 	// Prevent assigning all nodes the 'database-client' role.
-	clientNodes := 0
-	nodesCount := 0
-	err = s.DB.Cluster.Transaction(r.Context(), func(ctx context.Context, tx *db.ClusterTx) error {
-		nodesCount, err = tx.GetNodesCount(ctx)
-		if err != nil {
-			return fmt.Errorf("Failed loading nodes count: %w", err)
-		}
-
-		nodes, err := tx.GetNodes(ctx)
-		if err != nil {
-			return fmt.Errorf("Failed loading nodes: %w", err)
-		}
-
-		for _, n := range nodes {
-			// Ignore the node currently being updated.
-			if n.Name == member.Name {
-				continue
+	if slices.Contains(req.Roles, string(db.ClusterRoleDatabaseClient)) {
+		clientNodes := 1
+		nodesCount := 0
+		err = s.DB.Cluster.Transaction(r.Context(), func(ctx context.Context, tx *db.ClusterTx) error {
+			nodesCount, err = tx.GetNodesCount(ctx)
+			if err != nil {
+				return fmt.Errorf("Failed loading nodes count: %w", err)
 			}
 
-			if slices.Contains(n.Roles, db.ClusterRoleDatabaseClient) {
-				clientNodes += 1
+			nodes, err := tx.GetNodes(ctx)
+			if err != nil {
+				return fmt.Errorf("Failed loading nodes: %w", err)
 			}
+
+			for _, n := range nodes {
+				// Ignore the node currently being updated.
+				if n.Name == member.Name {
+					continue
+				}
+
+				if slices.Contains(n.Roles, db.ClusterRoleDatabaseClient) {
+					clientNodes++
+				}
+			}
+
+			return nil
+		})
+		if err != nil {
+			return response.SmartError(err)
 		}
 
-		return nil
-	})
-	if err != nil {
-		return response.SmartError(err)
-	}
-
-	if clientNodes+1 >= nodesCount {
-		return response.BadRequest(errors.New("Assigning the 'database-client' role to all nodes is not allowed"))
+		if clientNodes >= nodesCount {
+			return response.BadRequest(errors.New("Assigning the 'database-client' role to all nodes is not allowed"))
+		}
 	}
 
 	// Convert the roles.
@@ -2777,7 +2780,7 @@ func clusterCheckStoragePoolsMatch(ctx context.Context, clusterDB *db.Cluster, r
 					return fmt.Errorf("Mismatching driver for storage pool %s", name)
 				}
 				// Exclude the keys which are node-specific.
-				exclude := db.NodeSpecificStorageConfig
+				exclude := db.NodeSpecificStorageConfig(pool.Driver)
 				err = localUtil.CompareConfigs(pool.Config, reqPool.Config, exclude)
 				if err != nil {
 					return fmt.Errorf("Mismatching config for storage pool %s: %w", name, err)
@@ -2980,13 +2983,41 @@ func clusterNodeStatePost(d *Daemon, r *http.Request) response.Response {
 		return response.BadRequest(err)
 	}
 
-	// Validate the overrides.
-	if req.Action == "evacuate" && req.Mode != "" {
-		// Use the validator from the instance logic.
-		validator := internalInstance.InstanceConfigKeysAny["cluster.evacuate"]
-		err = validator(req.Mode)
+	// Handling of evacuation mode.
+	if req.Action == "evacuate" {
+		// Validate the mode if provided.
+		if req.Mode != "" {
+			validator := internalInstance.InstanceConfigKeysAny["cluster.evacuate"]
+			err = validator(req.Mode)
+			if err != nil {
+				return response.BadRequest(err)
+			}
+		}
+
+		// Get a count of the cluster members.
+		var serverCount int
+
+		err := s.DB.Cluster.Transaction(r.Context(), func(ctx context.Context, tx *db.ClusterTx) error {
+			nodes, err := tx.GetNodes(ctx)
+			if err != nil {
+				return fmt.Errorf("Failed getting cluster members: %w", err)
+			}
+
+			serverCount = len(nodes)
+
+			return nil
+		})
 		if err != nil {
-			return response.BadRequest(err)
+			return response.InternalError(err)
+		}
+
+		// Handle single node clusters.
+		if serverCount == 1 {
+			if req.Mode == "" || req.Mode == "auto" {
+				req.Mode = "stop"
+			} else if req.Mode != "stop" {
+				return response.BadRequest(fmt.Errorf("Can't perform %q evacuation on a single node cluster", req.Mode))
+			}
 		}
 	}
 

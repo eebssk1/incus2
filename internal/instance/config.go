@@ -1222,6 +1222,13 @@ var InstanceConfigKeysVM = map[string]func(value string) error{
 	//  shortdesc: QEMU VM definition name (used for migration between versions)
 	"volatile.vm.definition": validate.Optional(validate.IsAny),
 
+	// gendoc:generate(entity=instance, group=volatile, key=volatile.vm.hotplug.memory)
+	//
+	// ---
+	//  type: string
+	//  shortdesc: Memory setup of the VM as needed for state restoration
+	"volatile.vm.hotplug.memory": validate.Optional(validate.IsAny),
+
 	// gendoc:generate(entity=instance, group=volatile, key=volatile.vm.needs_reset)
 	//
 	// ---
@@ -1692,6 +1699,10 @@ func ConfigKeyChecker(key string, instanceType api.InstanceType) (func(value str
 // InstanceIncludeWhenCopying is used to decide whether to include a config item or not when copying an instance.
 // The remoteCopy argument indicates if the copy is remote (i.e between servers) as this affects the keys kept.
 func InstanceIncludeWhenCopying(configKey string, remoteCopy bool) bool {
+	if configKey == "volatile.apply_nvram" {
+		return true // Include volatile.apply_nvram to also reset the NVRAM in copied instances.
+	}
+
 	if configKey == "volatile.base_image" {
 		return true // Include volatile.base_image always as it can help optimize copies.
 	}

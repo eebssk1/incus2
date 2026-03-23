@@ -3097,6 +3097,12 @@ It is globally unique across all servers and projects.
 
 ```
 
+```{config:option} volatile.vm.hotplug.memory instance-volatile
+:shortdesc: "Memory setup of the VM as needed for state restoration"
+:type: "string"
+
+```
+
 ```{config:option} volatile.vm.needs_reset instance-volatile
 :shortdesc: "Indicates that the VM needs a full reset on next reboot"
 :type: "bool"
@@ -5412,6 +5418,13 @@ Specify the volume using the syntax `POOL/VOLUME`.
 Set this option to the name of the local LINSTOR satellite node, should it be different from the Incus server name.
 ```
 
+```{config:option} storage.logs_volume server-miscellaneous
+:scope: "local"
+:shortdesc: "Volume to use to store instance log directories"
+:type: "string"
+Specify the volume using the syntax `POOL/VOLUME`.
+```
+
 <!-- config group server-miscellaneous end -->
 <!-- config group server-network start -->
 ```{config:option} network.hwaddr_pattern server-network
@@ -5937,9 +5950,9 @@ This value is required by some providers.
 ```
 
 ```{config:option} size storage_lvm-common
-:default: "auto (20% of free disk space, >= 5 GiB and <= 30 GiB)"
+:default: "auto (20% of free disk space, >= 5 GiB and <= 30 GiB) for `lvm`."
 :scope: "local"
-:shortdesc: "Size of the storage pool when creating loop-based pools (in bytes, suffixes supported, can be increased to grow storage pool). Not usable with `lvmcluster`."
+:shortdesc: "Storage pool size (in bytes, suffixes supported, can be increased to grow storage pool). `lvmcluster` pools: cannot set at creation, but can be updated."
 :type: "string"
 
 ```
@@ -6611,6 +6624,14 @@ This value is required by some providers.
 :default: "same as `volume.lvm.stripes.size`"
 :shortdesc: "Size of stripes to use (at least 4096 bytes and multiple of 512 bytes)"
 :type: "string"
+
+```
+
+```{config:option} lvmcluster.remove_snapshots storage_volume_lvm-common
+:condition: "-"
+:default: "same as `volume.lvmcluster.remove_snapshots` or `false`"
+:shortdesc: "Remove snapshots as needed"
+:type: "bool"
 
 ```
 

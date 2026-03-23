@@ -523,6 +523,10 @@ var APIExtensions = []string{
 	"unix_hotplug_pci",
 	"cluster_evacuating_restoring",
 	"projects_restricted_image_servers",
+	"storage_lvmcluster_size",
+	"authorization_scriptlet_cert",
+	"lvmcluster_remove_snapshots",
+	"daemon_storage_logs",
 }
 
 // APIExtensionsCount returns the number of available API extensions.
