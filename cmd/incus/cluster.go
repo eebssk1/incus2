@@ -1010,11 +1010,9 @@ func (c *cmdClusterJoin) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if config.Cluster != nil && config.Cluster.ClusterAddress != "" && config.Cluster.ServerAddress != "" {
-		err = updateCluster(member, config)
-		if err != nil {
-			return err
-		}
+	err = updateCluster(member, config)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -1948,12 +1946,6 @@ func fillClusterConfig(config *api.InitPreseed) error {
 }
 
 func updateCluster(d incus.InstanceServer, config *api.InitPreseed) error {
-	// Detect if the user has chosen to join a cluster using the new
-	// cluster join API format, and use the dedicated API if so.
-	if config.Cluster == nil || config.Cluster.ClusterAddress == "" || config.Cluster.ServerAddress == "" {
-		return nil
-	}
-
 	// Ensure the server and cluster addresses are in canonical form.
 	config.Cluster.ServerAddress = internalUtil.CanonicalNetworkAddress(config.Cluster.ServerAddress, ports.HTTPSDefaultPort)
 	config.Cluster.ClusterAddress = internalUtil.CanonicalNetworkAddress(config.Cluster.ClusterAddress, ports.HTTPSDefaultPort)
