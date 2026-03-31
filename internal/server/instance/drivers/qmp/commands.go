@@ -1689,3 +1689,18 @@ func (m *Monitor) SetNICLink(id string, connected bool) error {
 	args.Up = connected
 	return m.Run("set_link", args, nil)
 }
+
+// QuerySpice checks whether SPICE support is available in QEMU.
+func (m *Monitor) QuerySpice() error {
+	return m.Run("query-spice", nil, nil)
+}
+
+// Query9pDevice checks whether virtio-9p-pci support is available in QEMU.
+func (m *Monitor) Query9pDevice() error {
+	return m.Run("device-list-properties", map[string]string{"typename": "virtio-9p-pci"}, nil)
+}
+
+// QueryVirtioSoundDevice checks whether virtio-sound-pci support is available in QEMU.
+func (m *Monitor) QueryVirtioSoundDevice() error {
+	return m.Run("device-list-properties", map[string]string{"typename": "virtio-sound-pci"}, nil)
+}

@@ -2388,6 +2388,25 @@ func (b *backend) DeleteInstance(inst instance.Instance, op *operations.Operatio
 	// Must come before DB VolumeDBDelete so that the volume ID is still available.
 	l.Debug("Deleting instance volume", logger.Ctx{"volName": volStorageName})
 
+	// Delete all dependent volumes associated with this instance.
+	err = b.forEachDependentDiskType(inst, func(dev deviceConfig.DeviceNamed) error {
+		// Load the pool for the disk.
+		diskPool, err := LoadByName(b.state, dev.Config["pool"])
+		if err != nil {
+			return fmt.Errorf("Failed loading storage pool: %w", err)
+		}
+
+		err = diskPool.DeleteCustomVolume(inst.Project().Name, dev.Config["source"], op)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}, op)
+	if err != nil {
+		return err
+	}
+
 	volExists, err := b.driver.HasVolume(vol)
 	if err != nil {
 		return err
@@ -3093,40 +3112,6 @@ func (b *backend) getInstanceDisk(inst instance.Instance) (string, error) {
 	}
 
 	return diskPath, nil
-}
-
-// CacheInstanceSnapshots instructs the driver to pre-fetch and cache details on all snapshots.
-// This is used to significantly accelerate listing of issues with a lot of snapshots.
-func (b *backend) CacheInstanceSnapshots(inst instance.ConfigReader) error {
-	l := b.logger.AddContext(logger.Ctx{"project": inst.Project().Name, "instance": inst.Name()})
-	l.Debug("CacheInstanceSnapshots started")
-	defer l.Debug("CacheInstanceSnapshots finished")
-
-	// Check we can convert the instance to the volume type needed.
-	volType, err := InstanceTypeToVolumeType(inst.Type())
-	if err != nil {
-		return err
-	}
-
-	contentVolume := InstanceContentType(inst)
-	volStorageName := project.Instance(inst.Project().Name, inst.Name())
-
-	// Load storage volume from database.
-	dbVol, err := VolumeDBGet(b, inst.Project().Name, inst.Name(), volType)
-	if err != nil {
-		return err
-	}
-
-	// Apply the main volume quota.
-	// There's no need to pass config as it's not needed when setting quotas.
-	vol := b.GetVolume(volType, contentVolume, volStorageName, dbVol.Config)
-
-	err = b.driver.CacheVolumeSnapshots(vol)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // CreateInstanceSnapshot creates a snapshot of an instance volume.

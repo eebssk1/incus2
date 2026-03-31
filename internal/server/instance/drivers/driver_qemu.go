@@ -1842,9 +1842,13 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 		"-no-user-config",
 		"-sandbox", "on,obsolete=deny,elevateprivileges=allow,spawn=allow,resourcecontrol=deny",
 		"-readconfig", confFile,
-		"-spice", d.spiceCmdlineConfig(),
 		"-pidfile", d.pidFilePath(),
 		"-D", d.LogFilePath(),
+	}
+
+	_, spiceSupported := info.Features["spice"]
+	if spiceSupported {
+		qemuArgs = append(qemuArgs, "-spice", d.spiceCmdlineConfig())
 	}
 
 	// If stateful, restore now.
@@ -2574,37 +2578,36 @@ func (d *qemu) setupNvram() error {
 }
 
 func (d *qemu) qemuArchConfig(arch int) (string, string, error) {
-	if arch == osarch.ARCH_64BIT_INTEL_X86 {
-		path, err := exec.LookPath("qemu-system-x86_64")
-		if err != nil {
-			return "", "", err
-		}
+	var bus string
+	var qemuCmd string
 
-		return path, "pcie", nil
-	} else if arch == osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN {
-		path, err := exec.LookPath("qemu-system-aarch64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pcie", nil
-	} else if arch == osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN {
-		path, err := exec.LookPath("qemu-system-ppc64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pci", nil
-	} else if arch == osarch.ARCH_64BIT_S390_BIG_ENDIAN {
-		path, err := exec.LookPath("qemu-system-s390x")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "ccw", nil
+	switch arch {
+	case osarch.ARCH_64BIT_INTEL_X86:
+		qemuCmd = "qemu-system-x86_64"
+		bus = "pcie"
+	case osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN:
+		qemuCmd = "qemu-system-aarch64"
+		bus = "pcie"
+	case osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN:
+		qemuCmd = "qemu-system-ppc64"
+		bus = "pci"
+	case osarch.ARCH_64BIT_S390_BIG_ENDIAN:
+		qemuCmd = "qemu-system-s390x"
+		bus = "ccw"
+	default:
+		return "", "", errors.New("Architecture isn't supported for virtual machines")
 	}
 
-	return "", "", errors.New("Architecture isn't supported for virtual machines")
+	qemuPath, err := exec.LookPath(qemuCmd)
+	if err != nil {
+		if d.state != nil && d.state.OS != nil && len(d.state.OS.Architectures) > 0 && arch == d.state.OS.Architectures[0] && util.PathExists("/usr/libexec/qemu-kvm") {
+			return "/usr/libexec/qemu-kvm", bus, nil
+		}
+
+		return "", "", err
+	}
+
+	return qemuPath, bus, nil
 }
 
 // RegisterDevices calls the Register() function on all of the instance's devices.
@@ -3976,6 +3979,11 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuType string, cpuI
 
 	conf = append(conf, qemuVsock(&vsockOpts)...)
 
+	info := DriverStatuses()[instancetype.VM].Info
+	_, spice := info.Features["spice"]
+	_, plan9 := info.Features["plan9"]
+	_, virtioSound := info.Features["virtio-sound"]
+
 	devBus, devAddr, multi = bus.allocate(busFunctionGroupGeneric)
 	serialOpts := qemuSerialOpts{
 		dev: qemuDevOpts{
@@ -3986,6 +3994,7 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuType string, cpuI
 		},
 		charDevName:      qemuSerialChardevName,
 		ringbufSizeBytes: qmp.RingbufSize,
+		spice:            spice,
 	}
 
 	conf = append(conf, qemuSerial(&serialOpts)...)
@@ -3998,19 +4007,23 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuType string, cpuI
 			devAddr:       devAddr,
 			multifunction: multi,
 			ports:         qemuSparseUSBPorts,
+			spice:         spice,
 		}
 
 		conf = append(conf, qemuUSB(&usbOpts)...)
 	}
 
 	// virtio-sound-pci devices can't be migrated and don't have a CCW equivalent.
-	if !isWindows && !d.CanLiveMigrate() && d.architecture != osarch.ARCH_64BIT_S390_BIG_ENDIAN {
+	if virtioSound && !isWindows && !d.CanLiveMigrate() && d.architecture != osarch.ARCH_64BIT_S390_BIG_ENDIAN {
 		devBus, devAddr, multi = bus.allocate(busFunctionGroupGeneric)
-		audioOpts := qemuDevOpts{
-			busName:       bus.name,
-			devBus:        devBus,
-			devAddr:       devAddr,
-			multifunction: multi,
+		audioOpts := qemuAudioOpts{
+			dev: qemuDevOpts{
+				busName:       bus.name,
+				devBus:        devBus,
+				devAddr:       devAddr,
+				multifunction: multi,
+			},
+			spice: spice,
 		}
 
 		conf = append(conf, qemuAudio(&audioOpts)...)
@@ -4035,10 +4048,8 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuType string, cpuI
 
 	conf = append(conf, qemuSCSI(&scsiOpts)...)
 
-	// Windows doesn't support virtio-9p.
-	if !isWindows {
-		// Always export the config directory as a 9p config drive, in case the host or VM guest doesn't support
-		// virtio-fs.
+	// Export the config directory and agent as 9p drives when supported.
+	if !isWindows && plan9 {
 		devBus, devAddr, multi = bus.allocate(busFunctionGroup9p)
 		driveConfig9pOpts := qemuDriveConfigOpts{
 			dev: qemuDevOpts{
@@ -9125,6 +9136,12 @@ func (d *qemu) Console(protocol string) (*os.File, chan error, error) {
 	case instance.ConsoleTypeConsole:
 		path = d.consolePath()
 	case instance.ConsoleTypeVGA:
+		info := DriverStatuses()[instancetype.VM].Info
+		_, spiceSupported := info.Features["spice"]
+		if !spiceSupported {
+			return nil, nil, fmt.Errorf("SPICE is not supported by the host")
+		}
+
 		path = d.spicePath()
 	default:
 		return nil, nil, fmt.Errorf("Unknown protocol %q", protocol)
@@ -9347,17 +9364,6 @@ func (d *qemu) Render() (any, any, error) {
 func (d *qemu) RenderFull(hostInterfaces []net.Interface) (*api.InstanceFull, any, error) {
 	if d.IsSnapshot() {
 		return nil, nil, errors.New("RenderFull doesn't work with snapshots")
-	}
-
-	// Pre-fetch the data.
-	pool, err := d.getStoragePool()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = pool.CacheInstanceSnapshots(d)
-	if err != nil {
-		return nil, nil, err
 	}
 
 	// Get the Instance struct.
@@ -9735,7 +9741,7 @@ func (d *qemu) getVsockID() (uint32, error) {
 	}
 
 	if d.reservedVsockID(uint32(vsockID)) {
-		return 0, fmt.Errorf("Failed to use reserved vsock Context ID: %q", vsockID)
+		return 0, fmt.Errorf("Failed to use reserved vsock Context ID: %d", vsockID)
 	}
 
 	return uint32(vsockID), nil
@@ -10431,6 +10437,30 @@ func (d *qemu) checkFeatures(hostArch int, qemuPath string) (map[string]any, err
 	// Check if vhost-net accelerator (for NIC CPU offloading) is available.
 	if util.PathExists("/dev/vhost-net") {
 		features["vhost_net"] = struct{}{}
+	}
+
+	// Check if SPICE is compiled into QEMU.
+	err = monitor.QuerySpice()
+	if err != nil {
+		logger.Debug("Failed querying SPICE during VM feature check", logger.Ctx{"err": err})
+	} else {
+		features["spice"] = struct{}{}
+	}
+
+	// Check if virtio-9p-pci is compiled into QEMU.
+	err = monitor.Query9pDevice()
+	if err != nil {
+		logger.Debug("Failed querying virtio-9p-pci during VM feature check", logger.Ctx{"err": err})
+	} else {
+		features["plan9"] = struct{}{}
+	}
+
+	// Check if virtio-sound-pci is compiled into QEMU.
+	err = monitor.QueryVirtioSoundDevice()
+	if err != nil {
+		logger.Debug("Failed querying virtio-sound-pci during VM feature check", logger.Ctx{"err": err})
+	} else {
+		features["virtio-sound"] = struct{}{}
 	}
 
 	// Check if running nested.
