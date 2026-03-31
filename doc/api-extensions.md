@@ -2251,7 +2251,6 @@ This parameter allows bypassing the project name filter.
 
 ## `metadata_configuration`
 Adds the `GET /1.0/metadata/configuration` API endpoint to retrieve the generated metadata configuration in a JSON format. The JSON structure adopts the structure ```"configs" > `ENTITY` > `ENTITY_SECTION` > "keys" > [<CONFIG_OPTION_0>, <CONFIG_OPTION_1>, ...]```.
-Check the list of {doc}`configuration options </config-options>` to see which configuration options are included.
 
 ## `syslog_socket`
 
@@ -3047,3 +3046,7 @@ Creating an instance snapshot creates a corresponding snapshot on the dependent 
 and deleting the instance snapshot removes it as well.
 Direct snapshot creation or deletion on a dependent volume is not allowed.
 Exporting and importing an instance also includes dependent volumes.
+
+## `metrics_project_resources`
+
+This adds project-level metrics to the `/1.0/metrics` endpoint including resource counts, configured limits, and current usage per project.

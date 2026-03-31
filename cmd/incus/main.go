@@ -24,6 +24,7 @@ import (
 	config "github.com/lxc/incus/v6/shared/cliconfig"
 	cli "github.com/lxc/incus/v6/shared/cmd"
 	"github.com/lxc/incus/v6/shared/logger"
+	"github.com/lxc/incus/v6/shared/termios"
 	"github.com/lxc/incus/v6/shared/util"
 )
 
@@ -48,7 +49,8 @@ type cmdGlobal struct {
 
 var commandFooter = i18n.G(`Use "{{.CommandPath}} [<command>] --help" for more information about a command.`)
 
-var usageTemplate = (color.UsagePrefix + `{{if .Runnable}}
+func usageTemplate() string {
+	return color.UsagePrefix + `{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
 
@@ -71,9 +73,11 @@ var usageTemplate = (color.UsagePrefix + `{{if .Runnable}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 
 ` + commandFooter + `{{end}}
-`)
+`
+}
 
-var usageTemplateSubCmds = (color.UsagePrefix + `{{if .Runnable}}
+func usageTemplateSubCmds() string {
+	return color.UsagePrefix + `{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
 ` + color.AliasesPrefix + `
@@ -98,7 +102,8 @@ var usageTemplateSubCmds = (color.UsagePrefix + `{{if .Runnable}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 
 ` + commandFooter + `{{end}}
-`)
+`
+}
 
 func aliases() []string {
 	c, err := config.LoadConfig("")
@@ -122,7 +127,16 @@ func aliases() []string {
 }
 
 func createApp() (*cobra.Command, *cmdGlobal, error) {
-	// Setup the parser
+	// Load config.
+	conf, err := config.LoadConfig("")
+	if err != nil {
+		return nil, nil, fmt.Errorf(i18n.G("Failed to load configuration: %s"), err)
+	}
+
+	// Initialize colors.
+	color.Init(conf.Defaults.NoColor)
+
+	// Setup the parser.
 	app := &cobra.Command{}
 	app.Use = "incus"
 	app.Short = i18n.G("Command line client for Incus")
@@ -139,14 +153,7 @@ Custom commands can be defined through aliases, use "incus alias" to control tho
 	app.ValidArgs = aliases()
 
 	// Global struct.
-	globalCmd := cmdGlobal{cmd: app, asker: ask.NewAsker(bufio.NewReader(os.Stdin))}
-
-	conf, err := config.LoadConfig("")
-	if err != nil {
-		return nil, nil, fmt.Errorf(i18n.G("Failed to load configuration: %s"), err)
-	}
-
-	globalCmd.conf = conf
+	globalCmd := cmdGlobal{cmd: app, asker: ask.NewAsker(bufio.NewReader(os.Stdin)), conf: conf}
 
 	// Global flags.
 	app.PersistentFlags().BoolVar(&globalCmd.flagVersion, "version", false, i18n.G("Print version number"))
@@ -370,9 +377,9 @@ func main() {
 		}
 
 		if globalCmd.flagSubCmds {
-			app.SetUsageTemplate(usageTemplateSubCmds)
+			app.SetUsageTemplate(usageTemplateSubCmds())
 		} else {
-			app.SetUsageTemplate(usageTemplate)
+			app.SetUsageTemplate(usageTemplate())
 		}
 	}
 
@@ -470,8 +477,10 @@ func (c *cmdGlobal) PreRun(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Setup password helper
-	c.conf.PromptPassword = func(filename string) (string, error) {
-		return c.asker.AskPasswordOnce(fmt.Sprintf(i18n.G("Password for %s: "), filename)), nil
+	if termios.IsTerminal(getStdinFd()) {
+		c.conf.PromptPassword = func(filename string) (string, error) {
+			return c.asker.AskPasswordOnce(fmt.Sprintf(i18n.G("Password for %s: "), filename)), nil
+		}
 	}
 
 	// If the user is running a command that may attempt to connect to the local daemon

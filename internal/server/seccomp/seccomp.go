@@ -531,12 +531,6 @@ const seccompNotifySysinfo = `sysinfo notify
 
 const seccompBlockNewMountAPI = `fsopen errno 38
 fsconfig errno 38
-fsinfo errno 38
-fsmount errno 38
-fspick errno 38
-open_tree errno 38
-move_mount errno 38
-openat2 errno 38
 `
 
 // We don't want to filter any of the following flag combinations since they do
@@ -814,10 +808,9 @@ func seccompGetPolicyContent(s *state.State, c Instance) (string, error) {
 
 		if util.IsTrue(config["security.syscalls.intercept.mount"]) {
 			policy += seccompNotifyMount
-			// We block the new mount api for now to simplify mount
-			// syscall interception. Since it keeps state over
-			// multiple syscalls we'd need more invasive changes to
-			// make this work.
+			// We block a subset of the new mount api as we can't easily intercept those mounts.
+			// Specifically, we're blocking fsopen and fsconfig which is
+			// enough to get /sbin/mount to fallback to the old mount API.
 			policy += seccompBlockNewMountAPI
 		}
 
@@ -1309,9 +1302,15 @@ func (srv *Server) doDeviceSyscall(c Instance, args *MknodArgs, siov *Iovec) int
 	dev["mode_t"] = fmt.Sprintf("%d", args.cMode)
 	dev["dev_t"] = fmt.Sprintf("%d", args.cDev)
 
-	errno := CallForkmknod(c, dev, int(args.cPid), srv.s)
-	if errno != int(-C.ENOMEDIUM) {
-		return errno
+	// /dev is typically mounted by real root, so even though we can
+	// mknod stuff in it, access will ultimately be denied.
+	//
+	// Instead go straight to the fallback mechanism of using a bind-mount.
+	if !strings.HasPrefix(dev["path"], "/dev") {
+		errno := CallForkmknod(c, dev, int(args.cPid), srv.s)
+		if errno != int(-C.ENOMEDIUM) {
+			return errno
+		}
 	}
 
 	err := c.InsertSeccompUnixDevice(fmt.Sprintf("forkmknod.unix.%d", int(args.cPid)), dev, int(args.cPid))
