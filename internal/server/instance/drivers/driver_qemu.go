@@ -37,10 +37,10 @@ import (
 	"github.com/kballard/go-shellquote"
 	"github.com/mdlayher/vsock"
 	"github.com/pkg/sftp"
+	"go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sys/unix"
 	"google.golang.org/protobuf/proto"
-	"gopkg.in/yaml.v2"
 
 	incus "github.com/lxc/incus/v6/client"
 	internalInstance "github.com/lxc/incus/v6/internal/instance"
@@ -361,6 +361,9 @@ type qemu struct {
 
 	// Indicate whether the root disk will be live-migrated.
 	migrationRootDisk bool
+
+	// Indicates whether this is an inner-cluster or cross-cluster move.
+	migrationClusterMove bool
 
 	// Keep a reference to the console socket when switching backends, so we can properly cleanup when switching back to a ring buffer.
 	consoleSocket     *net.UnixListener
@@ -812,7 +815,7 @@ func (d *qemu) onStop(target string) error {
 		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceRestarted.Event(d, nil))
 	} else if d.ephemeral {
 		// Destroy ephemeral virtual machines.
-		err = d.delete(true)
+		err = d.delete(true, true)
 		if err != nil {
 			op.Done(err)
 			return err
@@ -1040,12 +1043,15 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 		if filesystemConn != nil {
 			go func() {
 				if d.migrationRootDisk {
-					blockDevs, err := d.fetchRootBlockDeviceChain(monitor)
+					rootDiskName, _, err := internalInstance.GetRootDiskDevice(d.expandedDevices.CloneNative())
 					if err != nil {
-						d.logger.Error("Failed fetching block device chain", logger.Ctx{"err": err})
+						d.logger.Error("Failed getting instance root disk", logger.Ctx{"err": err})
+						return
 					}
 
-					rootDiskName := blockDevs[len(blockDevs)-1]
+					escapedDeviceName := linux.PathNameEncode(rootDiskName)
+					rootDiskName = d.blockNodeName(escapedDeviceName)
+
 					err = d.receiveMigrationSnapshot(monitor, rootDiskName, filesystemConn)
 					if err != nil {
 						d.logger.Error("Failed receiving migration snapshot", logger.Ctx{"err": err})
@@ -1071,20 +1077,14 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 						d.logger.Error("Failed loading storage pool", logger.Ctx{"err": err})
 					}
 
-					if diskPool.Driver().Info().Remote {
+					if !storagePools.ShouldMigrateDependentVolume(diskPool, d.migrationClusterMove) {
 						continue
 					}
 
 					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Volume.Name})
 
-					// Selects all block devices related to this instance (backing, root disk, overlays).
-					devName := d.blockNodeName(linux.PathNameEncode(vol.Volume.Name))
-					blockDevs, err := d.fetchBlockDeviceChain(monitor, devName)
-					if err != nil {
-						d.logger.Error("Failed fetching block device chain", logger.Ctx{"err": err})
-					}
+					diskName := d.blockNodeName(linux.PathNameEncode(vol.Volume.Name))
 
-					diskName := blockDevs[len(blockDevs)-1]
 					err = d.receiveMigrationSnapshot(monitor, diskName, filesystemConn)
 					if err != nil {
 						d.logger.Error("Failed receiving migration snapshot", logger.Ctx{"err": err})
@@ -3624,7 +3624,7 @@ func (d *qemu) templateApplyNow(trigger instance.TemplateTrigger, path string) e
 	}
 
 	metadata := &api.ImageMetadata{}
-	err = yaml.Unmarshal(content, metadata)
+	err = yaml.Load(content, metadata)
 	if err != nil {
 		return fmt.Errorf("Could not parse %s: %w", fname, err)
 	}
@@ -3894,7 +3894,9 @@ func (d *qemu) generateQemuConfig(machineDefinition string, cpuType string, cpuI
 	conf = append(conf, qemuConsole()...)
 
 	// VM core info (memory dump).
-	conf = append(conf, qemuCoreInfo()...)
+	if !slices.Contains([]int{osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN, osarch.ARCH_64BIT_S390_BIG_ENDIAN}, d.architecture) {
+		conf = append(conf, qemuCoreInfo()...)
+	}
 
 	// Setup the bus allocator.
 	bus := qemuNewBus(busName, &conf)
@@ -7283,7 +7285,10 @@ func (d *qemu) init() error {
 }
 
 // Delete the instance.
-func (d *qemu) Delete(force bool) error {
+// cleanupDependencies controls whether dependent resources (e.g. volumes,
+// and related state) are removed along with the instance.
+// When false, dependencies are preserved (e.g. storage-only moves).
+func (d *qemu) Delete(force bool, cleanupDependencies bool) error {
 	// Setup a new operation.
 	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionDelete, nil, false, false)
 	if err != nil {
@@ -7296,7 +7301,7 @@ func (d *qemu) Delete(force bool) error {
 		return api.StatusErrorf(http.StatusBadRequest, "Instance is running")
 	}
 
-	err = d.delete(force)
+	err = d.delete(force, cleanupDependencies)
 	if err != nil {
 		return err
 	}
@@ -7322,7 +7327,7 @@ func (d *qemu) Delete(force bool) error {
 }
 
 // Delete the instance without creating an operation lock.
-func (d *qemu) delete(force bool) error {
+func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 	ctxMap := logger.Ctx{
 		"created":   d.creationDate,
 		"ephemeral": d.ephemeral,
@@ -7360,7 +7365,7 @@ func (d *qemu) delete(force bool) error {
 		} else {
 			// Remove all snapshots.
 			err := d.deleteSnapshots(func(snapInst instance.Instance) error {
-				return snapInst.(*qemu).delete(true) // Internal delete function that doesn't lock.
+				return snapInst.(*qemu).delete(true, cleanupDependencies) // Internal delete function that doesn't lock.
 			})
 			if err != nil {
 				return fmt.Errorf("Failed deleting instance snapshots: %w", err)
@@ -7370,6 +7375,27 @@ func (d *qemu) delete(force bool) error {
 			err = pool.DeleteInstance(d, nil)
 			if err != nil {
 				return err
+			}
+
+			if cleanupDependencies {
+				// Delete all dependent volumes associated with this instance.
+				err = d.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+					// Load the pool for the disk.
+					diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
+					if err != nil {
+						return fmt.Errorf("Failed loading storage pool: %w", err)
+					}
+
+					err = diskPool.DeleteCustomVolume(d.Project().Name, dev.Config["source"], nil)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -7390,7 +7416,7 @@ func (d *qemu) delete(force bool) error {
 		}
 
 		// Run device removal function for each device.
-		d.devicesRemove(d)
+		d.devicesRemove(d, cleanupDependencies)
 
 		// Clean things up.
 		d.cleanup()
@@ -7506,7 +7532,7 @@ func (d *qemu) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties m
 			return nil, err
 		}
 
-		err = yaml.Unmarshal(content, &meta)
+		err = yaml.Load(content, &meta)
 		if err != nil {
 			_ = metaTarWriter.Close()
 			d.logger.Error("Failed exporting instance", ctxMap)
@@ -7538,7 +7564,7 @@ func (d *qemu) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties m
 
 	defer func() { _ = os.RemoveAll(tempDir) }()
 
-	data, err := yaml.Marshal(&meta)
+	data, err := yaml.Dump(&meta, yaml.V2)
 	if err != nil {
 		_ = metaTarWriter.Close()
 		d.logger.Error("Failed exporting instance", ctxMap)
@@ -8037,8 +8063,15 @@ func (d *qemu) createMigrationSnapshot(diskName string, diskSize int64) (func(),
 		return nil, fmt.Errorf("Failed adding migration storage snapshot block device: %w", err)
 	}
 
-	// Take a snapshot of the root disk and redirect writes to the snapshot disk.
-	err = monitor.BlockDevSnapshot(diskName, snapshotDiskName)
+	// Take a snapshot of the disk and redirect writes to the snapshot disk.
+	blockDevs, err := d.fetchBlockDeviceChain(monitor, diskName)
+	if err != nil {
+		return nil, fmt.Errorf("Failed fetching block device chain: %w", err)
+	}
+
+	blockDevName := blockDevs[len(blockDevs)-1]
+
+	err = monitor.BlockDevSnapshot(blockDevName, snapshotDiskName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed taking temporary migration storage snapshot: %w", err)
 	}
@@ -8199,13 +8232,13 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		return err
 	}
 
-	// Selects all block devices related to this instance (backing, root disk, overlays).
-	blockDevs, err := d.fetchRootBlockDeviceChain(monitor)
+	// Get the root disk device config.
+	rootDiskName, _, err := d.getRootDiskDevice()
 	if err != nil {
 		return err
 	}
 
-	rootDiskName := blockDevs[len(blockDevs)-1] // Name of source disk device to sync from. Last block device is the current root disk.
+	rootDiskName = d.blockNodeName(linux.PathNameEncode(rootDiskName))
 
 	// If we are performing an intra-cluster member move on a Ceph storage pool without storage change
 	// then we can treat this as shared storage and avoid needing to sync the root disk.
@@ -8218,7 +8251,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 			return fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		if diskPool.Driver().Info().Remote {
+		if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
 			continue
 		}
 
@@ -8277,18 +8310,12 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				return fmt.Errorf("Failed loading storage pool: %w", err)
 			}
 
-			if diskPool.Driver().Info().Remote {
+			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
 				continue
 			}
 
-			// Selects all block devices related to this instance (backing, root disk, overlays).
-			devName := d.blockNodeName(linux.PathNameEncode(vol.Name))
-			blockDevs, err := d.fetchBlockDeviceChain(monitor, devName)
-			if err != nil {
-				return err
-			}
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.Name))
 
-			diskName := blockDevs[len(blockDevs)-1]
 			d.logger.Debug("Create snapshot for dependent volume", logger.Ctx{"name": vol.Name, "size": vol.VolumeSize, "diskName": diskName})
 
 			cleanup, err := d.createMigrationSnapshot(diskName, vol.VolumeSize)
@@ -8464,18 +8491,11 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				return fmt.Errorf("Failed loading storage pool: %w", err)
 			}
 
-			if diskPool.Driver().Info().Remote {
+			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
 				continue
 			}
 
-			// Selects all block devices related to this instance (backing, root disk, overlays).
-			devName := d.blockNodeName(linux.PathNameEncode(vol.Name))
-			blockDevs, err := d.fetchBlockDeviceChain(monitor, devName)
-			if err != nil {
-				return err
-			}
-
-			diskName := blockDevs[len(blockDevs)-1]
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.Name))
 
 			_, err = d.sendMigrationSnapshot(diskName, filesystemConn, true)
 			if err != nil {
@@ -8648,7 +8668,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 		// Delete the extra local snapshots first.
 		for _, deleteTargetSnapshotIndex := range deleteTargetSnapshotIndexes {
-			err := targetSnapshots[deleteTargetSnapshotIndex].Delete(true)
+			err := targetSnapshots[deleteTargetSnapshotIndex].Delete(true, true)
 			if err != nil {
 				return err
 			}
@@ -8952,7 +8972,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 						return fmt.Errorf("Failed loading storage pool: %w", err)
 					}
 
-					if diskPool.Driver().Info().Remote {
+					if !storagePools.ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
 						continue
 					}
 
@@ -8969,6 +8989,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 				}
 
 				d.migrationRootDisk = !sameSharedStorage
+				d.migrationClusterMove = args.ClusterMoveSourceName != ""
 			}
 
 			// Although the instance technically isn't considered stateful, we set this to allow
@@ -11077,7 +11098,7 @@ func (d *qemu) GuestOS() string {
 }
 
 // CreateQcow2Snapshot creates a qcow2 snapshot for a running instance.
-func (d *qemu) CreateQcow2Snapshot(devPath string, devName string, snapshotName string, backingFilename string) error {
+func (d *qemu) CreateQcow2Snapshot(devPath string, devName string, snapshotName string, backingFilename string, stateful bool) error {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return err
@@ -11133,9 +11154,18 @@ func (d *qemu) CreateQcow2Snapshot(devPath string, devName string, snapshotName 
 	}
 
 	// Update metadata of the backing file.
-	err = monitor.ChangeBackingFile(nextOverlayName, nextOverlayName, backingFilename)
-	if err != nil {
-		return fmt.Errorf("Failed changing backing file: %w", err)
+	// Use the Qcow2Rebase method when performing stateful snapshots.
+	// Using QMP to modify a volume that was added while the VM is paused can cause QEMU to crash.
+	if stateful {
+		err = storageDrivers.Qcow2Rebase(devPath, backingFilename)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = monitor.ChangeBackingFile(nextOverlayName, nextOverlayName, backingFilename)
+		if err != nil {
+			return fmt.Errorf("Failed changing backing file: %w", err)
+		}
 	}
 
 	return nil
@@ -11227,7 +11257,7 @@ func (d *qemu) DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFil
 }
 
 // ExportQcow2Block exports a qcow2 block device by exposing it through a QEMU NBD server.
-func (d *qemu) ExportQcow2Block(blockIndex int) (func(), string, error) {
+func (d *qemu) ExportQcow2Block(diskName string, blockIndex int) (func(), string, error) {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return nil, "", err
@@ -11260,8 +11290,11 @@ func (d *qemu) ExportQcow2Block(blockIndex int) (func(), string, error) {
 		return nil, "", fmt.Errorf("Failed starting NBD server: %w", err)
 	}
 
+	escapedDeviceName := linux.PathNameEncode(diskName)
+	nodeName := d.blockNodeName(escapedDeviceName)
+
 	// Selects all block devices related to this instance (backing, root disk, overlays).
-	blockDevs, err := d.fetchRootBlockDeviceChain(monitor)
+	blockDevs, err := d.fetchBlockDeviceChain(monitor, nodeName)
 	if err != nil {
 		return nil, "", err
 	}

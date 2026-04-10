@@ -23,7 +23,7 @@ var (
 	zfsCacheMu             sync.Mutex
 	zfsCachePrefillQueue   []string
 	zfsCachePrefillRunning bool
-	zfsCachePrefillWait    sync.WaitGroup
+	zfsCachePrefillMu      sync.RWMutex
 	zfsCacheProperties     = []string{"used", "referenced"}
 )
 
@@ -66,12 +66,11 @@ func (d *zfs) prefillCachedProperties(dataset string) {
 
 	if !zfsCachePrefillRunning {
 		zfsCachePrefillRunning = true
-		zfsCachePrefillWait = sync.WaitGroup{}
-		zfsCachePrefillWait.Add(1)
+		zfsCachePrefillMu.Lock()
 		defer func() {
 			zfsCacheMu.Lock()
 
-			zfsCachePrefillWait.Done()
+			zfsCachePrefillMu.Unlock()
 			zfsCachePrefillRunning = false
 
 			zfsCacheMu.Unlock()
@@ -85,8 +84,13 @@ func (d *zfs) prefillCachedProperties(dataset string) {
 
 	// Check if we're done.
 	if !runPrefill {
-		// Wait for current run.
-		zfsCachePrefillWait.Wait()
+		// If we got here, the dataset we care about wasn't already in the cache AND there was an existing prefill run ongoing.
+		// Attempt to get a read lock for the prefiller, this will block until the current prefill is done running.
+		//
+		// Depending on timing, the current prefill may or may not have picked us up from the queue.
+		// So we check if we're still in the queue and if we are, we trigger another run which will hopefully pick us up then.
+		zfsCachePrefillMu.RLock()
+		zfsCachePrefillMu.RUnlock() //nolint:staticcheck
 
 		// Check that we made it.
 		zfsCacheMu.Lock()
@@ -126,7 +130,7 @@ func (d *zfs) prefillCachedProperties(dataset string) {
 
 	// Run the filler.
 	properties := strings.Join(append([]string{"name"}, zfsCacheProperties...), ",")
-	args := []string{"list", "-H", "-p", "-o", properties, "-r", "-t", "fs,vol,snap"}
+	args := []string{"list", "-H", "-p", "-o", properties, "-r", "-t", "filesystem,volume,snapshot"}
 	args = append(args, queue...)
 
 	out, err := subprocess.RunCommand("zfs", args...)

@@ -22,7 +22,7 @@ var (
 	truenasCacheMu             sync.Mutex
 	truenasCachePrefillQueue   map[string][]string
 	truenasCachePrefillRunning map[string]bool
-	truenasCachePrefillWait    map[string]*sync.WaitGroup
+	truenasCachePrefillMu      map[string]*sync.RWMutex
 	truenasCacheProperties     = []string{"used", "referenced"}
 )
 
@@ -32,7 +32,7 @@ func truenasCacheEnsurePool(pool string) {
 	if !ok {
 		truenasCache[pool] = map[string]map[string]truenasCacheEntry{}
 		truenasCachePrefillQueue[pool] = []string{}
-		truenasCachePrefillWait[pool] = &sync.WaitGroup{}
+		truenasCachePrefillMu[pool] = &sync.RWMutex{}
 	}
 }
 
@@ -78,12 +78,11 @@ func (d *truenas) prefillCachedProperties(dataset string) {
 
 	if !truenasCachePrefillRunning[d.name] {
 		truenasCachePrefillRunning[d.name] = true
-		truenasCachePrefillWait[d.name] = &sync.WaitGroup{}
-		truenasCachePrefillWait[d.name].Add(1)
+		truenasCachePrefillMu[d.name].Lock()
 		defer func() {
 			truenasCacheMu.Lock()
 
-			truenasCachePrefillWait[d.name].Done()
+			truenasCachePrefillMu[d.name].Unlock()
 			truenasCachePrefillRunning[d.name] = false
 
 			truenasCacheMu.Unlock()
@@ -97,12 +96,13 @@ func (d *truenas) prefillCachedProperties(dataset string) {
 
 	// Check if we're done.
 	if !runPrefill {
-		// Wait for current run.
-		truenasCacheMu.Lock()
-		wg := truenasCachePrefillWait[d.name]
-		truenasCacheMu.Unlock()
-
-		wg.Wait()
+		// If we got here, the dataset we care about wasn't already in the cache AND there was an existing prefill run ongoing.
+		// Attempt to get a read lock for the prefiller, this will block until the current prefill is done running.
+		//
+		// Depending on timing, the current prefill may or may not have picked us up from the queue.
+		// So we check if we're still in the queue and if we are, we trigger another run which will hopefully pick us up then.
+		truenasCachePrefillMu[d.name].RLock()
+		truenasCachePrefillMu[d.name].RUnlock() //nolint:staticcheck
 
 		// Check that we made it.
 		truenasCacheMu.Lock()
@@ -149,7 +149,7 @@ func (d *truenas) prefillCachedProperties(dataset string) {
 			batch = batch[:2]
 		}
 
-		args := []string{"list", "--no-headers", "--parsable", "-o", properties, "-r", "-t", "fs,vol,snap"}
+		args := []string{"list", "--no-headers", "--parsable", "-o", properties, "-r", "-t", "filesystem,volume,snapshot"}
 		args = append(args, batch...)
 
 		out, err := d.runTool(args...)

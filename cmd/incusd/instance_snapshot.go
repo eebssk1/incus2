@@ -687,7 +687,7 @@ func snapshotPost(s *state.State, r *http.Request, snapInst instance.Instance) r
 		}
 
 		// Pull mode.
-		op, err := operations.OperationCreate(s, snapInst.Project().Name, operations.OperationClassWebsocket, operationtype.SnapshotTransfer, resources, ws.Metadata(), run, nil, ws.Connect, r)
+		op, err := operations.OperationCreate(s, snapInst.Project().Name, operations.OperationClassWebsocket, operationtype.SnapshotTransfer, resources, ws.Metadata(), run, ws.Cancel, ws.Connect, r)
 		if err != nil {
 			return response.InternalError(err)
 		}
@@ -771,7 +771,7 @@ func snapshotPost(s *state.State, r *http.Request, snapInst instance.Instance) r
 func snapshotDelete(s *state.State, r *http.Request, snapInst instance.Instance) response.Response {
 	remove := func(op *operations.Operation) error {
 		snapInst.SetOperation(op)
-		return snapInst.Delete(false)
+		return snapInst.Delete(false, true)
 	}
 
 	parentName, snapName, _ := api.GetParentAndSnapshotName(snapInst.Name())

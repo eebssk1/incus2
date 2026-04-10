@@ -27,6 +27,7 @@ import (
 	"github.com/lxc/incus/v6/internal/server/instance"
 	"github.com/lxc/incus/v6/internal/server/instance/instancetype"
 	"github.com/lxc/incus/v6/internal/server/project"
+	"github.com/lxc/incus/v6/internal/server/response"
 	storagePools "github.com/lxc/incus/v6/internal/server/storage"
 	storageDrivers "github.com/lxc/incus/v6/internal/server/storage/drivers"
 	"github.com/lxc/incus/v6/internal/server/warnings"
@@ -928,8 +929,10 @@ func (d *disk) Register() error {
 // It is called irrespective of whether the instance is running or not.
 func (d *disk) Add() error {
 	if d.config["pool"] != "" && d.config["source"] != "" {
+		// During migration, the storage volume may not be present at this moment,
+		// so do not raise an error.
 		_, err := d.updateDependentConfig()
-		if err != nil {
+		if err != nil && !response.IsNotFoundError(err) {
 			return err
 		}
 	}
@@ -3140,7 +3143,7 @@ func (d *disk) cephCreds() (string, string) {
 }
 
 // Remove cleans up the device when it is removed from an instance.
-func (d *disk) Remove() error {
+func (d *disk) Remove(cleanupDependencies bool) error {
 	// Remove the config.iso file for cloud-init config drives.
 	if d.config["source"] == diskSourceCloudInit {
 		pool, err := storagePools.LoadByInstance(d.state, d.inst)
@@ -3162,10 +3165,11 @@ func (d *disk) Remove() error {
 		}
 	}
 
-	if d.config["pool"] != "" && d.config["source"] != "" && util.IsTrue(d.config["dependent"]) {
+	if d.config["pool"] != "" && d.config["source"] != "" && util.IsTrue(d.config["dependent"]) && cleanupDependencies {
 		d.config["dependent"] = ""
+		// If the volume doesn't exist, ignore this as we remove the device anyway.
 		_, err := d.updateDependentConfig()
-		if err != nil {
+		if err != nil && !response.IsNotFoundError(err) {
 			return err
 		}
 	}
@@ -3211,7 +3215,7 @@ func (d *disk) updateDependentConfig() (func() error, error) {
 		return err
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to fetch local storage volume record: %w", err)
+		return nil, err
 	}
 
 	if dbVolume.Type == db.StoragePoolVolumeTypeNameCustom {

@@ -35,10 +35,10 @@ import (
 	liblxc "github.com/lxc/go-lxc"
 	ociSpecs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/sftp"
+	yaml "go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sys/unix"
 	"google.golang.org/protobuf/proto"
-	yaml "gopkg.in/yaml.v2"
 
 	internalInstance "github.com/lxc/incus/v6/internal/instance"
 	"github.com/lxc/incus/v6/internal/instancewriter"
@@ -3612,7 +3612,7 @@ func (d *lxc) onStop(args map[string]string) error {
 
 		// Destroy ephemeral containers
 		if d.ephemeral {
-			err = d.delete(true)
+			err = d.delete(true, true)
 			if err != nil {
 				op.Done(fmt.Errorf("Failed deleting ephemeral instance: %w", err))
 				return
@@ -4294,7 +4294,10 @@ func (d *lxc) cleanup() {
 }
 
 // Delete deletes the instance.
-func (d *lxc) Delete(force bool) error {
+// cleanupDependencies controls whether dependent resources (e.g. volumes,
+// and related state) are removed along with the instance.
+// When false, dependencies are preserved (e.g. storage-only moves).
+func (d *lxc) Delete(force bool, cleanupDependencies bool) error {
 	// Setup a new operation.
 	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionDelete, nil, false, false)
 	if err != nil {
@@ -4307,7 +4310,7 @@ func (d *lxc) Delete(force bool) error {
 		return api.StatusErrorf(http.StatusBadRequest, "Instance is running")
 	}
 
-	err = d.delete(force)
+	err = d.delete(force, cleanupDependencies)
 	if err != nil {
 		return err
 	}
@@ -4333,7 +4336,7 @@ func (d *lxc) Delete(force bool) error {
 }
 
 // Delete deletes the instance without creating an operation lock.
-func (d *lxc) delete(force bool) error {
+func (d *lxc) delete(force bool, cleanupDependencies bool) error {
 	ctxMap := logger.Ctx{
 		"created":   d.creationDate,
 		"ephemeral": d.ephemeral,
@@ -4377,7 +4380,7 @@ func (d *lxc) delete(force bool) error {
 		} else {
 			// Remove all snapshots.
 			err := d.deleteSnapshots(func(snapInst instance.Instance) error {
-				return snapInst.(*lxc).delete(true) // Internal delete function that doesn't lock.
+				return snapInst.(*lxc).delete(true, cleanupDependencies) // Internal delete function that doesn't lock.
 			})
 			if err != nil {
 				return fmt.Errorf("Failed deleting instance snapshots: %w", err)
@@ -4387,6 +4390,27 @@ func (d *lxc) delete(force bool) error {
 			err = pool.DeleteInstance(d, nil)
 			if err != nil {
 				return err
+			}
+
+			if cleanupDependencies {
+				// Delete all dependent volumes associated with this instance.
+				err = d.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+					// Load the pool for the disk.
+					diskPool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
+					if err != nil {
+						return fmt.Errorf("Failed loading storage pool: %w", err)
+					}
+
+					err = diskPool.DeleteCustomVolume(d.Project().Name, dev.Config["source"], nil)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -4407,7 +4431,7 @@ func (d *lxc) delete(force bool) error {
 		}
 
 		// Run device removal function for each device.
-		d.devicesRemove(d)
+		d.devicesRemove(d, cleanupDependencies)
 
 		// Clean things up.
 		d.cleanup()
@@ -5595,7 +5619,7 @@ func (d *lxc) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties ma
 			return nil, err
 		}
 
-		err = yaml.Unmarshal(content, &meta)
+		err = yaml.Load(content, &meta)
 		if err != nil {
 			_ = metaTarWriter.Close()
 			if rootfsTarWriter != nil {
@@ -5635,7 +5659,7 @@ func (d *lxc) Export(metaWriter io.Writer, rootfsWriter io.Writer, properties ma
 
 	defer func() { _ = os.RemoveAll(tempDir) }()
 
-	data, err := yaml.Marshal(&meta)
+	data, err := yaml.Dump(&meta, yaml.V2)
 	if err != nil {
 		_ = metaTarWriter.Close()
 		if rootfsTarWriter != nil {
@@ -6648,7 +6672,7 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 		// Delete the extra local snapshots first.
 		for _, deleteTargetSnapshotIndex := range deleteTargetSnapshotIndexes {
-			err := targetSnapshots[deleteTargetSnapshotIndex].Delete(true)
+			err := targetSnapshots[deleteTargetSnapshotIndex].Delete(true, true)
 			if err != nil {
 				return err
 			}
@@ -7278,7 +7302,7 @@ func (d *lxc) templateApplyNow(trigger instance.TemplateTrigger) error {
 	}
 
 	metadata := &api.ImageMetadata{}
-	err = yaml.Unmarshal(content, &metadata)
+	err = yaml.Load(content, &metadata)
 	if err != nil {
 		return fmt.Errorf("Could not parse %s: %w", fname, err)
 	}
@@ -9581,7 +9605,7 @@ func (d *lxc) GuestOS() string {
 }
 
 // CreateQcow2Snapshot creates a qcow2 snapshot for a running instance. Not supported by containers.
-func (d *lxc) CreateQcow2Snapshot(devPath string, devName string, snapName string, backingFilename string) error {
+func (d *lxc) CreateQcow2Snapshot(devPath string, devName string, snapName string, backingFilename string, stateful bool) error {
 	return nil
 }
 
@@ -9591,7 +9615,7 @@ func (d *lxc) DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFile
 }
 
 // ExportQcow2Block exports a qcow2 block device. Not supported by containers.
-func (d *lxc) ExportQcow2Block(diskIndex int) (func(), string, error) {
+func (d *lxc) ExportQcow2Block(diskName string, diskIndex int) (func(), string, error) {
 	return nil, "", nil
 }
 

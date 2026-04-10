@@ -467,7 +467,7 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 
 	var op *operations.Operation
 	if push {
-		op, err = operations.OperationCreate(s, projectName, operations.OperationClassWebsocket, operationtype.InstanceCreate, resources, sink.Metadata(), run, nil, sink.Connect, r)
+		op, err = operations.OperationCreate(s, projectName, operations.OperationClassWebsocket, operationtype.InstanceCreate, resources, sink.Metadata(), run, sink.Cancel, sink.Connect, r)
 		if err != nil {
 			return response.InternalError(err)
 		}
@@ -868,7 +868,7 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 		}
 
 		// Clean up created instance if the post hook fails below.
-		runReverter.Add(func() { _ = inst.Delete(true) })
+		runReverter.Add(func() { _ = inst.Delete(true, true) })
 
 		// Run a late project restriction check on the instance.
 		instState, _, err := inst.Render()

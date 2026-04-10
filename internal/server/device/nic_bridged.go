@@ -342,7 +342,7 @@ func (d *nicBridged) validateConfig(instConf instance.ConfigReader, partialValid
 			return errors.New("Specified network is not fully created")
 		}
 
-		if n.Type() != "bridge" {
+		if n.Type() != "bridge" && (n.Type() != "physical" || !util.PathExists(fmt.Sprintf("/sys/class/net/%s/bridge", d.config["parent"]))) {
 			return errors.New("Specified network must be of type bridge")
 		}
 
@@ -1157,7 +1157,7 @@ func (d *nicBridged) postStop() error {
 }
 
 // Remove is run when the device is removed from the instance or the instance is deleted.
-func (d *nicBridged) Remove() error {
+func (d *nicBridged) Remove(cleanupDependencies bool) error {
 	// Handle the case where validation fails but the device still must be removed.
 	bridgeName := d.config["parent"]
 	if bridgeName == "" && d.config["network"] != "" {

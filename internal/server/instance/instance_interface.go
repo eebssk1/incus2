@@ -91,6 +91,10 @@ type Instance interface {
 	Info() Info
 	IsPrivileged() bool
 
+	// Dependent volumes
+	HasDependentDisk() bool
+	ForEachDependentDiskType(diskAction func(dev deviceConfig.DeviceNamed) error) error
+
 	// Snapshots & migration & backups.
 	Restore(source Instance, stateful bool, diskOnly bool) error
 	Snapshot(name string, expiry time.Time, stateful bool) error
@@ -98,15 +102,15 @@ type Instance interface {
 	Backups() ([]backup.InstanceBackup, error)
 	UpdateBackupFile() error
 	CanLiveMigrate() bool
-	CreateQcow2Snapshot(diskPath string, devName string, snapshotName string, backingFilename string) error
+	CreateQcow2Snapshot(diskPath string, devName string, snapshotName string, backingFilename string, stateful bool) error
 	DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFilename string) error
-	ExportQcow2Block(blockIndex int) (func(), string, error)
+	ExportQcow2Block(diskName string, blockIndex int) (func(), string, error)
 
 	// Config handling.
 	Rename(newName string, applyTemplateTrigger bool) error
 	Update(newConfig db.InstanceArgs, userRequested bool) error
 
-	Delete(force bool) error
+	Delete(force bool, cleanupDependencies bool) error
 	Export(meta io.Writer, roofs io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error)
 
 	// Live configuration.
