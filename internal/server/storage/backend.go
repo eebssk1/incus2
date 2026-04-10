@@ -9355,6 +9355,10 @@ func (b *backend) createDependentVolumesFromBackup(srcBackup backup.Info, srcDat
 	}
 
 	for _, disk := range srcBackup.Config.DependentVolumes {
+		if disk == nil {
+			return errors.New("Bad dependent volume definition found in index")
+		}
+
 		optimizedStorage := srcBackup.OptimizedStorage
 		optimizedHeader := srcBackup.OptimizedHeader
 
