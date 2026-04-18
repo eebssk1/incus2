@@ -22,6 +22,7 @@ import (
 
 	"github.com/lxc/incus/v6/internal/linux"
 	"github.com/lxc/incus/v6/internal/server/backup"
+	localUtil "github.com/lxc/incus/v6/internal/server/util"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/ioprogress"
 	"github.com/lxc/incus/v6/shared/logger"
@@ -587,7 +588,7 @@ func (d *btrfs) loadOptimizedBackupHeader(r io.ReadSeeker, mountPath string, bas
 		}
 
 		if hdr.Name == filepath.Join(basePrefix, "optimized_header.yaml") {
-			loader, err := yaml.NewLoader(tr)
+			loader, err := yaml.NewLoader(localUtil.MaxBytesReader(tr, 1024*1024))
 			if err != nil {
 				return nil, fmt.Errorf("Error parsing optimized backup header file: %w", err)
 			}
