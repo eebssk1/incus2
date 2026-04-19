@@ -24,6 +24,7 @@ import (
 	"github.com/lxc/incus/v6/shared/tcp"
 	localtls "github.com/lxc/incus/v6/shared/tls"
 	"github.com/lxc/incus/v6/shared/units"
+	"github.com/lxc/incus/v6/shared/util"
 	"github.com/lxc/incus/v6/shared/ws"
 )
 
@@ -1254,7 +1255,7 @@ func (r *ProtocolIncus) ExecInstance(instanceName string, exec api.InstanceExecP
 		if outputFiles["1"] != "" {
 			reader, _ := r.getInstanceExecOutputLogFile(instanceName, filepath.Base(outputFiles["1"]))
 			if args.Stdout != nil {
-				_, errCopy := io.Copy(args.Stdout, reader)
+				_, errCopy := util.SafeCopy(args.Stdout, reader)
 				// Regardless of errCopy value, we want to delete the file after a copy operation
 				errDelete := r.deleteInstanceExecOutputLogFile(instanceName, filepath.Base(outputFiles["1"]))
 				if errDelete != nil {
@@ -1275,7 +1276,7 @@ func (r *ProtocolIncus) ExecInstance(instanceName string, exec api.InstanceExecP
 		if outputFiles["2"] != "" {
 			reader, _ := r.getInstanceExecOutputLogFile(instanceName, filepath.Base(outputFiles["2"]))
 			if args.Stderr != nil {
-				_, errCopy := io.Copy(args.Stderr, reader)
+				_, errCopy := util.SafeCopy(args.Stderr, reader)
 				errDelete := r.deleteInstanceExecOutputLogFile(instanceName, filepath.Base(outputFiles["1"]))
 				if errDelete != nil {
 					return nil, errDelete
@@ -1715,7 +1716,7 @@ func (r *ProtocolIncus) rawConn(apiURL *url.URL, protocol string) (net.Conn, err
 		return nil, errors.New("Missing or unexpected Upgrade header in response")
 	}
 
-	return conn, err
+	return conn, nil
 }
 
 // GetInstanceFileSFTPConn returns a connection to the instance's SFTP endpoint.
@@ -2995,7 +2996,7 @@ func (r *ProtocolIncus) GetInstanceBackupFile(instanceName string, name string, 
 		}
 	}
 
-	size, err := io.Copy(req.BackupFile, body)
+	size, err := util.SafeCopy(req.BackupFile, body)
 	if err != nil {
 		return nil, err
 	}
@@ -3071,7 +3072,7 @@ func (r *ProtocolIncus) CreateInstanceBackupStream(instanceName string, backup a
 		}
 	}
 
-	_, err = io.Copy(req.BackupFile, body)
+	_, err = util.SafeCopy(req.BackupFile, body)
 	return err
 }
 

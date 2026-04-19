@@ -11,13 +11,16 @@ import (
 	"io"
 	"io/fs"
 	"maps"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -1753,7 +1756,7 @@ func (b *backend) isoFiller(data io.Reader) func(vol drivers.Volume, rootBlockPa
 
 		defer func() { _ = f.Close() }()
 
-		return io.Copy(f, data)
+		return util.SafeCopy(f, data)
 	}
 }
 
@@ -2979,6 +2982,13 @@ func (b *backend) MountInstance(inst instance.Instance, op *operations.Operation
 			}
 		}
 
+		reverter.Add(func() {
+			for _, snap := range volSnaps {
+				currentSnapVol := b.GetVolume(vol.Type(), vol.ContentType(), project.Instance(inst.Project().Name, snap.Name), vol.Config())
+				_, _ = b.driver.UnmountVolumeSnapshot(currentSnapVol, op)
+			}
+		})
+
 		// Fetch backing chain for a qcow2 formatted volume.
 		backingPaths, err = b.qcow2BackingPaths(vol, diskPath, inst.Project().Name)
 		if err != nil {
@@ -3180,6 +3190,10 @@ func (b *backend) CreateInstanceSnapshot(inst instance.Instance, src instance.In
 		volStorageParentName := project.Instance(inst.Project().Name, src.Name())
 		parentVol := b.GetVolume(volType, contentType, volStorageParentName, srcDBVol.Config)
 
+		reverter.Add(func() {
+			_ = b.driver.Qcow2DeletionCleanup(vol, volStorageParentName)
+		})
+
 		rootDiskName, _, err := internalInstance.GetRootDiskDevice(src.ExpandedDevices().CloneNative())
 		if err != nil {
 			return err
@@ -3191,6 +3205,10 @@ func (b *backend) CreateInstanceSnapshot(inst instance.Instance, src instance.In
 		if err != nil {
 			return err
 		}
+
+		reverter.Add(func() {
+			_ = b.qcow2DeleteSnapshot(parentVol, vol, src.Project().Name, src, rootDiskName, nil)
+		})
 	}
 
 	err = b.ensureInstanceSnapshotSymlink(inst.Type(), inst.Project().Name, inst.Name())
@@ -3206,10 +3224,14 @@ func (b *backend) CreateInstanceSnapshot(inst instance.Instance, src instance.In
 		}
 
 		_, snapshotName, _ := api.GetParentAndSnapshotName(inst.Name())
-		err = diskPool.CreateCustomVolumeSnapshot(inst.Project().Name, dev.Config["source"], snapshotName, time.Time{}, op)
+		err = diskPool.CreateCustomVolumeSnapshot(inst.Project().Name, dev.Config["source"], snapshotName, time.Time{}, inst.IsStateful(), op)
 		if err != nil {
 			return fmt.Errorf("Failed to create device snapshot for volume %q: %w", dev.Config["source"], err)
 		}
+
+		reverter.Add(func() {
+			_ = diskPool.DeleteCustomVolumeSnapshot(inst.Project().Name, fmt.Sprintf("%s/%s", dev.Config["source"], snapshotName), nil)
+		})
 
 		return nil
 	})
@@ -6266,7 +6288,7 @@ func (b *backend) ImportCustomVolume(projectName string, poolVol *backupConfig.C
 }
 
 // CreateCustomVolumeSnapshot creates a snapshot of a custom volume.
-func (b *backend) CreateCustomVolumeSnapshot(projectName, volName string, newSnapshotName string, newExpiryDate time.Time, op *operations.Operation) error {
+func (b *backend) CreateCustomVolumeSnapshot(projectName, volName string, newSnapshotName string, newExpiryDate time.Time, instanceStateful bool, op *operations.Operation) error {
 	l := b.logger.AddContext(logger.Ctx{"project": projectName, "volName": volName, "newSnapshotName": newSnapshotName, "newExpiryDate": newExpiryDate})
 	l.Debug("CreateCustomVolumeSnapshot started")
 	defer l.Debug("CreateCustomVolumeSnapshot finished")
@@ -6345,21 +6367,25 @@ func (b *backend) CreateCustomVolumeSnapshot(projectName, volName string, newSna
 	}
 
 	if parentVol.Config["block.type"] == drivers.BlockVolumeTypeQcow2 {
+		// Get the parent volume.
+		volStorageParentName := project.StorageVolume(projectName, volName)
+		parentVolume := b.GetVolume(drivers.VolumeTypeCustom, contentType, volStorageParentName, parentVol.Config)
+
+		reverter.Add(func() { _ = b.driver.Qcow2DeletionCleanup(vol, volStorageParentName) })
+
 		inst, devName, err := b.volumeUsedByRunningInstance(parentVol, projectName)
 		if err != nil {
 			return err
 		}
 
-		// Get the parent volume.
-		volStorageParentName := project.StorageVolume(projectName, volName)
-		parentVolume := b.GetVolume(drivers.VolumeTypeCustom, contentType, volStorageParentName, parentVol.Config)
-
 		// parentVol should already be prepared as an overlay by CreateVolumeSnapshot.
 		// vol will be used as the base.
-		err = b.qcow2CreateSnapshot(parentVolume, vol, projectName, inst, devName, false, op)
+		err = b.qcow2CreateSnapshot(parentVolume, vol, projectName, inst, devName, instanceStateful, op)
 		if err != nil {
 			return err
 		}
+
+		reverter.Add(func() { _ = b.qcow2DeleteSnapshot(parentVolume, vol, projectName, inst, devName, nil) })
 	}
 
 	b.state.Events.SendLifecycle(projectName, lifecycle.StorageVolumeSnapshotCreated.Event(vol, string(vol.Type()), projectName, op, logger.Ctx{"type": vol.Type()}))
@@ -8019,6 +8045,9 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 		return nil
 	}
 
+	reverter := revert.New()
+	defer reverter.Fail()
+
 	if vol.IsVMBlock() {
 		fsParentVol := vol.NewVMBlockFilesystemVolume()
 		fsVol := snapVol.NewVMBlockFilesystemVolume()
@@ -8026,6 +8055,8 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 		if err != nil {
 			return err
 		}
+
+		reverter.Add(func() { _ = drivers.Qcow2DeleteConfigSnapshot(fsParentVol, fsVol, nil) })
 	}
 
 	// For a running instance, mount the snapshot to increase the volume's refCount.
@@ -8036,6 +8067,8 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 		if err != nil {
 			return err
 		}
+
+		reverter.Add(func() { _, _ = b.driver.UnmountVolumeSnapshot(snapVol, nil) })
 	}
 
 	snapVolDevPath, err := b.driver.GetQcow2BackingFilePath(snapVol)
@@ -8084,6 +8117,7 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 		}
 	}
 
+	reverter.Success()
 	return nil
 }
 
@@ -8316,6 +8350,11 @@ func (b *backend) qcow2DeleteSnapshot(vol drivers.Volume, snapVol drivers.Volume
 			return err
 		}
 
+		// Use MountRefCountDecrement() instead of UnmountVolume() to avoid deactivating
+		// the entire block device. The device will be reused under a different name
+		// (renamed by Qcow2DeletionCleanup), so we only need to decrement the reference
+		// count for this specific snapshot volume.
+		snapVol.MountRefCountDecrement()
 		fsVol := snapVol.NewVMBlockFilesystemVolume()
 		_, err = b.driver.UnmountVolumeSnapshot(fsVol, op)
 		if err != nil {
@@ -8482,7 +8521,7 @@ func (b *backend) qcow2BackingPaths(vol drivers.Volume, diskPath string, project
 	err = vol.MountWithSnapshotsTask(func(_ string, _ map[string]string, op *operations.Operation) error {
 		chainPaths, err = drivers.Qcow2BackingChain(diskPath)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		for _, p := range chainPaths {
@@ -8653,7 +8692,7 @@ func (b *backend) qcow2MigrateVolume(s *state.State, vol drivers.Volume, project
 		}
 
 		b.logger.Debug("Sending block volume", logger.Ctx{"volName": vol.Name(), "path": nbdPath})
-		_, err = io.Copy(conn, fromPipe)
+		_, err = util.SafeCopy(conn, fromPipe)
 		if err != nil {
 			return fmt.Errorf("Error copying %q to migration connection: %w", nbdPath, err)
 		}
@@ -8809,15 +8848,9 @@ func (b *backend) qcow2CreateVolumeFromMigration(vol drivers.Volume, projectName
 			toPipe = drivers.NewSparseFileWrapper(to)
 		}
 
-		for {
-			_, err = io.CopyN(toPipe, fromPipe, 4*1024*1024)
-			if err != nil {
-				if errors.Is(err, io.EOF) {
-					break
-				}
-
-				return fmt.Errorf("Error copying from migration connection to %q: %w", path, err)
-			}
+		_, err = util.SafeCopy(toPipe, fromPipe)
+		if err != nil {
+			return fmt.Errorf("Error copying from migration connection to %q: %w", path, err)
 		}
 
 		return to.Close()
@@ -9138,4 +9171,186 @@ func (b *backend) createDependentVolumesFromMigration(inst instance.Instance, co
 
 	reverter.Success()
 	return cleanup, nil
+}
+
+// GetInstanceNBD returns an NBD connection to the VM's root disk.
+func (b *backend) GetInstanceNBD(inst instance.Instance, writable bool) (net.Conn, func(), error) {
+	if writable && inst.IsRunning() {
+		return nil, nil, errors.New("Writable NBD requires the instance be stopped")
+	}
+
+	instanceDeviceName, _, err := internalInstance.GetRootDiskDevice(inst.ExpandedDevices().CloneNative())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	volStorageName := project.Instance(inst.Project().Name, inst.Name())
+	vol := b.GetVolume(drivers.VolumeTypeVM, drivers.ContentTypeBlock, volStorageName, nil)
+
+	if !inst.IsRunning() {
+		b.logger.Debug("NBD connection (offline mode)")
+		return b.connectOfflineNBD(vol)
+	}
+
+	var volSize int64
+	var volDiskPath string
+	err = vol.MountTask(func(devPath string, op *operations.Operation) error {
+		volDiskPath, err = b.Driver().GetVolumeDiskPath(vol)
+		if err != nil {
+			return err
+		}
+
+		volSize, err = drivers.BlockDiskSizeBytes(volDiskPath)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return inst.ConnectNBD(instanceDeviceName, volSize, writable)
+}
+
+// GetCustomVolumeNBD returns an NBD connection to a VM's additional disk.
+func (b *backend) GetCustomVolumeNBD(projectName string, volName string, writable bool) (net.Conn, func(), error) {
+	// Get the volume.
+	dbVol, err := VolumeDBGet(b, projectName, volName, drivers.VolumeTypeCustom)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	volStorageName := project.StorageVolume(projectName, volName)
+	vol := b.GetVolume(drivers.VolumeTypeCustom, drivers.ContentTypeBlock, volStorageName, nil)
+
+	// Convert the volume type name to our internal integer representation.
+	volumeDbType, err := VolumeTypeNameToDBType(dbVol.Type)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	inst, instanceDeviceName, err := InstanceByVolumeName(b.state, b.name, projectName, volName, volumeDbType)
+	if err != nil {
+		if errors.Is(err, ErrVolumeNotAttachedToRunningInstance) {
+			b.logger.Debug("NBD connection (offline mode)")
+			return b.connectOfflineNBD(vol)
+		}
+
+		return nil, nil, err
+	}
+
+	if !inst.IsRunning() {
+		b.logger.Debug("NBD connection (offline mode)")
+		return b.connectOfflineNBD(vol)
+	}
+
+	if writable && inst.IsRunning() {
+		return nil, nil, errors.New("Writable NBD requires the instance be stopped")
+	}
+
+	var volSize int64
+	var volDiskPath string
+	err = vol.MountTask(func(devPath string, op *operations.Operation) error {
+		volDiskPath, err = b.Driver().GetVolumeDiskPath(vol)
+		if err != nil {
+			return err
+		}
+
+		volSize, err = drivers.BlockDiskSizeBytes(volDiskPath)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return inst.ConnectNBD(instanceDeviceName, volSize, writable)
+}
+
+// connectOfflineNBD spawns qemu-nbd for the given volume.
+func (b *backend) connectOfflineNBD(vol drivers.Volume) (net.Conn, func(), error) {
+	socketPath := filepath.Join(internalUtil.RunPath(fmt.Sprintf("%s-nbd.sock", vol.Name())))
+
+	cmd := exec.Command("qemu-nbd", fmt.Sprintf("--socket=%s", socketPath))
+
+	errCh := make(chan string)
+
+	go func() {
+		err := b.Driver().ActivateTask(vol, func(devPath string, op *operations.Operation) error {
+			volDiskPath, err := b.Driver().GetVolumeDiskPath(vol)
+			if err != nil {
+				return err
+			}
+
+			imgInfo, err := drivers.Qcow2Info(volDiskPath)
+			if err != nil {
+				return err
+			}
+
+			if imgInfo.Format == "qcow2" && len(imgInfo.FormatSpecific.Data.Bitmaps) > 0 {
+				for _, b := range imgInfo.FormatSpecific.Data.Bitmaps {
+					cmd.Args = append(cmd.Args, fmt.Sprintf("--bitmap=%s", b.Name))
+				}
+			}
+
+			cmd.Args = append(cmd.Args, volDiskPath)
+
+			err = cmd.Run()
+			if err != nil {
+				return fmt.Errorf("Failed to start qemu-nbd: %w", err)
+			}
+
+			return nil
+		}, nil)
+		if err != nil {
+			b.logger.Error("Failed when running qemu-nbd", logger.Ctx{"err": err})
+			errCh <- fmt.Sprintf("Failed when running qemu-nbd: %v", err)
+		}
+	}()
+
+	// Wait for qemu-nbd.
+	timeout := time.After(2 * time.Second)
+	tick := time.Tick(50 * time.Millisecond)
+	isReady := false
+
+	for {
+		select {
+		case <-timeout:
+			_ = cmd.Process.Kill()
+			return nil, nil, fmt.Errorf("Timeout waiting for qemu-nbd socket")
+		case <-tick:
+			_, err := os.Stat(socketPath)
+			if err == nil {
+				isReady = true
+			}
+
+		case res := <-errCh:
+			return nil, nil, fmt.Errorf("qemu-nbd failed: %s", res)
+		}
+
+		if isReady {
+			break
+		}
+	}
+
+	b.logger.Debug("Dial NBD server (offline mode)", logger.Ctx{"socketPath": socketPath})
+	nbdConn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		_ = cmd.Process.Kill()
+		return nil, nil, fmt.Errorf("Failed to connect to NBD socket: %w", err)
+	}
+
+	disconnect := func() {
+		b.logger.Debug("User requested NBD server stopped")
+		_ = nbdConn.Close()
+		_ = cmd.Process.Signal(syscall.SIGTERM)
+		_ = os.Remove(socketPath)
+	}
+
+	return nbdConn, disconnect, nil
 }

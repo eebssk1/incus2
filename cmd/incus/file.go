@@ -463,10 +463,9 @@ incus file pull foo/etc/hosts -
 }
 
 // pull runs the post-parsing command logic.
-func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, targetFile string) error {
-	target, targetIsDir := normalizePath(targetFile)
+func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, target string) error {
+	targetIsDir := strings.HasSuffix(target, "/")
 	targetExists := true
-
 	targetInfo, err := os.Stat(target)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
@@ -615,17 +614,10 @@ func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, targetFile string) error {
 
 				defer func() { _ = src.Close() }()
 
-				for {
-					// Read 1MB at a time.
-					_, err = io.CopyN(writer, src, 1024*1024)
-					if err != nil {
-						if err == io.EOF {
-							break
-						}
-
-						progress.Done("")
-						return err
-					}
+				_, err = util.SafeCopy(writer, src)
+				if err != nil {
+					progress.Done("")
+					return err
 				}
 			}
 

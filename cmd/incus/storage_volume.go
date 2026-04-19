@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -119,6 +120,10 @@ Unless specified through a prefix, all volume operations affect "custom" (user c
 	// List
 	storageVolumeListCmd := cmdStorageVolumeList{global: c.global, storage: c.storage, storageVolume: c}
 	cmd.AddCommand(storageVolumeListCmd.command())
+
+	// NBD
+	storageVolumeNBDCmd := cmdStorageVolumeNBD{global: c.global, storage: c.storage, storageVolume: c}
+	cmd.AddCommand(storageVolumeNBDCmd.Command())
 
 	// Rename
 	storageVolumeRenameCmd := cmdStorageVolumeRename{global: c.global, storage: c.storage, storageVolume: c}
@@ -2598,14 +2603,14 @@ incus file pull local v1 foo/etc/hosts -
 }
 
 // pull runs the post-parsing command logic.
-func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Parsed, targetFile string) error {
+func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Parsed, target string) error {
 	d := parsedPool.RemoteServer
 	poolName := parsedPool.RemoteObject.String
 	volName := parsedPath.List[0].String
 	fPath := "/" + parsedPath.List[1].String
-	target, targetIsDir := normalizePath(targetFile)
-	targetExists := true
 
+	targetIsDir := strings.HasSuffix(target, "/")
+	targetExists := true
 	targetInfo, err := os.Stat(target)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
@@ -2727,17 +2732,10 @@ func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Pars
 
 		defer func() { _ = src.Close() }()
 
-		for {
-			// Read 1MB at a time.
-			_, err = io.CopyN(writer, src, 1024*1024)
-			if err != nil {
-				if err == io.EOF {
-					break
-				}
-
-				progress.Done("")
-				return err
-			}
+		_, err = util.SafeCopy(writer, src)
+		if err != nil {
+			progress.Done("")
+			return err
 		}
 	}
 
@@ -3933,6 +3931,123 @@ func (c *cmdStorageVolumeImport) run(cmd *cobra.Command, args []string) error {
 	}
 
 	progress.Done("")
+
+	return nil
+}
+
+// NBD.
+type cmdStorageVolumeNBD struct {
+	global        *cmdGlobal
+	storage       *cmdStorage
+	storageVolume *cmdStorageVolume
+
+	flagAddress  string
+	flagWritable bool
+}
+
+var cmdStorageVolumeNBDUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.StorageVolumeType.Optional(), u.Volume)}
+
+// Command returns a cobra.Command for use with (*cobra.Command).AddCommand.
+func (c *cmdStorageVolumeNBD) Command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("nbd", cmdStorageVolumeNBDUsage...)
+	cmd.Short = i18n.G("NBD access to a block storage volume")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
+		`NBD access to a block storage volume.`))
+
+	cmd.Flags().StringVar(&c.flagAddress, "address", "", i18n.G("Specific address to listen on"))
+	cmd.Flags().BoolVar(&c.flagWritable, "writable", false, i18n.G("Get write access to the disk"))
+
+	cmd.RunE = c.Run
+
+	// completion for pool, volume, host path
+	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return c.global.cmpStoragePools(toComplete)
+		}
+
+		if len(args) == 1 {
+			return c.global.cmpStoragePoolVolumes(args[0])
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return cmd
+}
+
+// Run runs the actual command logic.
+func (c *cmdStorageVolumeNBD) Run(cmd *cobra.Command, args []string) error {
+	parsed, err := cmdStorageVolumeNBDUsage.Parse(c.global.conf, cmd, args)
+	if err != nil {
+		return err
+	}
+
+	d := parsed[0].RemoteServer
+	poolName := parsed[0].RemoteObject.String
+	volType := parsed[1].List[0].Get("custom")
+	volName := parsed[1].List[1].String
+
+	// Check if the pool and the volume exist before starting the SFTP server.
+	_, _, err = d.GetStoragePoolVolume(poolName, volType, volName)
+	if err != nil {
+		return err
+	}
+
+	// Proxy to a local listener.
+	listenAddr := c.flagAddress
+
+	if listenAddr == "" {
+		listenAddr = "127.0.0.1:0" // Listen on a random local port if not specified.
+	}
+
+	listener, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return fmt.Errorf(i18n.G("Failed to listen for connection: %w"), err)
+	}
+
+	fmt.Printf(i18n.G("NBD listening on %v")+"\n", listener.Addr())
+
+	// Wait for a connection.
+	nConn, err := listener.Accept()
+	if err != nil {
+		return fmt.Errorf(i18n.G("Failed to accept incoming connection: %w"), err)
+	}
+
+	defer func() { _ = nConn.Close() }()
+
+	fmt.Printf(i18n.G("NBD client connected %q")+"\n", nConn.RemoteAddr())
+	defer fmt.Printf(i18n.G("NBD client disconnected %q")+"\n", nConn.RemoteAddr())
+
+	// Connect to NBD.
+	conn, err := d.GetStoragePoolVolumeBlockNBDConn(poolName, volType, volName, incus.StorageVolumeNBDPost{Writable: c.flagWritable})
+	if err != nil {
+		return fmt.Errorf(i18n.G("NBD connection failed: %v")+"\n", err)
+	}
+
+	defer func() { _ = conn.Close() }()
+
+	// Proxy the traffic.
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+
+		_, _ = util.SafeCopy(conn, nConn)
+		_ = conn.Close()
+		_ = nConn.Close()
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, _ = util.SafeCopy(nConn, conn)
+		_ = conn.Close()
+		_ = nConn.Close()
+	}()
+
+	wg.Wait()
 
 	return nil
 }

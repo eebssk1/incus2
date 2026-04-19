@@ -74,6 +74,12 @@ var storagePoolVolumeTypeCmd = APIEndpoint{
 	Put:    APIEndpointAction{Handler: storagePoolVolumePut, AccessHandler: allowPermission(auth.ObjectTypeStorageVolume, auth.EntitlementCanEdit, "poolName", "type", "volumeName", "location")},
 }
 
+var storagePoolVolumeTypeNBDCmd = APIEndpoint{
+	Path: "storage-pools/{poolName}/volumes/{type}/{volumeName}/nbd",
+
+	Get: APIEndpointAction{Handler: storagePoolVolumeTypeNBDHandler, AccessHandler: allowPermission(auth.ObjectTypeStorageVolume, auth.EntitlementCanConnectNBD, "poolName", "type", "volumeName", "location")},
+}
+
 var storagePoolVolumeTypeSFTPCmd = APIEndpoint{
 	Path: "storage-pools/{poolName}/volumes/{type}/{volumeName}/sftp",
 
@@ -2547,7 +2553,7 @@ func createStoragePoolVolumeFromISO(s *state.State, r *http.Request, requestProj
 	reverter.Add(func() { _ = isoFile.Close() })
 
 	// Stream uploaded ISO data into temporary file.
-	size, err := io.Copy(isoFile, data)
+	size, err := util.SafeCopy(isoFile, data)
 	if err != nil {
 		return response.InternalError(err)
 	}
@@ -2600,7 +2606,7 @@ func createStoragePoolVolumeFromBackup(s *state.State, r *http.Request, requestP
 	reverter.Add(func() { _ = backupFile.Close() })
 
 	// Stream uploaded backup data into temporary file.
-	_, err = io.Copy(backupFile, data)
+	_, err = util.SafeCopy(backupFile, data)
 	if err != nil {
 		return response.InternalError(err)
 	}
