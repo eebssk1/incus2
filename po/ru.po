@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: lxd\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
 "POT-Creation-Date: 2026-04-25 19:43+0200\n"
-"PO-Revision-Date: 2026-04-25 16:09+0000\n"
+"PO-Revision-Date: 2026-04-27 17:09+0000\n"
 "Last-Translator: Kazantsev Mikhail <kazan417@mail.ru>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/incus/cli/ru/>\n"
 "Language: ru\n"
@@ -1711,7 +1711,7 @@ msgstr "Тип контента: %s"
 #: cmd/incus/info.go:132
 #, c-format
 msgid "Control: %s (%s)"
-msgstr "Контроль: %s (%s)"
+msgstr "api контроля визуализации: %s (%s)"
 
 #: cmd/incus/copy.go:64 cmd/incus/move.go:65
 msgid "Copy a stateful instance stateless"
@@ -1777,7 +1777,7 @@ msgstr ""
 #: cmd/incus/config_device.go:365 cmd/incus/config_device.go:366
 msgid "Copy profile inherited devices and override configuration keys"
 msgstr ""
-"Копировать унаследованные устройства профиля и переопределить ключи "
+"Копировать унаследованные устройства профиля и переопределить параметры "
 "конфигурации"
 
 #: cmd/incus/profile.go:271 cmd/incus/profile.go:272
@@ -2035,7 +2035,7 @@ msgstr "Текущее количество VF: %d"
 
 #: cmd/incus/network_forward.go:144
 msgid "DEFAULT TARGET ADDRESS"
-msgstr "АДРЕС ЦЕЛИ ПО УМОЛЧАНИЮ"
+msgstr "ЦЕЛЕВОЙ АДРЕС ПО УМОЛЧАНИЮ"
 
 #: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:464
 #: cmd/incus/config_trust.go:417 cmd/incus/image.go:1074
