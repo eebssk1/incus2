@@ -453,6 +453,11 @@ func (d *common) VolumeSnapshots(vol Volume, op *operations.Operation) ([]string
 	return nil, ErrNotSupported
 }
 
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *common) CanRestoreVolume(vol Volume, snapshotName string) error {
+	return nil
+}
+
 // RestoreVolume resets a volume to its snapshotted state.
 func (d *common) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
 	return ErrNotSupported

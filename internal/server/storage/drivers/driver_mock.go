@@ -206,6 +206,11 @@ func (d *mock) VolumeSnapshots(vol Volume, op *operations.Operation) ([]string, 
 	return nil, nil
 }
 
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *mock) CanRestoreVolume(vol Volume, snapshotName string) error {
+	return nil
+}
+
 // RestoreVolume restores a volume from a snapshot.
 func (d *mock) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
 	return nil
