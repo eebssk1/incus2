@@ -957,7 +957,7 @@ func (c *cmdNetworkACLRule) commandRemove() *cobra.Command {
 	cmd.Aliases = []string{"delete", "rm"}
 	cmd.Short = i18n.G("Remove rules from an ACL")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Remove rules from an ACL"))
-	cli.AddBoolFlag(cmd.Flags(), &c.flagRemoveForce, "force", i18n.G("Remove all rules that match"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRemoveForce, "force|f", i18n.G("Remove all rules that match"))
 
 	cmd.RunE = c.runRemove
 

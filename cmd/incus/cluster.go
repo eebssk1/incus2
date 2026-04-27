@@ -1501,7 +1501,7 @@ func (c *cmdClusterRestore) command() *cobra.Command {
 func (c *cmdClusterEvacuateAction) command() *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.RunE = c.run
-	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force", i18n.G(`Force evacuation without user confirmation`))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G(`Force evacuation without user confirmation`))
 
 	return cmd
 }

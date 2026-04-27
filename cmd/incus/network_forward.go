@@ -909,7 +909,7 @@ func (c *cmdNetworkForwardPort) commandRemove() *cobra.Command {
 	cmd.Aliases = []string{"delete", "rm"}
 	cmd.Short = i18n.G("Remove ports from a forward")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Remove ports from a forward"))
-	cli.AddBoolFlag(cmd.Flags(), &c.flagRemoveForce, "force", i18n.G("Remove all ports that match"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRemoveForce, "force|f", i18n.G("Remove all ports that match"))
 	cmd.RunE = c.runRemove
 
 	cli.AddStringFlag(cmd.Flags(), &c.networkForward.flagTarget, "target", "", "", i18n.G("Cluster member name"))

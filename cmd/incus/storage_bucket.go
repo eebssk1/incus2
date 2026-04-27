@@ -1297,7 +1297,7 @@ func (c *cmdStorageBucketExport) command() *cobra.Command {
 
 	cli.AddStringFlag(cmd.Flags(), &c.flagCompressionAlgorithm, "compression", "", "", i18n.G("Define a compression algorithm: for backup or none"))
 	cli.AddStringFlag(cmd.Flags(), &c.storageBucket.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force", i18n.G("Force overwriting existing backup file"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force overwriting existing backup file"))
 
 	cmd.RunE = c.run
 
