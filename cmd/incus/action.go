@@ -158,8 +158,7 @@ func (c *cmdAction) command(action string) *cobra.Command {
 	}
 
 	if slices.Contains([]string{"start", "restart", "stop"}, action) {
-		cmd.Flags().StringVar(&c.flagConsole, "console", "", i18n.G("Immediately attach to the console")+"``")
-		cmd.Flags().Lookup("console").NoOptDefVal = "console"
+		cli.AddStringFlag(cmd.Flags(), &c.flagConsole, "console", "", "console", i18n.G("Immediately attach to the console"))
 	}
 
 	if slices.Contains([]string{"restart", "stop"}, action) {

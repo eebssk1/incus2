@@ -270,7 +270,7 @@ func (c *cmdProfileCopy) command() *cobra.Command {
 	cmd.Aliases = []string{"cp"}
 	cmd.Short = i18n.G("Copy profiles")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Copy profiles`))
-	cmd.Flags().StringVar(&c.flagTargetProject, "target-project", "", i18n.G("Copy to a project different from the source")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagTargetProject, "target-project", "", "", i18n.G("Copy to a project different from the source"))
 	cmd.Flags().BoolVar(&c.flagRefresh, "refresh", false, i18n.G("Update the target profile from the source if it already exists"))
 
 	cmd.RunE = c.run
@@ -350,7 +350,7 @@ incus profile create p1 < config.yaml
 
 	cmd.RunE = c.run
 
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Profile description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Profile description"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
@@ -694,8 +694,8 @@ d - Description
 u - Used By`))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultProfileColumns, i18n.G("Columns")+"``")
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultProfileColumns, "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("Display profiles from all projects"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {

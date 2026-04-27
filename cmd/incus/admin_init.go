@@ -53,12 +53,12 @@ func (c *cmdAdminInit) command() *cobra.Command {
 	cmd.Flags().BoolVar(&c.flagPreseed, "preseed", false, i18n.G("Pre-seed mode, expects YAML config from stdin"))
 	cmd.Flags().BoolVar(&c.flagDump, "dump", false, i18n.G("Dump YAML config to stdout"))
 
-	cmd.Flags().StringVar(&c.flagNetworkAddress, "network-address", "", i18n.G("Address to bind to (default: none)")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagNetworkAddress, "network-address", "", "", i18n.G("Address to bind to (default: none)"))
 	cmd.Flags().IntVar(&c.flagNetworkPort, "network-port", -1, fmt.Sprintf(i18n.G("Port to bind to (default: %d)")+"``", ports.HTTPSDefaultPort))
-	cmd.Flags().StringVar(&c.flagStorageBackend, "storage-backend", "", i18n.G("Storage backend to use (btrfs, dir, lvm or zfs, default: dir)")+"``")
-	cmd.Flags().StringVar(&c.flagStorageDevice, "storage-create-device", "", i18n.G("Setup device based storage using DEVICE")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagStorageBackend, "storage-backend", "", "", i18n.G("Storage backend to use (btrfs, dir, lvm or zfs, default: dir)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagStorageDevice, "storage-create-device", "", "", i18n.G("Setup device based storage using DEVICE"))
 	cmd.Flags().IntVar(&c.flagStorageLoopSize, "storage-create-loop", -1, i18n.G("Setup loop based storage with SIZE in GiB")+"``")
-	cmd.Flags().StringVar(&c.flagStoragePool, "storage-pool", "", i18n.G("Storage pool to use or create")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagStoragePool, "storage-pool", "", "", i18n.G("Storage pool to use or create"))
 
 	return cmd
 }
