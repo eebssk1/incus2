@@ -110,7 +110,7 @@ incus file create --type=symlink foo/bar baz
 	cli.AddIntFlag(cmd.Flags(), &c.file.flagGID, "gid", -1, i18n.G("Set the file's gid on create"))
 	cli.AddIntFlag(cmd.Flags(), &c.file.flagUID, "uid", -1, i18n.G("Set the file's uid on create"))
 	cli.AddStringFlag(cmd.Flags(), &c.file.flagMode, "mode", "", "", i18n.G("Set the file's perms on create"))
-	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type", "file", "", i18n.G("The type to create (file, symlink, or directory)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "file", "", i18n.G("The type to create (file, symlink, or directory)"))
 
 	cmd.RunE = c.run
 

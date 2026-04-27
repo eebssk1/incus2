@@ -552,7 +552,7 @@ incus storage volume create default foo < config.yaml
     Create custom storage volume "foo" in pool "default" with configuration from config.yaml`))
 
 	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cli.AddStringFlag(cmd.Flags(), &c.flagContentType, "type", "filesystem", "", i18n.G("Content type, block or filesystem"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagContentType, "type|t", "filesystem", "", i18n.G("Content type, block or filesystem"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Volume description"))
 
 	cmd.RunE = c.run
@@ -2167,7 +2167,7 @@ incus file create --type=symlink foo bar/baz qux
 	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagGID, "gid", -1, i18n.G("Set the file's gid on create"))
 	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagUID, "uid", -1, i18n.G("Set the file's uid on create"))
 	cli.AddStringFlag(cmd.Flags(), &c.storageVolumeFile.flagMode, "mode", "", "", i18n.G("Set the file's perms on create"))
-	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type", "file", "", i18n.G("The type to create (file, symlink, or directory)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "file", "", i18n.G("The type to create (file, symlink, or directory)"))
 
 	cmd.RunE = c.run
 
@@ -3856,7 +3856,7 @@ incus storage volume import default some-installer.iso installer --type=iso
     Create a new custom volume storing some-installer.iso for use as a CD-ROM image`))
 	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
-	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type", "", "", i18n.G("Import type, backup or iso (default \"backup\")"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "", "", i18n.G("Import type, backup or iso (default \"backup\")"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {

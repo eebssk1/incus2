@@ -316,7 +316,7 @@ incus network peer create default peer3 web/default < config.yaml
 
 	cmd.RunE = c.run
 
-	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type", "local", "", i18n.G("Type of peer (local or remote)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "local", "", i18n.G("Type of peer (local or remote)"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Peer description"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
