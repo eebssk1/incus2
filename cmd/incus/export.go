@@ -46,14 +46,11 @@ incus export u1 -
 	Download a backup tarball with it written to the standard output.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagInstanceOnly, "instance-only", false,
-		i18n.G("Whether or not to only backup the instance (without snapshots)"))
-	cmd.Flags().BoolVar(&c.flagRootOnly, "root-only", false,
-		i18n.G("Whether or not to only backup the instance (without dependent volumes)"))
-	cmd.Flags().BoolVar(&c.flagOptimizedStorage, "optimized-storage", false,
-		i18n.G("Use storage driver optimized format (can only be restored on a similar pool)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagInstanceOnly, "instance-only", i18n.G("Whether or not to only backup the instance (without snapshots)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRootOnly, "root-only", i18n.G("Whether or not to only backup the instance (without dependent volumes)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagOptimizedStorage, "optimized-storage", i18n.G("Use storage driver optimized format (can only be restored on a similar pool)"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagCompressionAlgorithm, "compression", "", "", i18n.G("Compression algorithm to use (none for uncompressed)"))
-	cmd.Flags().BoolVar(&c.flagForce, "force", false, i18n.G("Force overwriting existing backup file"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force", i18n.G("Force overwriting existing backup file"))
 
 	return cmd
 }

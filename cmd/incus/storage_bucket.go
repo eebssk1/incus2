@@ -369,7 +369,7 @@ func (c *cmdStorageBucketGet) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Get values for storage bucket configuration keys`))
 
 	cli.AddStringFlag(cmd.Flags(), &c.storageBucket.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a storage bucket property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a storage bucket property"))
 	cmd.RunE = c.run
 
 	return cmd
@@ -460,7 +460,7 @@ Pre-defined column shorthand chars:
   L - Location of the storage bucket (e.g. its cluster member)`))
 
 	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
-	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("Display storage pool buckets from all projects"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAllProjects, "all-projects", i18n.G("Display storage pool buckets from all projects"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultStorageBucketColumns, "", i18n.G("Columns"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
@@ -598,7 +598,7 @@ For backward compatibility, a single configuration key may still be set with:
     incus storage bucket set [<remote>:]<pool> <bucket> <key> <value>`))
 
 	cli.AddStringFlag(cmd.Flags(), &c.storageBucket.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a storage bucket property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a storage bucket property"))
 	cmd.RunE = c.run
 
 	return cmd
@@ -756,7 +756,7 @@ func (c *cmdStorageBucketUnset) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Unset storage bucket configuration keys`))
 
 	cli.AddStringFlag(cmd.Flags(), &c.storageBucket.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a storage bucket property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a storage bucket property"))
 	cmd.RunE = c.run
 
 	return cmd
@@ -1297,7 +1297,7 @@ func (c *cmdStorageBucketExport) command() *cobra.Command {
 
 	cli.AddStringFlag(cmd.Flags(), &c.flagCompressionAlgorithm, "compression", "", "", i18n.G("Define a compression algorithm: for backup or none"))
 	cli.AddStringFlag(cmd.Flags(), &c.storageBucket.flagTarget, "target", "", "", i18n.G("Cluster member name"))
-	cmd.Flags().BoolVar(&c.flagForce, "force", false, i18n.G("Force overwriting existing backup file"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force", i18n.G("Force overwriting existing backup file"))
 
 	cmd.RunE = c.run
 

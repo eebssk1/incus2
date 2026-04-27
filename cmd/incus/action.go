@@ -148,13 +148,13 @@ func (c *cmdAction) command(action string) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.RunE = c.run
 
-	cmd.Flags().BoolVar(&c.flagAll, "all", false, i18n.G("Run against all instances"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all", i18n.G("Run against all instances"))
 
 	switch action {
 	case "stop":
-		cmd.Flags().BoolVar(&c.flagStateful, "stateful", false, i18n.G("Store the instance state"))
+		cli.AddBoolFlag(cmd.Flags(), &c.flagStateful, "stateful", i18n.G("Store the instance state"))
 	case "start":
-		cmd.Flags().BoolVar(&c.flagStateless, "stateless", false, i18n.G("Ignore the instance state"))
+		cli.AddBoolFlag(cmd.Flags(), &c.flagStateless, "stateless", i18n.G("Ignore the instance state"))
 	}
 
 	if slices.Contains([]string{"start", "restart", "stop"}, action) {
@@ -162,7 +162,7 @@ func (c *cmdAction) command(action string) *cobra.Command {
 	}
 
 	if slices.Contains([]string{"restart", "stop"}, action) {
-		cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Force the instance to stop"))
+		cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force the instance to stop"))
 		cli.AddIntFlag(cmd.Flags(), &c.flagTimeout, "timeout", -1, i18n.G("Time to wait for the instance to shutdown cleanly"))
 	}
 

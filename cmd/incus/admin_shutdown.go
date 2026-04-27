@@ -41,7 +41,7 @@ func (c *cmdAdminShutdown) command() *cobra.Command {
   shutdown, especially if a non-standard timeout was configured for them.`))
 	cmd.RunE = c.run
 	cli.AddIntFlag(cmd.Flags(), &c.flagTimeout, "timeout|t", 0, "Number of seconds to wait before giving up")
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, "Force shutdown instead of waiting for running operations to finish"+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", "Force shutdown instead of waiting for running operations to finish")
 
 	return cmd
 }

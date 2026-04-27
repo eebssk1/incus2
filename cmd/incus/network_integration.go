@@ -335,7 +335,7 @@ func (c *cmdNetworkIntegrationGet) command() *cobra.Command {
 		`Get values for network integration configuration keys`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a network integration property"))
 	return cmd
 }
 
@@ -570,7 +570,7 @@ For backward compatibility, a single configuration key may still be set with:
     incus network integration set [<remote>:]<network integration> <key> <value>`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a network integration property"))
 	return cmd
 }
 
@@ -639,7 +639,7 @@ func (c *cmdNetworkIntegrationUnset) command() *cobra.Command {
 		`Unset network integration configuration keys`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a network integration property"))
 	return cmd
 }
 

@@ -62,9 +62,9 @@ incus exec c1 -- ls -lh /
 	cmd.RunE = c.run
 	cli.AddStringArrayFlag(cmd.Flags(), &c.flagEnvironment, "env", i18n.G("Environment variable to set (e.g. HOME=/home/foo)"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagMode, "mode", "auto", "", i18n.G("Override the terminal mode (auto, interactive or non-interactive)"))
-	cmd.Flags().BoolVarP(&c.flagForceInteractive, "force-interactive", "t", false, i18n.G("Force pseudo-terminal allocation"))
-	cmd.Flags().BoolVarP(&c.flagForceNonInteractive, "force-noninteractive", "T", false, i18n.G("Disable pseudo-terminal allocation"))
-	cmd.Flags().BoolVarP(&c.flagDisableStdin, "disable-stdin", "n", false, i18n.G("Disable stdin (reads from /dev/null)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForceInteractive, "force-interactive|t", i18n.G("Force pseudo-terminal allocation"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForceNonInteractive, "force-noninteractive|T", i18n.G("Disable pseudo-terminal allocation"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagDisableStdin, "disable-stdin|n", i18n.G("Disable stdin (reads from /dev/null)"))
 	cmd.Flags().Uint32Var(&c.flagUser, "user", 0, i18n.G("User ID to run the command as (default 0)")+"``")
 	cmd.Flags().Uint32Var(&c.flagGroup, "group", 0, i18n.G("Group ID to run the command as (default 0)")+"``")
 	cli.AddStringFlag(cmd.Flags(), &c.flagCwd, "cwd", "", "", i18n.G("Directory to run the command in (default /root)"))

@@ -48,10 +48,10 @@ func (c *cmdAdminInit) command() *cobra.Command {
   init --dump
 `
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagAuto, "auto", false, i18n.G("Automatic (non-interactive) mode"))
-	cmd.Flags().BoolVar(&c.flagMinimal, "minimal", false, i18n.G("Minimal configuration (non-interactive)"))
-	cmd.Flags().BoolVar(&c.flagPreseed, "preseed", false, i18n.G("Pre-seed mode, expects YAML config from stdin"))
-	cmd.Flags().BoolVar(&c.flagDump, "dump", false, i18n.G("Dump YAML config to stdout"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAuto, "auto", i18n.G("Automatic (non-interactive) mode"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagMinimal, "minimal", i18n.G("Minimal configuration (non-interactive)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagPreseed, "preseed", i18n.G("Pre-seed mode, expects YAML config from stdin"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagDump, "dump", i18n.G("Dump YAML config to stdout"))
 
 	cli.AddStringFlag(cmd.Flags(), &c.flagNetworkAddress, "network-address", "", "", i18n.G("Address to bind to (default: none)"))
 	cli.AddIntFlag(cmd.Flags(), &c.flagNetworkPort, "network-port", -1, fmt.Sprintf(i18n.G("Port to bind to (default: %d)"), ports.HTTPSDefaultPort))

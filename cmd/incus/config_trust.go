@@ -97,7 +97,7 @@ func (c *cmdConfigTrustAdd) command() *cobra.Command {
 This will issue a trust token to be used by the client to add itself to the trust store.
 `))
 
-	cmd.Flags().BoolVar(&c.flagRestricted, "restricted", false, i18n.G("Restrict the certificate to one or more projects"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRestricted, "restricted", i18n.G("Restrict the certificate to one or more projects"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagProjects, "projects", "", "", i18n.G("List of projects to restrict the certificate to"))
 
 	cmd.RunE = c.run
@@ -173,7 +173,7 @@ The following certificate types are supported:
 - metrics
 `))
 
-	cmd.Flags().BoolVar(&c.flagRestricted, "restricted", false, i18n.G("Restrict the certificate to one or more projects"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRestricted, "restricted", i18n.G("Restrict the certificate to one or more projects"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagProjects, "projects", "", "", i18n.G("List of projects to restrict the certificate to"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagName, "name", "", "", i18n.G("Alternative certificate name"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type", "client", "", i18n.G("Type of certificate"))

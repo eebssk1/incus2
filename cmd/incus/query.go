@@ -43,8 +43,8 @@ func (c *cmdQuery) command() *cobra.Command {
 	cmd.Hidden = true
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagRespWait, "wait", false, i18n.G("Wait for the operation to complete"))
-	cmd.Flags().BoolVar(&c.flagRespRaw, "raw", false, i18n.G("Print the raw response"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRespWait, "wait", i18n.G("Wait for the operation to complete"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRespRaw, "raw", i18n.G("Print the raw response"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagAction, "request|X", "GET", "", i18n.G("Action"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagData, "data|d", "", "", i18n.G("Input data"))
 

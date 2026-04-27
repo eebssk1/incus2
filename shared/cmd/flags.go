@@ -30,3 +30,11 @@ func AddIntFlag(flags *pflag.FlagSet, flag *int, name string, defVal int, usage 
 	// backticks is a way to solve that.
 	flags.IntVarP(flag, name, shorthand, defVal, "``"+usage)
 }
+
+// AddBoolFlag adds a boolean flag to the given flag set.
+func AddBoolFlag(flags *pflag.FlagSet, flag *bool, name string, usage string) {
+	name, shorthand, _ := strings.Cut(name, "|")
+	// Cobra handles value hints and backticks in a way that doesn’t suit us. Prepending two
+	// backticks is a way to solve that.
+	flags.BoolVarP(flag, name, shorthand, false, "``"+usage)
+}
