@@ -4013,6 +4013,19 @@ func (d *lxc) Restore(sourceContainer instance.Instance, stateful bool, diskOnly
 
 	defer op.Done(nil)
 
+	// Initialize storage interface for the container.
+	pool, err := storagePools.LoadByInstance(d.state, d)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
+	err = pool.CanRestoreInstanceSnapshot(d, sourceContainer)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
 	// Stop the container.
 	wasRunning := d.IsRunning()
 	if wasRunning {
@@ -4072,13 +4085,6 @@ func (d *lxc) Restore(sourceContainer instance.Instance, stateful bool, diskOnly
 	// Wait for any file operations to complete.
 	// This is required so we can actually unmount the container and restore its rootfs.
 	d.stopForkfile(false)
-
-	// Initialize storage interface for the container and mount the rootfs for criu state check.
-	pool, err := storagePools.LoadByInstance(d.state, d)
-	if err != nil {
-		op.Done(err)
-		return err
-	}
 
 	d.logger.Debug("Mounting instance to check for CRIU state path existence")
 
