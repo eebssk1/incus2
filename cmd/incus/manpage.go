@@ -29,7 +29,7 @@ func (c *cmdManpage) command() *cobra.Command {
 		`Generate manpages for all commands`))
 	cmd.Hidden = true
 	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "man", "", i18n.G("Format (man|md|rest|yaml)"))
-	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all", i18n.G("Include less common commands"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all|a", i18n.G("Include less common commands"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		format := cmd.Flag("format").Value.String()

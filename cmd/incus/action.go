@@ -148,7 +148,7 @@ func (c *cmdAction) command(action string) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.RunE = c.run
 
-	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all", i18n.G("Run against all instances"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all|a", i18n.G("Run against all instances"))
 
 	switch action {
 	case "stop":
