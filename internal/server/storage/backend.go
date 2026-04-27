@@ -3513,6 +3513,93 @@ func (b *backend) DeleteInstanceSnapshot(inst instance.Instance, op *operations.
 	return nil
 }
 
+// CanRestoreInstanceSnapshot checks whether an instance snapshot can be restored.
+func (b *backend) CanRestoreInstanceSnapshot(inst instance.Instance, src instance.Instance) error {
+	l := b.logger.AddContext(logger.Ctx{"project": inst.Project().Name, "instance": inst.Name(), "src": src.Name()})
+	l.Debug("CanRestoreInstanceSnapshot started")
+	defer l.Debug("CanRestoreInstanceSnapshot finished")
+
+	reverter := revert.New()
+	defer reverter.Fail()
+
+	if inst.Type() != src.Type() {
+		return errors.New("Instance types must match")
+	}
+
+	if inst.IsSnapshot() {
+		return errors.New("Instance must not be snapshot")
+	}
+
+	if !src.IsSnapshot() {
+		return errors.New("Source instance must be a snapshot")
+	}
+
+	snaps, err := inst.Snapshots()
+	if err != nil {
+		return err
+	}
+
+	if len(snaps) > 0 && snaps[len(snaps)-1].Name() != src.Name() && inst.HasDependentDisk() {
+		return fmt.Errorf("Snapshot %q cannot be restored due to subsequent snapshot(s).", src.Name())
+	}
+
+	// Check we can convert the instance to the volume type needed.
+	volType, err := InstanceTypeToVolumeType(inst.Type())
+	if err != nil {
+		return err
+	}
+
+	contentType := InstanceContentType(inst)
+
+	// Load storage volume from database.
+	dbVol, err := VolumeDBGet(b, inst.Project().Name, inst.Name(), volType)
+	if err != nil {
+		return err
+	}
+
+	// Generate the effective root device volume for instance.
+	volStorageName := project.Instance(inst.Project().Name, inst.Name())
+	vol := b.GetVolume(volType, contentType, volStorageName, dbVol.Config)
+
+	_, snapshotName, isSnap := api.GetParentAndSnapshotName(src.Name())
+	if !isSnap {
+		return errors.New("Volume name must be a snapshot")
+	}
+
+	srcDBVol, err := VolumeDBGet(b, src.Project().Name, src.Name(), volType)
+	if err != nil {
+		return err
+	}
+
+	if dbVol.Config["block.type"] == drivers.BlockVolumeTypeQcow2 {
+		snapVol := b.GetVolume(volType, contentType, project.Instance(inst.Project().Name, src.Name()), srcDBVol.Config)
+		err = b.qcow2CanRestoreSnapshot(vol, snapVol, inst.Project().Name)
+		if err != nil {
+			var snapErr drivers.ErrDeleteSnapshots
+			if errors.As(err, &snapErr) {
+				return nil
+			}
+
+			return err
+		}
+
+		return nil
+	}
+
+	err = b.driver.CanRestoreVolume(vol, snapshotName)
+	if err != nil {
+		var snapErr drivers.ErrDeleteSnapshots
+		if errors.As(err, &snapErr) {
+			return nil
+		}
+
+		return err
+	}
+
+	reverter.Success()
+	return nil
+}
+
 // RestoreInstanceSnapshot restores an instance snapshot.
 func (b *backend) RestoreInstanceSnapshot(inst instance.Instance, src instance.Instance, op *operations.Operation) error {
 	l := b.logger.AddContext(logger.Ctx{"project": inst.Project().Name, "instance": inst.Name(), "src": src.Name()})
@@ -8196,11 +8283,10 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 	return nil
 }
 
-// qcow2RestoreSnapshot restores the QCOW2 volume snapshot.
-func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string, op *operations.Operation) error {
-	// Return if this is not a qcow2 image.
+// qcow2CanRestoreSnapshot checks if a qcow2 snapshot can be restored.
+func (b *backend) qcow2CanRestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string) error {
 	if vol.Config()["block.type"] != drivers.BlockVolumeTypeQcow2 {
-		return nil
+		return fmt.Errorf("Not a QCOW2 volume type")
 	}
 
 	snapVolDevPath, err := b.driver.GetQcow2BackingFilePath(snapVol)
@@ -8260,6 +8346,38 @@ func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volum
 			// Setup custom error to tell the backend what to delete.
 			err := drivers.ErrDeleteSnapshots{}
 			err.Snapshots = snapshots
+			return err
+		}
+
+		return nil
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// qcow2RestoreSnapshot restores the QCOW2 volume snapshot.
+func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string, op *operations.Operation) error {
+	// Return if this is not a qcow2 image.
+	if vol.Config()["block.type"] != drivers.BlockVolumeTypeQcow2 {
+		return nil
+	}
+
+	err := b.qcow2CanRestoreSnapshot(vol, snapVol, projectName)
+	if err != nil {
+		return err
+	}
+
+	snapVolDevPath, err := b.driver.GetQcow2BackingFilePath(snapVol)
+	if err != nil {
+		return err
+	}
+
+	err = vol.MountWithSnapshotsTask(func(_ string, _ map[string]string, op *operations.Operation) error {
+		parentDiskPath, err := b.driver.GetVolumeDiskPath(vol)
+		if err != nil {
 			return err
 		}
 

@@ -213,6 +213,11 @@ func (b *mockBackend) DeleteInstanceSnapshot(inst instance.Instance, op *operati
 	return nil
 }
 
+// CanRestoreInstanceSnapshot checks if an instance snapshot can be restored.
+func (b *mockBackend) CanRestoreInstanceSnapshot(inst instance.Instance, src instance.Instance) error {
+	return nil
+}
+
 func (b *mockBackend) RestoreInstanceSnapshot(inst instance.Instance, src instance.Instance, op *operations.Operation) error {
 	return nil
 }
