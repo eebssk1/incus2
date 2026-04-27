@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: incus\n"
         "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-        "POT-Creation-Date: 2026-04-25 19:43+0200\n"
+        "POT-Creation-Date: 2026-04-28 01:45+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,7 +76,7 @@ msgid   "### This is a YAML representation of the certificate.\n"
         "### Note that the fingerprint is shown but cannot be changed"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:397
+#: cmd/incus/cluster_group.go:398
 msgid   "### This is a YAML representation of the cluster group.\n"
         "### Any line starting with a '# will be ignored."
 msgstr  ""
@@ -202,7 +202,7 @@ msgid   "### This is a YAML representation of the network integration.\n"
         "### Note that the name is shown but cannot be changed"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:609
+#: cmd/incus/network_load_balancer.go:610
 msgid   "### This is a YAML representation of the network load balancer.\n"
         "### Any line starting with a '# will be ignored.\n"
         "###\n"
@@ -476,7 +476,7 @@ msgstr  ""
 msgid   "--target cannot be used with instances"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:129
+#: cmd/incus/admin_sql.go:128
 #, c-format
 msgid   "=> Query %d:"
 msgstr  ""
@@ -555,7 +555,7 @@ msgstr  ""
 msgid   "Action (defaults to GET)"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:739
+#: cmd/incus/cluster_group.go:740
 msgid   "Add a cluster member to a cluster group"
 msgstr  ""
 
@@ -567,11 +567,11 @@ msgstr  ""
 msgid   "Add addresses to a network address set"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:817
+#: cmd/incus/network_load_balancer.go:818
 msgid   "Add backend to a load balancer"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:816
+#: cmd/incus/network_load_balancer.go:817
 msgid   "Add backends to a load balancer"
 msgstr  ""
 
@@ -583,7 +583,7 @@ msgstr  ""
 msgid   "Add instance devices"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:738
+#: cmd/incus/cluster_group.go:739
 msgid   "Add member to group"
 msgstr  ""
 
@@ -630,7 +630,7 @@ msgstr  ""
 msgid   "Add ports to a forward"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:975 cmd/incus/network_load_balancer.go:976
+#: cmd/incus/network_load_balancer.go:976 cmd/incus/network_load_balancer.go:977
 msgid   "Add ports to a load balancer"
 msgstr  ""
 
@@ -842,11 +842,11 @@ msgstr  ""
 msgid   "BASE IMAGE"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:821
+#: cmd/incus/network_load_balancer.go:822
 msgid   "Backend description"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:1158
+#: cmd/incus/network_load_balancer.go:1159
 msgid   "Backend health:"
 msgstr  ""
 
@@ -1135,27 +1135,27 @@ msgstr  ""
 msgid   "Client version: %s\n"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:233
+#: cmd/incus/cluster_group.go:234
 #, c-format
 msgid   "Cluster group %s created"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:278
+#: cmd/incus/cluster_group.go:279
 #, c-format
 msgid   "Cluster group %s deleted"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:599
+#: cmd/incus/cluster_group.go:600
 #, c-format
 msgid   "Cluster group %s isn't currently applied to %s"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:670
+#: cmd/incus/cluster_group.go:671
 #, c-format
 msgid   "Cluster group %s renamed to %s"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:179
+#: cmd/incus/cluster_group.go:180
 msgid   "Cluster group description"
 msgstr  ""
 
@@ -1169,22 +1169,22 @@ msgstr  ""
 msgid   "Cluster member %s added to cluster groups %v"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:787
+#: cmd/incus/cluster_group.go:788
 #, c-format
 msgid   "Cluster member %s added to group %s"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:776
+#: cmd/incus/cluster_group.go:777
 #, c-format
 msgid   "Cluster member %s is already in group %s"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:619
+#: cmd/incus/cluster_group.go:620
 #, c-format
 msgid   "Cluster member %s removed from group %s"
 msgstr  ""
 
-#: cmd/incus/config.go:102 cmd/incus/config.go:382 cmd/incus/config.go:522 cmd/incus/config.go:689 cmd/incus/config.go:809 cmd/incus/copy.go:66 cmd/incus/create.go:69 cmd/incus/info.go:54 cmd/incus/move.go:67 cmd/incus/network.go:348 cmd/incus/network.go:798 cmd/incus/network.go:871 cmd/incus/network.go:1047 cmd/incus/network.go:1428 cmd/incus/network.go:1512 cmd/incus/network.go:1574 cmd/incus/network_forward.go:248 cmd/incus/network_forward.go:319 cmd/incus/network_forward.go:484 cmd/incus/network_forward.go:623 cmd/incus/network_forward.go:764 cmd/incus/network_forward.go:842 cmd/incus/network_forward.go:915 cmd/incus/network_load_balancer.go:251 cmd/incus/network_load_balancer.go:321 cmd/incus/network_load_balancer.go:469 cmd/incus/network_load_balancer.go:591 cmd/incus/network_load_balancer.go:743 cmd/incus/network_load_balancer.go:820 cmd/incus/network_load_balancer.go:885 cmd/incus/network_load_balancer.go:979 cmd/incus/network_load_balancer.go:1045 cmd/incus/storage.go:116 cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:799 cmd/incus/storage.go:892 cmd/incus/storage.go:971 cmd/incus/storage_bucket.go:114 cmd/incus/storage_bucket.go:203 cmd/incus/storage_bucket.go:253 cmd/incus/storage_bucket.go:371 cmd/incus/storage_bucket.go:600 cmd/incus/storage_bucket.go:705 cmd/incus/storage_bucket.go:758 cmd/incus/storage_bucket.go:856 cmd/incus/storage_bucket.go:982 cmd/incus/storage_bucket.go:1072 cmd/incus/storage_bucket.go:1121 cmd/incus/storage_bucket.go:1241 cmd/incus/storage_bucket.go:1299 cmd/incus/storage_bucket.go:1478 cmd/incus/storage_volume.go:347 cmd/incus/storage_volume.go:554 cmd/incus/storage_volume.go:649 cmd/incus/storage_volume.go:905 cmd/incus/storage_volume.go:1114 cmd/incus/storage_volume.go:1231 cmd/incus/storage_volume.go:1677 cmd/incus/storage_volume.go:1737 cmd/incus/storage_volume.go:1819 cmd/incus/storage_volume.go:1968 cmd/incus/storage_volume.go:2057 cmd/incus/storage_volume.go:3056 cmd/incus/storage_volume.go:3204 cmd/incus/storage_volume.go:3440 cmd/incus/storage_volume.go:3509 cmd/incus/storage_volume.go:3573 cmd/incus/storage_volume.go:3650 cmd/incus/storage_volume.go:3858
+#: cmd/incus/config.go:102 cmd/incus/config.go:382 cmd/incus/config.go:522 cmd/incus/config.go:689 cmd/incus/config.go:809 cmd/incus/copy.go:66 cmd/incus/create.go:69 cmd/incus/info.go:54 cmd/incus/move.go:67 cmd/incus/network.go:348 cmd/incus/network.go:798 cmd/incus/network.go:871 cmd/incus/network.go:1047 cmd/incus/network.go:1428 cmd/incus/network.go:1512 cmd/incus/network.go:1574 cmd/incus/network_forward.go:248 cmd/incus/network_forward.go:319 cmd/incus/network_forward.go:484 cmd/incus/network_forward.go:623 cmd/incus/network_forward.go:764 cmd/incus/network_forward.go:842 cmd/incus/network_forward.go:915 cmd/incus/network_load_balancer.go:251 cmd/incus/network_load_balancer.go:322 cmd/incus/network_load_balancer.go:470 cmd/incus/network_load_balancer.go:592 cmd/incus/network_load_balancer.go:744 cmd/incus/network_load_balancer.go:821 cmd/incus/network_load_balancer.go:886 cmd/incus/network_load_balancer.go:980 cmd/incus/network_load_balancer.go:1046 cmd/incus/storage.go:116 cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:799 cmd/incus/storage.go:892 cmd/incus/storage.go:971 cmd/incus/storage_bucket.go:114 cmd/incus/storage_bucket.go:203 cmd/incus/storage_bucket.go:253 cmd/incus/storage_bucket.go:371 cmd/incus/storage_bucket.go:600 cmd/incus/storage_bucket.go:705 cmd/incus/storage_bucket.go:758 cmd/incus/storage_bucket.go:856 cmd/incus/storage_bucket.go:982 cmd/incus/storage_bucket.go:1072 cmd/incus/storage_bucket.go:1121 cmd/incus/storage_bucket.go:1241 cmd/incus/storage_bucket.go:1299 cmd/incus/storage_bucket.go:1478 cmd/incus/storage_volume.go:347 cmd/incus/storage_volume.go:554 cmd/incus/storage_volume.go:649 cmd/incus/storage_volume.go:905 cmd/incus/storage_volume.go:1114 cmd/incus/storage_volume.go:1231 cmd/incus/storage_volume.go:1677 cmd/incus/storage_volume.go:1737 cmd/incus/storage_volume.go:1819 cmd/incus/storage_volume.go:1968 cmd/incus/storage_volume.go:2057 cmd/incus/storage_volume.go:3056 cmd/incus/storage_volume.go:3204 cmd/incus/storage_volume.go:3440 cmd/incus/storage_volume.go:3509 cmd/incus/storage_volume.go:3573 cmd/incus/storage_volume.go:3650 cmd/incus/storage_volume.go:3858
 msgid   "Cluster member name"
 msgstr  ""
 
@@ -1192,7 +1192,7 @@ msgstr  ""
 msgid   "Clustering enabled"
 msgstr  ""
 
-#: cmd/incus/cluster.go:170 cmd/incus/cluster.go:1124 cmd/incus/cluster_group.go:438 cmd/incus/config_trust.go:399 cmd/incus/config_trust.go:585 cmd/incus/image.go:1045 cmd/incus/image_alias.go:209 cmd/incus/list.go:140 cmd/incus/network.go:1044 cmd/incus/network.go:1242 cmd/incus/network_allocations.go:67 cmd/incus/network_forward.go:121 cmd/incus/network_integration.go:411 cmd/incus/network_load_balancer.go:128 cmd/incus/network_peer.go:117 cmd/incus/network_zone.go:122 cmd/incus/operation.go:149 cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:975 cmd/incus/snapshot.go:342 cmd/incus/storage.go:659 cmd/incus/storage_bucket.go:464 cmd/incus/storage_bucket.go:857 cmd/incus/storage_volume.go:1439 cmd/incus/storage_volume.go:3284 cmd/incus/top.go:67 cmd/incus/warning.go:98
+#: cmd/incus/cluster.go:170 cmd/incus/cluster.go:1124 cmd/incus/cluster_group.go:439 cmd/incus/config_trust.go:399 cmd/incus/config_trust.go:585 cmd/incus/image.go:1045 cmd/incus/image_alias.go:209 cmd/incus/list.go:140 cmd/incus/network.go:1044 cmd/incus/network.go:1242 cmd/incus/network_allocations.go:67 cmd/incus/network_forward.go:121 cmd/incus/network_integration.go:411 cmd/incus/network_load_balancer.go:128 cmd/incus/network_peer.go:117 cmd/incus/network_zone.go:122 cmd/incus/operation.go:149 cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:975 cmd/incus/snapshot.go:342 cmd/incus/storage.go:659 cmd/incus/storage_bucket.go:464 cmd/incus/storage_bucket.go:857 cmd/incus/storage_volume.go:1439 cmd/incus/storage_volume.go:3284 cmd/incus/top.go:67 cmd/incus/warning.go:98
 msgid   "Columns"
 msgstr  ""
 
@@ -1241,7 +1241,7 @@ msgstr  ""
 msgid   "Config option should be in the format KEY=VALUE"
 msgstr  ""
 
-#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:373 cmd/incus/config.go:265 cmd/incus/config.go:340 cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329 cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668 cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726 cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:705 cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670 cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569 cmd/incus/project.go:394 cmd/incus/storage.go:353 cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202 cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
+#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:374 cmd/incus/config.go:265 cmd/incus/config.go:340 cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329 cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668 cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726 cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706 cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670 cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569 cmd/incus/project.go:394 cmd/incus/storage.go:353 cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202 cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
 #, c-format
 msgid   "Config parsing error: %s"
 msgstr  ""
@@ -1563,7 +1563,7 @@ msgstr  ""
 msgid   "DEFAULT TARGET ADDRESS"
 msgstr  ""
 
-#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:464 cmd/incus/config_trust.go:417 cmd/incus/image.go:1074 cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076 cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155 cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427 cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139 cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871 cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:549 cmd/incus/storage.go:686 cmd/incus/storage_bucket.go:481 cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
+#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:465 cmd/incus/config_trust.go:417 cmd/incus/image.go:1074 cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076 cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155 cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427 cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139 cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871 cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:549 cmd/incus/storage.go:686 cmd/incus/storage_bucket.go:481 cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
 msgid   "DESCRIPTION"
 msgstr  ""
 
@@ -1626,7 +1626,7 @@ msgstr  ""
 msgid   "Delete background operations (will attempt to cancel)"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:251 cmd/incus/cluster_group.go:252
+#: cmd/incus/cluster_group.go:252 cmd/incus/cluster_group.go:253
 msgid   "Delete cluster groups"
 msgstr  ""
 
@@ -1682,7 +1682,7 @@ msgstr  ""
 msgid   "Delete network integrations"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:739 cmd/incus/network_load_balancer.go:740
+#: cmd/incus/network_load_balancer.go:740 cmd/incus/network_load_balancer.go:741
 msgid   "Delete network load balancers"
 msgstr  ""
 
@@ -2000,7 +2000,7 @@ msgstr  ""
 msgid   "EXPIRY DATE"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:303 cmd/incus/cluster_group.go:304
+#: cmd/incus/cluster_group.go:304 cmd/incus/cluster_group.go:305
 msgid   "Edit a cluster group"
 msgstr  ""
 
@@ -2052,7 +2052,7 @@ msgstr  ""
 msgid   "Edit network integration configurations as YAML"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:587 cmd/incus/network_load_balancer.go:588
+#: cmd/incus/network_load_balancer.go:588 cmd/incus/network_load_balancer.go:589
 msgid   "Edit network load balancer configurations as YAML"
 msgstr  ""
 
@@ -2103,7 +2103,7 @@ msgstr  ""
 msgid   "Edit trust configurations as YAML"
 msgstr  ""
 
-#: cmd/incus/cluster.go:211 cmd/incus/cluster.go:1153 cmd/incus/cluster_group.go:472 cmd/incus/config_trust.go:429 cmd/incus/config_trust.go:610 cmd/incus/image.go:1092 cmd/incus/image_alias.go:258 cmd/incus/list.go:528 cmd/incus/network.go:1091 cmd/incus/network.go:1280 cmd/incus/network_allocations.go:92 cmd/incus/network_forward.go:157 cmd/incus/network_integration.go:437 cmd/incus/network_load_balancer.go:163 cmd/incus/network_peer.go:150 cmd/incus/network_zone.go:158 cmd/incus/operation.go:181 cmd/incus/profile.go:741 cmd/incus/project.go:559 cmd/incus/remote.go:1002 cmd/incus/snapshot.go:376 cmd/incus/storage.go:698 cmd/incus/storage_bucket.go:498 cmd/incus/storage_bucket.go:882 cmd/incus/storage_volume.go:1597 cmd/incus/storage_volume.go:3387 cmd/incus/top.go:95 cmd/incus/warning.go:236
+#: cmd/incus/cluster.go:211 cmd/incus/cluster.go:1153 cmd/incus/cluster_group.go:473 cmd/incus/config_trust.go:429 cmd/incus/config_trust.go:610 cmd/incus/image.go:1092 cmd/incus/image_alias.go:258 cmd/incus/list.go:528 cmd/incus/network.go:1091 cmd/incus/network.go:1280 cmd/incus/network_allocations.go:92 cmd/incus/network_forward.go:157 cmd/incus/network_integration.go:437 cmd/incus/network_load_balancer.go:163 cmd/incus/network_peer.go:150 cmd/incus/network_zone.go:158 cmd/incus/operation.go:181 cmd/incus/profile.go:741 cmd/incus/project.go:559 cmd/incus/remote.go:1002 cmd/incus/snapshot.go:376 cmd/incus/storage.go:698 cmd/incus/storage_bucket.go:498 cmd/incus/storage_bucket.go:882 cmd/incus/storage_volume.go:1597 cmd/incus/storage_volume.go:3387 cmd/incus/top.go:95 cmd/incus/warning.go:236
 #, c-format
 msgid   "Empty column entry (redundant, leading or trailing command) in '%s'"
 msgstr  ""
@@ -2163,7 +2163,7 @@ msgstr  ""
 msgid   "Error retrieving aliases: %w"
 msgstr  ""
 
-#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:922 cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479 cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368 cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604 cmd/incus/network_load_balancer.go:523 cmd/incus/network_peer.go:560 cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167 cmd/incus/profile.go:1031 cmd/incus/project.go:810 cmd/incus/storage.go:845 cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871 cmd/incus/storage_volume.go:1914
+#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:923 cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479 cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368 cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604 cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560 cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167 cmd/incus/profile.go:1031 cmd/incus/project.go:810 cmd/incus/storage.go:845 cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871 cmd/incus/storage_volume.go:1914
 #, c-format
 msgid   "Error setting properties: %v"
 msgstr  ""
@@ -2178,7 +2178,7 @@ msgstr  ""
 msgid   "Error unsetting properties: %v"
 msgstr  ""
 
-#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:916 cmd/incus/network.go:1473 cmd/incus/network_acl.go:490 cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598 cmd/incus/network_load_balancer.go:517 cmd/incus/network_peer.go:554 cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161 cmd/incus/profile.go:1025 cmd/incus/project.go:804 cmd/incus/storage.go:839 cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865 cmd/incus/storage_volume.go:1908
+#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:917 cmd/incus/network.go:1473 cmd/incus/network_acl.go:490 cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598 cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554 cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161 cmd/incus/profile.go:1025 cmd/incus/project.go:804 cmd/incus/storage.go:839 cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865 cmd/incus/storage_volume.go:1908
 #, c-format
 msgid   "Error unsetting property: %v"
 msgstr  ""
@@ -2228,8 +2228,7 @@ msgid   "Execute a SQL query against the local or global database\n"
         "  The global database is common to all members in the cluster, and contains\n"
         "  cluster-specific data (such as profiles, containers, etc).\n"
         "\n"
-        "  If you are running a non-clustered server, the same applies, as that\n"
-        "  instance is effectively a single-member cluster.\n"
+        "  Non-clustered servers still have both local and global databases.\n"
         "\n"
         "  If <query> is the special value \"-\", then the query is read from\n"
         "  standard input.\n"
@@ -2613,7 +2612,7 @@ msgstr  ""
 msgid   "Failed to open target file %q: %w"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:104
+#: cmd/incus/admin_sql.go:103
 #, c-format
 msgid   "Failed to parse dump response: %w"
 msgstr  ""
@@ -2628,7 +2627,7 @@ msgstr  ""
 msgid   "Failed to read from file: %w"
 msgstr  ""
 
-#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:81
+#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:80
 #, c-format
 msgid   "Failed to read from stdin: %w"
 msgstr  ""
@@ -2653,7 +2652,7 @@ msgstr  ""
 msgid   "Failed to render the config: %w"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:98
+#: cmd/incus/admin_sql.go:97
 #, c-format
 msgid   "Failed to request dump: %w"
 msgstr  ""
@@ -2819,7 +2818,7 @@ msgstr  ""
 msgid   "Format (csv|json|table|yaml|compact|markdown), use suffix \",noheader\" to disable headers and \",header\" to enable if demanded, e.g. csv,header"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:58 cmd/incus/alias.go:111 cmd/incus/cluster.go:171 cmd/incus/cluster_group.go:439 cmd/incus/config_template.go:270 cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584 cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141 cmd/incus/network.go:1045 cmd/incus/network.go:1241 cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64 cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410 cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116 cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818 cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:519 cmd/incus/project.go:994 cmd/incus/remote.go:974 cmd/incus/snapshot.go:341 cmd/incus/storage.go:661 cmd/incus/storage_bucket.go:462 cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466 cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
+#: cmd/incus/admin_sql.go:57 cmd/incus/alias.go:111 cmd/incus/cluster.go:171 cmd/incus/cluster_group.go:440 cmd/incus/config_template.go:270 cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584 cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141 cmd/incus/network.go:1045 cmd/incus/network.go:1241 cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64 cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410 cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116 cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818 cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:519 cmd/incus/project.go:994 cmd/incus/remote.go:974 cmd/incus/snapshot.go:341 cmd/incus/storage.go:661 cmd/incus/storage_bucket.go:462 cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466 cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
 msgid   "Format (csv|json|table|yaml|compact|markdown), use suffix \",noheader\" to disable headers and \",header\" to enable it if missing, e.g. csv,header"
 msgstr  ""
 
@@ -2922,11 +2921,11 @@ msgstr  ""
 msgid   "Get a summary of resource allocations"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:1129
+#: cmd/incus/network_load_balancer.go:1130
 msgid   "Get current load balancer status"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:1130
+#: cmd/incus/network_load_balancer.go:1131
 msgid   "Get current load-balancer status"
 msgstr  ""
 
@@ -2938,7 +2937,7 @@ msgstr  ""
 msgid   "Get runtime information on networks"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:809
+#: cmd/incus/cluster_group.go:810
 msgid   "Get the key as a cluster group property"
 msgstr  ""
 
@@ -2958,7 +2957,7 @@ msgstr  ""
 msgid   "Get the key as a network integration property"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:407
+#: cmd/incus/network_load_balancer.go:408
 msgid   "Get the key as a network load balancer property"
 msgstr  ""
 
@@ -3002,7 +3001,7 @@ msgstr  ""
 msgid   "Get the key as an instance property"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:806
+#: cmd/incus/cluster_group.go:807
 msgid   "Get values for cluster group configuration keys"
 msgstr  ""
 
@@ -3034,7 +3033,7 @@ msgstr  ""
 msgid   "Get values for network integration configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:403 cmd/incus/network_load_balancer.go:404
+#: cmd/incus/network_load_balancer.go:404 cmd/incus/network_load_balancer.go:405
 msgid   "Get values for network load balancer configuration keys"
 msgstr  ""
 
@@ -3676,11 +3675,11 @@ msgid   "List all active cluster member join tokens\n"
         "  E - Expires At"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:417
+#: cmd/incus/cluster_group.go:418
 msgid   "List all the cluster groups"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:418
+#: cmd/incus/cluster_group.go:419
 msgid   "List all the cluster groups\n"
         "\n"
         "Default column layout: ndm\n"
@@ -3709,7 +3708,7 @@ msgstr  ""
 msgid   "List all the cluster members\n"
         "\n"
         "	The -c option takes a (optionally comma-separated) list of arguments\n"
-        "	that control which image attributes to output when displaying in table\n"
+        "	that control which cluster members attributes to output when displaying in table\n"
         "	or csv format.\n"
         "\n"
         "	Default column layout is: nurafdsm\n"
@@ -3780,8 +3779,8 @@ msgid   "List available network load balancers\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which instance attributes to output when displaying in table or csv\n"
-        "format.\n"
+        "which network load balancer attributes to output when displaying\n"
+        "in table or csv format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
         "or (extended) config keys.\n"
@@ -3806,7 +3805,7 @@ msgid   "List available network peers\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which network zone attributes to output when displaying in table or csv\n"
+        "which network peer attributes to output when displaying in table or csv\n"
         "format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -3923,8 +3922,8 @@ msgid   "List background operations\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which instance attributes to output when displaying in table or csv\n"
-        "format.\n"
+        "which attributes of background operations to output when displaying\n"
+        "in table or csv format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
         "or (extended) config keys.\n"
@@ -3953,7 +3952,7 @@ msgid   "List image aliases\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which instance attributes to output when displaying in table or csv\n"
+        "which attributes of image aliases to output when displaying in table or csv\n"
         "format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4018,7 +4017,7 @@ msgid   "List instance snapshots\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which network zone attributes to output when displaying in table or csv\n"
+        "which snapshots attributes to output when displaying in table or csv\n"
         "format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4127,8 +4126,8 @@ msgid   "List network allocations in use\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which instance attributes to output when displaying in table or csv\n"
-        "format.\n"
+        "which network allocations attribute attributes to output when\n"
+        "displaying in table or csv format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
         "or (extended) config keys.\n"
@@ -4154,7 +4153,7 @@ msgid   "List network integrations\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which network zone attributes to output when displaying in table or csv\n"
+        "which network integrations attributes to output when displaying in table or csv\n"
         "format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4197,7 +4196,7 @@ msgid   "List profiles\n"
         "  - \"description=.*bar.*\" lists all profiles with a description that contains \"bar\"\n"
         "\n"
         "The -c option takes a (optionally comma-separated) list of arguments\n"
-        "that control which image attributes to output when displaying in table\n"
+        "that control which profile attributes to output when displaying in table\n"
         "or csv format.\n"
         "\n"
         "Default column layout is: ndu\n"
@@ -4342,7 +4341,7 @@ msgid   "List the available remotes\n"
         "\n"
         "== Columns ==\n"
         "The -c option takes a comma separated list of arguments that control\n"
-        "which instance attributes to output when displaying in table or csv\n"
+        "which remote attributes to output when displaying in table or csv\n"
         "format.\n"
         "\n"
         "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4416,7 +4415,7 @@ msgstr  ""
 msgid   "List, show and delete background operations"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:322
+#: cmd/incus/network_load_balancer.go:323
 msgid   "Load balancer description"
 msgstr  ""
 
@@ -4493,7 +4492,7 @@ msgstr  ""
 msgid   "MANAGED"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:463
+#: cmd/incus/cluster_group.go:464
 msgid   "MEMBERS"
 msgstr  ""
 
@@ -4645,11 +4644,11 @@ msgstr  ""
 msgid   "Manage network integrations"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:798 cmd/incus/network_load_balancer.go:799
+#: cmd/incus/network_load_balancer.go:799 cmd/incus/network_load_balancer.go:800
 msgid   "Manage network load balancer backends"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:957 cmd/incus/network_load_balancer.go:958
+#: cmd/incus/network_load_balancer.go:958 cmd/incus/network_load_balancer.go:959
 msgid   "Manage network load balancer ports"
 msgstr  ""
 
@@ -4893,7 +4892,7 @@ msgstr  ""
 msgid   "Moving the storage volume: %s"
 msgstr  ""
 
-#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1101
+#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1102
 msgid   "Multiple ports match. Use --force to remove them all"
 msgstr  ""
 
@@ -4905,7 +4904,7 @@ msgstr  ""
 msgid   "Must run as root to import from directory"
 msgstr  ""
 
-#: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143 cmd/incus/cluster_group.go:462 cmd/incus/config_trust.go:413 cmd/incus/config_trust.go:600 cmd/incus/list.go:484 cmd/incus/network.go:1071 cmd/incus/network_acl.go:162 cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426 cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144 cmd/incus/network_zone.go:870 cmd/incus/profile.go:723 cmd/incus/project.go:542 cmd/incus/project.go:671 cmd/incus/remote.go:988 cmd/incus/snapshot.go:365 cmd/incus/storage.go:684 cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872 cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
+#: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143 cmd/incus/cluster_group.go:463 cmd/incus/config_trust.go:413 cmd/incus/config_trust.go:600 cmd/incus/list.go:484 cmd/incus/network.go:1071 cmd/incus/network_acl.go:162 cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426 cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144 cmd/incus/network_zone.go:870 cmd/incus/profile.go:723 cmd/incus/project.go:542 cmd/incus/project.go:671 cmd/incus/remote.go:988 cmd/incus/snapshot.go:365 cmd/incus/storage.go:684 cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872 cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
 msgid   "NAME"
 msgstr  ""
 
@@ -5149,12 +5148,12 @@ msgstr  ""
 msgid   "Network integration %s renamed to %s"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:384
+#: cmd/incus/network_load_balancer.go:385
 #, c-format
 msgid   "Network load balancer %s created"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:782
+#: cmd/incus/network_load_balancer.go:783
 #, c-format
 msgid   "Network load balancer %s deleted"
 msgstr  ""
@@ -5245,15 +5244,15 @@ msgstr  ""
 msgid   "No device found for this storage volume"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:1155
+#: cmd/incus/network_load_balancer.go:1156
 msgid   "No load-balancer health information available"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:937
+#: cmd/incus/network_load_balancer.go:938
 msgid   "No matching backend found"
 msgstr  ""
 
-#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1109
+#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1110
 msgid   "No matching port(s) found"
 msgstr  ""
 
@@ -5460,7 +5459,7 @@ msgstr  ""
 msgid   "Pool name cannot be empty"
 msgstr  ""
 
-#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:980
+#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:981
 msgid   "Port description"
 msgstr  ""
 
@@ -5502,7 +5501,7 @@ msgstr  ""
 msgid   "Press ctrl+c to finish"
 msgstr  ""
 
-#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:374 cmd/incus/config.go:266 cmd/incus/config.go:341 cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232 cmd/incus/config_trust.go:330 cmd/incus/image.go:459 cmd/incus/network.go:760 cmd/incus/network_acl.go:669 cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727 cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:706 cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671 cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570 cmd/incus/project.go:395 cmd/incus/storage.go:354 cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203 cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
+#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:375 cmd/incus/config.go:266 cmd/incus/config.go:341 cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232 cmd/incus/config_trust.go:330 cmd/incus/image.go:459 cmd/incus/network.go:760 cmd/incus/network_acl.go:669 cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727 cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707 cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671 cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570 cmd/incus/project.go:395 cmd/incus/storage.go:354 cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203 cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
 msgid   "Press enter to open the editor again or ctrl+c to abort change"
 msgstr  ""
 
@@ -5827,7 +5826,7 @@ msgstr  ""
 msgid   "Remove %s and everything it contains (instances, images, volumes, networks, ...) (yes/no): "
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:562
+#: cmd/incus/cluster_group.go:563
 msgid   "Remove a cluster member from a cluster group"
 msgstr  ""
 
@@ -5847,7 +5846,7 @@ msgstr  ""
 msgid   "Remove aliases"
 msgstr  ""
 
-#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1042
+#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1043
 msgid   "Remove all ports that match"
 msgstr  ""
 
@@ -5859,11 +5858,11 @@ msgstr  ""
 msgid   "Remove all rules that match"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:882
+#: cmd/incus/network_load_balancer.go:883
 msgid   "Remove backend from a load balancer"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:881
+#: cmd/incus/network_load_balancer.go:882
 msgid   "Remove backends from a load balancer"
 msgstr  ""
 
@@ -5875,7 +5874,7 @@ msgstr  ""
 msgid   "Remove instance devices"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:561
+#: cmd/incus/cluster_group.go:562
 msgid   "Remove member from group"
 msgstr  ""
 
@@ -5883,7 +5882,7 @@ msgstr  ""
 msgid   "Remove ports from a forward"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:1040 cmd/incus/network_load_balancer.go:1041
+#: cmd/incus/network_load_balancer.go:1041 cmd/incus/network_load_balancer.go:1042
 msgid   "Remove ports from a load balancer"
 msgstr  ""
 
@@ -5912,7 +5911,7 @@ msgstr  ""
 msgid   "Remove trusted client"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:637 cmd/incus/cluster_group.go:638
+#: cmd/incus/cluster_group.go:638 cmd/incus/cluster_group.go:639
 msgid   "Rename a cluster group"
 msgstr  ""
 
@@ -6052,7 +6051,7 @@ msgstr  ""
 msgid   "Role (admin or read-only)"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:138
+#: cmd/incus/admin_sql.go:137
 #, c-format
 msgid   "Rows affected: %d"
 msgstr  ""
@@ -6209,7 +6208,7 @@ msgstr  ""
 msgid   "Server doesn't trust us after authentication"
 msgstr  ""
 
-#: cmd/incus/cluster.go:286 cmd/incus/cluster.go:1196 cmd/incus/cluster.go:1291 cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:515
+#: cmd/incus/cluster.go:286 cmd/incus/cluster.go:1196 cmd/incus/cluster.go:1291 cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:516
 msgid   "Server isn't part of a cluster"
 msgstr  ""
 
@@ -6227,7 +6226,7 @@ msgstr  ""
 msgid   "Server: %s"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:876
+#: cmd/incus/cluster_group.go:877
 msgid   "Set a cluster group's configuration keys"
 msgstr  ""
 
@@ -6320,11 +6319,11 @@ msgid   "Set network integration configuration keys\n"
         "    incus network integration set [<remote>:]<network integration> <key> <value>"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:460
+#: cmd/incus/network_load_balancer.go:461
 msgid   "Set network load balancer keys"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:461
+#: cmd/incus/network_load_balancer.go:462
 msgid   "Set network load balancer keys\n"
         "\n"
         "For backward compatibility, a single configuration key may still be set with:\n"
@@ -6455,7 +6454,7 @@ msgstr  ""
 msgid   "Set the files' UIDs on push (in recursive mode, only sets the target directory's UID if it doesn't exist and -p is used)"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:879
+#: cmd/incus/cluster_group.go:880
 msgid   "Set the key as a cluster group property"
 msgstr  ""
 
@@ -6479,7 +6478,7 @@ msgstr  ""
 msgid   "Set the key as a network integration property"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:468
+#: cmd/incus/network_load_balancer.go:469
 msgid   "Set the key as a network load balancer property"
 msgstr  ""
 
@@ -6543,7 +6542,7 @@ msgstr  ""
 msgid   "Show all information messages"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:687 cmd/incus/cluster_group.go:688
+#: cmd/incus/cluster_group.go:688 cmd/incus/cluster_group.go:689
 msgid   "Show cluster group configurations"
 msgstr  ""
 
@@ -7099,7 +7098,7 @@ msgstr  ""
 msgid   "The is no config key to set on an instance snapshot."
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:856
+#: cmd/incus/cluster_group.go:857
 #, c-format
 msgid   "The key %q does not exist on cluster group %q"
 msgstr  ""
@@ -7127,7 +7126,7 @@ msgstr  ""
 msgid   "The profile device doesn't exist"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:847
+#: cmd/incus/cluster_group.go:848
 #, c-format
 msgid   "The property %q does not exist on the cluster group %q: %v"
 msgstr  ""
@@ -7147,7 +7146,7 @@ msgstr  ""
 msgid   "The property %q does not exist on the instance snapshot %s: %v"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:432
+#: cmd/incus/network_load_balancer.go:433
 #, c-format
 msgid   "The property %q does not exist on the load balancer %q: %v"
 msgstr  ""
@@ -7488,7 +7487,7 @@ msgstr  ""
 msgid   "Unknown channel type for client %q: %s"
 msgstr  ""
 
-#: cmd/incus/cluster.go:217 cmd/incus/cluster.go:1159 cmd/incus/cluster_group.go:478 cmd/incus/config_trust.go:435 cmd/incus/config_trust.go:616 cmd/incus/image.go:1098 cmd/incus/image_alias.go:264 cmd/incus/list.go:546 cmd/incus/network.go:1097 cmd/incus/network.go:1286 cmd/incus/network_allocations.go:98 cmd/incus/network_forward.go:163 cmd/incus/network_integration.go:443 cmd/incus/network_load_balancer.go:169 cmd/incus/network_peer.go:156 cmd/incus/network_zone.go:164 cmd/incus/operation.go:187 cmd/incus/profile.go:747 cmd/incus/project.go:565 cmd/incus/remote.go:1008 cmd/incus/snapshot.go:382 cmd/incus/storage.go:704 cmd/incus/storage_bucket.go:504 cmd/incus/storage_bucket.go:888 cmd/incus/storage_volume.go:1603 cmd/incus/storage_volume.go:3393 cmd/incus/top.go:101 cmd/incus/warning.go:242
+#: cmd/incus/cluster.go:217 cmd/incus/cluster.go:1159 cmd/incus/cluster_group.go:479 cmd/incus/config_trust.go:435 cmd/incus/config_trust.go:616 cmd/incus/image.go:1098 cmd/incus/image_alias.go:264 cmd/incus/list.go:546 cmd/incus/network.go:1097 cmd/incus/network.go:1286 cmd/incus/network_allocations.go:98 cmd/incus/network_forward.go:163 cmd/incus/network_integration.go:443 cmd/incus/network_load_balancer.go:169 cmd/incus/network_peer.go:156 cmd/incus/network_zone.go:164 cmd/incus/operation.go:187 cmd/incus/profile.go:747 cmd/incus/project.go:565 cmd/incus/remote.go:1008 cmd/incus/snapshot.go:382 cmd/incus/storage.go:704 cmd/incus/storage_bucket.go:504 cmd/incus/storage_bucket.go:888 cmd/incus/storage_volume.go:1603 cmd/incus/storage_volume.go:3393 cmd/incus/top.go:101 cmd/incus/warning.go:242
 #, c-format
 msgid   "Unknown column shorthand char '%c' in '%s'"
 msgstr  ""
@@ -7518,7 +7517,7 @@ msgstr  ""
 msgid   "Unknown output type %q"
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:955
+#: cmd/incus/cluster_group.go:956
 msgid   "Unset a cluster group's configuration keys"
 msgstr  ""
 
@@ -7566,11 +7565,11 @@ msgstr  ""
 msgid   "Unset network integration configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:558
+#: cmd/incus/network_load_balancer.go:559
 msgid   "Unset network load balancer configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:559
+#: cmd/incus/network_load_balancer.go:560
 msgid   "Unset network load balancer keys"
 msgstr  ""
 
@@ -7617,7 +7616,7 @@ msgid   "Unset storage volume configuration keys\n"
         "Supported values for type are \"custom\", \"container\" and \"virtual-machine\"."
 msgstr  ""
 
-#: cmd/incus/cluster_group.go:958
+#: cmd/incus/cluster_group.go:959
 msgid   "Unset the key as a cluster group property"
 msgstr  ""
 
@@ -7641,7 +7640,7 @@ msgstr  ""
 msgid   "Unset the key as a network integration property"
 msgstr  ""
 
-#: cmd/incus/network_load_balancer.go:562
+#: cmd/incus/network_load_balancer.go:563
 msgid   "Unset the key as a network load balancer property"
 msgstr  ""
 
@@ -8175,9 +8174,10 @@ msgstr  ""
 
 #: cmd/incus/cluster_group.go:174
 msgid   "incus cluster group create g1\n"
+        "    Create a cluster group named g1\n"
         "\n"
         "incus cluster group create g1 < config.yaml\n"
-        "	Create a cluster group with configuration from config.yaml"
+        "    Create a cluster group named g1 with configuration from config.yaml"
 msgstr  ""
 
 #: cmd/incus/config_device.go:95
@@ -8394,6 +8394,7 @@ msgstr  ""
 
 #: cmd/incus/network_load_balancer.go:314
 msgid   "incus network load-balancer create n1 127.0.0.1\n"
+        "    Create network load-balancer for network n1\n"
         "\n"
         "incus network load-balancer create n1 127.0.0.1 < config.yaml\n"
         "    Create network load-balancer for network n1 with configuration from config.yaml"
@@ -8438,7 +8439,7 @@ msgid   "incus profile assign foo default,bar\n"
         "    Reset \"foo\" to only using the \"default\" profile.\n"
         "\n"
         "incus profile assign foo --no-profiles\n"
-        "    Remove all profile from \"foo\""
+        "    Remove all profile assigned to \"foo\""
 msgstr  ""
 
 #: cmd/incus/profile.go:345
