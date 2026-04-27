@@ -116,7 +116,7 @@ func Qcow2Commit(path string) error {
 
 // Qcow2Info returns information about a qcow2 image.
 func Qcow2Info(path string) (*ImageInfo, error) {
-	imgJSON, err := subprocess.RunCommand("qemu-img", "info", "--output=json", path)
+	imgJSON, err := subprocess.RunCommand("qemu-img", "info", "-U", "--output=json", path)
 	if err != nil {
 		return nil, err
 	}
