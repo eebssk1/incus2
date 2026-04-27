@@ -56,9 +56,9 @@ incus move <old name> <new name> [--instance-only]
     Rename a local instance.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringArrayVarP(&c.flagConfig, "config", "c", nil, i18n.G("Config key/value to apply to the target instance")+"``")
-	cmd.Flags().StringArrayVarP(&c.flagDevice, "device", "d", nil, i18n.G("New key/value to apply to a specific device")+"``")
-	cmd.Flags().StringArrayVarP(&c.flagProfile, "profile", "p", nil, i18n.G("Profile to apply to the target instance")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagConfig, "config|c", i18n.G("Config key/value to apply to the target instance"))
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagDevice, "device|d", i18n.G("New key/value to apply to a specific device"))
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagProfile, "profile|p", i18n.G("Profile to apply to the target instance"))
 	cmd.Flags().BoolVar(&c.flagNoProfiles, "no-profiles", false, i18n.G("Unset all profiles on the target instance"))
 	cmd.Flags().BoolVar(&c.flagInstanceOnly, "instance-only", false, i18n.G("Move the instance without its snapshots"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagMode, "mode", moveDefaultMode, "", i18n.G("Transfer mode. One of pull, push or relay."))

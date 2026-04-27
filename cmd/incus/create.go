@@ -58,9 +58,9 @@ incus launch images:debian/12 v2 --vm -d root,size=50GiB -d root,io.bus=nvme
 
 	cmd.Aliases = []string{"init"}
 	cmd.RunE = c.run
-	cmd.Flags().StringArrayVarP(&c.flagConfig, "config", "c", nil, i18n.G("Config key/value to apply to the new instance")+"``")
-	cmd.Flags().StringArrayVarP(&c.flagProfile, "profile", "p", nil, i18n.G("Profile to apply to the new instance")+"``")
-	cmd.Flags().StringArrayVarP(&c.flagDevice, "device", "d", nil, i18n.G("New key/value to apply to a specific device")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagConfig, "config|c", i18n.G("Config key/value to apply to the new instance"))
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagProfile, "profile|p", i18n.G("Profile to apply to the new instance"))
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagDevice, "device|d", i18n.G("New key/value to apply to a specific device"))
 	cmd.Flags().BoolVarP(&c.flagEphemeral, "ephemeral", "e", false, i18n.G("Ephemeral instance"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagEnvironmentFile, "environment-file", "", "", i18n.G("Include environment variables from file"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagNetwork, "network|n", "", "", i18n.G("Network name"))

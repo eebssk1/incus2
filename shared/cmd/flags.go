@@ -14,3 +14,11 @@ func AddStringFlag(flags *pflag.FlagSet, flag *string, name string, defVal strin
 	flags.StringVarP(flag, name, shorthand, defVal, "``"+usage)
 	flags.Lookup(name).NoOptDefVal = noOptDefVal
 }
+
+// AddStringArrayFlag adds a string array flag to the given flag set.
+func AddStringArrayFlag(flags *pflag.FlagSet, flag *[]string, name string, usage string) {
+	name, shorthand, _ := strings.Cut(name, "|")
+	// Cobra handles value hints and backticks in a way that doesn’t suit us. Prepending two
+	// backticks is a way to solve that.
+	flags.StringArrayVarP(flag, name, shorthand, nil, "``"+usage)
+}

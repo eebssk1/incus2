@@ -60,7 +60,7 @@ incus exec c1 -- ls -lh /
 	Run the "ls -lh /" command in instance "c1"`))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringArrayVar(&c.flagEnvironment, "env", nil, i18n.G("Environment variable to set (e.g. HOME=/home/foo)")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagEnvironment, "env", i18n.G("Environment variable to set (e.g. HOME=/home/foo)"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagMode, "mode", "auto", "", i18n.G("Override the terminal mode (auto, interactive or non-interactive)"))
 	cmd.Flags().BoolVarP(&c.flagForceInteractive, "force-interactive", "t", false, i18n.G("Force pseudo-terminal allocation"))
 	cmd.Flags().BoolVarP(&c.flagForceNonInteractive, "force-noninteractive", "T", false, i18n.G("Disable pseudo-terminal allocation"))

@@ -172,11 +172,11 @@ It requires the source to be an alias and for it to be public.`))
 	cmd.Flags().BoolVar(&c.flagPublic, "public", false, i18n.G("Make image public"))
 	cmd.Flags().BoolVar(&c.flagCopyAliases, "copy-aliases", false, i18n.G("Copy aliases from source"))
 	cmd.Flags().BoolVar(&c.flagAutoUpdate, "auto-update", false, i18n.G("Keep the image up to date after initial copy"))
-	cmd.Flags().StringArrayVar(&c.flagAliases, "alias", nil, i18n.G("New aliases to add to the image")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagAliases, "alias", i18n.G("New aliases to add to the image"))
 	cmd.Flags().BoolVar(&c.flagVM, "vm", false, i18n.G("Copy virtual machine images"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagMode, "mode", "pull", "", i18n.G("Transfer mode. One of pull (default), push or relay"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagTargetProject, "target-project", "", "", i18n.G("Copy to a project different from the source"))
-	cmd.Flags().StringArrayVarP(&c.flagProfile, "profile", "p", nil, i18n.G("Profile to apply to the new image")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagProfile, "profile|p", i18n.G("Profile to apply to the new image"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -670,7 +670,7 @@ Directory import is only available on Linux and must be performed as root.`))
 
 	cmd.Flags().BoolVar(&c.flagPublic, "public", false, i18n.G("Make image public"))
 	cmd.Flags().BoolVar(&c.flagReuse, "reuse", false, i18n.G("If the image alias already exists, delete and create a new one"))
-	cmd.Flags().StringArrayVar(&c.flagAliases, "alias", nil, i18n.G("New aliases to add to the image")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagAliases, "alias", i18n.G("New aliases to add to the image"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
