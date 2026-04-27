@@ -983,22 +983,7 @@ func (d *Daemon) init() error {
 
 	// Detect LXC features
 	d.os.LXCFeatures = map[string]bool{}
-	lxcExtensions := []string{
-		"mount_injection_file",
-		"seccomp_notify",
-		"network_ipvlan",
-		"network_l2proxy",
-		"network_gateway_device_route",
-		"network_phys_macvlan_mtu",
-		"network_veth_router",
-		"cgroup2",
-		"pidfd",
-		"seccomp_allow_deny_syntax",
-		"devpts_fd",
-		"seccomp_proxy_send_notify_fd",
-		"idmapped_mounts_v2",
-		"core_scheduling",
-	}
+	lxcExtensions := []string{}
 
 	for _, extension := range lxcExtensions {
 		d.os.LXCFeatures[extension] = liblxc.HasAPIExtension(extension)
@@ -1021,7 +1006,7 @@ func (d *Daemon) init() error {
 		logger.Info(" - netnsid-based network retrieval: no")
 	}
 
-	if canUsePidFds() && d.os.LXCFeatures["pidfd"] {
+	if canUsePidFds() {
 		d.os.PidFds = true
 		d.os.PidFdsThread = canUseThreadPidFds()
 	}
@@ -1041,10 +1026,6 @@ func (d *Daemon) init() error {
 	if canUseCoreScheduling() {
 		d.os.CoreScheduling = true
 		logger.Info(" - core scheduling: yes")
-
-		if d.os.LXCFeatures["core_scheduling"] {
-			d.os.ContainerCoreScheduling = true
-		}
 	} else {
 		logger.Info(" - core scheduling: no")
 	}
@@ -1070,7 +1051,7 @@ func (d *Daemon) init() error {
 		logger.Info(" - seccomp listener continue syscalls: no")
 	}
 
-	if canUseSeccompListenerAddfd() && d.os.LXCFeatures["seccomp_proxy_send_notify_fd"] {
+	if canUseSeccompListenerAddfd() {
 		d.os.SeccompListenerAddfd = true
 		logger.Info(" - seccomp listener add file descriptors: yes")
 	} else {
@@ -1084,7 +1065,7 @@ func (d *Daemon) init() error {
 		logger.Info(" - attach to namespaces via pidfds: no")
 	}
 
-	if d.os.LXCFeatures["devpts_fd"] && canUseNativeTerminals() {
+	if canUseNativeTerminals() {
 		d.os.NativeTerminals = true
 		logger.Info(" - safe native terminal allocation: yes")
 	} else {
