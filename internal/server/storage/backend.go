@@ -1160,12 +1160,12 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 		newDevices := inst.LocalDevices()
 		err = src.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
 			// Load the pool for the disk.
-			diskPool, err := LoadByName(b.state, dev.Config["pool"])
+			diskPool, err := LoadByName(b.state, newDevices[dev.Name]["pool"])
 			if err != nil {
 				return fmt.Errorf("Failed loading storage pool: %w", err)
 			}
 
-			err = diskPool.CreateCustomVolumeFromCopy(inst.Project().Name, src.Project().Name, newDevices[dev.Name]["source"], "", nil, diskPool.Name(), dev.Config["source"], snapshots, op)
+			err = diskPool.CreateCustomVolumeFromCopy(inst.Project().Name, src.Project().Name, newDevices[dev.Name]["source"], "", nil, dev.Config["pool"], dev.Config["source"], snapshots, op)
 			if err != nil {
 				return err
 			}
@@ -9641,16 +9641,6 @@ func (b *backend) createDependentVolumesFromMigration(inst instance.Instance, co
 	devicesMap := DevicesMapFromBackupConfig(info.Config)
 
 	for idx, dependentVol := range args.DependentVolumes {
-		diskPool, err := LoadByName(b.state, dependentVol.Pool)
-		if err != nil {
-			return nil, fmt.Errorf("Failed loading storage pool: %w", err)
-		}
-
-		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
-			continue
-		}
-
-		b.logger.Debug("createDependentVolumesFromMigration", logger.Ctx{"name": dependentVol.Name, "type": dependentVol.MigrationType, "size": dependentVol.VolumeSize})
 		devices := inst.ExpandedDevices().Clone()
 		deviceName := DeviceByPoolAndVolume(devicesMap, dependentVol.Pool, dependentVol.Name)
 		if deviceName == "" {
@@ -9662,6 +9652,17 @@ func (b *backend) createDependentVolumesFromMigration(inst instance.Instance, co
 			return nil, fmt.Errorf("Device %s not found for instance %s", deviceName, inst.Name())
 		}
 
+		newDiskPoolName := dev["pool"]
+		diskPool, err := LoadByName(b.state, newDiskPoolName)
+		if err != nil {
+			return nil, fmt.Errorf("Failed loading storage pool: %w", err)
+		}
+
+		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
+			continue
+		}
+
+		b.logger.Debug("createDependentVolumesFromMigration", logger.Ctx{"name": dependentVol.Name, "type": dependentVol.MigrationType, "size": dependentVol.VolumeSize})
 		volumeArgs := localMigration.VolumeTargetArgs{
 			IndexHeaderVersion: localMigration.IndexHeaderVersion,
 			Name:               dev["source"],
