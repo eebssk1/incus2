@@ -38,3 +38,19 @@ func AddBoolFlag(flags *pflag.FlagSet, flag *bool, name string, usage string) {
 	// backticks is a way to solve that.
 	flags.BoolVarP(flag, name, shorthand, false, "``"+usage)
 }
+
+// AddUint32Flag adds a `uint32` flag to the given flag set.
+func AddUint32Flag(flags *pflag.FlagSet, flag *uint32, name string, usage string) {
+	name, shorthand, _ := strings.Cut(name, "|")
+	// Cobra handles value hints and backticks in a way that doesn’t suit us. Prepending two
+	// backticks is a way to solve that.
+	flags.Uint32VarP(flag, name, shorthand, 0, "``"+usage)
+}
+
+// AddUint64Flag adds a `uint64` flag to the given flag set.
+func AddUint64Flag(flags *pflag.FlagSet, flag *uint64, name string, usage string) {
+	name, shorthand, _ := strings.Cut(name, "|")
+	// Cobra handles value hints and backticks in a way that doesn’t suit us. Prepending two
+	// backticks is a way to solve that.
+	flags.Uint64VarP(flag, name, shorthand, 0, "``"+usage)
+}

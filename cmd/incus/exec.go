@@ -65,8 +65,8 @@ incus exec c1 -- ls -lh /
 	cli.AddBoolFlag(cmd.Flags(), &c.flagForceInteractive, "force-interactive|t", i18n.G("Force pseudo-terminal allocation"))
 	cli.AddBoolFlag(cmd.Flags(), &c.flagForceNonInteractive, "force-noninteractive|T", i18n.G("Disable pseudo-terminal allocation"))
 	cli.AddBoolFlag(cmd.Flags(), &c.flagDisableStdin, "disable-stdin|n", i18n.G("Disable stdin (reads from /dev/null)"))
-	cmd.Flags().Uint32Var(&c.flagUser, "user", 0, i18n.G("User ID to run the command as (default 0)")+"``")
-	cmd.Flags().Uint32Var(&c.flagGroup, "group", 0, i18n.G("Group ID to run the command as (default 0)")+"``")
+	cli.AddUint32Flag(cmd.Flags(), &c.flagUser, "user", i18n.G("User ID to run the command as (default 0)"))
+	cli.AddUint32Flag(cmd.Flags(), &c.flagGroup, "group", i18n.G("Group ID to run the command as (default 0)"))
 	cli.AddStringFlag(cmd.Flags(), &c.flagCwd, "cwd", "", "", i18n.G("Directory to run the command in (default /root)"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

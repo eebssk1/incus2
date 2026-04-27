@@ -1441,7 +1441,7 @@ func (c *cmdNetworkZoneRecordEntry) commandAdd() *cobra.Command {
 	cmd.Short = i18n.G("Add a network zone record entry")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Add entries to a network zone record"))
 	cmd.RunE = c.runAdd
-	cmd.Flags().Uint64Var(&c.flagTTL, "ttl", 0, i18n.G("Entry TTL")+"``")
+	cli.AddUint64Flag(cmd.Flags(), &c.flagTTL, "ttl", i18n.G("Entry TTL"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
