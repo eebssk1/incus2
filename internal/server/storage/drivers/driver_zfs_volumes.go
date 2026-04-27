@@ -3561,7 +3561,7 @@ func (d *zfs) RestoreVolume(vol Volume, snapshotName string, op *operations.Oper
 	return d.restoreVolume(vol, snapshotName, false, op)
 }
 
-func (d *zfs) restoreVolume(vol Volume, snapshotName string, migration bool, op *operations.Operation) error {
+func (d *zfs) restoreVolume(vol Volume, snapshotName string, isMigration bool, op *operations.Operation) error {
 	err := d.CanRestoreVolume(vol, snapshotName)
 	if err != nil {
 		return err
@@ -3605,9 +3605,9 @@ func (d *zfs) restoreVolume(vol Volume, snapshotName string, migration bool, op 
 	}
 
 	// For VM images, restore the associated filesystem dataset too.
-	if !migration && vol.IsVMBlock() {
+	if !isMigration && vol.IsVMBlock() {
 		fsVol := vol.NewVMBlockFilesystemVolume()
-		err := d.restoreVolume(fsVol, snapshotName, migration, op)
+		err := d.restoreVolume(fsVol, snapshotName, isMigration, op)
 		if err != nil {
 			return err
 		}
