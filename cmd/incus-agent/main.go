@@ -1,3 +1,5 @@
+//go:debug httpmuxgo121=0
+
 package main
 
 import (
