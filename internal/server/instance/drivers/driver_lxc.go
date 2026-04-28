@@ -1794,12 +1794,12 @@ func (d *lxc) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 
 	// Generate uevent inside container if requested.
 	if len(runConf.Uevents) > 0 {
-		pidFd := d.inheritInitPidFd()
-		pidFdNr := "-1"
-		if pidFd != nil {
-			defer func() { _ = pidFd.Close() }()
-			pidFdNr = "3"
+		pidFd, err := d.InitPidFd()
+		if err != nil {
+			return err
 		}
+
+		defer func() { _ = pidFd.Close() }()
 
 		for _, eventParts := range runConf.Uevents {
 			length := 0
@@ -1812,13 +1812,13 @@ func (d *lxc) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 				"inject",
 				"--",
 				fmt.Sprintf("%d", d.InitPID()),
-				pidFdNr,
+				"3",
 				fmt.Sprintf("%d", length),
 			}
 
 			args = append(args, eventParts...)
 
-			_, _, err := subprocess.RunCommandSplit(
+			_, _, err = subprocess.RunCommandSplit(
 				context.TODO(),
 				nil,
 				[]*os.File{pidFd},
@@ -7454,15 +7454,6 @@ func (d *lxc) templateApplyNow(trigger instance.TemplateTrigger) error {
 	return nil
 }
 
-func (d *lxc) inheritInitPidFd() *os.File {
-	pidFdFile, err := d.InitPidFd()
-	if err != nil {
-		return nil
-	}
-
-	return pidFdFile
-}
-
 // FileSFTPConn returns a connection to the forkfile handler.
 func (d *lxc) FileSFTPConn() (net.Conn, error) {
 	// Lock to avoid concurrent spawning.
@@ -7584,9 +7575,14 @@ func (d *lxc) FileSFTPConn() (net.Conn, error) {
 		args = append(args, "4")
 		extraFiles = append(extraFiles, rootfsFile)
 
-		// Get the pidfd.
-		pidFd := d.inheritInitPidFd()
-		if pidFd != nil {
+		// Get the pidfd if the container is running.
+		if d.IsRunning() {
+			pidFd, err := d.InitPidFd()
+			if err != nil {
+				chReady <- err
+				return
+			}
+
 			defer func() { _ = pidFd.Close() }()
 			args = append(args, "5")
 			extraFiles = append(extraFiles, pidFd)
@@ -8300,10 +8296,12 @@ func (d *lxc) insertMountGo(source, target, fstype string, flags int, mntnsPID i
 	mntsrc := filepath.Join("/dev/.incus-mounts", filepath.Base(tmpMount))
 	pidStr := fmt.Sprintf("%d", pid)
 
-	pidFdNr, pidFd := seccomp.MakePidFd(pid, d.state)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := seccomp.MakePidFd(pid)
+	if err != nil {
+		return err
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	if !strings.HasPrefix(target, "/") {
 		target = "/" + target
@@ -8374,10 +8372,12 @@ func (d *lxc) moveMount(source, target, fstype string, flags int, idmapType idma
 		return errors.New("Invalid idmap value specified")
 	}
 
-	pidFdNr, pidFd := seccomp.MakePidFd(pid, d.state)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := seccomp.MakePidFd(pid)
+	if err != nil {
+		return err
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	pidStr := fmt.Sprintf("%d", pid)
 
@@ -8385,7 +8385,7 @@ func (d *lxc) moveMount(source, target, fstype string, flags int, idmapType idma
 		target = "/" + target
 	}
 
-	_, err := subprocess.RunCommandInheritFds(
+	_, err = subprocess.RunCommandInheritFds(
 		context.Background(),
 		[]*os.File{pidFd},
 		d.state.OS.ExecPath,
