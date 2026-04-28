@@ -4253,18 +4253,8 @@ func (d *qemu) writeQemuConfigFile(configPath string) error {
 
 // getCPUOpts retrieves configuration options for virtualized CPUs and memory.
 func (d *qemu) getCPUOpts(cpuInfo *qemuCPUTopology, memSizeBytes int64) (*qemuCPUOpts, error) {
-	// Figure out what memory object layout we're going to use.
-	// Before v6.0 or if version unknown, we use the "repeated" format, otherwise we use "indexed" format.
-	qemuMemObjectFormat := "repeated"
-	qemuVer6, _ := version.NewDottedVersion("6.0")
-	qemuVer, _ := d.version()
-	if qemuVer != nil && qemuVer.Compare(qemuVer6) >= 0 {
-		qemuMemObjectFormat = "indexed"
-	}
-
 	cpuOpts := qemuCPUOpts{
-		architecture:        d.architectureName,
-		qemuMemObjectFormat: qemuMemObjectFormat,
+		architecture: d.architectureName,
 	}
 
 	hostNodes := []uint64{}
