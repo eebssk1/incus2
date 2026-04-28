@@ -36,8 +36,7 @@ func (c *cmdAdminSQL) command() *cobra.Command {
   The global database is common to all members in the cluster, and contains
   cluster-specific data (such as profiles, containers, etc).
 
-  If you are running a non-clustered server, the same applies, as that
-  instance is effectively a single-member cluster.
+  Non-clustered servers still have both local and global databases.
 
   If <query> is the special value "-", then the query is read from
   standard input.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-25 19:43+0200\n"
+"POT-Creation-Date: 2026-04-28 01:45+0200\n"
 "PO-Revision-Date: 2026-04-21 03:01+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/incus/cli/sv/>\n"
@@ -118,7 +118,7 @@ msgstr ""
 "###\n"
 "### Observera att fingeravtrycket visas men inte kan ändras"
 
-#: cmd/incus/cluster_group.go:397
+#: cmd/incus/cluster_group.go:398
 msgid ""
 "### This is a YAML representation of the cluster group.\n"
 "### Any line starting with a '# will be ignored."
@@ -359,7 +359,7 @@ msgstr ""
 "###\n"
 "### Observera att namnet visas men inte kan ändras"
 
-#: cmd/incus/network_load_balancer.go:609
+#: cmd/incus/network_load_balancer.go:610
 msgid ""
 "### This is a YAML representation of the network load balancer.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -764,7 +764,7 @@ msgstr "--target kan endast användas med kluster"
 msgid "--target cannot be used with instances"
 msgstr "--target kan inte användas med instanser"
 
-#: cmd/incus/admin_sql.go:129
+#: cmd/incus/admin_sql.go:128
 #, c-format
 msgid "=> Query %d:"
 msgstr "=> Fråga %d:"
@@ -845,7 +845,7 @@ msgstr "Åtgärden %q stöds inte av detta verktyg"
 msgid "Action (defaults to GET)"
 msgstr "Åtgärd (standardinställning är GET)"
 
-#: cmd/incus/cluster_group.go:739
+#: cmd/incus/cluster_group.go:740
 msgid "Add a cluster member to a cluster group"
 msgstr "Lägg till en klustermedlem till en klustergrupp"
 
@@ -857,11 +857,11 @@ msgstr "Lägg till en nätverkszonpost"
 msgid "Add addresses to a network address set"
 msgstr "Lägg till adresser till en nätverksadressuppsättning"
 
-#: cmd/incus/network_load_balancer.go:817
+#: cmd/incus/network_load_balancer.go:818
 msgid "Add backend to a load balancer"
 msgstr "Lägg till backend till en lastbalanserare"
 
-#: cmd/incus/network_load_balancer.go:816
+#: cmd/incus/network_load_balancer.go:817
 msgid "Add backends to a load balancer"
 msgstr "Lägg till backends till en lastbalanserare"
 
@@ -873,7 +873,7 @@ msgstr "Lägg till poster i en nätverkszonpost"
 msgid "Add instance devices"
 msgstr "Lägg till instans-enheter"
 
-#: cmd/incus/cluster_group.go:738
+#: cmd/incus/cluster_group.go:739
 msgid "Add member to group"
 msgstr "Lägg till medlem i grupp"
 
@@ -943,8 +943,8 @@ msgstr ""
 msgid "Add ports to a forward"
 msgstr "Lägg till portar till en vidarebefordran"
 
-#: cmd/incus/network_load_balancer.go:975
 #: cmd/incus/network_load_balancer.go:976
+#: cmd/incus/network_load_balancer.go:977
 msgid "Add ports to a load balancer"
 msgstr "Lägg till portar till en lastbalanserare"
 
@@ -1170,11 +1170,11 @@ msgstr "Genomsnitt: %.2f %.2f %.2f"
 msgid "BASE IMAGE"
 msgstr "BASBILD"
 
-#: cmd/incus/network_load_balancer.go:821
+#: cmd/incus/network_load_balancer.go:822
 msgid "Backend description"
 msgstr "Beskrivning av backend"
 
-#: cmd/incus/network_load_balancer.go:1158
+#: cmd/incus/network_load_balancer.go:1159
 msgid "Backend health:"
 msgstr "Backend-hälsa:"
 
@@ -1480,27 +1480,27 @@ msgstr "Klientcertifikatet är nu betrott av servern:"
 msgid "Client version: %s\n"
 msgstr "Klientversion: %s\n"
 
-#: cmd/incus/cluster_group.go:233
+#: cmd/incus/cluster_group.go:234
 #, c-format
 msgid "Cluster group %s created"
 msgstr "Klustergrupp %s skapad"
 
-#: cmd/incus/cluster_group.go:278
+#: cmd/incus/cluster_group.go:279
 #, c-format
 msgid "Cluster group %s deleted"
 msgstr "Klustergrupp %s raderad"
 
-#: cmd/incus/cluster_group.go:599
+#: cmd/incus/cluster_group.go:600
 #, c-format
 msgid "Cluster group %s isn't currently applied to %s"
 msgstr "Klustergrupp %s tillämpas för närvarande inte på %s"
 
-#: cmd/incus/cluster_group.go:670
+#: cmd/incus/cluster_group.go:671
 #, c-format
 msgid "Cluster group %s renamed to %s"
 msgstr "Klustergrupp %s döpt om till %s"
 
-#: cmd/incus/cluster_group.go:179
+#: cmd/incus/cluster_group.go:180
 msgid "Cluster group description"
 msgstr "Beskrivning av klustergruppen"
 
@@ -1514,17 +1514,17 @@ msgstr "Klusteranslutningstoken för %s raderad"
 msgid "Cluster member %s added to cluster groups %v"
 msgstr "Klustermedlem %s tillagd till klustergrupper %v"
 
-#: cmd/incus/cluster_group.go:787
+#: cmd/incus/cluster_group.go:788
 #, c-format
 msgid "Cluster member %s added to group %s"
 msgstr "Klustermedlem %s tillagd till grupp %s"
 
-#: cmd/incus/cluster_group.go:776
+#: cmd/incus/cluster_group.go:777
 #, c-format
 msgid "Cluster member %s is already in group %s"
 msgstr "Klustermedlem %s ingår redan i grupp %s"
 
-#: cmd/incus/cluster_group.go:619
+#: cmd/incus/cluster_group.go:620
 #, c-format
 msgid "Cluster member %s removed from group %s"
 msgstr "Klustermedlem %s borttagen från grupp %s"
@@ -1539,14 +1539,14 @@ msgstr "Klustermedlem %s borttagen från grupp %s"
 #: cmd/incus/network_forward.go:484 cmd/incus/network_forward.go:623
 #: cmd/incus/network_forward.go:764 cmd/incus/network_forward.go:842
 #: cmd/incus/network_forward.go:915 cmd/incus/network_load_balancer.go:251
-#: cmd/incus/network_load_balancer.go:321
-#: cmd/incus/network_load_balancer.go:469
-#: cmd/incus/network_load_balancer.go:591
-#: cmd/incus/network_load_balancer.go:743
-#: cmd/incus/network_load_balancer.go:820
-#: cmd/incus/network_load_balancer.go:885
-#: cmd/incus/network_load_balancer.go:979
-#: cmd/incus/network_load_balancer.go:1045 cmd/incus/storage.go:116
+#: cmd/incus/network_load_balancer.go:322
+#: cmd/incus/network_load_balancer.go:470
+#: cmd/incus/network_load_balancer.go:592
+#: cmd/incus/network_load_balancer.go:744
+#: cmd/incus/network_load_balancer.go:821
+#: cmd/incus/network_load_balancer.go:886
+#: cmd/incus/network_load_balancer.go:980
+#: cmd/incus/network_load_balancer.go:1046 cmd/incus/storage.go:116
 #: cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:799
 #: cmd/incus/storage.go:892 cmd/incus/storage.go:971
 #: cmd/incus/storage_bucket.go:114 cmd/incus/storage_bucket.go:203
@@ -1573,7 +1573,7 @@ msgid "Clustering enabled"
 msgstr "Klustering aktiverad"
 
 #: cmd/incus/cluster.go:170 cmd/incus/cluster.go:1124
-#: cmd/incus/cluster_group.go:438 cmd/incus/config_trust.go:399
+#: cmd/incus/cluster_group.go:439 cmd/incus/config_trust.go:399
 #: cmd/incus/config_trust.go:585 cmd/incus/image.go:1045
 #: cmd/incus/image_alias.go:209 cmd/incus/list.go:140 cmd/incus/network.go:1044
 #: cmd/incus/network.go:1242 cmd/incus/network_allocations.go:67
@@ -1647,12 +1647,12 @@ msgstr "Konfigurationsnyckel/värde som ska tillämpas på målinstansen"
 msgid "Config option should be in the format KEY=VALUE"
 msgstr "Konfigurationsflaggan ska ha formatet NYCKEL=VÄRDE"
 
-#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:373
+#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:374
 #: cmd/incus/config.go:265 cmd/incus/config.go:340
 #: cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329
 #: cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668
 #: cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726
-#: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:705
+#: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706
 #: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670
 #: cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569
 #: cmd/incus/project.go:394 cmd/incus/storage.go:353
@@ -2013,7 +2013,7 @@ msgstr "Aktuellt antal VF: %d"
 msgid "DEFAULT TARGET ADDRESS"
 msgstr "STANDARDMÅLADRESS"
 
-#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:464
+#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:465
 #: cmd/incus/config_trust.go:417 cmd/incus/image.go:1074
 #: cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076
 #: cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155
@@ -2085,7 +2085,7 @@ msgstr "Ta bort alla varningar"
 msgid "Delete background operations (will attempt to cancel)"
 msgstr "Ta bort bakgrundsoperationer (försöker avbryta)"
 
-#: cmd/incus/cluster_group.go:251 cmd/incus/cluster_group.go:252
+#: cmd/incus/cluster_group.go:252 cmd/incus/cluster_group.go:253
 msgid "Delete cluster groups"
 msgstr "Ta bort klustergrupper"
 
@@ -2141,8 +2141,8 @@ msgstr "Ta bort nätverksvidarebefordringar"
 msgid "Delete network integrations"
 msgstr "Ta bort nätverksintegrationer"
 
-#: cmd/incus/network_load_balancer.go:739
 #: cmd/incus/network_load_balancer.go:740
+#: cmd/incus/network_load_balancer.go:741
 msgid "Delete network load balancers"
 msgstr "Ta bort nätverkslastbalanserare"
 
@@ -2499,7 +2499,7 @@ msgstr "GÅR UT DEN"
 msgid "EXPIRY DATE"
 msgstr "UTGÅNGSDATUM"
 
-#: cmd/incus/cluster_group.go:303 cmd/incus/cluster_group.go:304
+#: cmd/incus/cluster_group.go:304 cmd/incus/cluster_group.go:305
 msgid "Edit a cluster group"
 msgstr "Redigera en klustergrupp"
 
@@ -2551,8 +2551,8 @@ msgstr "Redigera nätverkskonfigurationer som YAML"
 msgid "Edit network integration configurations as YAML"
 msgstr "Redigera nätverksintegrationskonfigurationer som YAML"
 
-#: cmd/incus/network_load_balancer.go:587
 #: cmd/incus/network_load_balancer.go:588
+#: cmd/incus/network_load_balancer.go:589
 msgid "Edit network load balancer configurations as YAML"
 msgstr "Redigera konfigurationer för nätverkslastbalanserare som YAML"
 
@@ -2611,7 +2611,7 @@ msgid "Edit trust configurations as YAML"
 msgstr "Redigera förtroendekonfigurationer som YAML"
 
 #: cmd/incus/cluster.go:211 cmd/incus/cluster.go:1153
-#: cmd/incus/cluster_group.go:472 cmd/incus/config_trust.go:429
+#: cmd/incus/cluster_group.go:473 cmd/incus/config_trust.go:429
 #: cmd/incus/config_trust.go:610 cmd/incus/image.go:1092
 #: cmd/incus/image_alias.go:258 cmd/incus/list.go:528 cmd/incus/network.go:1091
 #: cmd/incus/network.go:1280 cmd/incus/network_allocations.go:92
@@ -2701,11 +2701,11 @@ msgstr "Fel vid avkodning av data: %v"
 msgid "Error retrieving aliases: %w"
 msgstr "Fel vid hämtning av alias: %w"
 
-#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:922
+#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:923
 #: cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479
 #: cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368
 #: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
-#: cmd/incus/network_load_balancer.go:523 cmd/incus/network_peer.go:560
+#: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
 #: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
 #: cmd/incus/profile.go:1031 cmd/incus/project.go:810 cmd/incus/storage.go:845
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
@@ -2724,10 +2724,10 @@ msgstr "Fel vid inställning av termstorlek %s"
 msgid "Error unsetting properties: %v"
 msgstr "Fel vid avaktivering av egenskaper: %v"
 
-#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:916
+#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:917
 #: cmd/incus/network.go:1473 cmd/incus/network_acl.go:490
 #: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
-#: cmd/incus/network_load_balancer.go:517 cmd/incus/network_peer.go:554
+#: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
 #: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
 #: cmd/incus/profile.go:1025 cmd/incus/project.go:804 cmd/incus/storage.go:839
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
@@ -2773,6 +2773,7 @@ msgid "Execute a SQL query against the local or global database"
 msgstr "Utför en SQL-fråga mot den lokala eller globala databasen"
 
 #: cmd/incus/admin_sql.go:30
+#, fuzzy
 msgid ""
 "Execute a SQL query against the local or global database\n"
 "\n"
@@ -2783,8 +2784,7 @@ msgid ""
 "  The global database is common to all members in the cluster, and contains\n"
 "  cluster-specific data (such as profiles, containers, etc).\n"
 "\n"
-"  If you are running a non-clustered server, the same applies, as that\n"
-"  instance is effectively a single-member cluster.\n"
+"  Non-clustered servers still have both local and global databases.\n"
 "\n"
 "  If <query> is the special value \"-\", then the query is read from\n"
 "  standard input.\n"
@@ -3233,7 +3233,7 @@ msgstr "Misslyckades med att öppna källfilen %q: %v"
 msgid "Failed to open target file %q: %w"
 msgstr "Misslyckades att öppna målfil %q: %w"
 
-#: cmd/incus/admin_sql.go:104
+#: cmd/incus/admin_sql.go:103
 #, c-format
 msgid "Failed to parse dump response: %w"
 msgstr "Det gick inte att analysera dumpningssvaret: %w"
@@ -3248,7 +3248,7 @@ msgstr "Det gick inte att analysera förinställningen: %w"
 msgid "Failed to read from file: %w"
 msgstr "Det gick inte att läsa från filen: %w"
 
-#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:81
+#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:80
 #, c-format
 msgid "Failed to read from stdin: %w"
 msgstr "Läsning från stdin misslyckades: %w"
@@ -3274,7 +3274,7 @@ msgstr "Det gick inte att byta namn på exportfilen: %w"
 msgid "Failed to render the config: %w"
 msgstr "Det gick inte att rendera konfigurationen: %w"
 
-#: cmd/incus/admin_sql.go:98
+#: cmd/incus/admin_sql.go:97
 #, c-format
 msgid "Failed to request dump: %w"
 msgstr "Misslyckades med att begära dump: %w"
@@ -3482,8 +3482,8 @@ msgstr ""
 "för att inaktivera rubriker och \",header\" för att aktivera dem om så "
 "önskas, t.ex. csv,header"
 
-#: cmd/incus/admin_sql.go:58 cmd/incus/alias.go:111 cmd/incus/cluster.go:171
-#: cmd/incus/cluster_group.go:439 cmd/incus/config_template.go:270
+#: cmd/incus/admin_sql.go:57 cmd/incus/alias.go:111 cmd/incus/cluster.go:171
+#: cmd/incus/cluster_group.go:440 cmd/incus/config_template.go:270
 #: cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584
 #: cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141
 #: cmd/incus/network.go:1045 cmd/incus/network.go:1241
@@ -3628,11 +3628,11 @@ msgstr "Genererar ett klientcertifikat. Detta kan ta en minut..."
 msgid "Get a summary of resource allocations"
 msgstr "Få en sammanfattning av resursfördelningen"
 
-#: cmd/incus/network_load_balancer.go:1129
+#: cmd/incus/network_load_balancer.go:1130
 msgid "Get current load balancer status"
 msgstr "Hämta aktuell status för lastbalanseraren"
 
-#: cmd/incus/network_load_balancer.go:1130
+#: cmd/incus/network_load_balancer.go:1131
 msgid "Get current load-balancer status"
 msgstr "Hämta aktuell lastbalanserarstatus"
 
@@ -3644,7 +3644,7 @@ msgstr "Hämta bildegenskaper"
 msgid "Get runtime information on networks"
 msgstr "Hämta information om körtid i nätverk"
 
-#: cmd/incus/cluster_group.go:809
+#: cmd/incus/cluster_group.go:810
 msgid "Get the key as a cluster group property"
 msgstr "Hämta nyckeln som en klustergruppsegenskap"
 
@@ -3664,7 +3664,7 @@ msgstr "Hämta nyckeln som en nätverksvidarebefordringsegenskap"
 msgid "Get the key as a network integration property"
 msgstr "Hämta nyckeln som en nätverksintegrationsegenskap"
 
-#: cmd/incus/network_load_balancer.go:407
+#: cmd/incus/network_load_balancer.go:408
 msgid "Get the key as a network load balancer property"
 msgstr "Hämta nyckeln som en egenskap för nätverkslastbalanseraren"
 
@@ -3708,7 +3708,7 @@ msgstr "Hämta nyckeln som en lagringsvolymegenskap"
 msgid "Get the key as an instance property"
 msgstr "Hämta nyckeln som en instansegenskap"
 
-#: cmd/incus/cluster_group.go:806
+#: cmd/incus/cluster_group.go:807
 msgid "Get values for cluster group configuration keys"
 msgstr "Hämta värden för konfigurationsnycklar för klustergrupper"
 
@@ -3740,8 +3740,8 @@ msgstr "Hämta värden för konfigurationsnycklar för nätverksvidarebefordran"
 msgid "Get values for network integration configuration keys"
 msgstr "Hämta värden för konfigurationsnycklar för nätverksintegration"
 
-#: cmd/incus/network_load_balancer.go:403
 #: cmd/incus/network_load_balancer.go:404
+#: cmd/incus/network_load_balancer.go:405
 msgid "Get values for network load balancer configuration keys"
 msgstr "Hämta värden för konfigurationsnycklar för nätverkslastbalanserare"
 
@@ -4479,11 +4479,11 @@ msgstr ""
 "- Token E -\n"
 "Går ut"
 
-#: cmd/incus/cluster_group.go:417
+#: cmd/incus/cluster_group.go:418
 msgid "List all the cluster groups"
 msgstr "Lista alla klustergrupper"
 
-#: cmd/incus/cluster_group.go:418
+#: cmd/incus/cluster_group.go:419
 msgid ""
 "List all the cluster groups\n"
 "\n"
@@ -4528,11 +4528,13 @@ msgid "List all the cluster members"
 msgstr "Lista alla klustermedlemmar"
 
 #: cmd/incus/cluster.go:150
+#, fuzzy
 msgid ""
 "List all the cluster members\n"
 "\n"
 "\tThe -c option takes a (optionally comma-separated) list of arguments\n"
-"\tthat control which image attributes to output when displaying in table\n"
+"\tthat control which cluster members attributes to output when displaying in "
+"table\n"
 "\tor csv format.\n"
 "\n"
 "\tDefault column layout is: nurafdsm\n"
@@ -4637,6 +4639,7 @@ msgid "List available network load balancers"
 msgstr "Lista tillgängliga nätverkslastbalanserare"
 
 #: cmd/incus/network_load_balancer.go:105
+#, fuzzy
 msgid ""
 "List available network load balancers\n"
 "\n"
@@ -4644,8 +4647,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which network load balancer attributes to output when displaying\n"
+"in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -4683,6 +4686,7 @@ msgid "List available network peers"
 msgstr "Lista tillgängliga nätverkspeers"
 
 #: cmd/incus/network_peer.go:93
+#, fuzzy
 msgid ""
 "List available network peers\n"
 "\n"
@@ -4690,7 +4694,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which network peer attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4888,6 +4892,7 @@ msgid "List background operations"
 msgstr "Lista bakgrundsoperationer"
 
 #: cmd/incus/operation.go:124
+#, fuzzy
 msgid ""
 "List background operations\n"
 "\n"
@@ -4895,8 +4900,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which attributes of background operations to output when displaying\n"
+"in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -4940,6 +4945,7 @@ msgid "List image aliases"
 msgstr "Lista avbildsalias"
 
 #: cmd/incus/image_alias.go:187
+#, fuzzy
 msgid ""
 "List image aliases\n"
 "\n"
@@ -4948,7 +4954,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
+"which attributes of image aliases to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5052,6 +5058,7 @@ msgid "List instance snapshots"
 msgstr "Lista instansöversikter"
 
 #: cmd/incus/snapshot.go:320
+#, fuzzy
 msgid ""
 "List instance snapshots\n"
 "\n"
@@ -5059,7 +5066,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which snapshots attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5269,14 +5276,15 @@ msgid "List network allocations in use"
 msgstr "Lista nätverkstilldelningar som används"
 
 #: cmd/incus/network_allocations.go:39
+#, fuzzy
 msgid ""
 "List network allocations in use\n"
 "Default column layout: uatnm\n"
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which network allocations attribute attributes to output when\n"
+"displaying in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -5315,6 +5323,7 @@ msgid "List network integrations"
 msgstr "Lista nätverksintegrationer"
 
 #: cmd/incus/network_integration.go:389
+#, fuzzy
 msgid ""
 "List network integrations\n"
 "\n"
@@ -5322,7 +5331,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which network integrations attributes to output when displaying in table or "
+"csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5373,6 +5383,7 @@ msgid "List profiles"
 msgstr "Lista profiler"
 
 #: cmd/incus/profile.go:674
+#, fuzzy
 msgid ""
 "List profiles\n"
 "\n"
@@ -5386,7 +5397,7 @@ msgid ""
 "contains \"bar\"\n"
 "\n"
 "The -c option takes a (optionally comma-separated) list of arguments\n"
-"that control which image attributes to output when displaying in table\n"
+"that control which profile attributes to output when displaying in table\n"
 "or csv format.\n"
 "\n"
 "Default column layout is: ndu\n"
@@ -5647,6 +5658,7 @@ msgid "List the available remotes"
 msgstr "Lista tillgängliga fjärrkontroller"
 
 #: cmd/incus/remote.go:949
+#, fuzzy
 msgid ""
 "List the available remotes\n"
 "\n"
@@ -5654,7 +5666,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
+"which remote attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5793,7 +5805,7 @@ msgstr ""
 msgid "List, show and delete background operations"
 msgstr "Lista, visa och ta bort bakgrundsoperationer"
 
-#: cmd/incus/network_load_balancer.go:322
+#: cmd/incus/network_load_balancer.go:323
 msgid "Load balancer description"
 msgstr "Beskrivning av lastbalanserare"
 
@@ -5872,7 +5884,7 @@ msgstr "MAD: %s (%s)"
 msgid "MANAGED"
 msgstr "HANTERAD"
 
-#: cmd/incus/cluster_group.go:463
+#: cmd/incus/cluster_group.go:464
 msgid "MEMBERS"
 msgstr "MEDLEMMAR"
 
@@ -6045,13 +6057,13 @@ msgstr "Hantera nätverksvidarebefordringar"
 msgid "Manage network integrations"
 msgstr "Hantera nätverksintegrationer"
 
-#: cmd/incus/network_load_balancer.go:798
 #: cmd/incus/network_load_balancer.go:799
+#: cmd/incus/network_load_balancer.go:800
 msgid "Manage network load balancer backends"
 msgstr "Hantera backend-system för nätverkslastbalansering"
 
-#: cmd/incus/network_load_balancer.go:957
 #: cmd/incus/network_load_balancer.go:958
+#: cmd/incus/network_load_balancer.go:959
 msgid "Manage network load balancer ports"
 msgstr "Hantera portar för nätverkslastbalanserare"
 
@@ -6331,7 +6343,7 @@ msgstr "Flytta till ett annat projekt än källan"
 msgid "Moving the storage volume: %s"
 msgstr "Flytta lagringsvolymen: %s"
 
-#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1101
+#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1102
 msgid "Multiple ports match. Use --force to remove them all"
 msgstr "Flera portar matchar. Använd --force för att ta bort dem alla"
 
@@ -6344,7 +6356,7 @@ msgid "Must run as root to import from directory"
 msgstr "Måste köras som root för att importera från katalogen"
 
 #: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143
-#: cmd/incus/cluster_group.go:462 cmd/incus/config_trust.go:413
+#: cmd/incus/cluster_group.go:463 cmd/incus/config_trust.go:413
 #: cmd/incus/config_trust.go:600 cmd/incus/list.go:484
 #: cmd/incus/network.go:1071 cmd/incus/network_acl.go:162
 #: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
@@ -6606,12 +6618,12 @@ msgstr "Nätverksintegration %s raderad"
 msgid "Network integration %s renamed to %s"
 msgstr "Nätverksintegration %s döpt om till %s"
 
-#: cmd/incus/network_load_balancer.go:384
+#: cmd/incus/network_load_balancer.go:385
 #, c-format
 msgid "Network load balancer %s created"
 msgstr "Nätverkslastbalanserare %s skapad"
 
-#: cmd/incus/network_load_balancer.go:782
+#: cmd/incus/network_load_balancer.go:783
 #, c-format
 msgid "Network load balancer %s deleted"
 msgstr "Nätverkslastbalanserare %s raderad"
@@ -6705,15 +6717,15 @@ msgstr "Ingen enhet hittades för detta nätverk"
 msgid "No device found for this storage volume"
 msgstr "Ingen enhet hittades för denna lagringsvolym"
 
-#: cmd/incus/network_load_balancer.go:1155
+#: cmd/incus/network_load_balancer.go:1156
 msgid "No load-balancer health information available"
 msgstr "Ingen information om lastbalanserarens hälsa tillgänglig"
 
-#: cmd/incus/network_load_balancer.go:937
+#: cmd/incus/network_load_balancer.go:938
 msgid "No matching backend found"
 msgstr "Ingen matchande backend hittades"
 
-#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1109
+#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1110
 msgid "No matching port(s) found"
 msgstr "Inga matchande portar hittades"
 
@@ -6932,7 +6944,7 @@ msgstr "Avsökningsintervall (i sekunder)"
 msgid "Pool name cannot be empty"
 msgstr "Poolnamnet får inte vara tomt"
 
-#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:980
+#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:981
 msgid "Port description"
 msgstr "Portbeskrivning"
 
@@ -6974,13 +6986,13 @@ msgstr "Tryck på CTRL-C för att avsluta"
 msgid "Press ctrl+c to finish"
 msgstr "Tryck på Ctrl+C för att avsluta"
 
-#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:374
+#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:375
 #: cmd/incus/config.go:266 cmd/incus/config.go:341
 #: cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232
 #: cmd/incus/config_trust.go:330 cmd/incus/image.go:459
 #: cmd/incus/network.go:760 cmd/incus/network_acl.go:669
 #: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727
-#: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:706
+#: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707
 #: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671
 #: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570
 #: cmd/incus/project.go:395 cmd/incus/storage.go:354
@@ -7339,7 +7351,7 @@ msgstr ""
 "Ta bort %s och allt som den innehåller (instanser, avbildningar, volymer, "
 "nätverk, ...) (ja/nej): "
 
-#: cmd/incus/cluster_group.go:562
+#: cmd/incus/cluster_group.go:563
 msgid "Remove a cluster member from a cluster group"
 msgstr "Ta bort en klustermedlem från en klustergrupp"
 
@@ -7359,7 +7371,7 @@ msgstr "Ta bort adresser från en nätverksadressuppsättning"
 msgid "Remove aliases"
 msgstr "Ta bort alias"
 
-#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1042
+#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1043
 msgid "Remove all ports that match"
 msgstr "Ta bort alla portar som matchar"
 
@@ -7371,11 +7383,11 @@ msgstr "Ta bort alla profiler från instansen"
 msgid "Remove all rules that match"
 msgstr "Ta bort alla regler som matchar"
 
-#: cmd/incus/network_load_balancer.go:882
+#: cmd/incus/network_load_balancer.go:883
 msgid "Remove backend from a load balancer"
 msgstr "Ta bort backend från en lastbalanserare"
 
-#: cmd/incus/network_load_balancer.go:881
+#: cmd/incus/network_load_balancer.go:882
 msgid "Remove backends from a load balancer"
 msgstr "Ta bort backends från en lastbalanserare"
 
@@ -7387,7 +7399,7 @@ msgstr "Ta bort poster från en nätverkszonpost"
 msgid "Remove instance devices"
 msgstr "Ta bort instansens enheter"
 
-#: cmd/incus/cluster_group.go:561
+#: cmd/incus/cluster_group.go:562
 msgid "Remove member from group"
 msgstr "Ta bort medlem från grupp"
 
@@ -7395,8 +7407,8 @@ msgstr "Ta bort medlem från grupp"
 msgid "Remove ports from a forward"
 msgstr "Ta bort portar från en vidarebefordran"
 
-#: cmd/incus/network_load_balancer.go:1040
 #: cmd/incus/network_load_balancer.go:1041
+#: cmd/incus/network_load_balancer.go:1042
 msgid "Remove ports from a load balancer"
 msgstr "Ta bort portar från en lastbalanserare"
 
@@ -7425,7 +7437,7 @@ msgstr "Ta bort ögonblicksbild %s från %s (ja/nej): "
 msgid "Remove trusted client"
 msgstr "Ta bort betrodd klient"
 
-#: cmd/incus/cluster_group.go:637 cmd/incus/cluster_group.go:638
+#: cmd/incus/cluster_group.go:638 cmd/incus/cluster_group.go:639
 msgid "Rename a cluster group"
 msgstr "Byt namn på en klustergrupp"
 
@@ -7571,7 +7583,7 @@ msgstr "Återkalla klustermedlemmens anslutningstoken"
 msgid "Role (admin or read-only)"
 msgstr "Roll (administratör eller skrivskyddad)"
 
-#: cmd/incus/admin_sql.go:138
+#: cmd/incus/admin_sql.go:137
 #, c-format
 msgid "Rows affected: %d"
 msgstr "Berörda rader: %d"
@@ -7731,7 +7743,7 @@ msgid "Server doesn't trust us after authentication"
 msgstr "Servern litar inte på oss efter autentisering"
 
 #: cmd/incus/cluster.go:286 cmd/incus/cluster.go:1196 cmd/incus/cluster.go:1291
-#: cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:515
+#: cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:516
 msgid "Server isn't part of a cluster"
 msgstr "Servern ingår inte i ett kluster"
 
@@ -7749,7 +7761,7 @@ msgstr "Serverversion: %s\n"
 msgid "Server: %s"
 msgstr "Server: %s"
 
-#: cmd/incus/cluster_group.go:876
+#: cmd/incus/cluster_group.go:877
 msgid "Set a cluster group's configuration keys"
 msgstr "Ställ in konfigurationsnycklarna för en klustergrupp"
 
@@ -7893,11 +7905,11 @@ msgstr ""
 "    incus network integration set [<fjärr>:]<nätverksintegration> <nyckel> "
 "<värde>"
 
-#: cmd/incus/network_load_balancer.go:460
+#: cmd/incus/network_load_balancer.go:461
 msgid "Set network load balancer keys"
 msgstr "Ställ in nycklar för nätverkslastbalanserare"
 
-#: cmd/incus/network_load_balancer.go:461
+#: cmd/incus/network_load_balancer.go:462
 msgid ""
 "Set network load balancer keys\n"
 "\n"
@@ -8102,7 +8114,7 @@ msgstr ""
 "Ange filernas UID vid push (i rekursivt läge, anger bara målkatalogens UID "
 "om den inte finns och -p används)"
 
-#: cmd/incus/cluster_group.go:879
+#: cmd/incus/cluster_group.go:880
 msgid "Set the key as a cluster group property"
 msgstr "Ställ in nyckeln som en klustergruppsegenskap"
 
@@ -8126,7 +8138,7 @@ msgstr "Ställ in nyckeln som en nätverksvidarebefordringsegenskap"
 msgid "Set the key as a network integration property"
 msgstr "Ställ in nyckeln som en nätverksintegrationsegenskap"
 
-#: cmd/incus/network_load_balancer.go:468
+#: cmd/incus/network_load_balancer.go:469
 msgid "Set the key as a network load balancer property"
 msgstr "Ställ in nyckeln som en egenskap för nätverkslastbalanseraren"
 
@@ -8190,7 +8202,7 @@ msgstr "Visa alla felsökningsmeddelanden"
 msgid "Show all information messages"
 msgstr "Visa alla informationsmeddelanden"
 
-#: cmd/incus/cluster_group.go:687 cmd/incus/cluster_group.go:688
+#: cmd/incus/cluster_group.go:688 cmd/incus/cluster_group.go:689
 msgid "Show cluster group configurations"
 msgstr "Visa klustergruppskonfigurationer"
 
@@ -8818,7 +8830,7 @@ msgid "The is no config key to set on an instance snapshot."
 msgstr ""
 "Det finns ingen konfigurationsnyckel att ställa in på en instanssnapshot."
 
-#: cmd/incus/cluster_group.go:856
+#: cmd/incus/cluster_group.go:857
 #, c-format
 msgid "The key %q does not exist on cluster group %q"
 msgstr "Nyckeln %q finns inte i klustergruppen %q"
@@ -8849,7 +8861,7 @@ msgstr "Minsta uppdateringsfrekvens är 10 sekunder"
 msgid "The profile device doesn't exist"
 msgstr "Profil-enheten finns inte"
 
-#: cmd/incus/cluster_group.go:847
+#: cmd/incus/cluster_group.go:848
 #, c-format
 msgid "The property %q does not exist on the cluster group %q: %v"
 msgstr "Egenskapen %q finns inte i klustergruppen %q: %v"
@@ -8869,7 +8881,7 @@ msgstr "Egenskapen %q finns inte på instansen %q: %v"
 msgid "The property %q does not exist on the instance snapshot %s: %v"
 msgstr "Egenskaperna %q finns inte på instansens ögonblicksbild %s/%s: %v"
 
-#: cmd/incus/network_load_balancer.go:432
+#: cmd/incus/network_load_balancer.go:433
 #, c-format
 msgid "The property %q does not exist on the load balancer %q: %v"
 msgstr "Egenskapen %q finns inte på lastbalanseraren %q: %v"
@@ -9253,7 +9265,7 @@ msgid "Unknown channel type for client %q: %s"
 msgstr "Okänd kanaltyp för klient %q: %s"
 
 #: cmd/incus/cluster.go:217 cmd/incus/cluster.go:1159
-#: cmd/incus/cluster_group.go:478 cmd/incus/config_trust.go:435
+#: cmd/incus/cluster_group.go:479 cmd/incus/config_trust.go:435
 #: cmd/incus/config_trust.go:616 cmd/incus/image.go:1098
 #: cmd/incus/image_alias.go:264 cmd/incus/list.go:546 cmd/incus/network.go:1097
 #: cmd/incus/network.go:1286 cmd/incus/network_allocations.go:98
@@ -9294,7 +9306,7 @@ msgstr "Okänd nyckel: %s"
 msgid "Unknown output type %q"
 msgstr "Okänd utdatatyp %q"
 
-#: cmd/incus/cluster_group.go:955
+#: cmd/incus/cluster_group.go:956
 msgid "Unset a cluster group's configuration keys"
 msgstr "Inaktivera konfigurationsnycklarna för en klustergrupp"
 
@@ -9342,11 +9354,11 @@ msgstr "Avmarkera nätverksvidarebefordringsnycklar"
 msgid "Unset network integration configuration keys"
 msgstr "Avmarkera konfigurationsnycklar för nätverksintegration"
 
-#: cmd/incus/network_load_balancer.go:558
+#: cmd/incus/network_load_balancer.go:559
 msgid "Unset network load balancer configuration keys"
 msgstr "Avmarkera konfigurationsnycklar för nätverkslastbalanserare"
 
-#: cmd/incus/network_load_balancer.go:559
+#: cmd/incus/network_load_balancer.go:560
 msgid "Unset network load balancer keys"
 msgstr "Avmarkera nycklar för nätverkslastbalanserare"
 
@@ -9400,7 +9412,7 @@ msgstr ""
 "Värden som stöds för typen är \"custom\", \"container\" och \"virtual-"
 "machine\"."
 
-#: cmd/incus/cluster_group.go:958
+#: cmd/incus/cluster_group.go:959
 msgid "Unset the key as a cluster group property"
 msgstr "Avmarkera nyckeln som en klustergruppsegenskap"
 
@@ -9424,7 +9436,7 @@ msgstr "Avmarkera nyckeln som en nätverksvidarebefordringsegenskap"
 msgid "Unset the key as a network integration property"
 msgstr "Avmarkera nyckeln som en nätverksintegrationsegenskap"
 
-#: cmd/incus/network_load_balancer.go:562
+#: cmd/incus/network_load_balancer.go:563
 msgid "Unset the key as a network load balancer property"
 msgstr "Inaktivera nyckeln som en egenskap för nätverkslastbalanserare"
 
@@ -10051,11 +10063,13 @@ msgstr ""
 "     Återställ \"foo\" till att endast använda klustergruppen \"default\"."
 
 #: cmd/incus/cluster_group.go:174
+#, fuzzy
 msgid ""
 "incus cluster group create g1\n"
+"    Create a cluster group named g1\n"
 "\n"
 "incus cluster group create g1 < config.yaml\n"
-"\tCreate a cluster group with configuration from config.yaml"
+"    Create a cluster group named g1 with configuration from config.yaml"
 msgstr ""
 "incus cluster group create g1\n"
 "\n"
@@ -10477,8 +10491,10 @@ msgstr ""
 "integration.yaml"
 
 #: cmd/incus/network_load_balancer.go:314
+#, fuzzy
 msgid ""
 "incus network load-balancer create n1 127.0.0.1\n"
+"    Create network load-balancer for network n1\n"
 "\n"
 "incus network load-balancer create n1 127.0.0.1 < config.yaml\n"
 "    Create network load-balancer for network n1 with configuration from "
@@ -10551,6 +10567,7 @@ msgstr ""
 "den operationen UUID"
 
 #: cmd/incus/profile.go:186
+#, fuzzy
 msgid ""
 "incus profile assign foo default,bar\n"
 "    Set the profiles for \"foo\" to \"default\" and \"bar\".\n"
@@ -10559,7 +10576,7 @@ msgid ""
 "    Reset \"foo\" to only using the \"default\" profile.\n"
 "\n"
 "incus profile assign foo --no-profiles\n"
-"    Remove all profile from \"foo\""
+"    Remove all profile assigned to \"foo\""
 msgstr ""
 "incus profile assign foo default,bar\n"
 "Ställ in profilerna för \"foo\" till \"default\" och \"bar\".\n"
