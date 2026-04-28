@@ -411,6 +411,7 @@ import (
 
 	_ "github.com/lxc/incus/v6/shared/cgo" // Used by cgo
 	"github.com/lxc/incus/v6/shared/logger"
+	"github.com/lxc/incus/v6/shared/util"
 )
 
 // ShiftOwner updates the uid and gid for a file within a specific basepath.
@@ -699,6 +700,10 @@ const (
 
 // CanIdmapMount checks if the provided path and filesystem can use VFS idmapped mounts.
 func CanIdmapMount(path string, fstype string) bool {
+	if util.IsTrue(os.Getenv("INCUS_IDMAPPED_MOUNTS_DISABLE")) {
+		return false
+	}
+
 	cpath := C.CString(path)
 	defer C.free(unsafe.Pointer(cpath))
 	cfstype := C.CString(fstype)
