@@ -76,7 +76,6 @@ import (
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/archive"
 	"github.com/lxc/incus/v6/shared/cancel"
-	"github.com/lxc/incus/v6/shared/idmap"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/proxy"
 	"github.com/lxc/incus/v6/shared/revert"
@@ -989,122 +988,8 @@ func (d *Daemon) init() error {
 		d.os.LXCFeatures[extension] = liblxc.HasAPIExtension(extension)
 	}
 
-	// Look for kernel features
-	logger.Infof("Kernel features:")
-
-	d.os.CloseRange = canUseCloseRange()
-	if d.os.CloseRange {
-		logger.Info(" - closing multiple file descriptors efficiently: yes")
-	} else {
-		logger.Info(" - closing multiple file descriptors efficiently: no")
-	}
-
-	d.os.NetnsGetifaddrs = canUseNetnsGetifaddrs()
-	if d.os.NetnsGetifaddrs {
-		logger.Info(" - netnsid-based network retrieval: yes")
-	} else {
-		logger.Info(" - netnsid-based network retrieval: no")
-	}
-
-	if canUsePidFds() {
-		d.os.PidFds = true
-		d.os.PidFdsThread = canUseThreadPidFds()
-	}
-
-	if d.os.PidFds {
-		logger.Info(" - pidfds: yes")
-	} else {
-		logger.Info(" - pidfds: no")
-	}
-
-	if d.os.PidFdsThread {
-		logger.Info(" - pidfds for threads: yes")
-	} else {
-		logger.Info(" - pidfds for threads: no")
-	}
-
-	if canUseCoreScheduling() {
-		d.os.CoreScheduling = true
-		logger.Info(" - core scheduling: yes")
-	} else {
-		logger.Info(" - core scheduling: no")
-	}
-
-	d.os.UeventInjection = canUseUeventInjection()
-	if d.os.UeventInjection {
-		logger.Info(" - uevent injection: yes")
-	} else {
-		logger.Info(" - uevent injection: no")
-	}
-
-	d.os.SeccompListener = canUseSeccompListener()
-	if d.os.SeccompListener {
-		logger.Info(" - seccomp listener: yes")
-	} else {
-		logger.Info(" - seccomp listener: no")
-	}
-
-	d.os.SeccompListenerContinue = canUseSeccompListenerContinue()
-	if d.os.SeccompListenerContinue {
-		logger.Info(" - seccomp listener continue syscalls: yes")
-	} else {
-		logger.Info(" - seccomp listener continue syscalls: no")
-	}
-
-	if canUseSeccompListenerAddfd() {
-		d.os.SeccompListenerAddfd = true
-		logger.Info(" - seccomp listener add file descriptors: yes")
-	} else {
-		logger.Info(" - seccomp listener add file descriptors: no")
-	}
-
-	d.os.PidFdSetns = canUsePidFdSetns()
-	if d.os.PidFdSetns {
-		logger.Info(" - attach to namespaces via pidfds: yes")
-	} else {
-		logger.Info(" - attach to namespaces via pidfds: no")
-	}
-
-	if canUseNativeTerminals() {
-		d.os.NativeTerminals = true
-		logger.Info(" - safe native terminal allocation: yes")
-	} else {
-		logger.Info(" - safe native terminal allocation: no")
-	}
-
-	d.os.UnprivBinfmt = canUseBinfmt()
-	if d.os.UnprivBinfmt {
-		logger.Info(" - unprivileged binfmt_misc: yes")
-	} else {
-		logger.Info(" - unprivileged binfmt_misc: no")
-	}
-
-	/*
-	 * During daemon startup we're the only thread that touches VFS3Fscaps
-	 * so we don't need to bother with atomic.StoreInt32() when touching
-	 * VFS3Fscaps.
-	 */
-	d.os.VFS3Fscaps = idmap.SupportsVFS3FSCaps("")
-	if d.os.VFS3Fscaps {
-		idmap.VFS3FSCaps = idmap.VFS3FSCapsSupported
-		logger.Infof(" - unprivileged file capabilities: yes")
-	} else {
-		idmap.VFS3FSCaps = idmap.VFS3FSCapsUnsupported
-		logger.Infof(" - unprivileged file capabilities: no")
-	}
-
 	// Get cgroup warnings.
 	dbWarnings = append(dbWarnings, cgroup.Warnings()...)
-
-	// Detect idmapped mounts support.
-	if util.IsTrue(os.Getenv("INCUS_IDMAPPED_MOUNTS_DISABLE")) {
-		logger.Info(" - idmapped mounts kernel support: disabled")
-	} else if kernelSupportsIdmappedMounts() {
-		d.os.IdmappedMounts = true
-		logger.Info(" - idmapped mounts kernel support: yes")
-	} else {
-		logger.Info(" - idmapped mounts kernel support: no")
-	}
 
 	// Detect and cached available instance types from operational drivers.
 	drivers := instanceDrivers.DriverStatuses()
@@ -1613,17 +1498,15 @@ func (d *Daemon) init() error {
 		devicesRegister(instances)
 
 		// Setup seccomp handler
-		if d.os.SeccompListener {
-			seccompServer, err := seccomp.NewSeccompServer(d.State(), internalUtil.RunPath("seccomp.socket"), func(pid int32, state *state.State) (seccomp.Instance, error) {
-				return findContainerForPid(pid, state)
-			})
-			if err != nil {
-				return err
-			}
-
-			d.seccomp = seccompServer
-			logger.Info("Started seccomp handler", logger.Ctx{"path": internalUtil.RunPath("seccomp.socket")})
+		seccompServer, err := seccomp.NewSeccompServer(d.State(), internalUtil.RunPath("seccomp.socket"), func(pid int32, state *state.State) (seccomp.Instance, error) {
+			return findContainerForPid(pid, state)
+		})
+		if err != nil {
+			return err
 		}
+
+		d.seccomp = seccompServer
+		logger.Info("Started seccomp handler", logger.Ctx{"path": internalUtil.RunPath("seccomp.socket")})
 
 		// Read the trusted certificates
 		updateCertificateCache(d)

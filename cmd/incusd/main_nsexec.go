@@ -325,7 +325,6 @@ __attribute__((constructor)) void init(void) {
 		cmdline_cur++;
 	cmdline_cur++;
 	if (cmdline_size <= cmdline_cur - cmdline_buf) {
-		checkfeature();
 		return;
 	}
 
@@ -354,8 +353,7 @@ __attribute__((constructor)) void init(void) {
 			fprintf(stderr, "Failed unshare of mount namespace: %s\n", strerror(errno));
 			return;
 		}
-	} else if (strncmp(cmdline_cur, "-", 1) == 0 || strcmp(cmdline_cur, "daemon") == 0)
-		checkfeature();
+	}
 }
 */
 import "C"
