@@ -3199,3 +3199,23 @@ func (r *ProtocolIncus) GetInstanceDebugMemory(name string, format string) (io.R
 
 	return resp.Body, nil
 }
+
+// CreateInstanceBitmap requests that Incus creates a new bitmap for the instance.
+func (r *ProtocolIncus) CreateInstanceBitmap(name string, bitmap api.StorageVolumeBitmapsPost) error {
+	if !r.HasExtension("storage_volume_nbd") {
+		return errors.New("The server is missing the required \"storage_volume_nbd\" API extension")
+	}
+
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeAny)
+	if err != nil {
+		return err
+	}
+
+	// Send the request
+	_, _, err = r.query("POST", fmt.Sprintf("%s/%s/bitmaps", path, url.PathEscape(name)), bitmap, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

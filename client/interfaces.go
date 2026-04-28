@@ -124,6 +124,8 @@ type InstanceServer interface {
 	ConsoleInstance(instanceName string, console api.InstanceConsolePost, args *InstanceConsoleArgs) (op Operation, err error)
 	ConsoleInstanceDynamic(instanceName string, console api.InstanceConsolePost, args *InstanceConsoleArgs) (Operation, func(io.ReadWriteCloser) error, error)
 
+	CreateInstanceBitmap(name string, bitmap api.StorageVolumeBitmapsPost) error
+
 	GetInstanceConsoleLog(instanceName string, args *InstanceConsoleLogArgs) (content io.ReadCloser, err error)
 	DeleteInstanceConsoleLog(instanceName string, args *InstanceConsoleLogArgs) (err error)
 
@@ -399,6 +401,12 @@ type InstanceServer interface {
 	GetStorageVolumeBackupFile(pool string, volName string, name string, req *BackupFileRequest) (resp *BackupFileResponse, err error)
 	CreateStorageVolumeBackupStream(pool string, volName string, backup api.StorageVolumeBackupsPost, req *BackupFileRequest) (err error)
 	CreateStoragePoolVolumeFromBackup(pool string, args StorageVolumeBackupArgs) (op Operation, err error)
+
+	// Storage volume bitmaps manipulations functions ("storage_volume_nbd" API extension)
+	GetStorageVolumeBitmapNames(pool string, volumeType string, volumeName string) ([]string, error)
+	GetStorageVolumeBitmaps(pool string, volumeType string, volumeName string) ([]api.StorageVolumeBitmap, error)
+	CreateStorageVolumeBitmap(pool string, volumeType string, volumeName string, bitmap api.StorageVolumeBitmapsPost) error
+	DeleteStorageVolumeBitmap(pool string, volumeType string, volumeName string, bitmapName string) error
 
 	// Storage volume ISO import function ("custom_volume_iso" API extension)
 	CreateStoragePoolVolumeFromISO(pool string, args StorageVolumeBackupArgs) (op Operation, err error)
