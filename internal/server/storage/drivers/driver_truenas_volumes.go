@@ -1082,21 +1082,6 @@ func (d *truenas) SetVolumeQuota(vol Volume, size string, allowUnsafeResize bool
 				return err
 			}
 		} else if sizeBytes > oldVolSizeBytes {
-
-			// Grow FileSystem
-
-			if !tnHasIscsiRefresh {
-				if inUse {
-					return fmt.Errorf("Growing an online TrueNAS filesystem requires iSCSI Refresh support. Please update the TrueNAS tool: %w", ErrInUse)
-				}
-
-				// Deactivate if necessary, so we can re-activate after changing the zvol size, since we can't use refresh
-				_, err = d.deactivateVolume(vol)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Grow block device first, ignoring any shrink errors, which could happen because we've already ignored a shrink error when shrinking.
 			err = d.setVolsize(dataset, sizeBytes, false)
 			if err != nil {
@@ -1119,7 +1104,7 @@ func (d *truenas) SetVolumeQuota(vol Volume, size string, allowUnsafeResize bool
 				return err
 			}
 
-			if tnHasIscsiRefresh && actualSize < sizeBytes {
+			if actualSize < sizeBytes {
 				// refresh until it does actually grow
 				for range 20 {
 					// rescan iscsi devices to pickup any size change
