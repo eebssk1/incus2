@@ -718,13 +718,13 @@ func InstanceNeedsIntercept(s *state.State, c Instance) (bool, error) {
 }
 
 // MakePidFd prepares a pidfd to inherit for the init process of the container.
-func MakePidFd(pid int, s *state.State) (int, *os.File) {
+func MakePidFd(pid int) (int, *os.File, error) {
 	pidFdFile, err := linux.PidFdOpen(pid, 0)
 	if err != nil {
-		return -1, nil
+		return -1, nil, err
 	}
 
-	return 3, pidFdFile
+	return 3, pidFdFile, nil
 }
 
 func seccompGetPolicyContent(s *state.State, c Instance) (string, error) {
@@ -1222,10 +1222,12 @@ func CallForkmknod(c Instance, dev deviceConfig.Device, requestPID int, s *state
 		return int(-C.EPERM)
 	}
 
-	pidFdNr, pidFd := MakePidFd(requestPID, s)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := MakePidFd(requestPID)
+	if err != nil {
+		return int(-C.EPERM)
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	_, stderr, err := subprocess.RunCommandSplit(
 		context.TODO(),
@@ -1433,10 +1435,15 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 
 	args.pid = int(siov.req.pid)
 
-	pidFdNr, pidFd := MakePidFd(args.pid, srv.s)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := MakePidFd(args.pid)
+	if err != nil {
+		ctx["err"] = fmt.Sprintf("Failed to open pidfd: %s", err)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	uid, gid, fsuid, fsgid, err := TaskIDs(args.pid)
 	if err != nil {
@@ -1565,10 +1572,15 @@ func (srv *Server) HandleSchedSetschedulerSyscall(c Instance, siov *Iovec) int {
 	args := SchedSetschedulerArgs{}
 	args.pidCaller = int(siov.req.pid)
 
-	pidFdNr, pidFd := MakePidFd(args.pidCaller, srv.s)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := MakePidFd(args.pidCaller)
+	if err != nil {
+		ctx["err"] = fmt.Sprintf("Failed to open pidfd: %s", err)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	uid, gid, _, _, err := TaskIDs(args.pidCaller)
 	if err != nil {
@@ -1992,10 +2004,15 @@ func (srv *Server) HandleMountSyscall(c Instance, siov *Iovec) int {
 		pid: int(siov.req.pid),
 	}
 
-	pidFdNr, pidFd := MakePidFd(args.pid, srv.s)
-	if pidFdNr >= 0 {
-		defer func() { _ = pidFd.Close() }()
+	pidFdNr, pidFd, err := MakePidFd(args.pid)
+	if err != nil {
+		ctx["err"] = fmt.Sprintf("Failed to open pidfd: %s", err)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
+
+	defer func() { _ = pidFd.Close() }()
 
 	mntSource := [unix.PathMax]C.char{}
 	mntTarget := [unix.PathMax]C.char{}
@@ -2065,7 +2082,7 @@ func (srv *Server) HandleMountSyscall(c Instance, siov *Iovec) int {
 	args.data = C.GoString(&mntData[0])
 	ctx["data"] = args.data
 
-	err := linux.PidfdSendSignal(int(pidFd.Fd()), 0, 0)
+	err = linux.PidfdSendSignal(int(pidFd.Fd()), 0, 0)
 	if err != nil {
 		ctx["err"] = fmt.Sprintf("Failed to send signal to target process for of mount syscall: %s", err)
 		ctx["syscall_continue"] = "true"
