@@ -728,11 +728,9 @@ func (d *lxc) initLXC(config bool) (*liblxc.Container, error) {
 		}
 	}
 
-	if d.state.OS.CoreScheduling {
-		err = lxcSetConfigItem(cc, "lxc.sched.core", "1")
-		if err != nil {
-			return nil, err
-		}
+	err = lxcSetConfigItem(cc, "lxc.sched.core", "1")
+	if err != nil {
+		return nil, err
 	}
 
 	// Allow for lightweight init
@@ -801,7 +799,7 @@ func (d *lxc) initLXC(config bool) (*liblxc.Container, error) {
 	}
 
 	// Handle unprivileged binfmt_misc.
-	if d.IsPrivileged() || !d.state.OS.UnprivBinfmt {
+	if d.IsPrivileged() {
 		bindMounts = append(bindMounts, "/proc/sys/fs/binfmt_misc")
 	}
 
@@ -1336,10 +1334,6 @@ var (
 func (d *lxc) IdmappedStorage(fspath string, fstype string) idmap.StorageType {
 	var mode idmap.StorageType = idmap.StorageTypeNone
 	var bindMount bool = fstype == "none" || fstype == ""
-
-	if !d.state.OS.IdmappedMounts {
-		return mode
-	}
 
 	buf := &unix.Statfs_t{}
 
@@ -7461,16 +7455,12 @@ func (d *lxc) templateApplyNow(trigger instance.TemplateTrigger) error {
 }
 
 func (d *lxc) inheritInitPidFd() *os.File {
-	if d.state.OS.PidFds {
-		pidFdFile, err := d.InitPidFd()
-		if err != nil {
-			return nil
-		}
-
-		return pidFdFile
+	pidFdFile, err := d.InitPidFd()
+	if err != nil {
+		return nil
 	}
 
-	return nil
+	return pidFdFile
 }
 
 // FileSFTPConn returns a connection to the forkfile handler.
@@ -8120,18 +8110,10 @@ func (d *lxc) networkState(hostInterfaces []net.Interface) map[string]api.Instan
 		return result
 	}
 
-	couldUseNetnsGetifaddrs := d.state.OS.NetnsGetifaddrs
-	if couldUseNetnsGetifaddrs {
-		nw, err := netutils.NetnsGetifaddrs(int32(pid), hostInterfaces)
-		if err != nil {
-			couldUseNetnsGetifaddrs = false
-			d.logger.Warn("Failed to retrieve network information via netlink", logger.Ctx{"pid": pid})
-		} else {
-			result = nw
-		}
-	}
+	nw, err := netutils.NetnsGetifaddrs(int32(pid), hostInterfaces)
+	if err != nil {
+		d.logger.Warn("Failed to retrieve network information via netlink, falling back to forknet", logger.Ctx{"pid": pid})
 
-	if !couldUseNetnsGetifaddrs {
 		pidFd := d.inheritInitPidFd()
 		pidFdNr := "-1"
 		if pidFd != nil {
@@ -8156,18 +8138,15 @@ func (d *lxc) networkState(hostInterfaces []net.Interface) map[string]api.Instan
 			return result
 		}
 
-		// If we can use netns_getifaddrs() but it failed and the setns() +
-		// netns_getifaddrs() succeeded we should just always fallback to the
-		// setns() + netns_getifaddrs() style retrieval.
-		d.state.OS.NetnsGetifaddrs = false
-
-		nw := map[string]api.InstanceStateNetwork{}
-		err = json.Unmarshal([]byte(out), &nw)
+		fallbackResult := map[string]api.InstanceStateNetwork{}
+		err = json.Unmarshal([]byte(out), &fallbackResult)
 		if err != nil {
 			d.logger.Error("Failure to read forknet json", logger.Ctx{"err": err})
 			return result
 		}
 
+		result = fallbackResult
+	} else {
 		result = nw
 	}
 
@@ -8460,7 +8439,7 @@ func (d *lxc) moveMount(source, target, fstype string, flags int, idmapType idma
 }
 
 func (d *lxc) insertMount(source, target, fstype string, flags int, idmapType idmap.StorageType) error {
-	if d.state.OS.IdmappedMounts && idmapType == idmap.StorageTypeIdmapped {
+	if idmapType == idmap.StorageTypeIdmapped {
 		return d.moveMount(source, target, fstype, flags, idmapType)
 	}
 
