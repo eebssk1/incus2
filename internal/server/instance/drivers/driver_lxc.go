@@ -8112,43 +8112,11 @@ func (d *lxc) networkState(hostInterfaces []net.Interface) map[string]api.Instan
 
 	nw, err := netutils.NetnsGetifaddrs(int32(pid), hostInterfaces)
 	if err != nil {
-		d.logger.Warn("Failed to retrieve network information via netlink, falling back to forknet", logger.Ctx{"pid": pid})
-
-		pidFd := d.inheritInitPidFd()
-		pidFdNr := "-1"
-		if pidFd != nil {
-			defer func() { _ = pidFd.Close() }()
-			pidFdNr = "3"
-		}
-
-		// Get the network state from the container
-		out, _, err := subprocess.RunCommandSplit(
-			context.TODO(),
-			nil,
-			[]*os.File{pidFd},
-			d.state.OS.ExecPath,
-			"forknet",
-			"info",
-			"--",
-			fmt.Sprintf("%d", pid),
-			pidFdNr)
-		// Process forkgetnet response
-		if err != nil {
-			d.logger.Error("Error calling 'forknet", logger.Ctx{"err": err, "pid": pid})
-			return result
-		}
-
-		fallbackResult := map[string]api.InstanceStateNetwork{}
-		err = json.Unmarshal([]byte(out), &fallbackResult)
-		if err != nil {
-			d.logger.Error("Failure to read forknet json", logger.Ctx{"err": err})
-			return result
-		}
-
-		result = fallbackResult
-	} else {
-		result = nw
+		d.logger.Error("Failed to retrieve network information via netlink", logger.Ctx{"err": err, "pid": pid})
+		return result
 	}
+
+	result = nw
 
 	// Get host_name from volatile data if not set already.
 	for name, dev := range result {
