@@ -184,7 +184,7 @@ func instanceProfile(sysOS *sys.OS, inst instance, extraBinaries []string) (stri
 			"feature_stacking": sysOS.AppArmorStacking && !sysOS.AppArmorStacked,
 			"feature_unix":     unixSupported,
 			"feature_userns":   usernsSupported,
-			"kernel_binfmt":    util.IsFalseOrEmpty(inst.ExpandedConfig()["security.privileged"]) && sysOS.UnprivBinfmt,
+			"kernel_binfmt":    util.IsFalseOrEmpty(inst.ExpandedConfig()["security.privileged"]),
 			"name":             InstanceProfileName(inst),
 			"namespace":        InstanceNamespaceName(inst),
 			"nesting":          util.IsTrue(inst.ExpandedConfig()["security.nesting"]),
