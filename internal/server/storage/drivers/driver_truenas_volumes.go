@@ -1953,12 +1953,8 @@ func (d *truenas) VolumeSnapshots(vol Volume, op *operations.Operation) ([]strin
 	return snapshots, nil
 }
 
-// RestoreVolume restores a volume from a snapshot.
-func (d *truenas) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
-	return d.restoreVolume(vol, snapshotName, false, op)
-}
-
-func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration bool, op *operations.Operation) error {
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *truenas) CanRestoreVolume(vol Volume, snapshotName string) error {
 	// Get the list of snapshots.
 	dataset := d.dataset(vol, false)
 	entries, err := d.getDatasets(dataset, "snapshot")
@@ -2001,6 +1997,22 @@ func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration boo
 		// Setup custom error to tell the backend what to delete.
 		err := ErrDeleteSnapshots{}
 		err.Snapshots = snapshots
+		return err
+	}
+
+	return nil
+}
+
+// RestoreVolume restores a volume from a snapshot.
+func (d *truenas) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
+	return d.restoreVolume(vol, snapshotName, false, op)
+}
+
+func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration bool, op *operations.Operation) error {
+	dataset := d.dataset(vol, false)
+
+	err := d.CanRestoreVolume(vol, snapshotName)
+	if err != nil {
 		return err
 	}
 

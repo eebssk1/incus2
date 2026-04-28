@@ -899,22 +899,8 @@ func (d *linstor) DeleteVolumeSnapshot(snapVol Volume, op *operations.Operation)
 	return nil
 }
 
-// RestoreVolume restores a volume from a snapshot.
-func (d *linstor) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
-	ourUnmount, err := d.UnmountVolume(vol, false, op)
-	if err != nil {
-		return err
-	}
-
-	if ourUnmount {
-		defer func() { _ = d.MountVolume(vol, op) }()
-	}
-
-	snapVol, err := vol.NewSnapshot(snapshotName)
-	if err != nil {
-		return err
-	}
-
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *linstor) CanRestoreVolume(vol Volume, snapshotName string) error {
 	resourceDefinition, err := d.getResourceDefinition(vol, false)
 	if err != nil {
 		return err
@@ -961,6 +947,30 @@ func (d *linstor) RestoreVolume(vol Volume, snapshotName string, op *operations.
 		// Setup custom error to tell the backend what to delete.
 		err := ErrDeleteSnapshots{}
 		err.Snapshots = snapshots
+		return err
+	}
+
+	return nil
+}
+
+// RestoreVolume restores a volume from a snapshot.
+func (d *linstor) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
+	ourUnmount, err := d.UnmountVolume(vol, false, op)
+	if err != nil {
+		return err
+	}
+
+	if ourUnmount {
+		defer func() { _ = d.MountVolume(vol, op) }()
+	}
+
+	snapVol, err := vol.NewSnapshot(snapshotName)
+	if err != nil {
+		return err
+	}
+
+	err = d.CanRestoreVolume(vol, snapshotName)
+	if err != nil {
 		return err
 	}
 

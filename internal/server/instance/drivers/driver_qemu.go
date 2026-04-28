@@ -5845,6 +5845,19 @@ func (d *qemu) Restore(source instance.Instance, stateful bool, diskOnly bool) e
 
 	var ctxMap logger.Ctx
 
+	// Load the storage driver.
+	pool, err := storagePools.LoadByInstance(d.state, d)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
+	err = pool.CanRestoreInstanceSnapshot(d, source)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
 	// Stop the instance.
 	wasRunning := false
 	if d.IsRunning() {
@@ -5902,13 +5915,6 @@ func (d *qemu) Restore(source instance.Instance, stateful bool, diskOnly bool) e
 	}
 
 	d.logger.Info("Restoring instance", ctxMap)
-
-	// Load the storage driver.
-	pool, err := storagePools.LoadByInstance(d.state, d)
-	if err != nil {
-		op.Done(err)
-		return err
-	}
 
 	// Restore the rootfs.
 	err = pool.RestoreInstanceSnapshot(d, source, nil)
