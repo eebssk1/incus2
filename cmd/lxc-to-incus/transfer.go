@@ -13,7 +13,6 @@ import (
 
 	"github.com/lxc/incus/v6/internal/linux"
 	"github.com/lxc/incus/v6/internal/migration"
-	"github.com/lxc/incus/v6/internal/rsync"
 	"github.com/lxc/incus/v6/shared/ws"
 )
 
@@ -80,13 +79,7 @@ func rsyncSendSetup(path string, rsyncArgs string) (*exec.Cmd, net.Conn, io.Read
 		"--compress-level=2",
 	}
 
-	if rsync.AtLeast("3.1.3") {
-		args = append(args, "--filter=-x security.selinux")
-	}
-
-	if rsync.AtLeast("3.1.0") {
-		args = append(args, "--ignore-missing-args")
-	}
+	args = append(args, "--filter=-x security.selinux", "--ignore-missing-args")
 
 	if rsyncArgs != "" {
 		args = append(args, strings.Split(rsyncArgs, " ")...)

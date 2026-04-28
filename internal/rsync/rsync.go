@@ -9,14 +9,12 @@ import (
 	"os"
 	"os/exec"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/lxc/incus/v6/internal/linux"
 	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
 	"github.com/lxc/incus/v6/shared/ioprogress"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/subprocess"
@@ -88,10 +86,7 @@ func LocalCopy(source string, dest string, bwlimit string, xattrs bool, rsyncArg
 	}
 
 	if xattrs {
-		args = append(args, "--xattrs")
-		if AtLeast("3.1.3") {
-			args = append(args, "--filter=-x security.selinux")
-		}
+		args = append(args, "--xattrs", "--filter=-x security.selinux")
 	}
 
 	if bwlimit != "" {
@@ -422,10 +417,7 @@ func Recv(path string, conn io.ReadWriteCloser, tracker *ioprogress.ProgressTrac
 func rsyncFeatureArgs(features []string) []string {
 	args := []string{}
 	if slices.Contains(features, "xattrs") {
-		args = append(args, "--xattrs")
-		if AtLeast("3.1.3") {
-			args = append(args, "--filter=-x security.selinux")
-		}
+		args = append(args, "--xattrs", "--filter=-x security.selinux")
 	}
 
 	if slices.Contains(features, "delete") {
@@ -440,31 +432,3 @@ func rsyncFeatureArgs(features []string) []string {
 	return args
 }
 
-// AtLeast compares the local version to a minimum version.
-func AtLeast(minimum string) bool {
-	// Parse the current version.
-	out, err := subprocess.RunCommand("rsync", "--version")
-	if err != nil {
-		return false
-	}
-
-	fields := strings.Split(strings.Split(out, "\n")[0], "  ")
-	if len(fields) < 3 {
-		return false
-	}
-
-	versionStr := strings.TrimPrefix(fields[1], "version ")
-
-	ver, err := version.Parse(versionStr)
-	if err != nil {
-		return false
-	}
-
-	// Load minimum version.
-	minVer, err := version.NewDottedVersion(minimum)
-	if err != nil {
-		return false
-	}
-
-	return ver.Compare(minVer) >= 0
-}
