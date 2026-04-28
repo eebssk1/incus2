@@ -1504,3 +1504,81 @@ func (r *ProtocolIncus) DeleteStorageVolumeFile(pool string, volumeType string, 
 
 	return nil
 }
+
+// GetStorageVolumeBitmapNames returns a list of volume bitmap names.
+func (r *ProtocolIncus) GetStorageVolumeBitmapNames(pool string, volumeType string, volumeName string) ([]string, error) {
+	if !r.HasExtension("storage_volume_nbd") {
+		return nil, errors.New("The server is missing the required \"storage_volume_nbd\" API extension")
+	}
+
+	// Fetch the raw URL values.
+	urls := []string{}
+	baseURL := fmt.Sprintf(
+		"/storage-pools/%s/volumes/%s/%s/bitmaps",
+		url.PathEscape(pool), url.PathEscape(volumeType), url.PathEscape(volumeName))
+	_, err := r.queryStruct("GET", baseURL, nil, "", &urls)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse it.
+	return urlsToResourceNames(baseURL, urls...)
+}
+
+// GetStorageVolumeBitmaps returns a list of volume bitmaps.
+func (r *ProtocolIncus) GetStorageVolumeBitmaps(pool string, volumeType string, volumeName string) ([]api.StorageVolumeBitmap, error) {
+	if !r.HasExtension("storage_volume_nbd") {
+		return nil, errors.New("The server is missing the required \"storage_volume_nbd\" API extension")
+	}
+
+	bitmaps := []api.StorageVolumeBitmap{}
+
+	path := fmt.Sprintf("/storage-pools/%s/volumes/%s/%s/bitmaps?recursion=1",
+		url.PathEscape(pool),
+		url.PathEscape(volumeType),
+		url.PathEscape(volumeName))
+	_, err := r.queryStruct("GET", path, nil, "", &bitmaps)
+	if err != nil {
+		return nil, err
+	}
+
+	return bitmaps, nil
+}
+
+// CreateStorageVolumeBitmap creates a new volume bitmap.
+func (r *ProtocolIncus) CreateStorageVolumeBitmap(pool string, volumeType string, volumeName string, bitmap api.StorageVolumeBitmapsPost) error {
+	if !r.HasExtension("storage_volume_nbd") {
+		return errors.New("The server is missing the required \"storage_volume_nbd\" API extension")
+	}
+
+	path := fmt.Sprintf("/storage-pools/%s/volumes/%s/%s/bitmaps",
+		url.PathEscape(pool),
+		url.PathEscape(volumeType),
+		url.PathEscape(volumeName))
+
+	// Send the request
+	_, _, err := r.query("POST", path, bitmap, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteStorageVolumeBitmap deletes a volume bitmap.
+func (r *ProtocolIncus) DeleteStorageVolumeBitmap(pool string, volumeType string, volumeName string, bitmapName string) error {
+	if !r.HasExtension("storage_volume_nbd") {
+		return errors.New("The server is missing the required \"storage_volume_nbd\" API extension")
+	}
+
+	path := fmt.Sprintf(
+		"/storage-pools/%s/volumes/%s/%s/bitmaps/%s",
+		url.PathEscape(pool), url.PathEscape(volumeType), url.PathEscape(volumeName), url.PathEscape(bitmapName))
+
+	_, _, err := r.query("DELETE", path, nil, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
