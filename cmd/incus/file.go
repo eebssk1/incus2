@@ -534,20 +534,20 @@ func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, target string) error {
 				sftpClients[instanceID] = sftpConn
 			}
 
-			srcInfo, path, err := c.puller.statFile(sftpConn, path)
+			srcInfo, normalizedPath, err := c.puller.statFile(sftpConn, path)
 			if err != nil {
 				return err
 			}
 
 			// Recursively copy directories.
 			if srcInfo.IsDir() {
-				return sftpRecursivePullFile(sftpConn, srcInfo, path, target, c.global.flagQuiet, c.puller.flagDereference, len(parsedFiles) > 1 || util.PathExists(target))
+				return sftpRecursivePullFile(sftpConn, srcInfo, path, normalizedPath, target, c.global.flagQuiet, c.puller.flagDereference, len(parsedFiles) > 1 || util.PathExists(target))
 			}
 
 			// Determine the target path.
 			var targetPath string
 			if targetIsDir {
-				targetPath = filepath.Join(target, filepath.Base(path))
+				targetPath = filepath.Join(target, filepath.Base(normalizedPath))
 			} else {
 				targetPath = target
 			}
@@ -560,7 +560,7 @@ func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, target string) error {
 			if isStdout(targetPath) {
 				f = os.Stdout
 			} else if targetIsLink {
-				linkName, err = sftpConn.ReadLink(path)
+				linkName, err = sftpConn.ReadLink(normalizedPath)
 				if err != nil {
 					return err
 				}
@@ -579,7 +579,7 @@ func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, target string) error {
 			}
 
 			progress := cli.ProgressRenderer{
-				Format: fmt.Sprintf(i18n.G("Pulling %s from %s: %%s"), targetPath, path),
+				Format: fmt.Sprintf(i18n.G("Pulling %s from %s: %%s"), targetPath, normalizedPath),
 				Quiet:  c.global.flagQuiet,
 			}
 
@@ -607,7 +607,7 @@ func (c *cmdFilePull) pull(parsedFiles []*u.Parsed, target string) error {
 					return err
 				}
 			} else {
-				src, err := sftpConn.Open(path)
+				src, err := sftpConn.Open(normalizedPath)
 				if err != nil {
 					return err
 				}
