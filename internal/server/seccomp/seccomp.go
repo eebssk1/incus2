@@ -465,7 +465,6 @@ import (
 	"time"
 	"unsafe"
 
-	liblxc "github.com/lxc/go-lxc"
 	"golang.org/x/sys/unix"
 
 	"github.com/lxc/incus/v6/internal/linux"
@@ -698,30 +697,24 @@ func InstanceNeedsIntercept(s *state.State, c Instance) (bool, error) {
 
 	config := c.ExpandedConfig()
 
-	keys := map[string]func(*state.State) error{
-		"security.syscalls.intercept.mknod":              lxcSupportSeccompNotify,
-		"security.syscalls.intercept.sched_setscheduler": lxcSupportSeccompNotify,
-		"security.syscalls.intercept.setxattr":           lxcSupportSeccompNotify,
-		"security.syscalls.intercept.sysinfo":            lxcSupportSeccompNotify,
-		"security.syscalls.intercept.mount":              lxcSupportSeccompNotifyContinue,
-		"security.syscalls.intercept.bpf":                lxcSupportSeccompNotifyAddfd,
+	keys := []string{
+		"security.syscalls.intercept.mknod",
+		"security.syscalls.intercept.sched_setscheduler",
+		"security.syscalls.intercept.setxattr",
+		"security.syscalls.intercept.sysinfo",
+		"security.syscalls.intercept.mount",
+		"security.syscalls.intercept.bpf",
 	}
 
-	needed := false
-	for key, check := range keys {
+	for _, key := range keys {
 		if util.IsFalseOrEmpty(config[key]) {
 			continue
 		}
 
-		err := check(s)
-		if err != nil {
-			return needed, err
-		}
-
-		needed = true
+		return true, nil
 	}
 
-	return needed, nil
+	return false, nil
 }
 
 // MakePidFd prepares a pidfd to inherit for the init process of the container.
@@ -2298,29 +2291,6 @@ func (srv *Server) HandleValid(fd int, siov *Iovec, findPID func(pid int32, s *s
 func (srv *Server) Stop() error {
 	_ = os.Remove(srv.path)
 	return srv.l.Close()
-}
-
-func lxcSupportSeccompNotifyContinue(s *state.State) error {
-	return lxcSupportSeccompNotify(s)
-}
-
-func lxcSupportSeccompNotifyAddfd(s *state.State) error {
-	return lxcSupportSeccompNotify(s)
-}
-
-func lxcSupportSeccompNotify(s *state.State) error {
-	c, err := liblxc.NewContainer("test-seccomp", s.OS.LxcPath)
-	if err != nil {
-		return errors.New("Failed to load seccomp notify test container")
-	}
-
-	err = c.SetConfigItem("lxc.seccomp.notify.proxy", fmt.Sprintf("unix:%s", internalUtil.RunPath("seccomp.socket")))
-	if err != nil {
-		return fmt.Errorf("LXC doesn't support notify proxy: %w", err)
-	}
-
-	_ = c.Release()
-	return nil
 }
 
 // MountSyscallFilter creates a mount syscall filter from the config.
