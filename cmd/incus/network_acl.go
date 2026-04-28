@@ -101,8 +101,8 @@ func (c *cmdNetworkACLList) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("List available network ACL"))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
-	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("List network ACLs across all projects"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAllProjects, "all-projects", i18n.G("List network ACLs across all projects"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -287,7 +287,7 @@ func (c *cmdNetworkACLGet) command() *cobra.Command {
 	cmd.Short = i18n.G("Get values for network ACL configuration keys")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Get values for network ACL configuration keys"))
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a network ACL property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a network ACL property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -360,7 +360,7 @@ func (c *cmdNetworkACLCreate) command() *cobra.Command {
 incus network acl create a1 < config.yaml
     Create network acl with configuration from config.yaml`))
 
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Network ACL description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Network ACL description"))
 
 	cmd.RunE = c.run
 
@@ -452,7 +452,7 @@ func (c *cmdNetworkACLSet) command() *cobra.Command {
 For backward compatibility, a single configuration key may still be set with:
     incus network set [<remote>:]<ACL> <key> <value>`))
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a network ACL property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a network ACL property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -530,7 +530,7 @@ func (c *cmdNetworkACLUnset) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Unset network ACL configuration keys"))
 	cmd.RunE = c.run
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a network ACL property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a network ACL property"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
@@ -823,7 +823,7 @@ func (c *cmdNetworkACLRule) commandAdd() *cobra.Command {
 	cmd.Short = i18n.G("Add rules to an ACL")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Add rules to an ACL"))
 
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Rule description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Rule description"))
 
 	cmd.RunE = c.runAdd
 
@@ -957,7 +957,7 @@ func (c *cmdNetworkACLRule) commandRemove() *cobra.Command {
 	cmd.Aliases = []string{"delete", "rm"}
 	cmd.Short = i18n.G("Remove rules from an ACL")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G("Remove rules from an ACL"))
-	cmd.Flags().BoolVar(&c.flagRemoveForce, "force", false, i18n.G("Remove all rules that match"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRemoveForce, "force|f", i18n.G("Remove all rules that match"))
 
 	cmd.RunE = c.runRemove
 

@@ -97,8 +97,8 @@ func (c *cmdConfigTrustAdd) command() *cobra.Command {
 This will issue a trust token to be used by the client to add itself to the trust store.
 `))
 
-	cmd.Flags().BoolVar(&c.flagRestricted, "restricted", false, i18n.G("Restrict the certificate to one or more projects"))
-	cmd.Flags().StringVar(&c.flagProjects, "projects", "", i18n.G("List of projects to restrict the certificate to")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRestricted, "restricted", i18n.G("Restrict the certificate to one or more projects"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagProjects, "projects", "", "", i18n.G("List of projects to restrict the certificate to"))
 
 	cmd.RunE = c.run
 
@@ -173,11 +173,11 @@ The following certificate types are supported:
 - metrics
 `))
 
-	cmd.Flags().BoolVar(&c.flagRestricted, "restricted", false, i18n.G("Restrict the certificate to one or more projects"))
-	cmd.Flags().StringVar(&c.flagProjects, "projects", "", i18n.G("List of projects to restrict the certificate to")+"``")
-	cmd.Flags().StringVar(&c.flagName, "name", "", i18n.G("Alternative certificate name")+"``")
-	cmd.Flags().StringVar(&c.flagType, "type", "client", i18n.G("Type of certificate")+"``")
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Certificate description")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRestricted, "restricted", i18n.G("Restrict the certificate to one or more projects"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagProjects, "projects", "", "", i18n.G("List of projects to restrict the certificate to"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagName, "name", "", "", i18n.G("Alternative certificate name"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "client", "", i18n.G("Type of certificate"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Certificate description"))
 
 	cmd.RunE = c.run
 
@@ -396,8 +396,8 @@ Column shorthand chars:
 	r - Whether certificate is restricted
 	p - Newline-separated list of projects`))
 
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", "ntdfe", i18n.G("Columns")+"``")
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", "ntdfe", "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -581,8 +581,8 @@ Pre-defined column shorthand chars:
   n - Name
   t - Token
   E - Expires At`))
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultConfigTrustListTokenColumns, i18n.G("Columns")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultConfigTrustListTokenColumns, "", i18n.G("Columns"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())

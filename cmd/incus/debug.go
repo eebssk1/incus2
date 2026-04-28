@@ -51,7 +51,7 @@ func (c *cmdDebugMemory) command() *cobra.Command {
     Creates an ELF format memory dump of the vm1 instance.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringVar(&c.flagFormat, "format", "elf", i18n.G("Format of memory dump (e.g. elf, win-dmp, kdump-zlib, kdump-raw-zlib, ...)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "elf", "", i18n.G("Format of memory dump (e.g. elf, win-dmp, kdump-zlib, kdump-raw-zlib, ...)"))
 
 	return cmd
 }

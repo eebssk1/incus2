@@ -28,8 +28,8 @@ func (c *cmdManpage) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Generate manpages for all commands`))
 	cmd.Hidden = true
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", "man", i18n.G("Format (man|md|rest|yaml)")+"``")
-	cmd.Flags().BoolVar(&c.flagAll, "all", false, i18n.G("Include less common commands"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "man", "", i18n.G("Format (man|md|rest|yaml)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all|a", i18n.G("Include less common commands"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		format := cmd.Flag("format").Value.String()

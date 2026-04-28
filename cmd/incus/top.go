@@ -63,10 +63,10 @@ Column shorthand chars:
   n - Instance name
   u - CPU usage (in seconds)`))
 
-	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("Display instances from all projects"))
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultTopColumns, i18n.G("Columns")+"``")
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G("Format (table|compact)")+"``")
-	cmd.Flags().IntVar(&c.flagRefresh, "refresh", 10, i18n.G("Configure the refresh delay in seconds")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAllProjects, "all-projects", i18n.G("Display instances from all projects"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultTopColumns, "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G("Format (table|compact)"))
+	cli.AddIntFlag(cmd.Flags(), &c.flagRefresh, "refresh", 10, i18n.G("Configure the refresh delay in seconds"))
 
 	cmd.RunE = c.run
 	return cmd

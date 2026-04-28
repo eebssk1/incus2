@@ -99,7 +99,7 @@ func (c *cmdConfigEdit) command() *cobra.Command {
 		`incus config edit <instance> < instance.yaml
     Update the instance configuration from config.yaml.`))
 
-	cmd.Flags().StringVar(&c.config.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.config.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -377,9 +377,9 @@ func (c *cmdConfigGet) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Get values for instance or server configuration keys`))
 
-	cmd.Flags().BoolVarP(&c.flagExpanded, "expanded", "e", false, i18n.G("Access the expanded configuration"))
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as an instance property"))
-	cmd.Flags().StringVar(&c.config.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagExpanded, "expanded|e", i18n.G("Access the expanded configuration"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as an instance property"))
+	cli.AddStringFlag(cmd.Flags(), &c.config.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -519,8 +519,8 @@ incus config set my-instance cloud-init.user-data - < cloud-init.yaml
 incus config set core.https_address=[::]:8443
     Will have the server listen on IPv4 and IPv6 port 8443.`))
 
-	cmd.Flags().StringVar(&c.config.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as an instance property"))
+	cli.AddStringFlag(cmd.Flags(), &c.config.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as an instance property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -685,8 +685,8 @@ func (c *cmdConfigShow) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Show instance or server configurations`))
 
-	cmd.Flags().BoolVarP(&c.flagExpanded, "expanded", "e", false, i18n.G("Show the expanded configuration"))
-	cmd.Flags().StringVar(&c.config.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagExpanded, "expanded|e", i18n.G("Show the expanded configuration"))
+	cli.AddStringFlag(cmd.Flags(), &c.config.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -806,8 +806,8 @@ func (c *cmdConfigUnset) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Unset instance or server configuration keys`))
 
-	cmd.Flags().StringVar(&c.config.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as an instance property"))
+	cli.AddStringFlag(cmd.Flags(), &c.config.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as an instance property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

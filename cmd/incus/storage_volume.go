@@ -343,13 +343,13 @@ func (c *cmdStorageVolumeCopy) command() *cobra.Command {
 	cmd.Short = i18n.G("Copy custom storage volumes")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Copy custom storage volumes`))
 
-	cmd.Flags().StringVar(&c.flagMode, "mode", "pull", i18n.G("Transfer mode. One of pull (default), push or relay.")+"``")
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().StringVar(&c.storageVolume.flagDestinationTarget, "destination-target", "", i18n.G("Destination cluster member name")+"``")
-	cmd.Flags().BoolVar(&c.flagVolumeOnly, "volume-only", false, i18n.G("Copy the volume without its snapshots"))
-	cmd.Flags().StringVar(&c.flagTargetProject, "target-project", "", i18n.G("Copy to a project different from the source")+"``")
-	cmd.Flags().BoolVar(&c.flagRefresh, "refresh", false, i18n.G("Refresh and update the existing storage volume copies"))
-	cmd.Flags().BoolVar(&c.flagRefreshExcludeOlder, "refresh-exclude-older", false, i18n.G("During refresh, exclude source snapshots earlier than latest target snapshot"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagMode, "mode", "pull", "", i18n.G("Transfer mode. One of pull (default), push or relay."))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolume.flagDestinationTarget, "destination-target", "", "", i18n.G("Destination cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagVolumeOnly, "volume-only", i18n.G("Copy the volume without its snapshots"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagTargetProject, "target-project", "", "", i18n.G("Copy to a project different from the source"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRefresh, "refresh", i18n.G("Refresh and update the existing storage volume copies"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagRefreshExcludeOlder, "refresh-exclude-older", i18n.G("During refresh, exclude source snapshots earlier than latest target snapshot"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -551,9 +551,9 @@ func (c *cmdStorageVolumeCreate) command() *cobra.Command {
 incus storage volume create default foo < config.yaml
     Create custom storage volume "foo" in pool "default" with configuration from config.yaml`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().StringVar(&c.flagContentType, "type", "filesystem", i18n.G("Content type, block or filesystem")+"``")
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Volume description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagContentType, "type|t", "filesystem", "", i18n.G("Content type, block or filesystem"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Volume description"))
 
 	cmd.RunE = c.run
 
@@ -646,7 +646,7 @@ func (c *cmdStorageVolumeDelete) command() *cobra.Command {
 	cmd.Short = i18n.G("Delete custom storage volumes")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Delete custom storage volumes`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -902,7 +902,7 @@ Supported values for type are "custom", "container" and "virtual-machine".`))
 incus storage volume edit default foo < volume.yaml
     Edit custom storage volume "foo" in pool "default" using the content of volume.yaml`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1111,8 +1111,8 @@ For snapshots, add the snapshot name (only if type is one of custom, container o
 incus storage volume get default virtual-machine/data snapshots.expiry
     Returns the snapshot expiration period for a virtual machine "data" in pool "default"`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a storage volume property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a storage volume property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1228,7 +1228,7 @@ Supported values for type are "custom", "container" and "virtual-machine".`))
 incus storage volume info default virtual-machine/v1
     Returns state information for virtual machine "v1" in pool "default"`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1436,8 +1436,8 @@ func (c *cmdStorageVolumeList) command() *cobra.Command {
 	cmd.Short = i18n.G("List storage volumes")
 
 	c.defaultColumns = "etndcuL"
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", c.defaultColumns, i18n.G("Columns")+"``")
-	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("All projects")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", c.defaultColumns, "", i18n.G("Columns"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAllProjects, "all-projects", i18n.G("All projects"))
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`List storage volumes
 
@@ -1463,7 +1463,7 @@ Column shorthand chars:
     t - Type of volume (custom, image, container or virtual-machine)
     u - Number of references (used by)
     U - Current disk usage`))
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -1673,10 +1673,10 @@ func (c *cmdStorageVolumeMove) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Move custom storage volumes between pools`))
 
-	cmd.Flags().StringVar(&c.storageVolumeCopy.flagMode, "mode", "pull", i18n.G("Transfer mode, one of pull (default), push or relay")+"``")
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().StringVar(&c.storageVolume.flagDestinationTarget, "destination-target", "", i18n.G("Destination cluster member name")+"``")
-	cmd.Flags().StringVar(&c.storageVolumeCopy.flagTargetProject, "target-project", "", i18n.G("Move to a project different from the source")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolumeCopy.flagMode, "mode", "pull", "", i18n.G("Transfer mode, one of pull (default), push or relay"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolume.flagDestinationTarget, "destination-target", "", "", i18n.G("Destination cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolumeCopy.flagTargetProject, "target-project", "", "", i18n.G("Move to a project different from the source"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1734,7 +1734,7 @@ func (c *cmdStorageVolumeRename) command() *cobra.Command {
 	cmd.Short = i18n.G("Rename custom storage volumes")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Rename custom storage volumes`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1816,8 +1816,8 @@ Supported values for type are "custom", "container" and "virtual-machine".`))
 incus storage volume set default virtual-machine/data snapshots.expiry=7d
     Sets the snapshot expiration period for a virtual machine "data" in pool "default" to seven days`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a storage volume property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a storage volume property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -1965,7 +1965,7 @@ incus storage volume show default virtual-machine/v1
 incus storage volume show default container/c1
     Will show the properties of the container volume "c1" in pool "default"`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -2054,8 +2054,8 @@ Supported values for type are "custom", "container" and "virtual-machine".`))
 incus storage volume unset default virtual-machine/v1 snapshots.expiry
     Removes the snapshot expiration period of virtual machine volume "v1" in pool "default"`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a storage volume property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a storage volume property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -2162,12 +2162,12 @@ func (c *cmdStorageVolumeFileCreate) command() *cobra.Command {
 incus file create --type=symlink foo bar/baz qux
    To create a symlink qux in bar storage volume on the foo pool whose target is baz.`))
 
-	cmd.Flags().BoolVarP(&c.storageVolumeFile.flagMkdir, "create-dirs", "p", false, i18n.G("Create any directories necessary")+"``")
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Force creating files or directories")+"``")
-	cmd.Flags().IntVar(&c.storageVolumeFile.flagGID, "gid", -1, i18n.G("Set the file's gid on create")+"``")
-	cmd.Flags().IntVar(&c.storageVolumeFile.flagUID, "uid", -1, i18n.G("Set the file's uid on create")+"``")
-	cmd.Flags().StringVar(&c.storageVolumeFile.flagMode, "mode", "", i18n.G("Set the file's perms on create")+"``")
-	cmd.Flags().StringVar(&c.flagType, "type", "file", i18n.G("The type to create (file, symlink, or directory)")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.storageVolumeFile.flagMkdir, "create-dirs|p", i18n.G("Create any directories necessary"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force creating files or directories"))
+	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagGID, "gid", -1, i18n.G("Set the file's gid on create"))
+	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagUID, "uid", -1, i18n.G("Set the file's uid on create"))
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolumeFile.flagMode, "mode", "", "", i18n.G("Set the file's perms on create"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "file", "", i18n.G("The type to create (file, symlink, or directory)"))
 
 	cmd.RunE = c.run
 
@@ -2329,7 +2329,7 @@ func (c *cmdStorageVolumeFileDelete) command() *cobra.Command {
 	cmd.Short = i18n.G("Delete files in custom volume")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Delete files in custom volume`))
 
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Force deleting files, directories, and subdirectories")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force deleting files, directories, and subdirectories"))
 
 	cmd.RunE = c.run
 
@@ -2403,9 +2403,9 @@ If no target path is provided, start an SSH SFTP listener instead.`))
 incus storage volume file mount mypool myvolume
    To start an SSH SFTP listener for the storage volume myvolume from pool mypool.`))
 
-	cmd.Flags().StringVar(&c.flagListen, "listen", "", i18n.G("Setup SSH SFTP listener on address:port instead of mounting"))
-	cmd.Flags().BoolVar(&c.flagAuthNone, "no-auth", false, i18n.G("Disable authentication when using SSH SFTP listener"))
-	cmd.Flags().StringVar(&c.flagAuthUser, "auth-user", "", i18n.G("Set authentication user when using SSH SFTP listener"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagListen, "listen", "", "", i18n.G("Setup SSH SFTP listener on address:port instead of mounting"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAuthNone, "no-auth", i18n.G("Disable authentication when using SSH SFTP listener"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagAuthUser, "auth-user", "", "", i18n.G("Set authentication user when using SSH SFTP listener"))
 
 	cmd.RunE = c.run
 
@@ -2584,11 +2584,11 @@ func (c *cmdStorageVolumeFilePull) command() *cobra.Command {
 incus file pull local v1 foo/etc/hosts -
    To pull /etc/hosts from the custom volume and write its output to standard output.`))
 
-	cmd.Flags().BoolVarP(&c.storageVolumeFile.flagMkdir, "create-dirs", "p", false, i18n.G("Create any directories necessary"))
-	cmd.Flags().BoolVarP(&c.puller.flagRecursive, "recursive", "r", false, i18n.G("Recursively transfer files"))
-	cmd.Flags().BoolVarP(&c.puller.flagNoDereference, "no-dereference", "P", false, i18n.G("Never follow symbolic links in source path")+"``")
-	cmd.Flags().BoolVarP(&c.puller.flagFollow, "follow", "H", false, i18n.G("Follow command-line symbolic links in source path")+"``")
-	cmd.Flags().BoolVarP(&c.puller.flagDereference, "dereference", "L", false, i18n.G("Always follow symbolic links in source path")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.storageVolumeFile.flagMkdir, "create-dirs|p", i18n.G("Create any directories necessary"))
+	cli.AddBoolFlag(cmd.Flags(), &c.puller.flagRecursive, "recursive|r", i18n.G("Recursively transfer files"))
+	cli.AddBoolFlag(cmd.Flags(), &c.puller.flagNoDereference, "no-dereference|P", i18n.G("Never follow symbolic links in source path"))
+	cli.AddBoolFlag(cmd.Flags(), &c.puller.flagFollow, "follow|H", i18n.G("Follow command-line symbolic links in source path"))
+	cli.AddBoolFlag(cmd.Flags(), &c.puller.flagDereference, "dereference|L", i18n.G("Always follow symbolic links in source path"))
 
 	cmd.RunE = c.run
 
@@ -2779,14 +2779,14 @@ func (c *cmdStorageVolumeFilePush) command() *cobra.Command {
 echo "Hello world" | incus storage volume file push - local v1 test
    To read "Hello world" from standard input and write it into test in volume "v1".`))
 
-	cmd.Flags().BoolVarP(&c.storageVolumeFile.flagMkdir, "create-dirs", "p", false, i18n.G("Create any directories necessary"))
-	cmd.Flags().IntVar(&c.storageVolumeFile.flagUID, "uid", -1, i18n.G("Set the file's uid on push")+"``")
-	cmd.Flags().IntVar(&c.storageVolumeFile.flagGID, "gid", -1, i18n.G("Set the file's gid on push")+"``")
-	cmd.Flags().StringVar(&c.storageVolumeFile.flagMode, "mode", "", i18n.G("Set the file's perms on push")+"``")
-	cmd.Flags().BoolVarP(&c.pusher.flagRecursive, "recursive", "r", false, i18n.G("Recursively transfer files"))
-	cmd.Flags().BoolVarP(&c.pusher.flagNoDereference, "no-dereference", "P", false, i18n.G("Never follow symbolic links in source path"))
-	cmd.Flags().BoolVarP(&c.pusher.flagFollow, "follow", "H", false, i18n.G("Follow command-line symbolic links in source path"))
-	cmd.Flags().BoolVarP(&c.pusher.flagDereference, "dereference", "L", false, i18n.G("Always follow symbolic links in source path"))
+	cli.AddBoolFlag(cmd.Flags(), &c.storageVolumeFile.flagMkdir, "create-dirs|p", i18n.G("Create any directories necessary"))
+	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagUID, "uid", -1, i18n.G("Set the file's uid on push"))
+	cli.AddIntFlag(cmd.Flags(), &c.storageVolumeFile.flagGID, "gid", -1, i18n.G("Set the file's gid on push"))
+	cli.AddStringFlag(cmd.Flags(), &c.storageVolumeFile.flagMode, "mode", "", "", i18n.G("Set the file's perms on push"))
+	cli.AddBoolFlag(cmd.Flags(), &c.pusher.flagRecursive, "recursive|r", i18n.G("Recursively transfer files"))
+	cli.AddBoolFlag(cmd.Flags(), &c.pusher.flagNoDereference, "no-dereference|P", i18n.G("Never follow symbolic links in source path"))
+	cli.AddBoolFlag(cmd.Flags(), &c.pusher.flagFollow, "follow|H", i18n.G("Follow command-line symbolic links in source path"))
+	cli.AddBoolFlag(cmd.Flags(), &c.pusher.flagDereference, "dereference|L", i18n.G("Always follow symbolic links in source path"))
 
 	cmd.RunE = c.run
 
@@ -3050,11 +3050,11 @@ func (c *cmdStorageVolumeSnapshotCreate) command() *cobra.Command {
 incus storage volume snapshot create default vol1 snap0 < config.yaml
     Create a snapshot of "foo" in pool "default" called "snap0" with the configuration from "config.yaml"`))
 
-	cmd.Flags().StringVar(&c.flagExpiry, "expiry", "", i18n.G("Expiry date or time span for the new snapshot"))
-	cmd.Flags().BoolVar(&c.flagNoExpiry, "no-expiry", false, i18n.G("Ignore any configured auto-expiry for the storage volume"))
-	cmd.Flags().BoolVar(&c.flagReuse, "reuse", false, i18n.G("If the snapshot name already exists, delete and create a new one"))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Snapshot description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagExpiry, "expiry", "", "", i18n.G("Expiry date or time span for the new snapshot"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagNoExpiry, "no-expiry", i18n.G("Ignore any configured auto-expiry for the storage volume"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagReuse, "reuse", i18n.G("If the snapshot name already exists, delete and create a new one"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Snapshot description"))
 
 	cmd.RunE = c.run
 
@@ -3201,7 +3201,7 @@ func (c *cmdStorageVolumeSnapshotDelete) command() *cobra.Command {
 	cmd.Short = i18n.G("Delete storage volume snapshots")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Delete storage volume snapshots`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -3281,8 +3281,8 @@ func (c *cmdStorageVolumeSnapshotList) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`List storage volume snapshots`))
 
 	c.defaultColumns = "nTE"
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", c.defaultColumns, i18n.G("Columns")+"``")
-	cmd.Flags().BoolVar(&c.flagAllProjects, "all-projects", false, i18n.G("All projects")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", c.defaultColumns, "", i18n.G("Columns"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAllProjects, "all-projects", i18n.G("All projects"))
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`List storage volume snapshots
 
@@ -3294,7 +3294,7 @@ func (c *cmdStorageVolumeSnapshotList) command() *cobra.Command {
 		n - Name
 		T - Taken at
 		E - Expiry`))
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -3437,7 +3437,7 @@ func (c *cmdStorageVolumeSnapshotRename) command() *cobra.Command {
 	cmd.Short = i18n.G("Rename storage volume snapshots")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Rename storage volume snapshots`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -3506,7 +3506,7 @@ func (c *cmdStorageVolumeSnapshotRestore) command() *cobra.Command {
 	cmd.Use = cli.U("restore", cmdStorageVolumeSnapshotRestoreUsage...)
 	cmd.Short = i18n.G("Restore storage volume snapshots")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Restore storage volume snapshots`))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 
 	cmd.RunE = c.run
 
@@ -3570,7 +3570,7 @@ func (c *cmdStorageVolumeSnapshotShow) command() *cobra.Command {
 	cmd.Short = i18n.G("Show storage volume snapshot configurations")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Show storage volume snapshhot configurations`))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 
 	cmd.RunE = c.run
 
@@ -3643,12 +3643,11 @@ func (c *cmdStorageVolumeExport) command() *cobra.Command {
 	cmd.Short = i18n.G("Export custom storage volumes")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Export custom storage volumes.`))
 
-	cmd.Flags().BoolVar(&c.flagVolumeOnly, "volume-only", false, i18n.G("Export the volume without its snapshots (ignored for ISO storage volumes)"))
-	cmd.Flags().BoolVar(&c.flagOptimizedStorage, "optimized-storage", false,
-		i18n.G("Use storage driver optimized format (can only be restored on a similar pool, ignored for ISO storage volumes)"))
-	cmd.Flags().StringVar(&c.flagCompressionAlgorithm, "compression", "", i18n.G("Compression algorithm to use (none for uncompressed, ignored for ISO storage volumes)")+"``")
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVar(&c.flagForce, "force", false, i18n.G("Force overwriting existing backup file"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagVolumeOnly, "volume-only", i18n.G("Export the volume without its snapshots (ignored for ISO storage volumes)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagOptimizedStorage, "optimized-storage", i18n.G("Use storage driver optimized format (can only be restored on a similar pool, ignored for ISO storage volumes)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagCompressionAlgorithm, "compression", "", "", i18n.G("Compression algorithm to use (none for uncompressed, ignored for ISO storage volumes)"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force overwriting existing backup file"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -3855,9 +3854,9 @@ func (c *cmdStorageVolumeImport) command() *cobra.Command {
 
 incus storage volume import default some-installer.iso installer --type=iso
     Create a new custom volume storing some-installer.iso for use as a CD-ROM image`))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
-	cmd.Flags().StringVar(&c.flagType, "type", "", i18n.G("Import type, backup or iso (default \"backup\")")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", "", "", i18n.G("Import type, backup or iso (default \"backup\")"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
@@ -3984,8 +3983,8 @@ func (c *cmdStorageVolumeNBD) Command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`NBD access to a block storage volume.`))
 
-	cmd.Flags().StringVar(&c.flagAddress, "address", "", i18n.G("Specific address to listen on"))
-	cmd.Flags().BoolVar(&c.flagWritable, "writable", false, i18n.G("Get write access to the disk"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagAddress, "address", "", "", i18n.G("Specific address to listen on"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagWritable, "writable", i18n.G("Get write access to the disk"))
 
 	cmd.RunE = c.Run
 

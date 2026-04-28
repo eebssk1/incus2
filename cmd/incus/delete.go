@@ -37,8 +37,8 @@ func (c *cmdDelete) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Delete instances`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Force the removal of running instances"))
-	cmd.Flags().BoolVarP(&c.flagInteractive, "interactive", "i", false, i18n.G("Require user confirmation"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Force the removal of running instances"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagInteractive, "interactive|i", i18n.G("Require user confirmation"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return c.global.cmpInstances(toComplete)

@@ -47,11 +47,10 @@ incus info [<remote>:] [--resources]
     For server information.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagShowAccess, "show-access", false, i18n.G("Show the instance's access list"))
-	cmd.Flags().StringVar(&c.flagShowLog, "show-log", "", i18n.G("Show the instance's recent log entries")+"``")
-	cmd.Flags().Lookup("show-log").NoOptDefVal = "default"
-	cmd.Flags().BoolVar(&c.flagResources, "resources", false, i18n.G("Show the resources available to the server"))
-	cmd.Flags().StringVar(&c.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagShowAccess, "show-access", i18n.G("Show the instance's access list"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagShowLog, "show-log", "", "default", i18n.G("Show the instance's recent log entries"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagResources, "resources", i18n.G("Show the resources available to the server"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {

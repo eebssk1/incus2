@@ -349,8 +349,8 @@ Custom commands can be defined through aliases, use "incus alias" to control tho
 	}
 
 	// Help flags
-	app.Flags().BoolVar(&globalCmd.flagHelpAll, "all", false, i18n.G("Show less common commands"))
-	help.Flags().BoolVar(&globalCmd.flagHelpAll, "all", false, i18n.G("Show less common commands"))
+	cli.AddBoolFlag(app.Flags(), &globalCmd.flagHelpAll, "all|a", i18n.G("Show less common commands"))
+	cli.AddBoolFlag(help.Flags(), &globalCmd.flagHelpAll, "all|a", i18n.G("Show less common commands"))
 
 	return app, &globalCmd, nil
 }

@@ -49,9 +49,9 @@ This command allows you to interact with the boot console of an instance
 as well as retrieve past log entries from it.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Forces a connection to the console, even if there is already an active session"))
-	cmd.Flags().BoolVar(&c.flagShowLog, "show-log", false, i18n.G("Retrieve the instance's console log"))
-	cmd.Flags().StringVarP(&c.flagType, "type", "t", c.global.defaultConsoleType(), i18n.G("Type of connection to establish: 'console' for serial console, 'vga' for SPICE graphical output")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Forces a connection to the console, even if there is already an active session"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagShowLog, "show-log", i18n.G("Retrieve the instance's console log"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagType, "type|t", c.global.defaultConsoleType(), "", i18n.G("Type of connection to establish: 'console' for serial console, 'vga' for SPICE graphical output"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return c.global.cmpInstances(toComplete)

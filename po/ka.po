@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-28 01:45+0200\n"
+"POT-Creation-Date: 2026-04-28 02:37+0200\n"
 "PO-Revision-Date: 2026-04-21 03:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Georgian <https://hosted.weblate.org/projects/incus/cli/ka/>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.17.1-dev\n"
 
-#: cmd/incus/info.go:438
+#: cmd/incus/info.go:437
 msgid "  Chassis:"
 msgstr "  შასი:"
 
-#: cmd/incus/info.go:478
+#: cmd/incus/info.go:477
 msgid "  Firmware:"
 msgstr "  მიკროკოდი:"
 
-#: cmd/incus/info.go:458
+#: cmd/incus/info.go:457
 msgid "  Motherboard:"
 msgstr "  მთავარი დაფა:"
 
@@ -380,7 +380,7 @@ msgid ""
 "### Any line starting with a '# will be ignored."
 msgstr ""
 
-#: cmd/incus/info.go:334
+#: cmd/incus/info.go:333
 #, c-format
 msgid "%d (id: %d, online: %v, NUMA node: %v)"
 msgstr "%d (id: %d, ხაზზე: %v, NUMA კვანძი: %v)"
@@ -405,7 +405,7 @@ msgstr ""
 msgid "%s (%d more)"
 msgstr "%s (კიდევ %d)"
 
-#: cmd/incus/info.go:176
+#: cmd/incus/info.go:175
 #, c-format
 msgid "%s (%s) (%d available)"
 msgstr "%s (%s) (%d ხელმისაწვდომია)"
@@ -439,17 +439,17 @@ msgstr ""
 msgid ", "
 msgstr ", "
 
-#: cmd/incus/info.go:324
+#: cmd/incus/info.go:323
 #, c-format
 msgid "- Level %d (type: %s): %s"
 msgstr "- დონე %d (ტიპი: %s): %s"
 
-#: cmd/incus/info.go:303
+#: cmd/incus/info.go:302
 #, c-format
 msgid "- Partition %d"
 msgstr "- დანაყოფი %d"
 
-#: cmd/incus/info.go:212
+#: cmd/incus/info.go:211
 #, c-format
 msgid "- Port %d (%s)"
 msgstr "- პორტი %d (%s)"
@@ -458,16 +458,16 @@ msgstr "- პორტი %d (%s)"
 msgid "--all cannot be used together with other arguments"
 msgstr ""
 
-#: cmd/incus/action.go:247
+#: cmd/incus/action.go:246
 msgid "--console can't be used while forcing instance shutdown"
 msgstr ""
 "--console-ის გამოყენება გაშვებული ასლის ნაძალადევი გამორთვისას შეუძლებელია"
 
-#: cmd/incus/action.go:413
+#: cmd/incus/action.go:412
 msgid "--console can't be used with --all"
 msgstr "--console-ის გამოყენება --all-თან ერთად შეუძლებელია"
 
-#: cmd/incus/action.go:417
+#: cmd/incus/action.go:416
 msgid "--console only works with a single instance"
 msgstr "--console მხოლოდ ერთ გაშვებულ ასლთან მუშაობს"
 
@@ -518,7 +518,7 @@ msgid "--target can only be used with clusters"
 msgstr ""
 
 #: cmd/incus/config.go:154 cmd/incus/config.go:419 cmd/incus/config.go:557
-#: cmd/incus/config.go:744 cmd/incus/info.go:636
+#: cmd/incus/config.go:744 cmd/incus/info.go:635
 msgid "--target cannot be used with instances"
 msgstr "--target გაშვებულ ასლებთან ერთად ვერ გამოიყენებთ"
 
@@ -527,7 +527,7 @@ msgstr "--target გაშვებულ ასლებთან ერთა�
 msgid "=> Query %d:"
 msgstr ""
 
-#: cmd/incus/remote.go:693
+#: cmd/incus/remote.go:689
 msgid "A client certificate is already present"
 msgstr ""
 
@@ -569,7 +569,7 @@ msgstr "APP"
 msgid "ARCHITECTURE"
 msgstr ""
 
-#: cmd/incus/remote.go:991
+#: cmd/incus/remote.go:987
 msgid "AUTH TYPE"
 msgstr "ავთენ. ტიპი"
 
@@ -594,14 +594,15 @@ msgstr "წვდომა გაფართოებულ კონფიგ�
 msgid "Acknowledge warning"
 msgstr "გაფრთხილების დადასტურება"
 
+#: cmd/incus/query.go:48
+#, fuzzy
+msgid "Action"
+msgstr "მდგომარეობა"
+
 #: cmd/incus/query.go:81
 #, c-format
 msgid "Action %q isn't supported by this tool"
 msgstr "ქმედება %q ამ პროგრამის მიერ მხარდაჭერილი არაა"
-
-#: cmd/incus/query.go:48
-msgid "Action (defaults to GET)"
-msgstr "ქმედება (ნაგულისხმევია: GET)"
 
 #: cmd/incus/cluster_group.go:740
 msgid "Add a cluster member to a cluster group"
@@ -718,12 +719,12 @@ msgstr ""
 msgid "Address to bind to (not including port)"
 msgstr ""
 
-#: cmd/incus/info.go:216
+#: cmd/incus/info.go:215
 #, c-format
 msgid "Address: %s"
 msgstr "მისამართი: %s"
 
-#: cmd/incus/info.go:360
+#: cmd/incus/info.go:359
 #, c-format
 msgid "Address: %v"
 msgstr ""
@@ -793,13 +794,13 @@ msgstr ""
 msgid "An instance path is required for %s"
 msgstr ""
 
-#: cmd/incus/image.go:943 cmd/incus/info.go:502 cmd/incus/info.go:506
-#: cmd/incus/info.go:664
+#: cmd/incus/image.go:943 cmd/incus/info.go:501 cmd/incus/info.go:505
+#: cmd/incus/info.go:663
 #, c-format
 msgid "Architecture: %s"
 msgstr "არქიტექტურა: %s"
 
-#: cmd/incus/info.go:142
+#: cmd/incus/info.go:141
 #, c-format
 msgid "Architecture: %v"
 msgstr "არქიტექტურა: %v"
@@ -861,12 +862,12 @@ msgid ""
 "as well as retrieve past log entries from it."
 msgstr ""
 
-#: cmd/incus/remote.go:601
+#: cmd/incus/remote.go:597
 #, c-format
 msgid "Authentication type '%s' not supported by server"
 msgstr "ავთენტიკაციის ტიპი '%s' სერვერის მიერ მხარდაჭერილი არაა"
 
-#: cmd/incus/info.go:235
+#: cmd/incus/info.go:234
 #, c-format
 msgid "Auto negotiation: %v"
 msgstr ""
@@ -892,7 +893,7 @@ msgstr ""
 msgid "Available projects:"
 msgstr "ხელმისაწვდომი პროექტები:"
 
-#: cmd/incus/info.go:496
+#: cmd/incus/info.go:495
 #, c-format
 msgid "Average: %.2f %.2f %.2f"
 msgstr ""
@@ -909,7 +910,7 @@ msgstr ""
 msgid "Backend health:"
 msgstr ""
 
-#: cmd/incus/export.go:106
+#: cmd/incus/export.go:103
 #, c-format
 msgid "Backing up instance: %s"
 msgstr "გაშვებული ასლის მარქაფი: %s"
@@ -919,17 +920,17 @@ msgstr "გაშვებული ასლის მარქაფი: %s"
 msgid "Backing up storage bucket: %s"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3729
+#: cmd/incus/storage_volume.go:3728
 #, c-format
 msgid "Backing up storage volume: %s"
 msgstr "საცავის ტომის მარქაფი: %s"
 
-#: cmd/incus/export.go:210 cmd/incus/storage_bucket.go:1456
-#: cmd/incus/storage_volume.go:3833
+#: cmd/incus/export.go:207 cmd/incus/storage_bucket.go:1456
+#: cmd/incus/storage_volume.go:3832
 msgid "Backup exported successfully!"
 msgstr "მარქაფის გატანა წარმატებულია!"
 
-#: cmd/incus/info.go:856 cmd/incus/storage_volume.go:1369
+#: cmd/incus/info.go:855 cmd/incus/storage_volume.go:1369
 msgid "Backups:"
 msgstr "მარქაფები:"
 
@@ -952,11 +953,11 @@ msgstr ""
 msgid "Bond:"
 msgstr "გადაბმა:"
 
-#: cmd/incus/action.go:354
+#: cmd/incus/action.go:353
 msgid "Both --all and instance name given"
 msgstr ""
 
-#: cmd/incus/info.go:143
+#: cmd/incus/info.go:142
 #, c-format
 msgid "Brand: %v"
 msgstr "მარკა: %v"
@@ -969,16 +970,16 @@ msgstr "ხიდი:"
 msgid "Bucket description"
 msgstr ""
 
-#: cmd/incus/info.go:352
+#: cmd/incus/info.go:351
 #, c-format
 msgid "Bus Address: %v"
 msgstr ""
 
-#: cmd/incus/info.go:779 cmd/incus/network.go:932
+#: cmd/incus/info.go:778 cmd/incus/network.go:932
 msgid "Bytes received"
 msgstr "მიღებული ბაიტები"
 
-#: cmd/incus/info.go:780 cmd/incus/network.go:933
+#: cmd/incus/info.go:779 cmd/incus/network.go:933
 msgid "Bytes sent"
 msgstr "გაგზავნილი ბაიტი"
 
@@ -1006,19 +1007,19 @@ msgstr ""
 msgid "CPU USAGE"
 msgstr "CPU-ის გამოყენება"
 
-#: cmd/incus/info.go:720
+#: cmd/incus/info.go:719
 msgid "CPU usage (in seconds)"
 msgstr "CPU-ის გამოყენება (წამებში)"
 
-#: cmd/incus/info.go:724
+#: cmd/incus/info.go:723
 msgid "CPU usage:"
 msgstr "CPU -ის გამოყენება:"
 
-#: cmd/incus/info.go:501
+#: cmd/incus/info.go:500
 msgid "CPU:"
 msgstr "CPU:"
 
-#: cmd/incus/info.go:505
+#: cmd/incus/info.go:504
 msgid "CPUs:"
 msgstr "CPU:"
 
@@ -1030,7 +1031,7 @@ msgstr "შექმნილია"
 msgid "CREATED AT"
 msgstr ""
 
-#: cmd/incus/info.go:145
+#: cmd/incus/info.go:144
 #, c-format
 msgid "CUDA Version: %v"
 msgstr "CUDA-ის ვერსია: %v"
@@ -1040,7 +1041,7 @@ msgstr "CUDA-ის ვერსია: %v"
 msgid "Cached: %s"
 msgstr "დაკეშილი: %s"
 
-#: cmd/incus/info.go:322
+#: cmd/incus/info.go:321
 msgid "Caches:"
 msgstr "ქეშები:"
 
@@ -1067,7 +1068,7 @@ msgstr ""
 msgid "Can't read from stdin: %w"
 msgstr ""
 
-#: cmd/incus/remote.go:1244
+#: cmd/incus/remote.go:1240
 msgid "Can't remove the default remote"
 msgstr ""
 
@@ -1137,12 +1138,12 @@ msgstr ""
 msgid "Cannot set key: %s"
 msgstr "პარამეტრის დაყენების შეცდომა: %s"
 
-#: cmd/incus/info.go:550 cmd/incus/info.go:562
+#: cmd/incus/info.go:549 cmd/incus/info.go:561
 #, c-format
 msgid "Card %d:"
 msgstr "ბარათი%d:"
 
-#: cmd/incus/info.go:128
+#: cmd/incus/info.go:127
 #, c-format
 msgid "Card: %s (%s)"
 msgstr "ბარათი: %s (%s)"
@@ -1168,7 +1169,7 @@ msgid ""
 "Certificate fingerprint mismatch between join token and cluster member %q"
 msgstr ""
 
-#: cmd/incus/remote.go:498
+#: cmd/incus/remote.go:494
 #, c-format
 msgid "Certificate fingerprint: %s"
 msgstr "სერტიფიკატის ნაბეჭდი: %s"
@@ -1192,7 +1193,7 @@ msgstr ""
 msgid "Client %s certificate add token:"
 msgstr ""
 
-#: cmd/incus/remote.go:647
+#: cmd/incus/remote.go:643
 msgid "Client certificate now trusted by server:"
 msgstr "კლიენტის სერტიფიკატი ახლა სანდოა სერვერის მიერ:"
 
@@ -1252,7 +1253,7 @@ msgstr ""
 
 #: cmd/incus/config.go:102 cmd/incus/config.go:382 cmd/incus/config.go:522
 #: cmd/incus/config.go:689 cmd/incus/config.go:809 cmd/incus/copy.go:66
-#: cmd/incus/create.go:69 cmd/incus/info.go:54 cmd/incus/move.go:67
+#: cmd/incus/create.go:69 cmd/incus/info.go:53 cmd/incus/move.go:67
 #: cmd/incus/network.go:348 cmd/incus/network.go:798 cmd/incus/network.go:871
 #: cmd/incus/network.go:1047 cmd/incus/network.go:1428
 #: cmd/incus/network.go:1512 cmd/incus/network.go:1574
@@ -1268,8 +1269,8 @@ msgstr ""
 #: cmd/incus/network_load_balancer.go:886
 #: cmd/incus/network_load_balancer.go:980
 #: cmd/incus/network_load_balancer.go:1046 cmd/incus/storage.go:116
-#: cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:799
-#: cmd/incus/storage.go:892 cmd/incus/storage.go:971
+#: cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:798
+#: cmd/incus/storage.go:891 cmd/incus/storage.go:970
 #: cmd/incus/storage_bucket.go:114 cmd/incus/storage_bucket.go:203
 #: cmd/incus/storage_bucket.go:253 cmd/incus/storage_bucket.go:371
 #: cmd/incus/storage_bucket.go:600 cmd/incus/storage_bucket.go:705
@@ -1285,7 +1286,7 @@ msgstr ""
 #: cmd/incus/storage_volume.go:2057 cmd/incus/storage_volume.go:3056
 #: cmd/incus/storage_volume.go:3204 cmd/incus/storage_volume.go:3440
 #: cmd/incus/storage_volume.go:3509 cmd/incus/storage_volume.go:3573
-#: cmd/incus/storage_volume.go:3650 cmd/incus/storage_volume.go:3858
+#: cmd/incus/storage_volume.go:3649 cmd/incus/storage_volume.go:3857
 msgid "Cluster member name"
 msgstr "კლასტერის წევრის სახელი"
 
@@ -1301,7 +1302,7 @@ msgstr "კლასტერი ჩართულია"
 #: cmd/incus/network_forward.go:121 cmd/incus/network_integration.go:411
 #: cmd/incus/network_load_balancer.go:128 cmd/incus/network_peer.go:117
 #: cmd/incus/network_zone.go:122 cmd/incus/operation.go:149
-#: cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:975
+#: cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:971
 #: cmd/incus/snapshot.go:342 cmd/incus/storage.go:659
 #: cmd/incus/storage_bucket.go:464 cmd/incus/storage_bucket.go:857
 #: cmd/incus/storage_volume.go:1439 cmd/incus/storage_volume.go:3284
@@ -1328,11 +1329,11 @@ msgstr ""
 msgid "Compression algorithm to use (`none` for uncompressed)"
 msgstr ""
 
-#: cmd/incus/export.go:55
+#: cmd/incus/export.go:52
 msgid "Compression algorithm to use (none for uncompressed)"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3649
+#: cmd/incus/storage_volume.go:3648
 msgid ""
 "Compression algorithm to use (none for uncompressed, ignored for ISO storage "
 "volumes)"
@@ -1399,7 +1400,7 @@ msgstr "შემცველობის ტიპი, ბლოკი ან �
 msgid "Content type: %s"
 msgstr "შემცველობის ტიპი: %s"
 
-#: cmd/incus/info.go:132
+#: cmd/incus/info.go:131
 #, c-format
 msgid "Control: %s (%s)"
 msgstr "კონტროლი: %s (%s)"
@@ -1483,21 +1484,21 @@ msgstr "ასლის კოპირება: %s"
 msgid "Copying the storage volume: %s"
 msgstr "საცავის ტომის კოპირება: %s"
 
-#: cmd/incus/info.go:330
+#: cmd/incus/info.go:329
 #, c-format
 msgid "Core %d"
 msgstr "ბირთვი %d"
 
-#: cmd/incus/info.go:328
+#: cmd/incus/info.go:327
 msgid "Cores:"
 msgstr "ბირთვები:"
 
-#: cmd/incus/remote.go:534
+#: cmd/incus/remote.go:530
 #, c-format
 msgid "Could not close server cert file %q: %w"
 msgstr ""
 
-#: cmd/incus/remote.go:267 cmd/incus/remote.go:518
+#: cmd/incus/remote.go:267 cmd/incus/remote.go:514
 msgid "Could not create server cert dir"
 msgstr "სერვერის სერტიფიკატის საქაღალდის შექმნა შეუძლებელია"
 
@@ -1526,7 +1527,7 @@ msgstr "სერტიფიკატის გასაღების ფა�
 msgid "Could not write new remote certificate for remote '%s' with error: %v"
 msgstr ""
 
-#: cmd/incus/remote.go:529
+#: cmd/incus/remote.go:525
 #, c-format
 msgid "Could not write server cert file %q: %w"
 msgstr ""
@@ -1583,7 +1584,7 @@ msgstr ""
 msgid "Create files and directories in instances"
 msgstr ""
 
-#: cmd/incus/export.go:101
+#: cmd/incus/export.go:98
 #, c-format
 msgid "Create instance backup: %w"
 msgstr ""
@@ -1673,7 +1674,7 @@ msgstr "საცავის პულების შექმნა"
 msgid "Create the instance with no profiles applied"
 msgstr ""
 
-#: cmd/incus/image.go:949 cmd/incus/info.go:675
+#: cmd/incus/image.go:949 cmd/incus/info.go:674
 #: cmd/incus/storage_volume.go:1323
 #, c-format
 msgid "Created: %s"
@@ -1693,7 +1694,7 @@ msgstr ""
 msgid "Creating the instance"
 msgstr "გაშვებული ასლის შექმნა"
 
-#: cmd/incus/info.go:152 cmd/incus/info.go:261
+#: cmd/incus/info.go:151 cmd/incus/info.go:260
 #, c-format
 msgid "Current number of VFs: %d"
 msgstr "VF-ების მიმდინარე რაოდენობა: %d"
@@ -1709,8 +1710,8 @@ msgstr "ნაგულისხმევი სამიზნის მის�
 #: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427
 #: cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139
 #: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871
-#: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:549
-#: cmd/incus/storage.go:686 cmd/incus/storage_bucket.go:481
+#: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548
+#: cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481
 #: cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
 msgid "DESCRIPTION"
 msgstr "აღწერა"
@@ -1723,11 +1724,11 @@ msgstr "დისკი"
 msgid "DISK USAGE"
 msgstr ""
 
-#: cmd/incus/storage.go:685
+#: cmd/incus/storage.go:684
 msgid "DRIVER"
 msgstr "დრაივერი"
 
-#: cmd/incus/info.go:124
+#: cmd/incus/info.go:123
 msgid "DRM:"
 msgstr ""
 
@@ -1741,7 +1742,7 @@ msgstr ""
 msgid "Daemon still running after %ds timeout"
 msgstr ""
 
-#: cmd/incus/info.go:488
+#: cmd/incus/info.go:487
 #, c-format
 msgid "Date: %s"
 msgstr "თარიღი: %s"
@@ -1883,7 +1884,7 @@ msgstr "აღწერა"
 msgid "Description:"
 msgstr "აღწერა:"
 
-#: cmd/incus/info.go:646 cmd/incus/storage_volume.go:1296
+#: cmd/incus/info.go:645 cmd/incus/storage_volume.go:1296
 #, c-format
 msgid "Description: %s"
 msgstr "აღწერა: %s"
@@ -1908,7 +1909,7 @@ msgstr "გაშვებული ასლებიდან ქსელი�
 msgid "Detach network interfaces from profiles"
 msgstr "პროფილებიდან ქსელის ინტერფეისების მოხსნა"
 
-#: cmd/incus/info.go:586 cmd/incus/info.go:598 cmd/incus/info.go:610
+#: cmd/incus/info.go:585 cmd/incus/info.go:597 cmd/incus/info.go:609
 #, c-format
 msgid "Device %d:"
 msgstr ""
@@ -1928,7 +1929,7 @@ msgstr "მოწყობილობა %s გადაფარულია %
 msgid "Device %s removed from %s"
 msgstr "მოწყობილობა %s წაიშალა %s-დან"
 
-#: cmd/incus/info.go:353
+#: cmd/incus/info.go:352
 #, c-format
 msgid "Device Address: %v"
 msgstr ""
@@ -1965,22 +1966,22 @@ msgstr ""
 msgid "Device “%s” doesn't exist"
 msgstr ""
 
-#: cmd/incus/info.go:281 cmd/incus/info.go:305
+#: cmd/incus/info.go:280 cmd/incus/info.go:304
 #, c-format
 msgid "Device: %s"
 msgstr "მოწყობილობა: %s"
 
-#: cmd/incus/info.go:372
+#: cmd/incus/info.go:371
 #, c-format
 msgid "Device: %v"
 msgstr ""
 
-#: cmd/incus/info.go:373
+#: cmd/incus/info.go:372
 #, c-format
 msgid "DeviceID: %v"
 msgstr ""
 
-#: cmd/incus/info.go:374
+#: cmd/incus/info.go:373
 #, c-format
 msgid "DevicePath: %v"
 msgstr ""
@@ -2017,20 +2018,20 @@ msgstr ""
 msgid "Disable stdin (reads from /dev/null)"
 msgstr ""
 
-#: cmd/incus/info.go:574
+#: cmd/incus/info.go:573
 #, c-format
 msgid "Disk %d:"
 msgstr "დისკი %d:"
 
-#: cmd/incus/info.go:713
+#: cmd/incus/info.go:712
 msgid "Disk usage:"
 msgstr "დისკის გამოყენება:"
 
-#: cmd/incus/info.go:569
+#: cmd/incus/info.go:568
 msgid "Disk:"
 msgstr "დისკი:"
 
-#: cmd/incus/info.go:572
+#: cmd/incus/info.go:571
 msgid "Disks:"
 msgstr "დისკები:"
 
@@ -2112,12 +2113,12 @@ msgstr ""
 msgid "Down delay"
 msgstr "გათიშვის დაყოვნება"
 
-#: cmd/incus/info.go:367 cmd/incus/info.go:379
+#: cmd/incus/info.go:366 cmd/incus/info.go:378
 #, c-format
 msgid "Driver: %v"
 msgstr ""
 
-#: cmd/incus/info.go:120 cmd/incus/info.go:206
+#: cmd/incus/info.go:119 cmd/incus/info.go:205
 #, c-format
 msgid "Driver: %v (%v)"
 msgstr "დრაივერი: %v (%v)"
@@ -2273,8 +2274,8 @@ msgstr ""
 #: cmd/incus/network_forward.go:157 cmd/incus/network_integration.go:437
 #: cmd/incus/network_load_balancer.go:163 cmd/incus/network_peer.go:150
 #: cmd/incus/network_zone.go:158 cmd/incus/operation.go:181
-#: cmd/incus/profile.go:741 cmd/incus/project.go:559 cmd/incus/remote.go:1002
-#: cmd/incus/snapshot.go:376 cmd/incus/storage.go:698
+#: cmd/incus/profile.go:741 cmd/incus/project.go:558 cmd/incus/remote.go:998
+#: cmd/incus/snapshot.go:376 cmd/incus/storage.go:697
 #: cmd/incus/storage_bucket.go:498 cmd/incus/storage_bucket.go:882
 #: cmd/incus/storage_volume.go:1597 cmd/incus/storage_volume.go:3387
 #: cmd/incus/top.go:95 cmd/incus/warning.go:236
@@ -2348,7 +2349,7 @@ msgstr ""
 #: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
 #: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
 #: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
-#: cmd/incus/profile.go:1031 cmd/incus/project.go:810 cmd/incus/storage.go:845
+#: cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
 #: cmd/incus/storage_volume.go:1914
 #, c-format
@@ -2370,7 +2371,7 @@ msgstr ""
 #: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
 #: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
 #: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
-#: cmd/incus/profile.go:1025 cmd/incus/project.go:804 cmd/incus/storage.go:839
+#: cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
 #: cmd/incus/storage_volume.go:1908
 #, c-format
@@ -2467,7 +2468,7 @@ msgstr ""
 msgid "Expected a struct, got a %v"
 msgstr ""
 
-#: cmd/incus/info.go:842 cmd/incus/info.go:893 cmd/incus/storage_volume.go:1356
+#: cmd/incus/info.go:841 cmd/incus/info.go:892 cmd/incus/storage_volume.go:1356
 #: cmd/incus/storage_volume.go:1406
 msgid "Expires at"
 msgstr "ამოწურვის ვადა"
@@ -2541,7 +2542,7 @@ msgstr ""
 msgid "Exporting backup of storage bucket: %s"
 msgstr ""
 
-#: cmd/incus/export.go:170 cmd/incus/storage_volume.go:3793
+#: cmd/incus/export.go:167 cmd/incus/storage_volume.go:3792
 #, c-format
 msgid "Exporting the backup: %s"
 msgstr ""
@@ -2568,7 +2569,7 @@ msgstr "თითის ანაბეჭდი"
 msgid "FIRST SEEN"
 msgstr ""
 
-#: cmd/incus/info.go:694 cmd/incus/remote.go:120
+#: cmd/incus/info.go:693 cmd/incus/remote.go:120
 msgid "FQDN"
 msgstr "FQDN"
 
@@ -2693,7 +2694,7 @@ msgstr ""
 msgid "Failed starting sshfs: %w"
 msgstr "sshfs-ის გაშვების შეცდომა: %w"
 
-#: cmd/incus/storage_volume.go:4043 cmd/incus/utils.go:675
+#: cmd/incus/storage_volume.go:4042 cmd/incus/utils.go:675
 #, c-format
 msgid "Failed to accept incoming connection: %w"
 msgstr ""
@@ -2712,8 +2713,8 @@ msgstr ""
 msgid "Failed to check if the daemon is ready (attempt %d): %v"
 msgstr ""
 
-#: cmd/incus/export.go:207 cmd/incus/storage_bucket.go:1453
-#: cmd/incus/storage_volume.go:3830
+#: cmd/incus/export.go:204 cmd/incus/storage_bucket.go:1453
+#: cmd/incus/storage_volume.go:3829
 #, c-format
 msgid "Failed to close export file: %w"
 msgstr ""
@@ -2763,7 +2764,7 @@ msgstr ""
 msgid "Failed to create certificate: %w"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3724
+#: cmd/incus/storage_volume.go:3723
 #, c-format
 msgid "Failed to create storage volume backup: %w"
 msgstr ""
@@ -2783,7 +2784,7 @@ msgstr ""
 msgid "Failed to fetch storage bucket backup: %w"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3807
+#: cmd/incus/storage_volume.go:3806
 #, c-format
 msgid "Failed to fetch storage volume backup file: %w"
 msgstr ""
@@ -2798,7 +2799,7 @@ msgstr ""
 msgid "Failed to join cluster: %w"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:4035 cmd/incus/utils.go:660
+#: cmd/incus/storage_volume.go:4034 cmd/incus/utils.go:660
 #, c-format
 msgid "Failed to listen for connection: %w"
 msgstr ""
@@ -2849,8 +2850,8 @@ msgstr ""
 msgid "Failed to remove alias %s: %w"
 msgstr ""
 
-#: cmd/incus/export.go:201 cmd/incus/storage_bucket.go:1447
-#: cmd/incus/storage_volume.go:3824
+#: cmd/incus/export.go:198 cmd/incus/storage_bucket.go:1447
+#: cmd/incus/storage_volume.go:3823
 #, c-format
 msgid "Failed to rename export file: %w"
 msgstr ""
@@ -2923,7 +2924,7 @@ msgstr ""
 msgid "Failed validation request: %w"
 msgstr ""
 
-#: cmd/incus/info.go:417
+#: cmd/incus/info.go:416
 #, c-format
 msgid "Family: %v"
 msgstr ""
@@ -2932,7 +2933,7 @@ msgstr ""
 msgid "Fast mode (same as --columns=nsacPt)"
 msgstr ""
 
-#: cmd/incus/export.go:184
+#: cmd/incus/export.go:181
 #, c-format
 msgid "Fetch instance backup file: %w"
 msgstr ""
@@ -2975,8 +2976,8 @@ msgstr ""
 msgid "Force evacuation without user confirmation"
 msgstr ""
 
-#: cmd/incus/export.go:56 cmd/incus/storage_bucket.go:1300
-#: cmd/incus/storage_volume.go:3651
+#: cmd/incus/export.go:53 cmd/incus/storage_bucket.go:1300
+#: cmd/incus/storage_volume.go:3650
 msgid "Force overwriting existing backup file"
 msgstr ""
 
@@ -2988,7 +2989,7 @@ msgstr ""
 msgid "Force removing a member, even if degraded"
 msgstr ""
 
-#: cmd/incus/action.go:166
+#: cmd/incus/action.go:165
 msgid "Force the instance to stop"
 msgstr ""
 
@@ -3049,9 +3050,9 @@ msgstr ""
 #: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410
 #: cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116
 #: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818
-#: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:519
-#: cmd/incus/project.go:994 cmd/incus/remote.go:974 cmd/incus/snapshot.go:341
-#: cmd/incus/storage.go:661 cmd/incus/storage_bucket.go:462
+#: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518
+#: cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341
+#: cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462
 #: cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466
 #: cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
 msgid ""
@@ -3067,7 +3068,7 @@ msgstr "ფორმატი (json|pretty|yaml)"
 msgid "Format (man|md|rest|yaml)"
 msgstr "ფორმატი (man|md|rest|yaml)"
 
-#: cmd/incus/remote.go:756
+#: cmd/incus/remote.go:752
 msgid "Format (pem|pfx)"
 msgstr ""
 
@@ -3089,39 +3090,39 @@ msgstr "გადაგზავნის დაყოვნება"
 msgid "Found alias %q references an argument outside the given number"
 msgstr ""
 
-#: cmd/incus/info.go:517 cmd/incus/info.go:528 cmd/incus/info.go:533
-#: cmd/incus/info.go:539
+#: cmd/incus/info.go:516 cmd/incus/info.go:527 cmd/incus/info.go:532
+#: cmd/incus/info.go:538
 #, c-format
 msgid "Free: %v"
 msgstr "თავისუფალი: %v"
 
-#: cmd/incus/info.go:331 cmd/incus/info.go:342
+#: cmd/incus/info.go:330 cmd/incus/info.go:341
 #, c-format
 msgid "Frequency: %vMhz"
 msgstr "სიხშირე: %vმჰც"
 
-#: cmd/incus/info.go:340
+#: cmd/incus/info.go:339
 #, c-format
 msgid "Frequency: %vMhz (min: %vMhz, max: %vMhz)"
 msgstr ""
 
-#: cmd/incus/remote.go:994
+#: cmd/incus/remote.go:990
 msgid "GLOBAL"
 msgstr ""
 
-#: cmd/incus/info.go:545
+#: cmd/incus/info.go:544
 msgid "GPU:"
 msgstr "GPU:"
 
-#: cmd/incus/info.go:548
+#: cmd/incus/info.go:547
 msgid "GPUs:"
 msgstr "GPU-ები:"
 
-#: cmd/incus/remote.go:862
+#: cmd/incus/remote.go:858
 msgid "Generate a client token derived from the client certificate"
 msgstr ""
 
-#: cmd/incus/remote.go:863
+#: cmd/incus/remote.go:859
 msgid ""
 "Generate a client trust token derived from the existing client certificate "
 "and private key.\n"
@@ -3153,16 +3154,16 @@ msgstr ""
 msgid "Generate manpages for all commands"
 msgstr ""
 
-#: cmd/incus/remote.go:675
+#: cmd/incus/remote.go:671
 msgid "Generate the client certificate"
 msgstr ""
 
-#: cmd/incus/remote.go:196 cmd/incus/remote.go:439 cmd/incus/remote.go:698
-#: cmd/incus/remote.go:782 cmd/incus/remote.go:887
+#: cmd/incus/remote.go:196 cmd/incus/remote.go:435 cmd/incus/remote.go:694
+#: cmd/incus/remote.go:778 cmd/incus/remote.go:883
 msgid "Generating a client certificate. This may take a minute..."
 msgstr ""
 
-#: cmd/incus/project.go:990 cmd/incus/project.go:991
+#: cmd/incus/project.go:989 cmd/incus/project.go:990
 msgid "Get a summary of resource allocations"
 msgstr ""
 
@@ -3327,7 +3328,7 @@ msgid ""
 "container or virtual-machine)."
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3988
+#: cmd/incus/storage_volume.go:3987
 msgid "Get write access to the disk"
 msgstr ""
 
@@ -3348,15 +3349,15 @@ msgstr ""
 msgid "HOSTNAME"
 msgstr "ჰოსტის სახელი"
 
-#: cmd/incus/info.go:768
+#: cmd/incus/info.go:767
 msgid "Host interface"
 msgstr "ჰოსტის ინტერფეისი"
 
-#: cmd/incus/info.go:693
+#: cmd/incus/info.go:692
 msgid "Hostname"
 msgstr "ჰოსტის სახელი"
 
-#: cmd/incus/info.go:516 cmd/incus/info.go:527
+#: cmd/incus/info.go:515 cmd/incus/info.go:526
 msgid "Hugepages:\n"
 msgstr ""
 
@@ -3384,17 +3385,17 @@ msgstr ""
 msgid "ID"
 msgstr "ID"
 
-#: cmd/incus/info.go:125
+#: cmd/incus/info.go:124
 #, c-format
 msgid "ID: %d"
 msgstr ""
 
-#: cmd/incus/info.go:213 cmd/incus/info.go:280 cmd/incus/info.go:304
+#: cmd/incus/info.go:212 cmd/incus/info.go:279 cmd/incus/info.go:303
 #, c-format
 msgid "ID: %s"
 msgstr ""
 
-#: cmd/incus/project.go:543
+#: cmd/incus/project.go:542
 msgid "IMAGES"
 msgstr "ასლები"
 
@@ -3402,7 +3403,7 @@ msgstr "ასლები"
 msgid "INSTANCE NAME"
 msgstr ""
 
-#: cmd/incus/info.go:366
+#: cmd/incus/info.go:365
 #, c-format
 msgid "IOMMU group: %v"
 msgstr ""
@@ -3415,7 +3416,7 @@ msgstr "IP"
 msgid "IP ADDRESS"
 msgstr "IP მისამართები"
 
-#: cmd/incus/info.go:784
+#: cmd/incus/info.go:783
 msgid "IP addresses"
 msgstr "IP მისამართები"
 
@@ -3443,7 +3444,7 @@ msgstr ""
 msgid "ISSUE DATE"
 msgstr "პრობლეების თარიღი"
 
-#: cmd/incus/info.go:371
+#: cmd/incus/info.go:370
 #, c-format
 msgid "Id: %v"
 msgstr ""
@@ -3532,11 +3533,11 @@ msgstr ""
 msgid "Import backups of storage buckets."
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3851
+#: cmd/incus/storage_volume.go:3850
 msgid "Import custom storage volumes"
 msgstr "მომხმარებლის საცავის ტომების შემოტანა"
 
-#: cmd/incus/storage_volume.go:3852
+#: cmd/incus/storage_volume.go:3851
 msgid "Import custom storage volumes."
 msgstr ""
 
@@ -3559,11 +3560,11 @@ msgstr "გაშვებული ასლის მარქაფები�
 msgid "Import storage bucket"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3917
+#: cmd/incus/storage_volume.go:3916
 msgid "Import type needs to be \"backup\" or \"iso\""
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3860
+#: cmd/incus/storage_volume.go:3859
 msgid "Import type, backup or iso (default \"backup\")"
 msgstr ""
 
@@ -3572,7 +3573,7 @@ msgstr ""
 msgid "Importing bucket: %s"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3926
+#: cmd/incus/storage_volume.go:3925
 #, c-format
 msgid "Importing custom volume: %s"
 msgstr ""
@@ -3594,7 +3595,7 @@ msgstr ""
 msgid "Incus - Command line client"
 msgstr ""
 
-#: cmd/incus/info.go:242
+#: cmd/incus/info.go:241
 msgid "Infiniband:"
 msgstr ""
 
@@ -3602,7 +3603,7 @@ msgstr ""
 msgid "Input data"
 msgstr "შეყვანილი მონაცემები"
 
-#: cmd/incus/info.go:894
+#: cmd/incus/info.go:893
 msgid "Instance Only"
 msgstr "მხოლოდ გაშვებული ასლი"
 
@@ -3646,13 +3647,13 @@ msgstr "გაშვებული ასლის ტიპი"
 msgid "Invalid IP address or DNS name"
 msgstr ""
 
-#: cmd/incus/export.go:134 cmd/incus/storage_bucket.go:1380
-#: cmd/incus/storage_volume.go:3757
+#: cmd/incus/export.go:131 cmd/incus/storage_bucket.go:1380
+#: cmd/incus/storage_volume.go:3756
 #, c-format
 msgid "Invalid URL %q: %w"
 msgstr ""
 
-#: cmd/incus/remote.go:391
+#: cmd/incus/remote.go:387
 #, c-format
 msgid "Invalid URL scheme \"%s\" in \"%s\""
 msgstr ""
@@ -3662,8 +3663,8 @@ msgstr ""
 msgid "Invalid argument %q"
 msgstr "არასწორი არგუმენტი %q"
 
-#: cmd/incus/export.go:139 cmd/incus/storage_bucket.go:1385
-#: cmd/incus/storage_volume.go:3762
+#: cmd/incus/export.go:136 cmd/incus/storage_bucket.go:1385
+#: cmd/incus/storage_volume.go:3761
 #, c-format
 msgid "Invalid backup name segment in path %q: %w"
 msgstr ""
@@ -3677,7 +3678,7 @@ msgstr ""
 msgid "Invalid certificate"
 msgstr "არასწორი სერტიფიკატი"
 
-#: cmd/incus/remote.go:772
+#: cmd/incus/remote.go:768
 #, c-format
 msgid "Invalid certificate format %q"
 msgstr ""
@@ -3750,7 +3751,7 @@ msgstr "არგუმენტების არასწორი რაო�
 msgid "Invalid peer type"
 msgstr ""
 
-#: cmd/incus/remote.go:380
+#: cmd/incus/remote.go:376
 #, c-format
 msgid "Invalid protocol: %s"
 msgstr "არასწორი პროტოკოლი: %s"
@@ -3768,7 +3769,7 @@ msgstr ""
 msgid "Invalid type %q"
 msgstr ""
 
-#: cmd/incus/info.go:245
+#: cmd/incus/info.go:244
 #, c-format
 msgid "IsSM: %s (%s)"
 msgstr ""
@@ -3785,7 +3786,7 @@ msgstr ""
 msgid "Keep the image up to date after initial copy"
 msgstr ""
 
-#: cmd/incus/info.go:692
+#: cmd/incus/info.go:691
 msgid "Kernel Version"
 msgstr "ბირთვის ვერსია"
 
@@ -3801,7 +3802,7 @@ msgstr ""
 msgid "LAST USED AT"
 msgstr "ბოლოს გამოყენების დრო"
 
-#: cmd/incus/project.go:1078
+#: cmd/incus/project.go:1077
 msgid "LIMIT"
 msgstr ""
 
@@ -3816,7 +3817,7 @@ msgstr "მისამართის მოსმენა"
 msgid "LOCATION"
 msgstr "მდებარეობა"
 
-#: cmd/incus/info.go:679
+#: cmd/incus/info.go:678
 #, c-format
 msgid "Last Used: %s"
 msgstr ""
@@ -3839,12 +3840,12 @@ msgstr ""
 msgid "Launching the instance"
 msgstr ""
 
-#: cmd/incus/info.go:236
+#: cmd/incus/info.go:235
 #, c-format
 msgid "Link detected: %v"
 msgstr ""
 
-#: cmd/incus/info.go:238
+#: cmd/incus/info.go:237
 #, c-format
 msgid "Link speed: %dMbit/s (%s duplex)"
 msgstr "კავშირის სიჩქარე: %dმბიტ/წმ (%s დუპლექსი)"
@@ -4626,11 +4627,11 @@ msgid ""
 "    U - Current disk usage"
 msgstr ""
 
-#: cmd/incus/remote.go:948
+#: cmd/incus/remote.go:944
 msgid "List the available remotes"
 msgstr "ხელმისაწვდომი დაშორებულების სია"
 
-#: cmd/incus/remote.go:949
+#: cmd/incus/remote.go:945
 msgid ""
 "List the available remotes\n"
 "\n"
@@ -4719,16 +4720,16 @@ msgstr ""
 msgid "Load balancer description"
 msgstr ""
 
-#: cmd/incus/info.go:493
+#: cmd/incus/info.go:492
 msgid "Load:"
 msgstr ""
 
-#: cmd/incus/info.go:667 cmd/incus/storage_volume.go:1312
+#: cmd/incus/info.go:666 cmd/incus/storage_volume.go:1312
 #, c-format
 msgid "Location: %s"
 msgstr "მდებარეობა: %s"
 
-#: cmd/incus/info.go:927
+#: cmd/incus/info.go:926
 #, c-format
 msgid "Log (%s):"
 msgstr ""
@@ -4774,7 +4775,7 @@ msgstr "მოწყობილობების დაწევა"
 msgid "MAC ADDRESS"
 msgstr ""
 
-#: cmd/incus/info.go:772
+#: cmd/incus/info.go:771
 msgid "MAC address"
 msgstr "MAC მისამართი"
 
@@ -4783,7 +4784,7 @@ msgstr "MAC მისამართი"
 msgid "MAC address: %s"
 msgstr "MAC მისამართი: %s"
 
-#: cmd/incus/info.go:249
+#: cmd/incus/info.go:248
 #, c-format
 msgid "MAD: %s (%s)"
 msgstr ""
@@ -4821,7 +4822,7 @@ msgstr "MII სიხშირე"
 msgid "MII state"
 msgstr "MII მდგომარეობა"
 
-#: cmd/incus/info.go:776
+#: cmd/incus/info.go:775
 msgid "MTU"
 msgstr "MTU"
 
@@ -5033,11 +5034,11 @@ msgstr "სანდო კლიენტების მართვა"
 msgid "Manage warnings"
 msgstr "გაფრთხილებების მართვა"
 
-#: cmd/incus/remote.go:676
+#: cmd/incus/remote.go:672
 msgid "Manually trigger the generation of a client certificate"
 msgstr ""
 
-#: cmd/incus/info.go:153 cmd/incus/info.go:262
+#: cmd/incus/info.go:152 cmd/incus/info.go:261
 #, c-format
 msgid "Maximum number of VFs: %d"
 msgstr ""
@@ -5046,7 +5047,7 @@ msgstr ""
 msgid "Maximum wait time"
 msgstr ""
 
-#: cmd/incus/info.go:164
+#: cmd/incus/info.go:163
 msgid "Mdev profiles:"
 msgstr "Mdev-ის პროფილები:"
 
@@ -5075,19 +5076,19 @@ msgstr ""
 msgid "Member %s renamed to %s"
 msgstr ""
 
-#: cmd/incus/info.go:731
+#: cmd/incus/info.go:730
 msgid "Memory (current)"
 msgstr "მეხსიერება (მიმდინარე)"
 
-#: cmd/incus/info.go:735
+#: cmd/incus/info.go:734
 msgid "Memory (peak)"
 msgstr "მეხსიერება (პიკი)"
 
-#: cmd/incus/info.go:747
+#: cmd/incus/info.go:746
 msgid "Memory usage:"
 msgstr "მეხსიერების გამოყენება:"
 
-#: cmd/incus/info.go:514
+#: cmd/incus/info.go:513
 msgid "Memory:"
 msgstr "მეხსიერება:"
 
@@ -5122,12 +5123,12 @@ msgstr "აკლია სამიზნე საქაღლდე"
 msgid "Mode"
 msgstr "რეჟიმი"
 
-#: cmd/incus/info.go:284
+#: cmd/incus/info.go:283
 #, c-format
 msgid "Model: %s"
 msgstr "მოდელი: %s"
 
-#: cmd/incus/info.go:144
+#: cmd/incus/info.go:143
 #, c-format
 msgid "Model: %v"
 msgstr "მოდელი: %v"
@@ -5227,8 +5228,8 @@ msgstr ""
 #: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
 #: cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144
 #: cmd/incus/network_zone.go:870 cmd/incus/profile.go:723
-#: cmd/incus/project.go:542 cmd/incus/project.go:671 cmd/incus/remote.go:988
-#: cmd/incus/snapshot.go:365 cmd/incus/storage.go:684
+#: cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984
+#: cmd/incus/snapshot.go:365 cmd/incus/storage.go:683
 #: cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872
 #: cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
 msgid "NAME"
@@ -5238,41 +5239,41 @@ msgstr "სახელი"
 msgid "NAT"
 msgstr "NAT"
 
-#: cmd/incus/storage_volume.go:3983
+#: cmd/incus/storage_volume.go:3982
 #, fuzzy
 msgid "NBD access to a block storage volume"
 msgstr "მომხმარებლის საცავის ტომების შემოტანა"
 
-#: cmd/incus/storage_volume.go:3984
+#: cmd/incus/storage_volume.go:3983
 #, fuzzy
 msgid "NBD access to a block storage volume."
 msgstr "მომხმარებლის საცავის ტომების შემოტანა"
 
-#: cmd/incus/storage_volume.go:4048
+#: cmd/incus/storage_volume.go:4047
 #, c-format
 msgid "NBD client connected %q"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:4049
+#: cmd/incus/storage_volume.go:4048
 #, fuzzy, c-format
 msgid "NBD client disconnected %q"
 msgstr "გაშვებული ასლი გაითიშა"
 
-#: cmd/incus/storage_volume.go:4054
+#: cmd/incus/storage_volume.go:4053
 #, c-format
 msgid "NBD connection failed: %v"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:4038
+#: cmd/incus/storage_volume.go:4037
 #, c-format
 msgid "NBD listening on %v"
 msgstr ""
 
-#: cmd/incus/project.go:548
+#: cmd/incus/project.go:547
 msgid "NETWORK ZONES"
 msgstr "ქსელის ზონა"
 
-#: cmd/incus/project.go:547
+#: cmd/incus/project.go:546
 msgid "NETWORKS"
 msgstr ""
 
@@ -5281,41 +5282,41 @@ msgstr ""
 msgid "NEW: %q (backend=%q, source=%q)"
 msgstr ""
 
-#: cmd/incus/info.go:557
+#: cmd/incus/info.go:556
 msgid "NIC:"
 msgstr ""
 
-#: cmd/incus/info.go:560
+#: cmd/incus/info.go:559
 msgid "NICs:"
 msgstr "NIC-ები:"
 
 #: cmd/incus/network.go:1120 cmd/incus/operation.go:214
-#: cmd/incus/project.go:580 cmd/incus/project.go:589 cmd/incus/project.go:598
-#: cmd/incus/project.go:607 cmd/incus/project.go:616 cmd/incus/project.go:625
-#: cmd/incus/remote.go:1052 cmd/incus/remote.go:1061 cmd/incus/remote.go:1070
+#: cmd/incus/project.go:579 cmd/incus/project.go:588 cmd/incus/project.go:597
+#: cmd/incus/project.go:606 cmd/incus/project.go:615 cmd/incus/project.go:624
+#: cmd/incus/remote.go:1048 cmd/incus/remote.go:1057 cmd/incus/remote.go:1066
 msgid "NO"
 msgstr ""
 
-#: cmd/incus/info.go:105 cmd/incus/info.go:191 cmd/incus/info.go:278
-#: cmd/incus/info.go:365
+#: cmd/incus/info.go:104 cmd/incus/info.go:190 cmd/incus/info.go:277
+#: cmd/incus/info.go:364
 #, c-format
 msgid "NUMA node: %v"
 msgstr "NUMA კვანძი: %v"
 
-#: cmd/incus/info.go:523
+#: cmd/incus/info.go:522
 msgid "NUMA nodes:\n"
 msgstr "NUMA კვანძები:\n"
 
-#: cmd/incus/info.go:141
+#: cmd/incus/info.go:140
 msgid "NVIDIA information:"
 msgstr "NVIDIA-ის ინფორმაცია:"
 
-#: cmd/incus/info.go:146
+#: cmd/incus/info.go:145
 #, c-format
 msgid "NVRM Version: %v"
 msgstr "NVRM ვერსია: %v"
 
-#: cmd/incus/info.go:840 cmd/incus/info.go:891 cmd/incus/storage_volume.go:1354
+#: cmd/incus/info.go:839 cmd/incus/info.go:890 cmd/incus/storage_volume.go:1354
 #: cmd/incus/storage_volume.go:1404
 msgid "Name"
 msgstr "სახელი"
@@ -5376,13 +5377,13 @@ msgstr ""
 msgid "Name of the storage pool:"
 msgstr ""
 
-#: cmd/incus/info.go:645 cmd/incus/network.go:909
+#: cmd/incus/info.go:644 cmd/incus/network.go:909
 #: cmd/incus/storage_volume.go:1294
 #, c-format
 msgid "Name: %s"
 msgstr "სახელი: %s"
 
-#: cmd/incus/info.go:318
+#: cmd/incus/info.go:317
 #, c-format
 msgid "Name: %v"
 msgstr "სახელი: %v"
@@ -5522,7 +5523,7 @@ msgstr ""
 msgid "Network type"
 msgstr "ქსელის ტიპი"
 
-#: cmd/incus/info.go:797 cmd/incus/network.go:931
+#: cmd/incus/info.go:796 cmd/incus/network.go:931
 msgid "Network usage:"
 msgstr "ქსელის გამოყენება:"
 
@@ -5606,7 +5607,7 @@ msgstr ""
 msgid "No unknown storage pools or volumes found. Nothing to do."
 msgstr ""
 
-#: cmd/incus/info.go:525
+#: cmd/incus/info.go:524
 #, c-format
 msgid "Node %d:\n"
 msgstr "კვანძი %d:\n"
@@ -5621,11 +5622,11 @@ msgstr ""
 msgid "Number of placement groups"
 msgstr ""
 
-#: cmd/incus/info.go:690
+#: cmd/incus/info.go:689
 msgid "OS"
 msgstr "OS"
 
-#: cmd/incus/info.go:691
+#: cmd/incus/info.go:690
 msgid "OS Version"
 msgstr "ოს-ის ვერსია"
 
@@ -5637,7 +5638,7 @@ msgstr ""
 msgid "One or more provided address isn't currently in the set"
 msgstr ""
 
-#: cmd/incus/remote.go:367
+#: cmd/incus/remote.go:363
 msgid "Only https URLs are supported for oci and simplestreams"
 msgstr ""
 
@@ -5658,7 +5659,7 @@ msgstr ""
 msgid "Open the web interface"
 msgstr ""
 
-#: cmd/incus/info.go:689
+#: cmd/incus/info.go:688
 msgid "Operating System:"
 msgstr "ოპერაციული სისტემა:"
 
@@ -5667,7 +5668,7 @@ msgstr "ოპერაციული სისტემა:"
 msgid "Operation %s deleted"
 msgstr "ოპერაცია %s წაიშალა"
 
-#: cmd/incus/info.go:895 cmd/incus/storage_volume.go:1408
+#: cmd/incus/info.go:894 cmd/incus/storage_volume.go:1408
 msgid "Optimized Storage"
 msgstr "ოპტიმიზებული საცავი"
 
@@ -5679,16 +5680,16 @@ msgstr ""
 msgid "Override the terminal mode (auto, interactive or non-interactive)"
 msgstr ""
 
-#: cmd/incus/info.go:116 cmd/incus/info.go:202
+#: cmd/incus/info.go:115 cmd/incus/info.go:201
 #, c-format
 msgid "PCI address: %v"
 msgstr "PCI მისამართი: %v"
 
-#: cmd/incus/info.go:593
+#: cmd/incus/info.go:592
 msgid "PCI device:"
 msgstr ""
 
-#: cmd/incus/info.go:596
+#: cmd/incus/info.go:595
 msgid "PCI devices:"
 msgstr ""
 
@@ -5700,7 +5701,7 @@ msgstr ""
 msgid "PID"
 msgstr "PID"
 
-#: cmd/incus/info.go:671
+#: cmd/incus/info.go:670
 #, c-format
 msgid "PID: %d"
 msgstr ""
@@ -5713,7 +5714,7 @@ msgstr ""
 msgid "PROCESSES"
 msgstr ""
 
-#: cmd/incus/list.go:487 cmd/incus/project.go:544
+#: cmd/incus/list.go:487 cmd/incus/project.go:543
 msgid "PROFILES"
 msgstr ""
 
@@ -5729,27 +5730,27 @@ msgstr "პროექტი"
 msgid "PROJECTS"
 msgstr ""
 
-#: cmd/incus/remote.go:990
+#: cmd/incus/remote.go:986
 msgid "PROTOCOL"
 msgstr "პროტოკოლი"
 
-#: cmd/incus/image.go:1080 cmd/incus/remote.go:992
+#: cmd/incus/image.go:1080 cmd/incus/remote.go:988
 msgid "PUBLIC"
 msgstr ""
 
-#: cmd/incus/info.go:781 cmd/incus/network.go:934
+#: cmd/incus/info.go:780 cmd/incus/network.go:934
 msgid "Packets received"
 msgstr "მიღებული პაკეტები"
 
-#: cmd/incus/info.go:782 cmd/incus/network.go:935
+#: cmd/incus/info.go:781 cmd/incus/network.go:935
 msgid "Packets sent"
 msgstr "გაგზავნილი პაკეტები"
 
-#: cmd/incus/info.go:301
+#: cmd/incus/info.go:300
 msgid "Partitions:"
 msgstr "დანაყოფები:"
 
-#: cmd/incus/main.go:481 cmd/incus/remote.go:821
+#: cmd/incus/main.go:481 cmd/incus/remote.go:817
 #, c-format
 msgid "Password for %s: "
 msgstr "%s-ის პაროლი: "
@@ -5792,7 +5793,7 @@ msgstr ""
 msgid "Please provide join token:"
 msgstr ""
 
-#: cmd/incus/remote.go:510
+#: cmd/incus/remote.go:506
 msgid "Please type 'y', 'n' or the fingerprint:"
 msgstr ""
 
@@ -5817,12 +5818,12 @@ msgstr ""
 msgid "Port to bind to (default: %d)"
 msgstr ""
 
-#: cmd/incus/info.go:228
+#: cmd/incus/info.go:227
 #, c-format
 msgid "Port type: %s"
 msgstr "პორტის ტიპი: %s"
 
-#: cmd/incus/info.go:210
+#: cmd/incus/info.go:209
 msgid "Ports:"
 msgstr "პორტები:"
 
@@ -5869,7 +5870,7 @@ msgstr ""
 msgid "Print help"
 msgstr "დახმარების გამოტანა"
 
-#: cmd/incus/remote.go:753
+#: cmd/incus/remote.go:749
 msgid "Print or retrieve the client certificate used by this Incus client"
 msgstr ""
 
@@ -5881,7 +5882,7 @@ msgstr ""
 msgid "Print version number"
 msgstr ""
 
-#: cmd/incus/info.go:495 cmd/incus/info.go:700
+#: cmd/incus/info.go:494 cmd/incus/info.go:699
 #, c-format
 msgid "Processes: %d"
 msgstr "პროცესები: %d"
@@ -5891,23 +5892,23 @@ msgstr "პროცესები: %d"
 msgid "Processing aliases failed: %s"
 msgstr ""
 
-#: cmd/incus/info.go:351 cmd/incus/info.go:364 cmd/incus/info.go:378
+#: cmd/incus/info.go:350 cmd/incus/info.go:363 cmd/incus/info.go:377
 #, c-format
 msgid "Product ID: %v"
 msgstr ""
 
-#: cmd/incus/info.go:464
+#: cmd/incus/info.go:463
 #, c-format
 msgid "Product: %s"
 msgstr ""
 
-#: cmd/incus/info.go:350 cmd/incus/info.go:363 cmd/incus/info.go:377
-#: cmd/incus/info.go:413
+#: cmd/incus/info.go:349 cmd/incus/info.go:362 cmd/incus/info.go:376
+#: cmd/incus/info.go:412
 #, c-format
 msgid "Product: %v"
 msgstr ""
 
-#: cmd/incus/info.go:112 cmd/incus/info.go:198
+#: cmd/incus/info.go:111 cmd/incus/info.go:197
 #, c-format
 msgid "Product: %v (%v)"
 msgstr ""
@@ -5981,7 +5982,7 @@ msgstr "პროფილი %s შეიქმნა"
 msgid "Project %s deleted"
 msgstr "პროფილი %s წაიშალა"
 
-#: cmd/incus/project.go:743
+#: cmd/incus/project.go:742
 #, c-format
 msgid "Project %s renamed to %s"
 msgstr ""
@@ -6070,7 +6071,7 @@ msgstr ""
 msgid "Query virtual machine images"
 msgstr ""
 
-#: cmd/incus/project.go:1077
+#: cmd/incus/project.go:1076
 msgid "RESOURCE"
 msgstr ""
 
@@ -6086,7 +6087,7 @@ msgstr "როლი"
 msgid "ROLES"
 msgstr ""
 
-#: cmd/incus/info.go:297 cmd/incus/info.go:306
+#: cmd/incus/info.go:296 cmd/incus/info.go:305
 #, c-format
 msgid "Read-Only: %v"
 msgstr "მხოლოდ-კითხვადი: %v"
@@ -6144,13 +6145,13 @@ msgstr "გაშვებული ასლის განახლება:
 msgid "Refreshing the image: %s"
 msgstr "ასლის განახლება: %s"
 
-#: cmd/incus/remote.go:1161
+#: cmd/incus/remote.go:1157
 #, c-format
 msgid "Remote %s already exists"
 msgstr "დაშორებული %s უკვე არსებობს"
 
-#: cmd/incus/remote.go:1152 cmd/incus/remote.go:1232 cmd/incus/remote.go:1296
-#: cmd/incus/remote.go:1344
+#: cmd/incus/remote.go:1148 cmd/incus/remote.go:1228 cmd/incus/remote.go:1292
+#: cmd/incus/remote.go:1340
 #, c-format
 msgid "Remote %s doesn't exist"
 msgstr "დაშორებული %s არ არსებბს"
@@ -6160,12 +6161,12 @@ msgstr "დაშორებული %s არ არსებბს"
 msgid "Remote %s exists as <%s>"
 msgstr ""
 
-#: cmd/incus/remote.go:1240
+#: cmd/incus/remote.go:1236
 #, c-format
 msgid "Remote %s is global and cannot be removed"
 msgstr ""
 
-#: cmd/incus/remote.go:1156 cmd/incus/remote.go:1236 cmd/incus/remote.go:1348
+#: cmd/incus/remote.go:1152 cmd/incus/remote.go:1232 cmd/incus/remote.go:1344
 #, c-format
 msgid "Remote %s is static and cannot be modified"
 msgstr ""
@@ -6178,7 +6179,7 @@ msgstr "დაშორებული სახელები შეიძლ�
 msgid "Remote trust token"
 msgstr ""
 
-#: cmd/incus/info.go:298
+#: cmd/incus/info.go:297
 #, c-format
 msgid "Removable: %v"
 msgstr "მოხსნადი: %v"
@@ -6260,7 +6261,7 @@ msgstr "დატვირთვის მათანაბრებელი�
 msgid "Remove profiles from instances"
 msgstr "გაშვებული ასლებიდან პროფილების წაშლა"
 
-#: cmd/incus/remote.go:1204 cmd/incus/remote.go:1205
+#: cmd/incus/remote.go:1200 cmd/incus/remote.go:1201
 msgid "Remove remotes"
 msgstr "დაშორებულების წაშლა"
 
@@ -6326,11 +6327,11 @@ msgstr "ქსელების სახელის გადარქმე�
 msgid "Rename profiles"
 msgstr "პროფილების სახელის გადარქმევა"
 
-#: cmd/incus/project.go:705 cmd/incus/project.go:706
+#: cmd/incus/project.go:704 cmd/incus/project.go:705
 msgid "Rename projects"
 msgstr "პროექტების სახელის გადარქმევა"
 
-#: cmd/incus/remote.go:1123 cmd/incus/remote.go:1124
+#: cmd/incus/remote.go:1119 cmd/incus/remote.go:1120
 msgid "Rename remotes"
 msgstr "დაშორებულების სახელის გადარქმევა"
 
@@ -6348,7 +6349,7 @@ msgstr ""
 msgid "Renamed storage volume snapshot from \"%s\" to \"%s\""
 msgstr ""
 
-#: cmd/incus/info.go:136
+#: cmd/incus/info.go:135
 #, c-format
 msgid "Render: %s (%s)"
 msgstr "რენდერი: %s (%s)"
@@ -6361,7 +6362,7 @@ msgstr ""
 msgid "Require user confirmation"
 msgstr "მომხმარებლის დადასტურების მოთხოვნა"
 
-#: cmd/incus/info.go:698
+#: cmd/incus/info.go:697
 msgid "Resources:"
 msgstr "რესურსები:"
 
@@ -6460,7 +6461,7 @@ msgstr "სიმძიმე"
 msgid "SIZE"
 msgstr "ზომა"
 
-#: cmd/incus/info.go:425
+#: cmd/incus/info.go:424
 #, c-format
 msgid "SKU: %v"
 msgstr ""
@@ -6469,11 +6470,11 @@ msgstr ""
 msgid "SNAPSHOTS"
 msgstr ""
 
-#: cmd/incus/storage.go:687
+#: cmd/incus/storage.go:686
 msgid "SOURCE"
 msgstr "წყარო"
 
-#: cmd/incus/info.go:151 cmd/incus/info.go:260
+#: cmd/incus/info.go:150 cmd/incus/info.go:259
 msgid "SR-IOV information:"
 msgstr "SR-IOV ინფორმაცია:"
 
@@ -6498,7 +6499,7 @@ msgstr ""
 
 #: cmd/incus/list.go:489 cmd/incus/network.go:1078
 #: cmd/incus/network_peer.go:142 cmd/incus/operation.go:167
-#: cmd/incus/storage.go:689 cmd/incus/warning.go:215
+#: cmd/incus/storage.go:688 cmd/incus/warning.go:215
 msgid "STATE"
 msgstr "მდგომარეობა"
 
@@ -6506,7 +6507,7 @@ msgstr "მდგომარეობა"
 msgid "STATEFUL"
 msgstr ""
 
-#: cmd/incus/remote.go:993
+#: cmd/incus/remote.go:989
 msgid "STATIC"
 msgstr ""
 
@@ -6514,7 +6515,7 @@ msgstr ""
 msgid "STATUS"
 msgstr "სტატუსი"
 
-#: cmd/incus/project.go:546
+#: cmd/incus/project.go:545
 msgid "STORAGE BUCKETS"
 msgstr "საცავის ბაკეტები"
 
@@ -6522,7 +6523,7 @@ msgstr "საცავის ბაკეტები"
 msgid "STORAGE POOL"
 msgstr ""
 
-#: cmd/incus/project.go:545
+#: cmd/incus/project.go:544
 msgid "STORAGE VOLUMES"
 msgstr ""
 
@@ -6547,25 +6548,25 @@ msgstr "საიდუმლო გასაღები: %s"
 msgid "Send a raw query to the server"
 msgstr ""
 
-#: cmd/incus/info.go:355
+#: cmd/incus/info.go:354
 #, c-format
 msgid "Serial Number: %v"
 msgstr ""
 
-#: cmd/incus/info.go:605
+#: cmd/incus/info.go:604
 msgid "Serial device:"
 msgstr ""
 
-#: cmd/incus/info.go:608
+#: cmd/incus/info.go:607
 msgid "Serial devices:"
 msgstr ""
 
-#: cmd/incus/info.go:429
+#: cmd/incus/info.go:428
 #, c-format
 msgid "Serial number: %v"
 msgstr ""
 
-#: cmd/incus/info.go:452 cmd/incus/info.go:468
+#: cmd/incus/info.go:451 cmd/incus/info.go:467
 #, c-format
 msgid "Serial: %s"
 msgstr ""
@@ -6574,11 +6575,11 @@ msgstr ""
 msgid "Server authentication type (tls or oidc)"
 msgstr ""
 
-#: cmd/incus/remote.go:508
+#: cmd/incus/remote.go:504
 msgid "Server certificate NACKed by user"
 msgstr ""
 
-#: cmd/incus/remote.go:643
+#: cmd/incus/remote.go:639
 msgid "Server doesn't trust us after authentication"
 msgstr ""
 
@@ -6765,11 +6766,11 @@ msgid ""
 "    incus profile set [<remote>:]<profile> <key> <value>"
 msgstr ""
 
-#: cmd/incus/project.go:762
+#: cmd/incus/project.go:761
 msgid "Set project configuration keys"
 msgstr ""
 
-#: cmd/incus/project.go:763
+#: cmd/incus/project.go:762
 msgid ""
 "Set project configuration keys\n"
 "\n"
@@ -6791,11 +6792,11 @@ msgid ""
 "    incus storage bucket set [<remote>:]<pool> <bucket> <key> <value>"
 msgstr ""
 
-#: cmd/incus/storage.go:792
+#: cmd/incus/storage.go:791
 msgid "Set storage pool configuration keys"
 msgstr ""
 
-#: cmd/incus/storage.go:793
+#: cmd/incus/storage.go:792
 msgid ""
 "Set storage pool configuration keys\n"
 "\n"
@@ -6822,7 +6823,7 @@ msgid ""
 "machine\"."
 msgstr ""
 
-#: cmd/incus/remote.go:1315 cmd/incus/remote.go:1316
+#: cmd/incus/remote.go:1311 cmd/incus/remote.go:1312
 msgid "Set the URL for the remote"
 msgstr ""
 
@@ -6916,7 +6917,7 @@ msgstr ""
 msgid "Set the key as a profile property"
 msgstr ""
 
-#: cmd/incus/project.go:770
+#: cmd/incus/project.go:769
 msgid "Set the key as a project property"
 msgstr ""
 
@@ -6924,7 +6925,7 @@ msgstr ""
 msgid "Set the key as a storage bucket property"
 msgstr ""
 
-#: cmd/incus/storage.go:800
+#: cmd/incus/storage.go:799
 msgid "Set the key as a storage property"
 msgstr ""
 
@@ -7057,7 +7058,7 @@ msgstr ""
 msgid "Show profile configurations"
 msgstr ""
 
-#: cmd/incus/project.go:885 cmd/incus/project.go:886
+#: cmd/incus/project.go:884 cmd/incus/project.go:885
 msgid "Show project options"
 msgstr ""
 
@@ -7069,7 +7070,7 @@ msgstr ""
 msgid "Show storage bucket key configurations"
 msgstr ""
 
-#: cmd/incus/storage.go:887 cmd/incus/storage.go:888
+#: cmd/incus/storage.go:886 cmd/incus/storage.go:887
 msgid "Show storage pool configurations and resources"
 msgstr ""
 
@@ -7110,11 +7111,11 @@ msgid ""
 "machine\"."
 msgstr ""
 
-#: cmd/incus/project.go:1096 cmd/incus/project.go:1097
+#: cmd/incus/project.go:1095 cmd/incus/project.go:1096
 msgid "Show the current project"
 msgstr ""
 
-#: cmd/incus/remote.go:720 cmd/incus/remote.go:721
+#: cmd/incus/remote.go:716 cmd/incus/remote.go:717
 msgid "Show the default remote"
 msgstr ""
 
@@ -7122,7 +7123,7 @@ msgstr ""
 msgid "Show the expanded configuration"
 msgstr ""
 
-#: cmd/incus/info.go:50 cmd/incus/project.go:993
+#: cmd/incus/info.go:50 cmd/incus/project.go:992
 msgid "Show the instance's access list"
 msgstr ""
 
@@ -7130,11 +7131,11 @@ msgstr ""
 msgid "Show the instance's recent log entries"
 msgstr ""
 
-#: cmd/incus/info.go:53
+#: cmd/incus/info.go:52
 msgid "Show the resources available to the server"
 msgstr ""
 
-#: cmd/incus/storage.go:891
+#: cmd/incus/storage.go:890
 msgid "Show the resources available to the storage pool"
 msgstr ""
 
@@ -7171,7 +7172,7 @@ msgstr ""
 msgid "Size: %.2fMiB"
 msgstr "ზომა: %.2fMiB"
 
-#: cmd/incus/info.go:291 cmd/incus/info.go:307
+#: cmd/incus/info.go:290 cmd/incus/info.go:306
 #, c-format
 msgid "Size: %s"
 msgstr "ზომა: %s"
@@ -7188,16 +7189,16 @@ msgstr ""
 msgid "Snapshots are read-only and can't have their configuration changed"
 msgstr ""
 
-#: cmd/incus/info.go:809 cmd/incus/storage_volume.go:1333
+#: cmd/incus/info.go:808 cmd/incus/storage_volume.go:1333
 msgid "Snapshots:"
 msgstr "სწრაფი ასლები:"
 
-#: cmd/incus/info.go:508
+#: cmd/incus/info.go:507
 #, c-format
 msgid "Socket %d:"
 msgstr "სოკეტი %d:"
 
-#: cmd/incus/action.go:455
+#: cmd/incus/action.go:454
 #, c-format
 msgid "Some instances failed to %s"
 msgstr ""
@@ -7216,7 +7217,7 @@ msgstr ""
 msgid "Source:"
 msgstr "წყარო:"
 
-#: cmd/incus/storage_volume.go:3987
+#: cmd/incus/storage_volume.go:3986
 msgid "Specific address to listen on"
 msgstr ""
 
@@ -7224,12 +7225,12 @@ msgstr ""
 msgid "Start instances"
 msgstr "გაშვებული ასლის გაშვება"
 
-#: cmd/incus/info.go:684
+#: cmd/incus/info.go:683
 #, c-format
 msgid "Started: %s"
 msgstr ""
 
-#: cmd/incus/launch.go:105
+#: cmd/incus/launch.go:104
 #, c-format
 msgid "Starting %s"
 msgstr "%s-ის გაშვება"
@@ -7238,7 +7239,7 @@ msgstr "%s-ის გაშვება"
 msgid "Starting recovery..."
 msgstr ""
 
-#: cmd/incus/info.go:766
+#: cmd/incus/info.go:765
 msgid "State"
 msgstr "მდგომარეობა"
 
@@ -7247,11 +7248,11 @@ msgstr "მდგომარეობა"
 msgid "State: %s"
 msgstr "მდგობარეობა: %s"
 
-#: cmd/incus/info.go:843
+#: cmd/incus/info.go:842
 msgid "Stateful"
 msgstr ""
 
-#: cmd/incus/info.go:647
+#: cmd/incus/info.go:646
 #, c-format
 msgid "Status: %s"
 msgstr "სტატუსი: %s"
@@ -7370,29 +7371,29 @@ msgstr ""
 msgid "Successfully updated cluster certificates"
 msgstr ""
 
-#: cmd/incus/info.go:220
+#: cmd/incus/info.go:219
 #, c-format
 msgid "Supported modes: %s"
 msgstr ""
 
-#: cmd/incus/info.go:224
+#: cmd/incus/info.go:223
 #, c-format
 msgid "Supported ports: %s"
 msgstr ""
 
-#: cmd/incus/info.go:739
+#: cmd/incus/info.go:738
 msgid "Swap (current)"
 msgstr "სვოპი (მიმდინარე)"
 
-#: cmd/incus/info.go:743
+#: cmd/incus/info.go:742
 msgid "Swap (peak)"
 msgstr "სვოპი (პიკი)"
 
-#: cmd/incus/project.go:937 cmd/incus/project.go:938
+#: cmd/incus/project.go:936 cmd/incus/project.go:937
 msgid "Switch the current project"
 msgstr "მიმდინარე პროექტის გადართვა"
 
-#: cmd/incus/remote.go:1268 cmd/incus/remote.go:1269
+#: cmd/incus/remote.go:1264 cmd/incus/remote.go:1265
 msgid "Switch the default remote"
 msgstr "ნაგულისხმევ დაშორებულზე გადართვა"
 
@@ -7400,7 +7401,7 @@ msgstr "ნაგულისხმევ დაშორებულზე გ�
 msgid "Symlink target path can only be used for type \"symlink\""
 msgstr ""
 
-#: cmd/incus/info.go:403
+#: cmd/incus/info.go:402
 msgid "System:"
 msgstr "სისტემა:"
 
@@ -7425,7 +7426,7 @@ msgstr "კოდი"
 msgid "TYPE"
 msgstr "ტიპი"
 
-#: cmd/incus/info.go:841 cmd/incus/info.go:892 cmd/incus/storage_volume.go:1405
+#: cmd/incus/info.go:840 cmd/incus/info.go:891 cmd/incus/storage_volume.go:1405
 msgid "Taken at"
 msgstr "კოდი მისამართზე"
 
@@ -7433,8 +7434,8 @@ msgstr "კოდი მისამართზე"
 msgid "Target isn't a cluster"
 msgstr ""
 
-#: cmd/incus/export.go:77 cmd/incus/storage_bucket.go:1329
-#: cmd/incus/storage_volume.go:3704
+#: cmd/incus/export.go:74 cmd/incus/storage_bucket.go:1329
+#: cmd/incus/storage_volume.go:3703
 #, c-format
 msgid "Target path %q already exists"
 msgstr ""
@@ -7699,7 +7700,7 @@ msgstr ""
 msgid "The server doesn't have a web UI installed"
 msgstr ""
 
-#: cmd/incus/info.go:394
+#: cmd/incus/info.go:393
 msgid "The server doesn't implement the newer v2 resources API"
 msgstr ""
 
@@ -7765,11 +7766,11 @@ msgstr ""
 msgid "This server is not available on the network"
 msgstr ""
 
-#: cmd/incus/info.go:332
+#: cmd/incus/info.go:331
 msgid "Threads:"
 msgstr "ნაკადები:"
 
-#: cmd/incus/action.go:167
+#: cmd/incus/action.go:166
 msgid "Time to wait for the instance to shutdown cleanly"
 msgstr ""
 
@@ -7797,7 +7798,7 @@ msgid ""
 msgstr ""
 
 #: cmd/incus/config.go:290 cmd/incus/config.go:475 cmd/incus/config.go:639
-#: cmd/incus/config.go:724 cmd/incus/copy.go:129 cmd/incus/info.go:386
+#: cmd/incus/config.go:724 cmd/incus/copy.go:129 cmd/incus/info.go:385
 #: cmd/incus/network.go:897 cmd/incus/storage.go:494
 msgid "To use --target, the destination remote must be a cluster"
 msgstr ""
@@ -7807,13 +7808,13 @@ msgstr ""
 msgid "Total: %s"
 msgstr "სულ: %s"
 
-#: cmd/incus/info.go:519 cmd/incus/info.go:530 cmd/incus/info.go:535
-#: cmd/incus/info.go:541
+#: cmd/incus/info.go:518 cmd/incus/info.go:529 cmd/incus/info.go:534
+#: cmd/incus/info.go:540
 #, c-format
 msgid "Total: %v"
 msgstr "სულ: %v"
 
-#: cmd/incus/info.go:232
+#: cmd/incus/info.go:231
 #, c-format
 msgid "Transceiver type: %s"
 msgstr "ტრანსივერის ტიპი: %s"
@@ -7852,17 +7853,17 @@ msgstr "გაშვებული ასლის მიმოცვლა: %s
 msgid "Transmit policy"
 msgstr "გადაცემის პოლიტიკა"
 
-#: cmd/incus/remote.go:615
+#: cmd/incus/remote.go:611
 #, c-format
 msgid "Trust token for %s: "
 msgstr ""
 
-#: cmd/incus/action.go:306 cmd/incus/launch.go:138
+#: cmd/incus/action.go:305 cmd/incus/launch.go:137
 #, c-format
 msgid "Try `incus info --show-log %s%s` for more info"
 msgstr ""
 
-#: cmd/incus/info.go:765
+#: cmd/incus/info.go:764
 msgid "Type"
 msgstr "ტიპი"
 
@@ -7880,14 +7881,14 @@ msgstr ""
 msgid "Type of peer (local or remote)"
 msgstr ""
 
-#: cmd/incus/image.go:944 cmd/incus/info.go:288 cmd/incus/info.go:433
-#: cmd/incus/info.go:444 cmd/incus/info.go:662 cmd/incus/network.go:917
+#: cmd/incus/image.go:944 cmd/incus/info.go:287 cmd/incus/info.go:432
+#: cmd/incus/info.go:443 cmd/incus/info.go:661 cmd/incus/network.go:917
 #: cmd/incus/storage_volume.go:1303
 #, c-format
 msgid "Type: %s"
 msgstr "ტიპი: %s"
 
-#: cmd/incus/project.go:1049
+#: cmd/incus/project.go:1048
 msgid "UNLIMITED"
 msgstr ""
 
@@ -7895,27 +7896,27 @@ msgstr ""
 msgid "UPLOAD DATE"
 msgstr ""
 
-#: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:989
+#: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:985
 #: cmd/incus/usage/usage.go:819
 msgid "URL"
 msgstr "URL"
 
-#: cmd/incus/project.go:1079 cmd/incus/storage_volume.go:1572
+#: cmd/incus/project.go:1078 cmd/incus/storage_volume.go:1572
 msgid "USAGE"
 msgstr ""
 
-#: cmd/incus/info.go:581
+#: cmd/incus/info.go:580
 msgid "USB device:"
 msgstr ""
 
-#: cmd/incus/info.go:584
+#: cmd/incus/info.go:583
 msgid "USB devices:"
 msgstr ""
 
 #: cmd/incus/network.go:1077 cmd/incus/network_acl.go:164
 #: cmd/incus/network_address_set.go:157 cmd/incus/network_allocations.go:80
 #: cmd/incus/network_integration.go:429 cmd/incus/network_zone.go:146
-#: cmd/incus/profile.go:726 cmd/incus/project.go:550 cmd/incus/storage.go:688
+#: cmd/incus/profile.go:726 cmd/incus/project.go:549 cmd/incus/storage.go:687
 #: cmd/incus/storage_volume.go:1571
 msgid "USED BY"
 msgstr "გამოიყენება"
@@ -7924,7 +7925,7 @@ msgstr "გამოიყენება"
 msgid "UUID"
 msgstr "UUID"
 
-#: cmd/incus/info.go:147 cmd/incus/info.go:405
+#: cmd/incus/info.go:146 cmd/incus/info.go:404
 #, c-format
 msgid "UUID: %v"
 msgstr ""
@@ -7960,8 +7961,8 @@ msgstr ""
 #: cmd/incus/network_forward.go:163 cmd/incus/network_integration.go:443
 #: cmd/incus/network_load_balancer.go:169 cmd/incus/network_peer.go:156
 #: cmd/incus/network_zone.go:164 cmd/incus/operation.go:187
-#: cmd/incus/profile.go:747 cmd/incus/project.go:565 cmd/incus/remote.go:1008
-#: cmd/incus/snapshot.go:382 cmd/incus/storage.go:704
+#: cmd/incus/profile.go:747 cmd/incus/project.go:564 cmd/incus/remote.go:1004
+#: cmd/incus/snapshot.go:382 cmd/incus/storage.go:703
 #: cmd/incus/storage_bucket.go:504 cmd/incus/storage_bucket.go:888
 #: cmd/incus/storage_volume.go:1603 cmd/incus/storage_volume.go:3393
 #: cmd/incus/top.go:101 cmd/incus/warning.go:242
@@ -8070,7 +8071,7 @@ msgstr ""
 msgid "Unset profile configuration keys"
 msgstr ""
 
-#: cmd/incus/project.go:843 cmd/incus/project.go:844
+#: cmd/incus/project.go:842 cmd/incus/project.go:843
 msgid "Unset project configuration keys"
 msgstr ""
 
@@ -8078,7 +8079,7 @@ msgstr ""
 msgid "Unset storage bucket configuration keys"
 msgstr ""
 
-#: cmd/incus/storage.go:967 cmd/incus/storage.go:968
+#: cmd/incus/storage.go:966 cmd/incus/storage.go:967
 msgid "Unset storage pool configuration keys"
 msgstr ""
 
@@ -8143,7 +8144,7 @@ msgstr ""
 msgid "Unset the key as a profile property"
 msgstr ""
 
-#: cmd/incus/project.go:847
+#: cmd/incus/project.go:846
 msgid "Unset the key as a project property"
 msgstr ""
 
@@ -8151,7 +8152,7 @@ msgstr ""
 msgid "Unset the key as a storage bucket property"
 msgstr ""
 
-#: cmd/incus/storage.go:972
+#: cmd/incus/storage.go:971
 msgid "Unset the key as a storage property"
 msgstr ""
 
@@ -8163,7 +8164,7 @@ msgstr ""
 msgid "Unset the key as an instance property"
 msgstr ""
 
-#: cmd/incus/info.go:913
+#: cmd/incus/info.go:912
 #, c-format
 msgid "Unsupported instance type: %s"
 msgstr ""
@@ -8215,12 +8216,12 @@ msgid ""
 "command."
 msgstr ""
 
-#: cmd/incus/export.go:54
+#: cmd/incus/export.go:51
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool)"
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3648
+#: cmd/incus/storage_volume.go:3647
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool, "
 "ignored for ISO storage volumes)"
@@ -8230,8 +8231,8 @@ msgstr ""
 msgid "Use with help or --help to view sub-commands"
 msgstr ""
 
-#: cmd/incus/info.go:518 cmd/incus/info.go:529 cmd/incus/info.go:534
-#: cmd/incus/info.go:540
+#: cmd/incus/info.go:517 cmd/incus/info.go:528 cmd/incus/info.go:533
+#: cmd/incus/info.go:539
 #, c-format
 msgid "Used: %v"
 msgstr "გამოყენებულია: %v"
@@ -8249,7 +8250,7 @@ msgstr ""
 msgid "User aborted delete operation"
 msgstr ""
 
-#: cmd/incus/info.go:155 cmd/incus/info.go:264
+#: cmd/incus/info.go:154 cmd/incus/info.go:263
 #, c-format
 msgid "VFs: %d"
 msgstr "VF-ები: %d"
@@ -8266,38 +8267,38 @@ msgstr "VLAN-ის გაფილტვრა"
 msgid "VLAN:"
 msgstr ""
 
-#: cmd/incus/info.go:349 cmd/incus/info.go:362 cmd/incus/info.go:376
+#: cmd/incus/info.go:348 cmd/incus/info.go:361 cmd/incus/info.go:375
 #, c-format
 msgid "Vendor ID: %v"
 msgstr ""
 
-#: cmd/incus/info.go:440 cmd/incus/info.go:460 cmd/incus/info.go:480
+#: cmd/incus/info.go:439 cmd/incus/info.go:459 cmd/incus/info.go:479
 #, c-format
 msgid "Vendor: %s"
 msgstr "მომწოდებელი: %s"
 
-#: cmd/incus/info.go:314 cmd/incus/info.go:348 cmd/incus/info.go:361
-#: cmd/incus/info.go:375 cmd/incus/info.go:409
+#: cmd/incus/info.go:313 cmd/incus/info.go:347 cmd/incus/info.go:360
+#: cmd/incus/info.go:374 cmd/incus/info.go:408
 #, c-format
 msgid "Vendor: %v"
 msgstr "მომწოდებელი: %v"
 
-#: cmd/incus/info.go:108 cmd/incus/info.go:194
+#: cmd/incus/info.go:107 cmd/incus/info.go:193
 #, c-format
 msgid "Vendor: %v (%v)"
 msgstr "მომწოდებელი: %v (%v)"
 
-#: cmd/incus/info.go:253
+#: cmd/incus/info.go:252
 #, c-format
 msgid "Verb: %s (%s)"
 msgstr "ზმნა: %s (%s)"
 
-#: cmd/incus/info.go:448 cmd/incus/info.go:472 cmd/incus/info.go:484
+#: cmd/incus/info.go:447 cmd/incus/info.go:471 cmd/incus/info.go:483
 #, c-format
 msgid "Version: %s"
 msgstr "ვერსია: %s"
 
-#: cmd/incus/info.go:421
+#: cmd/incus/info.go:420
 #, c-format
 msgid "Version: %v"
 msgstr ""
@@ -8315,7 +8316,7 @@ msgstr ""
 msgid "Volume snapshot name is: %s"
 msgstr ""
 
-#: cmd/incus/info.go:294
+#: cmd/incus/info.go:293
 #, c-format
 msgid "WWN: %s"
 msgstr ""
@@ -8396,11 +8397,11 @@ msgstr ""
 msgid "Where should this storage pool store its data?"
 msgstr ""
 
-#: cmd/incus/export.go:52
+#: cmd/incus/export.go:50
 msgid "Whether or not to only backup the instance (without dependent volumes)"
 msgstr ""
 
-#: cmd/incus/export.go:50
+#: cmd/incus/export.go:49
 msgid "Whether or not to only backup the instance (without snapshots)"
 msgstr ""
 
@@ -8488,9 +8489,9 @@ msgid "Would you like to use clustering?"
 msgstr ""
 
 #: cmd/incus/network.go:1117 cmd/incus/operation.go:217
-#: cmd/incus/project.go:582 cmd/incus/project.go:591 cmd/incus/project.go:600
-#: cmd/incus/project.go:609 cmd/incus/project.go:618 cmd/incus/project.go:627
-#: cmd/incus/remote.go:1054 cmd/incus/remote.go:1063 cmd/incus/remote.go:1072
+#: cmd/incus/project.go:581 cmd/incus/project.go:590 cmd/incus/project.go:599
+#: cmd/incus/project.go:608 cmd/incus/project.go:617 cmd/incus/project.go:626
+#: cmd/incus/remote.go:1050 cmd/incus/remote.go:1059 cmd/incus/remote.go:1068
 msgid "YES"
 msgstr "დიახ"
 
@@ -8526,7 +8527,7 @@ msgstr ""
 msgid "alias"
 msgstr "მეტსახელი"
 
-#: cmd/incus/info.go:655
+#: cmd/incus/info.go:654
 msgid "application"
 msgstr "აპლიკაცია"
 
@@ -8580,7 +8581,7 @@ msgstr ""
 msgid "condition"
 msgstr "მდგომარეობა"
 
-#: cmd/incus/project.go:673 cmd/incus/remote.go:1023
+#: cmd/incus/project.go:672 cmd/incus/remote.go:1019
 msgid "current"
 msgstr "მიმდინარე"
 
@@ -8608,11 +8609,11 @@ msgstr ""
 msgid "enabled"
 msgstr "ჩართულია"
 
-#: cmd/incus/info.go:659
+#: cmd/incus/info.go:658
 msgid "ephemeral"
 msgstr ""
 
-#: cmd/incus/action.go:447
+#: cmd/incus/action.go:446
 #, c-format
 msgid "error: %v"
 msgstr "შეცდომა: %v"
@@ -9202,7 +9203,7 @@ msgid ""
 "pool \"default\""
 msgstr ""
 
-#: cmd/incus/storage_volume.go:3853
+#: cmd/incus/storage_volume.go:3852
 msgid ""
 "incus storage volume import default backup0.tar.gz\n"
 "    Create a new custom volume using backup0.tar.gz as the source\n"
@@ -9300,7 +9301,7 @@ msgstr ""
 msgid "member"
 msgstr "წვერი"
 
-#: cmd/incus/remote.go:507
+#: cmd/incus/remote.go:503
 msgid "n"
 msgstr "ნანო"
 
@@ -9335,7 +9336,7 @@ msgstr ""
 msgid "not enough arguments; expected a value for %s"
 msgstr ""
 
-#: cmd/incus/remote.go:499
+#: cmd/incus/remote.go:495
 msgid "ok (y/n/[fingerprint])?"
 msgstr "დიახ (y/n/[ანაბეჭდი])?"
 
@@ -9497,7 +9498,7 @@ msgstr "საცავი"
 msgid "warning UUID"
 msgstr ""
 
-#: cmd/incus/remote.go:509
+#: cmd/incus/remote.go:505
 msgid "y"
 msgstr "წ"
 
@@ -9515,3 +9516,6 @@ msgstr "ზონა"
 #, c-format
 msgid "“%s”"
 msgstr "“%s”"
+
+#~ msgid "Action (defaults to GET)"
+#~ msgstr "ქმედება (ნაგულისხმევია: GET)"

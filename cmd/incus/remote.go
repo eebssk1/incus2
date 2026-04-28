@@ -133,14 +133,14 @@ Basic authentication can be used when combined with the "simplestreams" protocol
 `))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagAcceptCert, "accept-certificate", false, i18n.G("Accept certificate"))
-	cmd.Flags().StringVar(&c.flagToken, "token", "", i18n.G("Remote trust token")+"``")
-	cmd.Flags().StringVar(&c.flagProtocol, "protocol", "", i18n.G("Server protocol (incus, oci or simplestreams)")+"``")
-	cmd.Flags().StringVar(&c.flagAuthType, "auth-type", "", i18n.G("Server authentication type (tls or oidc)")+"``")
-	cmd.Flags().BoolVar(&c.flagPublic, "public", false, i18n.G("Public image server"))
-	cmd.Flags().StringVar(&c.flagProject, "project", "", i18n.G("Project to use for the remote")+"``")
-	cmd.Flags().IntVar(&c.flagKeepAlive, "keepalive", 0, i18n.G("Maintain remote connection for faster commands")+"``")
-	cmd.Flags().StringVar(&c.flagCredHelper, "credentials-helper", "", i18n.G("Binary helper for retrieving credentials")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAcceptCert, "accept-certificate", i18n.G("Accept certificate"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagToken, "token", "", "", i18n.G("Remote trust token"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagProtocol, "protocol", "incus", "", i18n.G("Server protocol (incus, oci or simplestreams)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagAuthType, "auth-type", "", "", i18n.G("Server authentication type (tls or oidc)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagPublic, "public", i18n.G("Public image server"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagProject, "project", "", "", i18n.G("Project to use for the remote"))
+	cli.AddIntFlag(cmd.Flags(), &c.flagKeepAlive, "keepalive", 0, i18n.G("Maintain remote connection for faster commands"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagCredHelper, "credentials-helper", "", "", i18n.G("Binary helper for retrieving credentials"))
 
 	return cmd
 }
@@ -340,10 +340,6 @@ func (c *cmdRemoteAdd) run(cmd *cobra.Command, args []string) error {
 	var rScheme string
 	var rHost string
 	var rPort string
-
-	if c.flagProtocol == "" {
-		c.flagProtocol = "incus"
-	}
 
 	// Initialize the remotes list if needed
 	if conf.Remotes == nil {
@@ -753,7 +749,7 @@ func (c *cmdRemoteGetClientCertificate) command() *cobra.Command {
 	cmd.Short = i18n.G("Print or retrieve the client certificate used by this Incus client")
 	cmd.RunE = c.run
 
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", "pem", i18n.G("Format (pem|pfx)")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "pem", "", i18n.G("Format (pem|pfx)"))
 
 	return cmd
 }
@@ -971,8 +967,8 @@ Pre-defined column shorthand chars:
   g - Global`))
 
 	cmd.RunE = c.run
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultRemoteColumns, i18n.G("Columns")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultRemoteColumns, "", i18n.G("Columns"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())

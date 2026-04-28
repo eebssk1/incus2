@@ -38,13 +38,13 @@ func (c *cmdPublish) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Publish instances as images`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagMakePublic, "public", false, i18n.G("Make the image public"))
-	cmd.Flags().StringArrayVar(&c.flagAliases, "alias", nil, i18n.G("New alias to define at target")+"``")
-	cmd.Flags().BoolVarP(&c.flagForce, "force", "f", false, i18n.G("Stop the instance if currently running"))
-	cmd.Flags().StringVar(&c.flagCompressionAlgorithm, "compression", "", i18n.G("Compression algorithm to use (`none` for uncompressed)"))
-	cmd.Flags().StringVar(&c.flagExpiresAt, "expire", "", i18n.G("Image expiration date (format: rfc3339)")+"``")
-	cmd.Flags().BoolVar(&c.flagReuse, "reuse", false, i18n.G("If the image alias already exists, delete and create a new one"))
-	cmd.Flags().StringVar(&c.flagFormat, "format", "unified", i18n.G("Image format")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagMakePublic, "public", i18n.G("Make the image public"))
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagAliases, "alias", i18n.G("New alias to define at target"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagForce, "force|f", i18n.G("Stop the instance if currently running"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagCompressionAlgorithm, "compression", "", "", i18n.G("Compression algorithm to use (`none` for uncompressed)"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagExpiresAt, "expire", "", "", i18n.G("Image expiration date (format: rfc3339)"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagReuse, "reuse", i18n.G("If the image alias already exists, delete and create a new one"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format", "unified", "", i18n.G("Image format"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {

@@ -177,7 +177,7 @@ func (c *cmdClusterGroupCreate) command() *cobra.Command {
 incus cluster group create g1 < config.yaml
     Create a cluster group named g1 with configuration from config.yaml`))
 
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Cluster group description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Cluster group description"))
 
 	cmd.RunE = c.run
 
@@ -436,8 +436,8 @@ Pre-defined column shorthand chars:
   d - Description
   m - Member`))
 
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultClusterGroupColumns, i18n.G("Columns")+"``")
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultClusterGroupColumns, "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -807,7 +807,7 @@ func (c *cmdClusterGroupGet) command() *cobra.Command {
 	cmd.Short = i18n.G("Get values for cluster group configuration keys")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, cmd.Short)
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a cluster group property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a cluster group property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -877,7 +877,7 @@ func (c *cmdClusterGroupSet) command() *cobra.Command {
 	cmd.Short = i18n.G("Set a cluster group's configuration keys")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, cmd.Short)
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a cluster group property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a cluster group property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -956,7 +956,7 @@ func (c *cmdClusterGroupUnset) command() *cobra.Command {
 	cmd.Short = i18n.G("Unset a cluster group's configuration keys")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, cmd.Short)
 
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a cluster group property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a cluster group property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
