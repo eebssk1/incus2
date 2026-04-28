@@ -728,13 +728,8 @@ func (d *lxc) initLXC(config bool) (*liblxc.Container, error) {
 		}
 	}
 
-	if d.state.OS.ContainerCoreScheduling {
+	if d.state.OS.CoreScheduling {
 		err = lxcSetConfigItem(cc, "lxc.sched.core", "1")
-		if err != nil {
-			return nil, err
-		}
-	} else if d.state.OS.CoreScheduling {
-		err = lxcSetConfigItem(cc, "lxc.hook.start-host", fmt.Sprintf("/proc/%d/exe forkcoresched 1", os.Getpid()))
 		if err != nil {
 			return nil, err
 		}
@@ -1316,12 +1311,7 @@ func (d *lxc) initLXC(config bool) (*liblxc.Container, error) {
 	}
 
 	// Setup shmounts
-	if d.state.OS.LXCFeatures["mount_injection_file"] {
-		err = lxcSetConfigItem(cc, "lxc.mount.auto", fmt.Sprintf("shmounts:%s:/dev/.incus-mounts", d.ShmountsPath()))
-	} else {
-		err = lxcSetConfigItem(cc, "lxc.mount.entry", fmt.Sprintf("%s dev/.incus-mounts none bind,create=dir 0 0", d.ShmountsPath()))
-	}
-
+	err = lxcSetConfigItem(cc, "lxc.mount.auto", fmt.Sprintf("shmounts:%s:/dev/.incus-mounts", d.ShmountsPath()))
 	if err != nil {
 		return nil, err
 	}
@@ -1347,7 +1337,7 @@ func (d *lxc) IdmappedStorage(fspath string, fstype string) idmap.StorageType {
 	var mode idmap.StorageType = idmap.StorageTypeNone
 	var bindMount bool = fstype == "none" || fstype == ""
 
-	if !d.state.OS.LXCFeatures["idmapped_mounts_v2"] || !d.state.OS.IdmappedMounts {
+	if !d.state.OS.IdmappedMounts {
 		return mode
 	}
 
@@ -7893,11 +7883,7 @@ func (d *lxc) Exec(req api.InstanceExecPost, stdin *os.File, stdout *os.File, st
 		fmt.Sprintf("%d", req.Group),
 	}
 
-	if d.state.OS.CoreScheduling && !d.state.OS.ContainerCoreScheduling {
-		args = append(args, "1")
-	} else {
-		args = append(args, "0")
-	}
+	args = append(args, "0")
 
 	args = append(args, "--")
 	args = append(args, "env")
@@ -8478,7 +8464,7 @@ func (d *lxc) insertMount(source, target, fstype string, flags int, idmapType id
 		return d.moveMount(source, target, fstype, flags, idmapType)
 	}
 
-	if d.state.OS.LXCFeatures["mount_injection_file"] && idmapType == idmap.StorageTypeNone {
+	if idmapType == idmap.StorageTypeNone {
 		return d.insertMountLXC(source, target, fstype, flags)
 	}
 
@@ -8487,54 +8473,29 @@ func (d *lxc) insertMount(source, target, fstype string, flags int, idmapType id
 
 func (d *lxc) removeMount(mount string) error {
 	// Get the init PID
-	pid := d.InitPID()
-	if pid == -1 {
+	if d.InitPID() == -1 {
 		// Container isn't running
 		return errors.New("Can't remove mount from stopped container")
 	}
 
-	if d.state.OS.LXCFeatures["mount_injection_file"] {
-		configPath := filepath.Join(d.RunPath(), "lxc.conf")
-		cname := project.Instance(d.Project().Name, d.Name())
+	configPath := filepath.Join(d.RunPath(), "lxc.conf")
+	cname := project.Instance(d.Project().Name, d.Name())
 
-		if !strings.HasPrefix(mount, "/") {
-			mount = "/" + mount
-		}
+	if !strings.HasPrefix(mount, "/") {
+		mount = "/" + mount
+	}
 
-		_, err := subprocess.RunCommand(
-			d.state.OS.ExecPath,
-			"forkmount",
-			"lxc-umount",
-			"--",
-			cname,
-			d.state.OS.LxcPath,
-			configPath,
-			mount)
-		if err != nil {
-			return err
-		}
-	} else {
-		// Remove the mount from the container
-		pidFd := d.inheritInitPidFd()
-		pidFdNr := "-1"
-		if pidFd != nil {
-			defer func() { _ = pidFd.Close() }()
-			pidFdNr = "3"
-		}
-
-		_, err := subprocess.RunCommandInheritFds(
-			context.TODO(),
-			[]*os.File{pidFd},
-			d.state.OS.ExecPath,
-			"forkmount",
-			"go-umount",
-			"--",
-			fmt.Sprintf("%d", pid),
-			pidFdNr,
-			mount)
-		if err != nil {
-			return err
-		}
+	_, err := subprocess.RunCommand(
+		d.state.OS.ExecPath,
+		"forkmount",
+		"lxc-umount",
+		"--",
+		cname,
+		d.state.OS.LxcPath,
+		configPath,
+		mount)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -8887,10 +8848,6 @@ func (d *lxc) DevptsFd() (*os.File, error) {
 
 	defer d.release()
 
-	if !liblxc.HasAPIExtension("devpts_fd") {
-		return nil, errors.New("Missing devpts_fd extension")
-	}
-
 	return cc.DevptsFd()
 }
 
@@ -8985,13 +8942,7 @@ func (d *lxc) cgroup(cc *liblxc.Container, running bool) (*cgroup.CGroup, error)
 	rw.cc = cc
 	rw.running = running
 
-	cg, err := cgroup.New(&rw)
-	if err != nil {
-		return nil, err
-	}
-
-	cg.UnifiedCapable = liblxc.HasAPIExtension("cgroup2")
-	return cg, nil
+	return cgroup.New(&rw)
 }
 
 type lxcCgroupReadWriter struct {

@@ -81,7 +81,6 @@ type OS struct {
 
 	// Kernel features
 	CloseRange              bool // CloseRange indicates support for the close_range syscall.
-	ContainerCoreScheduling bool // ContainerCoreScheduling indicates LXC and kernel support for core scheduling.
 	CoreScheduling          bool // CoreScheduling indicates support for core scheduling syscalls.
 	IdmappedMounts          bool // IdmappedMounts indicates kernel support for VFS idmap.
 	NativeTerminals         bool // NativeTerminals indicates support for TIOGPTPEER ioctl.

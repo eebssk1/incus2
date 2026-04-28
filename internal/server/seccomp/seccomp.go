@@ -755,19 +755,10 @@ func seccompGetPolicyContent(s *state.State, c Instance) (string, error) {
 	}
 
 	if allowlist != "" {
-		if s.OS.LXCFeatures["seccomp_allow_deny_syntax"] {
-			policy += "allowlist\n[all]\n"
-		} else {
-			policy += "whitelist\n[all]\n"
-		}
-
+		policy += "allowlist\n[all]\n"
 		policy += allowlist
 	} else {
-		if s.OS.LXCFeatures["seccomp_allow_deny_syntax"] {
-			policy += "denylist\n[all]\n"
-		} else {
-			policy += "blacklist\n[all]\n"
-		}
+		policy += "denylist\n[all]\n"
 
 		defaultFlag, ok := config["security.syscalls.deny_default"]
 		if !ok {
@@ -2424,10 +2415,6 @@ func lxcSupportSeccompNotifyAddfd(s *state.State) error {
 func lxcSupportSeccompNotify(s *state.State) error {
 	if !s.OS.SeccompListener {
 		return errors.New("Seccomp notify not supported")
-	}
-
-	if !s.OS.LXCFeatures["seccomp_notify"] {
-		return errors.New("LXC doesn't support seccomp notify")
 	}
 
 	c, err := liblxc.NewContainer("test-seccomp", s.OS.LxcPath)

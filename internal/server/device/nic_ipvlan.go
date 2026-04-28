@@ -234,11 +234,6 @@ func (d *nicIPVLAN) validateEnvironment() error {
 		return errors.New("Requires name property to start")
 	}
 
-	extensions := d.state.OS.LXCFeatures
-	if !extensions["network_ipvlan"] || !extensions["network_l2proxy"] || !extensions["network_gateway_device_route"] {
-		return errors.New("Requires liblxc has following API extensions: network_ipvlan, network_l2proxy, network_gateway_device_route")
-	}
-
 	// gendoc:generate(entity=devices, group=nic_ipvlan, key=parent)
 	//
 	// ---
