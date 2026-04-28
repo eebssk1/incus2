@@ -726,16 +726,12 @@ func InstanceNeedsIntercept(s *state.State, c Instance) (bool, error) {
 
 // MakePidFd prepares a pidfd to inherit for the init process of the container.
 func MakePidFd(pid int, s *state.State) (int, *os.File) {
-	if s.OS.PidFds {
-		pidFdFile, err := linux.PidFdOpen(pid, 0)
-		if err != nil {
-			return -1, nil
-		}
-
-		return 3, pidFdFile
+	pidFdFile, err := linux.PidFdOpen(pid, 0)
+	if err != nil {
+		return -1, nil
 	}
 
-	return -1, nil
+	return 3, pidFdFile
 }
 
 func seccompGetPolicyContent(s *state.State, c Instance) (string, error) {
@@ -1330,26 +1326,18 @@ func (srv *Server) HandleMknodSyscall(c Instance, siov *Iovec) int {
 
 	if C.device_allowed(C.dev_t(siov.req.data.args[2]), C.mode_t(siov.req.data.args[1])) < 0 {
 		ctx["err"] = "Device not allowed"
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(siov.resp.error)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	cPathBuf := [unix.PathMax]C.char{}
 	_, err := C.pread(C.int(siov.memFd), unsafe.Pointer(&cPathBuf[0]), C.size_t(unix.PathMax), C.off_t(siov.req.data.args[0]))
 	if err != nil {
 		ctx["err"] = fmt.Sprintf("Failed to read memory for mknod syscall: %s", err)
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args := MknodArgs{
@@ -1384,38 +1372,26 @@ func (srv *Server) HandleMknodatSyscall(c Instance, siov *Iovec) int {
 	if int32(siov.req.data.args[0]) != int32(C.AT_FDCWD) {
 		ctx["err"] = "Non AT_FDCWD mknodat calls are not allowed"
 		logger.Debug("bla", ctx)
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	siov.resp.error = C.device_allowed(C.dev_t(siov.req.data.args[3]), C.mode_t(siov.req.data.args[2]))
 	if siov.resp.error != 0 {
 		ctx["err"] = "Device not allowed"
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(siov.resp.error)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	cPathBuf := [unix.PathMax]C.char{}
 	_, err := C.pread(C.int(siov.memFd), unsafe.Pointer(&cPathBuf[0]), C.size_t(unix.PathMax), C.off_t(siov.req.data.args[1]))
 	if err != nil {
 		ctx["err"] = "Failed to read memory for mknodat syscall: %s"
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args := MknodArgs{
@@ -1471,24 +1447,16 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 
 	uid, gid, fsuid, fsgid, err := TaskIDs(args.pid)
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	idmapset, err := c.CurrentIdmap()
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args.nsuid, args.nsgid = idmapset.ShiftFromNS(uid, gid)
@@ -1499,13 +1467,9 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 	_, err = C.pread(C.int(siov.memFd), unsafe.Pointer(&cBuf[0]), C.size_t(unix.PathMax), C.off_t(siov.req.data.args[0]))
 	if err != nil {
 		ctx["err"] = fmt.Sprintf("Failed to read memory for setxattr syscall: %s", err)
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args.path = C.GoString(&cBuf[0])
@@ -1514,13 +1478,9 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 	_, err = C.pread(C.int(siov.memFd), unsafe.Pointer(&cBuf[0]), C.size_t(unix.PathMax), C.off_t(siov.req.data.args[1]))
 	if err != nil {
 		ctx["err"] = fmt.Sprintf("Failed to read memory for setxattr syscall: %s", err)
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args.name = C.GoString(&cBuf[0])
@@ -1535,13 +1495,9 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 	_, err = C.pread(C.int(siov.memFd), unsafe.Pointer(&buf[0]), C.size_t(args.size), C.off_t(siov.req.data.args[2]))
 	if err != nil {
 		ctx["err"] = fmt.Sprintf("Failed to read memory for setxattr syscall: %s", err)
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args.value = buf
@@ -1549,7 +1505,7 @@ func (srv *Server) HandleSetxattrSyscall(c Instance, siov *Iovec) int {
 	whiteout := 0
 	if string(args.name) == "trusted.overlay.opaque" && string(args.value) == "y" {
 		whiteout = 1
-	} else if srv.s.OS.SeccompListenerContinue {
+	} else {
 		ctx["syscall_continue"] = "true"
 		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
 		return 0
@@ -1623,49 +1579,33 @@ func (srv *Server) HandleSchedSetschedulerSyscall(c Instance, siov *Iovec) int {
 
 	uid, gid, _, _, err := TaskIDs(args.pidCaller)
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	idmapset, err := c.CurrentIdmap()
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	// Only care about userns root for now.
 	args.nsuid, args.nsgid = idmapset.ShiftFromNS(uid, gid)
 	if args.nsuid != 0 || args.nsgid != 0 {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	// The target pid is only valid in the container's pid namespace as
 	// we're taking it from the raw system call arguments.
 	args.pidTarget = int(siov.req.data.args[0])
 	if args.pidTarget < 0 {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	// If the caller passed zero they want to change their own attributes.
@@ -1682,13 +1622,9 @@ func (srv *Server) HandleSchedSetschedulerSyscall(c Instance, siov *Iovec) int {
 
 	// error out if policy < 0
 	if args.policy < 0 {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EINVAL)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	// int policy
@@ -1697,13 +1633,9 @@ func (srv *Server) HandleSchedSetschedulerSyscall(c Instance, siov *Iovec) int {
 	schedParamArgs := C.struct_sched_param{}
 	_, err = C.pread(C.int(siov.memFd), unsafe.Pointer(&schedParamArgs), C.INCUS_SCHED_PARAM_SIZE, C.off_t(siov.req.data.args[2]))
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			ctx["syscall_continue"] = "true"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-
-		return int(-C.EPERM)
+		ctx["syscall_continue"] = "true"
+		C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
+		return 0
 	}
 
 	args.schedPriority = schedParamArgs.sched_priority
@@ -2286,18 +2218,8 @@ func (srv *Server) HandleBpfSyscall(c Instance, siov *Iovec) int {
 		return 0
 	}
 
-	if srv.s.OS.PidFdsThread {
-		flags |= C.PIDFD_THREAD
-		tgid = -1
-	} else {
-		tgid, err := FindTGID(siov.procFd)
-		if err != nil || tgid == -1 {
-			ctx["syscall_continue"] = "true"
-			ctx["syscall_handler_reason"] = "Could not find thread group leader ID"
-			C.seccomp_notify_update_response(siov.resp, 0, C.uint32_t(seccompUserNotifFlagContinue))
-			return 0
-		}
-	}
+	flags |= C.PIDFD_THREAD
+	tgid = -1
 
 	// Locking to a thread shouldn't be necessary but it still makes me
 	// queezy that Go could just wander off to somewhere.
@@ -2356,11 +2278,7 @@ func (srv *Server) HandleValid(fd int, siov *Iovec, findPID func(pid int32, s *s
 
 	c, err := findPID(int32(siov.msg.monitor_pid), srv.s)
 	if err != nil {
-		if srv.s.OS.SeccompListenerContinue {
-			_ = siov.SendSeccompIovec(fd, 0, seccompUserNotifFlagContinue)
-		} else {
-			_ = siov.SendSeccompIovec(fd, int(-C.EPERM), 0)
-		}
+		_ = siov.SendSeccompIovec(fd, 0, seccompUserNotifFlagContinue)
 
 		logger.Errorf("Failed to find container for monitor %d", siov.msg.monitor_pid)
 		return err
@@ -2383,40 +2301,14 @@ func (srv *Server) Stop() error {
 }
 
 func lxcSupportSeccompNotifyContinue(s *state.State) error {
-	err := lxcSupportSeccompNotify(s)
-	if err != nil {
-		return err
-	}
-
-	if !s.OS.SeccompListenerContinue {
-		return errors.New("Seccomp notify doesn't support continuing syscalls")
-	}
-
-	return nil
+	return lxcSupportSeccompNotify(s)
 }
 
 func lxcSupportSeccompNotifyAddfd(s *state.State) error {
-	err := lxcSupportSeccompNotify(s)
-	if err != nil {
-		return err
-	}
-
-	if !s.OS.SeccompListenerContinue {
-		return errors.New("Seccomp notify doesn't support continuing syscalls")
-	}
-
-	if !s.OS.SeccompListenerAddfd {
-		return errors.New("Seccomp notify doesn't support adding file descriptors")
-	}
-
-	return nil
+	return lxcSupportSeccompNotify(s)
 }
 
 func lxcSupportSeccompNotify(s *state.State) error {
-	if !s.OS.SeccompListener {
-		return errors.New("Seccomp notify not supported")
-	}
-
 	c, err := liblxc.NewContainer("test-seccomp", s.OS.LxcPath)
 	if err != nil {
 		return errors.New("Failed to load seccomp notify test container")
