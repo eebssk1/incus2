@@ -314,6 +314,121 @@ test_filemanip() {
     # ... and so does adding a trailing `/`.
     file_check_push_deref_dir -rL /tmp/qux/ baz barqux
 
+
+    # Test consecutive pulls.
+
+    rm -rf "${TEST_DIR}/tmp/foo"
+    mkdir "${TEST_DIR}/tmp/foo"
+    incus file delete -f filemanip/tmp/bar --project=test
+    incus file create --type=directory filemanip/tmp/bar --project=test
+    incus file create --type=directory filemanip/tmp/baz --project=test
+    incus file create filemanip/tmp/bar/one --project=test
+    incus file create filemanip/tmp/bar/two --project=test
+    echo xxx | incus file push - filemanip/tmp/baz/one --project=test
+
+    # One dotted, one non-dotted, no overlap.
+    incus file pull -r filemanip/tmp/bar/. filemanip/tmp/baz/ "${TEST_DIR}/tmp/foo" --project=test
+    [ -f "${TEST_DIR}/tmp/foo/one" ]
+    [ -f "${TEST_DIR}/tmp/foo/two" ]
+    [ -f "${TEST_DIR}/tmp/foo/baz/one" ]
+
+    # Two dotted, overlapping.
+    rm -rf "${TEST_DIR}/tmp/foo"
+    mkdir "${TEST_DIR}/tmp/foo"
+    incus file pull -r filemanip/tmp/bar/. filemanip/tmp/baz/. "${TEST_DIR}/tmp/foo" --project=test
+    [ -f "${TEST_DIR}/tmp/foo/one" ]
+    [ -f "${TEST_DIR}/tmp/foo/two" ]
+    [ "$(cat "${TEST_DIR}/tmp/foo/one")" = xxx ]
+
+    # File/directory overlap.
+    rm -rf "${TEST_DIR}/tmp/foo"
+    mkdir "${TEST_DIR}/tmp/foo"
+    incus file delete -f filemanip/tmp/bar --project=test
+    incus file create -p --type=directory filemanip/tmp/bar/one --project=test
+    ! incus file pull -r filemanip/tmp/baz/. filemanip/tmp/bar/. "${TEST_DIR}/tmp/foo" --project=test || false
+    # To mimic cp, the operation must have a leftover file.
+    [ -f "${TEST_DIR}/tmp/foo/one" ]
+
+    # Directory merging.
+    rm -rf "${TEST_DIR}/tmp/foo"
+    mkdir "${TEST_DIR}/tmp/foo"
+    incus file delete -f filemanip/tmp/baz --project=test
+    incus file create -p --type=directory filemanip/tmp/baz/one --project=test
+    incus file create filemanip/tmp/bar/one/foo --project=test
+    incus file create filemanip/tmp/bar/one/bar --project=test
+    echo xxx | incus file push - filemanip/tmp/baz/one/foo --project=test
+    incus file pull -r filemanip/tmp/bar/. filemanip/tmp/baz/. "${TEST_DIR}/tmp/foo" --project=test
+    [ -f "${TEST_DIR}/tmp/foo/one/foo" ]
+    [ -f "${TEST_DIR}/tmp/foo/one/bar" ]
+    [ "$(cat "${TEST_DIR}/tmp/foo/one/foo")" = xxx ]
+
+    # Directory stacking.
+    rm -rf "${TEST_DIR}/tmp/foo"
+    mkdir "${TEST_DIR}/tmp/foo"
+    incus file delete -f filemanip/tmp/baz --project=test
+    incus file pull -r filemanip/tmp/bar/one "${TEST_DIR}/tmp/foo/one" --project=test
+    incus file pull -r filemanip/tmp/bar/one "${TEST_DIR}/tmp/foo/one" --project=test
+    [ -f "${TEST_DIR}/tmp/foo/one/foo" ]
+    [ -f "${TEST_DIR}/tmp/foo/one/bar" ]
+    [ -f "${TEST_DIR}/tmp/foo/one/one/foo" ]
+    [ -f "${TEST_DIR}/tmp/foo/one/one/bar" ]
+
+
+    # Test consecutive pushes.
+
+    incus file delete filemanip/tmp/foo --project=test
+    rm -rf "${TEST_DIR}/tmp/bar"
+    incus file create --type=directory filemanip/tmp/foo --project=test
+    mkdir "${TEST_DIR}/tmp/bar" "${TEST_DIR}/tmp/baz"
+    touch "${TEST_DIR}/tmp/bar/one" "${TEST_DIR}/tmp/bar/two"
+    echo xxx > "${TEST_DIR}/tmp/baz/one"
+
+    # One dotted, one non-dotted, no overlap.
+    incus file push -r "${TEST_DIR}/tmp/bar/." "${TEST_DIR}/tmp/baz/" filemanip/tmp/foo --project=test
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/two ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/baz/one ]
+
+    # Two dotted, overlapping.
+    incus file delete -f filemanip/tmp/foo --project=test
+    incus file create --type=directory filemanip/tmp/foo --project=test
+    incus file push -r "${TEST_DIR}/tmp/bar/." "${TEST_DIR}/tmp/baz/." filemanip/tmp/foo --project=test
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/two ]
+    [ "$(incus file pull filemanip/tmp/foo/one - --project=test)" = xxx ]
+
+    # File/directory overlap.
+    incus file delete -f filemanip/tmp/foo --project=test
+    incus file create --type=directory filemanip/tmp/foo --project=test
+    rm -rf "${TEST_DIR}/tmp/bar"
+    mkdir -p "${TEST_DIR}/tmp/bar/one"
+    ! incus file push -r "${TEST_DIR}/tmp/baz/." "${TEST_DIR}/tmp/bar/." filemanip/tmp/foo --project=test || false
+    # To mimic cp, the operation must have a leftover file.
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one ]
+
+    # Directory merging.
+    incus file delete -f filemanip/tmp/foo --project=test
+    incus file create --type=directory filemanip/tmp/foo --project=test
+    rm -rf "${TEST_DIR}/tmp/baz"
+    mkdir -p "${TEST_DIR}/tmp/baz/one"
+    touch "${TEST_DIR}/tmp/bar/one/foo" "${TEST_DIR}/tmp/bar/one/bar"
+    echo xxx > "${TEST_DIR}/tmp/baz/one/foo"
+    incus file push -r "${TEST_DIR}/tmp/bar/." "${TEST_DIR}/tmp/baz/." filemanip/tmp/foo --project=test
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/foo ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/bar ]
+    [ "$(incus file pull filemanip/tmp/foo/one/foo - --project=test)" = xxx ]
+
+    # Directory stacking.
+    incus file delete -f filemanip/tmp/foo --project=test
+    incus file create --type=directory filemanip/tmp/foo --project=test
+    rm -rf "${TEST_DIR}/tmp/baz"
+    incus file push -r "${TEST_DIR}/tmp/bar/one" filemanip/tmp/foo/one --project=test
+    incus file push -r "${TEST_DIR}/tmp/bar/one" filemanip/tmp/foo/one --project=test
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/foo ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/bar ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/one/foo ]
+    incus exec filemanip --project=test -- [ -f /tmp/foo/one/one/bar ]
+
     # Test SFTP functionality.
     cmd=$(
         unset -f incus
