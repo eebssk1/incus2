@@ -2654,19 +2654,19 @@ func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Pars
 
 	defer func() { _ = sftpConn.Close() }()
 
-	srcInfo, fPath, err := c.puller.statFile(sftpConn, fPath)
+	srcInfo, normalizedPath, err := c.puller.statFile(sftpConn, fPath)
 	if err != nil {
 		return err
 	}
 
 	// Recursively copy directories.
 	if srcInfo.IsDir() {
-		return sftpRecursivePullFile(sftpConn, srcInfo, fPath, target, c.global.flagQuiet, c.puller.flagDereference, util.PathExists(target))
+		return sftpRecursivePullFile(sftpConn, srcInfo, fPath, normalizedPath, target, c.global.flagQuiet, c.puller.flagDereference, util.PathExists(target))
 	}
 
 	var targetPath string
 	if targetIsDir {
-		targetPath = filepath.Join(target, filepath.Base(fPath))
+		targetPath = filepath.Join(target, filepath.Base(normalizedPath))
 	} else {
 		targetPath = target
 	}
@@ -2679,7 +2679,7 @@ func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Pars
 	if isStdout(targetPath) {
 		f = os.Stdout
 	} else if targetIsLink {
-		linkName, err = sftpConn.ReadLink(fPath)
+		linkName, err = sftpConn.ReadLink(normalizedPath)
 		if err != nil {
 			return err
 		}
@@ -2698,7 +2698,7 @@ func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Pars
 	}
 
 	progress := cli.ProgressRenderer{
-		Format: fmt.Sprintf(i18n.G("Pulling %s from %s: %%s"), targetPath, fPath),
+		Format: fmt.Sprintf(i18n.G("Pulling %s from %s: %%s"), targetPath, normalizedPath),
 		Quiet:  c.global.flagQuiet,
 	}
 
@@ -2726,7 +2726,7 @@ func (c *cmdStorageVolumeFilePull) pull(parsedPool *u.Parsed, parsedPath *u.Pars
 			return err
 		}
 	} else {
-		src, err := sftpConn.Open(fPath)
+		src, err := sftpConn.Open(normalizedPath)
 		if err != nil {
 			return err
 		}
