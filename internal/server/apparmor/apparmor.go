@@ -48,22 +48,12 @@ func Init() error {
 	// Fill in aaCacheDir.
 	basePath := filepath.Join(aaPath, "cache")
 
-	// Multiple policy cache directories were only added in v2.13.
-	minVer, err := version.NewDottedVersion("2.13")
+	output, err := subprocess.RunCommand("apparmor_parser", "-L", basePath, "--print-cache-dir")
 	if err != nil {
 		return err
 	}
 
-	if aaVersion.Compare(minVer) < 0 {
-		aaCacheDir = basePath
-	} else {
-		output, err := subprocess.RunCommand("apparmor_parser", "-L", basePath, "--print-cache-dir")
-		if err != nil {
-			return err
-		}
-
-		aaCacheDir = strings.TrimSpace(output)
-	}
+	aaCacheDir = strings.TrimSpace(output)
 
 	return nil
 }
@@ -221,12 +211,7 @@ func parserSupports(sysOS *sys.OS, feature string) (bool, error) {
 	}
 
 	if feature == "unix" {
-		minVer, err := version.NewDottedVersion("2.10.95")
-		if err != nil {
-			return false, err
-		}
-
-		return aaVersion.Compare(minVer) >= 0, nil
+		return true, nil
 	}
 
 	if feature == "userns" {
