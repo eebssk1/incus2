@@ -616,15 +616,13 @@ func (d *proxy) setupProxyProcInfo() (*proxyProcInfo, error) {
 	containerPidFd := -1
 	daemonPidFd := -1
 	var inheritFd []*os.File
-	if d.state.OS.PidFds {
-		cPidFd, err := cc.InitPidFd()
+	cPidFd, err := cc.InitPidFd()
+	if err == nil {
+		dPidFd, err := linux.PidFdOpen(os.Getpid(), 0)
 		if err == nil {
-			dPidFd, err := linux.PidFdOpen(os.Getpid(), 0)
-			if err == nil {
-				inheritFd = []*os.File{cPidFd, dPidFd}
-				containerPidFd = 3
-				daemonPidFd = 4
-			}
+			inheritFd = []*os.File{cPidFd, dPidFd}
+			containerPidFd = 3
+			daemonPidFd = 4
 		}
 	}
 
