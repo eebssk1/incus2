@@ -876,6 +876,7 @@ func (r *ProtocolIncus) CopyInstance(source InstanceServer, instance api.Instanc
 		Live:              req.Source.Live,
 		InstanceOnly:      req.Source.InstanceOnly,
 		AllowInconsistent: req.Source.AllowInconsistent,
+		Devices:           req.Devices,
 	}
 
 	// Push mode migration
