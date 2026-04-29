@@ -7,6 +7,11 @@ require (
 	github.com/LINBIT/golinstor v0.60.0
 	github.com/adhocore/gronx v1.19.6
 	github.com/apex/log v1.9.0
+	github.com/aws/aws-sdk-go-v2 v1.41.7
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.16
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.1.19
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.100.1
+	github.com/aws/smithy-go v1.25.1
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/checkpoint-restore/go-criu/v8 v8.2.0
 	github.com/cowsql/go-cowsql v1.22.0
@@ -38,7 +43,6 @@ require (
 	github.com/mdlayher/netx v0.0.0-20230430222610-7e21880baee8
 	github.com/mdlayher/vsock v1.2.1
 	github.com/miekg/dns v1.1.72
-	github.com/minio/minio-go/v7 v7.0.100
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/opencontainers/runtime-spec v1.3.0
@@ -75,6 +79,14 @@ require (
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.10 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.23 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.23 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.24 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.23 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.23 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
@@ -92,14 +104,12 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20240924180020-3414d57e47da // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/donovanhide/eventsource v0.0.0-20210830082556-c59027999da0 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eapache/channels v1.1.0 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gaissmai/bart v0.26.1 // indirect
-	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -115,8 +125,6 @@ require (
 	github.com/josharian/native v1.1.0 // indirect
 	github.com/k-sone/critbitgo v1.4.0 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -125,8 +133,6 @@ require (
 	github.com/mdlayher/ethernet v0.0.0-20220221185849-529eae5b6118 // indirect
 	github.com/mdlayher/packet v1.1.2 // indirect
 	github.com/mdlayher/socket v0.6.0 // indirect
-	github.com/minio/crc64nvme v1.1.1 // indirect
-	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/muhlemmer/gu v0.3.1 // indirect
@@ -139,7 +145,6 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/orcaman/concurrent-map/v2 v2.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
-	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
@@ -149,7 +154,6 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rootless-containers/proto/go-proto v0.0.0-20260207013450-f6ee952d53d9 // indirect
 	github.com/rs/cors v1.11.1 // indirect
-	github.com/rs/xid v1.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/fasthash v1.0.3 // indirect
@@ -158,7 +162,6 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tinylib/msgp v1.6.4 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/u-root/uio v0.0.0-20240224005618-d2acac8f3701 // indirect
