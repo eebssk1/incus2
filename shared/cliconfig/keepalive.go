@@ -34,7 +34,7 @@ func (c *Config) handleKeepAlive(remote Remote, name string) (incus.InstanceServ
 		_ = os.Remove(socketPath)
 
 		// Prepare to spawn the proxy.
-		proc, err := subprocess.NewProcess("incus", []string{"remote", "proxy", name, socketPath, fmt.Sprintf("--timeout=%d", remote.KeepAlive)}, "", "")
+		proc, err := subprocess.NewProcess("incus", []string{"remote", "proxy", name + ":", socketPath, fmt.Sprintf("--timeout=%d", remote.KeepAlive)}, "", "")
 		if err != nil {
 			return nil, err
 		}

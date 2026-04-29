@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lxd\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-28 02:37+0200\n"
+"POT-Creation-Date: 2026-04-29 14:22+0000\n"
 "PO-Revision-Date: 2026-04-21 03:03+0000\n"
 "Last-Translator: meipeter <meipeter114514@outlook.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
@@ -655,26 +655,31 @@ msgid "%s (backend=%q, source=%q)"
 msgstr "%s（后端=%q，来源=%q）"
 
 #: cmd/incus/file.go:724 cmd/incus/storage_volume.go:2828
-#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:372
+#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:391
 #, c-format
 msgid "%s is not a directory"
 msgstr "%s 不是目录"
 
-#: cmd/incus/utils_sftp.go:261
+#: cmd/incus/usage/usage.go:343
+#, c-format
+msgid "%s the %s syntax is deprecated; %s\n"
+msgstr ""
+
+#: cmd/incus/utils_sftp.go:280
 #, c-format
 msgid "'%s' isn't a supported file type"
 msgstr "“%s”不是受支持的文件类型"
 
-#: cmd/incus/usage/parse.go:242
+#: cmd/incus/usage/parse.go:238
 #, c-format
 msgid "(skipped: %s)\n"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:244
+#: cmd/incus/usage/parse.go:240
 msgid "(skipped: no value given)"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 msgid ", "
 msgstr ""
 
@@ -777,7 +782,7 @@ msgid ""
 "a directory"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:768
+#: cmd/incus/usage/usage.go:808
 msgid "ACL"
 msgstr ""
 
@@ -958,7 +963,7 @@ msgstr "向集群成员添加角色"
 msgid "Add rules to an ACL"
 msgstr "向 ACL 添加规则"
 
-#: cmd/incus/color/color.go:42
+#: cmd/incus/color/color.go:44
 msgid "Additional Help Topics:"
 msgstr ""
 
@@ -1015,7 +1020,7 @@ msgstr "别名：%s"
 msgid "Aliases already exists: %s"
 msgstr "别名已存在：%s"
 
-#: cmd/incus/image.go:971 cmd/incus/color/color.go:37
+#: cmd/incus/image.go:971 cmd/incus/color/color.go:39
 msgid "Aliases:"
 msgstr "别名："
 
@@ -1144,7 +1149,7 @@ msgstr "自动更新：%s"
 msgid "Automatic (non-interactive) mode"
 msgstr "自动（非交互）模式"
 
-#: cmd/incus/color/color.go:39
+#: cmd/incus/color/color.go:41
 #, fuzzy
 msgid "Available Commands:"
 msgstr "可用项目："
@@ -1409,7 +1414,7 @@ msgstr "显卡 %d："
 msgid "Card: %s (%s)"
 msgstr ""
 
-#: cmd/incus/config_trust.go:792
+#: cmd/incus/config_trust.go:790
 #, c-format
 msgid "Certificate add token for %s deleted"
 msgstr "已删除 %s 的证书添加令牌"
@@ -2172,7 +2177,7 @@ msgstr "删除警告"
 msgid "Description"
 msgstr "描述"
 
-#: cmd/incus/color/color.go:34
+#: cmd/incus/color/color.go:36
 #, fuzzy
 msgid "Description:"
 msgstr "描述"
@@ -2713,7 +2718,7 @@ msgstr "更新模板文件时出错：%s"
 msgid "Error while executing alias expansion: %s\n"
 msgstr "执行别名扩展时出错：%s\n"
 
-#: cmd/incus/color/color.go:33
+#: cmd/incus/color/color.go:34
 #, fuzzy
 msgid "Error:"
 msgstr "错误：%v\n"
@@ -2731,7 +2736,7 @@ msgstr "正在解散集群成员：%s"
 msgid "Event type to listen for"
 msgstr "要监听的事件类型"
 
-#: cmd/incus/color/color.go:38
+#: cmd/incus/color/color.go:40
 msgid "Examples:"
 msgstr ""
 
@@ -3172,12 +3177,12 @@ msgid "Failed to load configuration: %s"
 msgstr "加载配置失败：%s"
 
 #: cmd/incus/file.go:786 cmd/incus/storage_volume.go:2878
-#: cmd/incus/utils_sftp.go:292
+#: cmd/incus/utils_sftp.go:311
 #, fuzzy, c-format
 msgid "Failed to open source file %q: %v"
 msgstr "关闭服务器证书文件 %q 失败：%w"
 
-#: cmd/incus/utils_sftp.go:73
+#: cmd/incus/utils_sftp.go:74
 #, fuzzy, c-format
 msgid "Failed to open target file %q: %w"
 msgstr "关闭服务器证书文件 %q 失败：%w"
@@ -3271,7 +3276,7 @@ msgstr "无法与集群建立信任关系：%w"
 msgid "Failed to update cluster member state: %w"
 msgstr "更新群集成员状态失败：%w"
 
-#: cmd/incus/utils_sftp.go:256
+#: cmd/incus/utils_sftp.go:275
 #, c-format
 msgid "Failed to walk path for %s: %s"
 msgstr "为 %s 遍历路径失败：%s"
@@ -3305,7 +3310,7 @@ msgstr "获取实例备份文件：%w"
 msgid "Fingerprint: %s"
 msgstr "指纹：%s"
 
-#: cmd/incus/color/color.go:40
+#: cmd/incus/color/color.go:42
 msgid "Flags:"
 msgstr ""
 
@@ -3730,7 +3735,7 @@ msgstr ""
 msgid "Given target %q does not match source volume location %q"
 msgstr "给定的目标 %q 与源卷位置 %q 不匹配"
 
-#: cmd/incus/color/color.go:41
+#: cmd/incus/color/color.go:43
 msgid "Global Flags:"
 msgstr ""
 
@@ -6169,7 +6174,7 @@ msgstr ""
 msgid "No %s storage backends available"
 msgstr ""
 
-#: cmd/incus/config_trust.go:799
+#: cmd/incus/config_trust.go:797
 #, c-format
 msgid "No certificate add token for member %s on remote: %s"
 msgstr ""
@@ -6619,7 +6624,7 @@ msgstr "协议: %s"
 msgid "Provided certificate path doesn't exist: %s"
 msgstr "提供的证书路径不存在: %s"
 
-#: cmd/incus/remote_unix.go:47
+#: cmd/incus/remote_unix.go:46
 msgid "Proxy timeout (exits when no connections)"
 msgstr "代理已超时 (无连接时退出)"
 
@@ -6651,7 +6656,7 @@ msgid "Pull files from instances"
 msgstr "从实例拉取文件"
 
 #: cmd/incus/file.go:582 cmd/incus/storage_volume.go:2701
-#: cmd/incus/utils_sftp.go:191
+#: cmd/incus/utils_sftp.go:210
 #, fuzzy, c-format
 msgid "Pulling %s from %s: %%s"
 msgstr "正在从 %[2]s 拉取 %[1]s: %%s"
@@ -6666,7 +6671,7 @@ msgid "Push files into instances"
 msgstr "向实例推送文件"
 
 #: cmd/incus/file.go:853 cmd/incus/storage_volume.go:2945
-#: cmd/incus/utils_sftp.go:303
+#: cmd/incus/utils_sftp.go:322
 #, fuzzy, c-format
 msgid "Pushing %s to %s: %%s"
 msgstr "正在向 %[2]s 推送 %[1]s: %%s"
@@ -7031,7 +7036,7 @@ msgstr ""
 msgid "Retrieving image: %s"
 msgstr ""
 
-#: cmd/incus/config_trust.go:745 cmd/incus/config_trust.go:746
+#: cmd/incus/config_trust.go:744 cmd/incus/config_trust.go:745
 msgid "Revoke certificate add token"
 msgstr ""
 
@@ -7052,11 +7057,11 @@ msgstr ""
 msgid "Rule description"
 msgstr ""
 
-#: cmd/incus/remote_unix.go:41
+#: cmd/incus/remote_unix.go:40
 msgid "Run a local API proxy"
 msgstr ""
 
-#: cmd/incus/remote_unix.go:42
+#: cmd/incus/remote_unix.go:41
 msgid "Run a local API proxy for the remote"
 msgstr ""
 
@@ -7765,7 +7770,7 @@ msgstr ""
 msgid "Show the used and free space in bytes"
 msgstr ""
 
-#: cmd/incus/config_trust.go:814 cmd/incus/config_trust.go:815
+#: cmd/incus/config_trust.go:812 cmd/incus/config_trust.go:813
 msgid "Show trust configurations"
 msgstr ""
 
@@ -8372,7 +8377,7 @@ msgstr ""
 msgid "This command isn't supported on Windows"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:115
+#: cmd/incus/usage/parse.go:111
 msgid ""
 "This command was called with --explain; its arguments are valid, but no "
 "further processing is done"
@@ -8521,7 +8526,7 @@ msgid "UPLOAD DATE"
 msgstr ""
 
 #: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:985
-#: cmd/incus/usage/usage.go:819
+#: cmd/incus/usage/usage.go:859
 msgid "URL"
 msgstr ""
 
@@ -8599,12 +8604,12 @@ msgstr ""
 msgid "Unknown console type %q"
 msgstr ""
 
-#: cmd/incus/utils_sftp.go:238
+#: cmd/incus/utils_sftp.go:257
 #, c-format
 msgid "Unknown file type '%s'"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:336
+#: cmd/incus/usage/usage.go:376
 #, c-format
 msgid "Unknown flag --%s"
 msgstr ""
@@ -8827,7 +8832,7 @@ msgstr ""
 msgid "Upper devices"
 msgstr ""
 
-#: cmd/incus/color/color.go:35
+#: cmd/incus/color/color.go:37
 #, fuzzy
 msgid "Usage:"
 msgstr "CPU 占用："
@@ -8981,6 +8986,10 @@ msgstr ""
 
 #: cmd/incus/query.go:46
 msgid "Wait for the operation to complete"
+msgstr ""
+
+#: cmd/incus/color/color.go:35
+msgid "Warning:"
 msgstr ""
 
 #: cmd/incus/admin_init_interactive.go:541
@@ -9142,17 +9151,17 @@ msgstr ""
 msgid "Zone description"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:769
+#: cmd/incus/usage/usage.go:809
 #, fuzzy
 msgid "address"
 msgstr "IP地址"
 
-#: cmd/incus/usage/usage.go:770
+#: cmd/incus/usage/usage.go:810
 #, fuzzy
 msgid "address set"
 msgstr "地址：%s"
 
-#: cmd/incus/usage/usage.go:771
+#: cmd/incus/usage/usage.go:811
 #, fuzzy
 msgid "alias"
 msgstr "<别名>"
@@ -9161,24 +9170,24 @@ msgstr "<别名>"
 msgid "application"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:772
+#: cmd/incus/usage/usage.go:812
 msgid "backend"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:773
+#: cmd/incus/usage/usage.go:813
 msgid "backup file"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:774
+#: cmd/incus/usage/usage.go:814
 msgid "bucket"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:81
+#: cmd/incus/usage/parse.go:77
 #, c-format
 msgid "cannot parse this argument; unexpected %s"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:84
+#: cmd/incus/usage/parse.go:80
 #, c-format
 msgid "cannot parse this argument; unexpected %s in %s"
 msgstr ""
@@ -9191,7 +9200,7 @@ msgstr ""
 msgid "cert.key"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:775
+#: cmd/incus/usage/usage.go:815
 msgid "client"
 msgstr ""
 
@@ -9204,7 +9213,7 @@ msgstr ""
 msgid "command"
 msgstr "调试命令"
 
-#: cmd/incus/usage/usage.go:776
+#: cmd/incus/usage/usage.go:816
 #, fuzzy
 msgid "command-line argument"
 msgstr "Incus - 命令行客户端"
@@ -9222,12 +9231,12 @@ msgstr ""
 msgid "description"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:777
+#: cmd/incus/usage/usage.go:817
 #, fuzzy
 msgid "device"
 msgstr "设备 %d："
 
-#: cmd/incus/usage/usage.go:779
+#: cmd/incus/usage/usage.go:819
 #, fuzzy
 msgid "directory"
 msgstr "%s 不是目录"
@@ -9236,7 +9245,7 @@ msgstr "%s 不是目录"
 msgid "disabled"
 msgstr ""
 
-#: cmd/incus/storage.go:519 cmd/incus/usage/usage.go:780
+#: cmd/incus/storage.go:519 cmd/incus/usage/usage.go:820
 msgid "driver"
 msgstr ""
 
@@ -9253,33 +9262,33 @@ msgstr ""
 msgid "error: %v"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:99
+#: cmd/incus/usage/parse.go:95
 #, c-format
 msgid "expected %s"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:782
+#: cmd/incus/usage/usage.go:822
 msgid "expiry"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:783
+#: cmd/incus/usage/usage.go:823
 msgid "file"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:784
+#: cmd/incus/usage/usage.go:824
 msgid "filter"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:785
+#: cmd/incus/usage/usage.go:825
 #, fuzzy
 msgid "fingerprint"
 msgstr "指纹：%s"
 
-#: cmd/incus/usage/usage.go:786
+#: cmd/incus/usage/usage.go:826
 msgid "group"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:787
+#: cmd/incus/usage/usage.go:827
 msgid "image"
 msgstr ""
 
@@ -9919,30 +9928,30 @@ msgstr ""
 msgid "info"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:788
+#: cmd/incus/usage/usage.go:828
 #, fuzzy
 msgid "instance"
 msgstr "删除实例"
 
-#: cmd/incus/usage/usage.go:789
+#: cmd/incus/usage/usage.go:829
 #, fuzzy
 msgid "interface"
 msgstr "主机接口"
 
-#: cmd/incus/usage/usage.go:792
+#: cmd/incus/usage/usage.go:832
 msgid "key"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:790
+#: cmd/incus/usage/usage.go:830
 #, fuzzy
 msgid "listen address"
 msgstr "IPv4上行地址"
 
-#: cmd/incus/usage/usage.go:791
+#: cmd/incus/usage/usage.go:831
 msgid "listen port"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:794
+#: cmd/incus/usage/usage.go:834
 msgid "member"
 msgstr ""
 
@@ -9954,12 +9963,12 @@ msgstr ""
 msgid "name"
 msgstr "名字"
 
-#: cmd/incus/usage/usage.go:795
+#: cmd/incus/usage/usage.go:835
 #, fuzzy
 msgid "network"
 msgstr "删除网络"
 
-#: cmd/incus/usage/usage.go:796
+#: cmd/incus/usage/usage.go:836
 #, fuzzy
 msgid "network integration"
 msgstr "创建网络集成"
@@ -9969,7 +9978,7 @@ msgstr "创建网络集成"
 msgid "network or integration"
 msgstr "创建网络集成"
 
-#: cmd/incus/usage/usage.go:854
+#: cmd/incus/usage/usage.go:894
 #, c-format
 msgid "new %s name"
 msgstr ""
@@ -9979,7 +9988,7 @@ msgstr ""
 msgid "no"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:54
+#: cmd/incus/usage/parse.go:50
 #, c-format
 msgid "not enough arguments; expected a value for %s"
 msgstr ""
@@ -9988,33 +9997,37 @@ msgstr ""
 msgid "ok (y/n/[fingerprint])?"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 #, c-format
 msgid "one of %s or %s"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:797
+#: cmd/incus/usage/usage.go:837
 #, fuzzy
 msgid "operation"
 msgstr "描述"
 
-#: cmd/incus/usage/usage.go:798
+#: cmd/incus/usage/usage.go:838
 msgid "path"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:799
+#: cmd/incus/usage/usage.go:839
 msgid "peer"
+msgstr ""
+
+#: cmd/incus/usage/legacysupport.go:8
+msgid "please switch to the “<key>=<value>” syntax"
 msgstr ""
 
 #: cmd/incus/config.go:55
 msgid "please use `incus profile`"
 msgstr "请使用 incus profile"
 
-#: cmd/incus/usage/usage.go:800
+#: cmd/incus/usage/usage.go:840
 msgid "pool"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:801
+#: cmd/incus/usage/usage.go:841
 msgid "port"
 msgstr ""
 
@@ -10022,35 +10035,35 @@ msgstr ""
 msgid "preseed.yaml"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:802
+#: cmd/incus/usage/usage.go:842
 #, fuzzy
 msgid "profile"
 msgstr "复制配置文件"
 
-#: cmd/incus/usage/usage.go:803
+#: cmd/incus/usage/usage.go:843
 #, fuzzy
 msgid "project"
 msgstr "所有项目"
 
-#: cmd/incus/usage/usage.go:804
+#: cmd/incus/usage/usage.go:844
 #, fuzzy
 msgid "protocol"
 msgstr "协议: %s"
 
-#: cmd/incus/usage/usage.go:805
+#: cmd/incus/usage/usage.go:845
 msgid "query"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:806
+#: cmd/incus/usage/usage.go:846
 msgid "record"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:807
+#: cmd/incus/usage/usage.go:847
 #, fuzzy
 msgid "remote"
 msgstr "<远程>"
 
-#: cmd/incus/usage/usage.go:811
+#: cmd/incus/usage/usage.go:851
 msgid "role"
 msgstr ""
 
@@ -10058,11 +10071,11 @@ msgstr ""
 msgid "rootfs tarball"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:812
+#: cmd/incus/usage/usage.go:852
 msgid "snapshot"
 msgstr ""
 
-#: cmd/incus/remote_unix.go:36
+#: cmd/incus/remote_unix.go:35
 msgid "socket file"
 msgstr ""
 
@@ -10084,28 +10097,28 @@ msgstr "sshfs 挂载 %q 在 %q"
 msgid "stdin can only be used once, with no other source arguments"
 msgstr "--target 不能与实例一起使用"
 
-#: cmd/incus/usage/usage.go:814
+#: cmd/incus/usage/usage.go:854
 msgid "symlink target path"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:815
+#: cmd/incus/usage/usage.go:855
 msgid "tarball"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:860
+#: cmd/incus/usage/usage.go:900
 #, fuzzy, c-format
 msgid "target %s"
 msgstr "<目标>"
 
-#: cmd/incus/usage/usage.go:816
+#: cmd/incus/usage/usage.go:856
 msgid "template"
 msgstr ""
 
-#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:817
+#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:857
 msgid "token"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:71
+#: cmd/incus/usage/parse.go:67
 #, c-format
 msgid "too many arguments; unexpected %s"
 msgstr ""
@@ -10114,21 +10127,21 @@ msgstr ""
 msgid "total space"
 msgstr "总空间"
 
-#: cmd/incus/usage/usage.go:813 cmd/incus/usage/usage.go:818
+#: cmd/incus/usage/usage.go:853 cmd/incus/usage/usage.go:858
 msgid "type"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:95
+#: cmd/incus/usage/parse.go:91
 #, c-format
 msgid "unexpected %s"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:102
+#: cmd/incus/usage/parse.go:98
 #, c-format
 msgid "unexpected %s; expected %s"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:51
+#: cmd/incus/usage/parse.go:47
 msgid "unexpected end of argument; did you forget a suffix?"
 msgstr ""
 
@@ -10140,16 +10153,16 @@ msgstr ""
 msgid "used by"
 msgstr "使用者"
 
-#: cmd/incus/usage/usage.go:820
+#: cmd/incus/usage/usage.go:860
 msgid "value"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:821
+#: cmd/incus/usage/usage.go:861
 #, fuzzy
 msgid "volume"
 msgstr "列"
 
-#: cmd/incus/usage/usage.go:822
+#: cmd/incus/usage/usage.go:862
 msgid "warning UUID"
 msgstr ""
 
@@ -10163,11 +10176,11 @@ msgstr ""
 msgid "yes"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:823
+#: cmd/incus/usage/usage.go:863
 msgid "zone"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:25
+#: cmd/incus/usage/utils.go:52
 #, c-format
 msgid "“%s”"
 msgstr ""

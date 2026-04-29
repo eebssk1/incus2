@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-28 02:37+0200\n"
+"POT-Creation-Date: 2026-04-29 14:22+0000\n"
 "PO-Revision-Date: 2026-04-21 03:01+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/incus/cli/sv/>\n"
@@ -659,26 +659,31 @@ msgid "%s (backend=%q, source=%q)"
 msgstr "%s (backend=%q, källa=%q)"
 
 #: cmd/incus/file.go:724 cmd/incus/storage_volume.go:2828
-#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:372
+#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:391
 #, c-format
 msgid "%s is not a directory"
 msgstr "%s är inte en katalog"
 
-#: cmd/incus/utils_sftp.go:261
+#: cmd/incus/usage/usage.go:343
+#, c-format
+msgid "%s the %s syntax is deprecated; %s\n"
+msgstr ""
+
+#: cmd/incus/utils_sftp.go:280
 #, c-format
 msgid "'%s' isn't a supported file type"
 msgstr "'%s' är inte en filtyp som stöds"
 
-#: cmd/incus/usage/parse.go:242
+#: cmd/incus/usage/parse.go:238
 #, c-format
 msgid "(skipped: %s)\n"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:244
+#: cmd/incus/usage/parse.go:240
 msgid "(skipped: no value given)"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 msgid ", "
 msgstr ""
 
@@ -779,7 +784,7 @@ msgid ""
 "a directory"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:768
+#: cmd/incus/usage/usage.go:808
 msgid "ACL"
 msgstr ""
 
@@ -961,7 +966,7 @@ msgstr "Lägg till roller till en klustermedlem"
 msgid "Add rules to an ACL"
 msgstr "Lägg till regler i en ACL"
 
-#: cmd/incus/color/color.go:42
+#: cmd/incus/color/color.go:44
 msgid "Additional Help Topics:"
 msgstr ""
 
@@ -1020,7 +1025,7 @@ msgstr "Alias: %s"
 msgid "Aliases already exists: %s"
 msgstr "Alias finns redan: %s"
 
-#: cmd/incus/image.go:971 cmd/incus/color/color.go:37
+#: cmd/incus/image.go:971 cmd/incus/color/color.go:39
 msgid "Aliases:"
 msgstr "Alias:"
 
@@ -1153,7 +1158,7 @@ msgstr "Automatisk uppdatering: %s"
 msgid "Automatic (non-interactive) mode"
 msgstr "Automatiskt (icke-interaktivt) läge"
 
-#: cmd/incus/color/color.go:39
+#: cmd/incus/color/color.go:41
 #, fuzzy
 msgid "Available Commands:"
 msgstr "Tillgängliga projekt:"
@@ -1423,7 +1428,7 @@ msgstr "Kort %d:"
 msgid "Card: %s (%s)"
 msgstr "Kort: %s (%s)"
 
-#: cmd/incus/config_trust.go:792
+#: cmd/incus/config_trust.go:790
 #, c-format
 msgid "Certificate add token for %s deleted"
 msgstr "Certifikatstoken för %s borttaget"
@@ -2191,7 +2196,7 @@ msgstr "Ta bort varningar"
 msgid "Description"
 msgstr "Beskrivning"
 
-#: cmd/incus/color/color.go:34
+#: cmd/incus/color/color.go:36
 #, fuzzy
 msgid "Description:"
 msgstr "Beskrivning"
@@ -2747,7 +2752,7 @@ msgstr "Fel vid uppdatering av mallfil: %s"
 msgid "Error while executing alias expansion: %s\n"
 msgstr "Fel vid exekvering av aliasutvidgning: %s\n"
 
-#: cmd/incus/color/color.go:33
+#: cmd/incus/color/color.go:34
 #, fuzzy
 msgid "Error:"
 msgstr "Fel: %v\n"
@@ -2765,7 +2770,7 @@ msgstr "Evakuerar klustermedlem: %s"
 msgid "Event type to listen for"
 msgstr "Händelsetyp att lyssna efter"
 
-#: cmd/incus/color/color.go:38
+#: cmd/incus/color/color.go:40
 msgid "Examples:"
 msgstr ""
 
@@ -3224,12 +3229,12 @@ msgid "Failed to load configuration: %s"
 msgstr "Konfigurationen kunde inte läsas in: %s"
 
 #: cmd/incus/file.go:786 cmd/incus/storage_volume.go:2878
-#: cmd/incus/utils_sftp.go:292
+#: cmd/incus/utils_sftp.go:311
 #, c-format
 msgid "Failed to open source file %q: %v"
 msgstr "Misslyckades med att öppna källfilen %q: %v"
 
-#: cmd/incus/utils_sftp.go:73
+#: cmd/incus/utils_sftp.go:74
 #, c-format
 msgid "Failed to open target file %q: %w"
 msgstr "Misslyckades att öppna målfil %q: %w"
@@ -3325,7 +3330,7 @@ msgstr "Det gick inte att upprätta ett förtroendeförhållande med klustret: %
 msgid "Failed to update cluster member state: %w"
 msgstr "Det gick inte att uppdatera klustermedlemmens status: %w"
 
-#: cmd/incus/utils_sftp.go:256
+#: cmd/incus/utils_sftp.go:275
 #, c-format
 msgid "Failed to walk path for %s: %s"
 msgstr "Kunde inte gå sökvägen för %s: %s"
@@ -3359,7 +3364,7 @@ msgstr "Hämta säkerhetskopia av instans: %w"
 msgid "Fingerprint: %s"
 msgstr "Fingeravtryck: %s"
 
-#: cmd/incus/color/color.go:40
+#: cmd/incus/color/color.go:42
 msgid "Flags:"
 msgstr ""
 
@@ -3807,7 +3812,7 @@ msgstr ""
 msgid "Given target %q does not match source volume location %q"
 msgstr "Eftersom målet %q inte matchar källvolymens plats %q"
 
-#: cmd/incus/color/color.go:41
+#: cmd/incus/color/color.go:43
 msgid "Global Flags:"
 msgstr ""
 
@@ -6700,7 +6705,7 @@ msgstr "Ny nyckel/värde som ska tillämpas på en specifik enhet"
 msgid "No %s storage backends available"
 msgstr "Inga %s lagringsbackends tillgängliga"
 
-#: cmd/incus/config_trust.go:799
+#: cmd/incus/config_trust.go:797
 #, c-format
 msgid "No certificate add token for member %s on remote: %s"
 msgstr "Inget certifikat lägg till token för medlem %s på fjärr: %s"
@@ -7156,7 +7161,7 @@ msgstr "Protokoll: %s"
 msgid "Provided certificate path doesn't exist: %s"
 msgstr "Angiven certifikatväg finns inte: %s"
 
-#: cmd/incus/remote_unix.go:47
+#: cmd/incus/remote_unix.go:46
 msgid "Proxy timeout (exits when no connections)"
 msgstr "Proxy-timeout (avslutas när inga anslutningar finns)"
 
@@ -7187,7 +7192,7 @@ msgid "Pull files from instances"
 msgstr "Hämta filer från instanser"
 
 #: cmd/incus/file.go:582 cmd/incus/storage_volume.go:2701
-#: cmd/incus/utils_sftp.go:191
+#: cmd/incus/utils_sftp.go:210
 #, c-format
 msgid "Pulling %s from %s: %%s"
 msgstr "Drar ner %s från %s: %%s"
@@ -7201,7 +7206,7 @@ msgid "Push files into instances"
 msgstr "Skicka filer till instanser"
 
 #: cmd/incus/file.go:853 cmd/incus/storage_volume.go:2945
-#: cmd/incus/utils_sftp.go:303
+#: cmd/incus/utils_sftp.go:322
 #, c-format
 msgid "Pushing %s to %s: %%s"
 msgstr "Trycker %s till %s: %%s"
@@ -7572,7 +7577,7 @@ msgstr "Hämta instansens konsollogg"
 msgid "Retrieving image: %s"
 msgstr "Hämtar avbildning: %s"
 
-#: cmd/incus/config_trust.go:745 cmd/incus/config_trust.go:746
+#: cmd/incus/config_trust.go:744 cmd/incus/config_trust.go:745
 msgid "Revoke certificate add token"
 msgstr "Återkalla certifikat lägg till token"
 
@@ -7593,11 +7598,11 @@ msgstr "Berörda rader: %d"
 msgid "Rule description"
 msgstr "Regelbeskrivning"
 
-#: cmd/incus/remote_unix.go:41
+#: cmd/incus/remote_unix.go:40
 msgid "Run a local API proxy"
 msgstr "Kör en lokal API-proxy"
 
-#: cmd/incus/remote_unix.go:42
+#: cmd/incus/remote_unix.go:41
 msgid "Run a local API proxy for the remote"
 msgstr "Kör en lokal API-proxy för fjärrkontrollen"
 
@@ -8402,7 +8407,7 @@ msgstr "Visa de resurser som är tillgängliga för lagringspoolen"
 msgid "Show the used and free space in bytes"
 msgstr "Visa använt och ledigt utrymme i byte"
 
-#: cmd/incus/config_trust.go:814 cmd/incus/config_trust.go:815
+#: cmd/incus/config_trust.go:812 cmd/incus/config_trust.go:813
 msgid "Show trust configurations"
 msgstr "Visa förtroendekonfigurationer"
 
@@ -9052,7 +9057,7 @@ msgstr ""
 msgid "This command isn't supported on Windows"
 msgstr "Det här kommandot stöds inte i Windows"
 
-#: cmd/incus/usage/parse.go:115
+#: cmd/incus/usage/parse.go:111
 msgid ""
 "This command was called with --explain; its arguments are valid, but no "
 "further processing is done"
@@ -9207,7 +9212,7 @@ msgid "UPLOAD DATE"
 msgstr "UPPLADDNINGSDATUM"
 
 #: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:985
-#: cmd/incus/usage/usage.go:819
+#: cmd/incus/usage/usage.go:859
 msgid "URL"
 msgstr "URL"
 
@@ -9287,12 +9292,12 @@ msgstr "Okänd kolumnförkortning char '%c' i '%s'"
 msgid "Unknown console type %q"
 msgstr "Okänd konsoltyp %q"
 
-#: cmd/incus/utils_sftp.go:238
+#: cmd/incus/utils_sftp.go:257
 #, c-format
 msgid "Unknown file type '%s'"
 msgstr "Okänd filtyp '%s'"
 
-#: cmd/incus/usage/usage.go:336
+#: cmd/incus/usage/usage.go:376
 #, fuzzy, c-format
 msgid "Unknown flag --%s"
 msgstr "Okänd nyckel: %s"
@@ -9520,7 +9525,7 @@ msgstr "Uppladdad: %s"
 msgid "Upper devices"
 msgstr "Övre enheter"
 
-#: cmd/incus/color/color.go:35
+#: cmd/incus/color/color.go:37
 #, fuzzy
 msgid "Usage:"
 msgstr "Användning: %s"
@@ -9694,6 +9699,11 @@ msgstr ""
 #: cmd/incus/query.go:46
 msgid "Wait for the operation to complete"
 msgstr "Vänta tills operationen är klar"
+
+#: cmd/incus/color/color.go:35
+#, fuzzy
+msgid "Warning:"
+msgstr "Visa varning"
 
 #: cmd/incus/admin_init_interactive.go:541
 msgid ""
@@ -9874,17 +9884,17 @@ msgstr "Du måste ange ett namn på målinstansen"
 msgid "Zone description"
 msgstr "Zonbeskrivning"
 
-#: cmd/incus/usage/usage.go:769
+#: cmd/incus/usage/usage.go:809
 #, fuzzy
 msgid "address"
 msgstr "MAC-adress"
 
-#: cmd/incus/usage/usage.go:770
+#: cmd/incus/usage/usage.go:810
 #, fuzzy
 msgid "address set"
 msgstr "Addres: %s"
 
-#: cmd/incus/usage/usage.go:771
+#: cmd/incus/usage/usage.go:811
 #, fuzzy
 msgid "alias"
 msgstr "<alias>"
@@ -9893,25 +9903,25 @@ msgstr "<alias>"
 msgid "application"
 msgstr "applikation"
 
-#: cmd/incus/usage/usage.go:772
+#: cmd/incus/usage/usage.go:812
 msgid "backend"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:773
+#: cmd/incus/usage/usage.go:813
 #, fuzzy
 msgid "backup file"
 msgstr "socket-fil"
 
-#: cmd/incus/usage/usage.go:774
+#: cmd/incus/usage/usage.go:814
 msgid "bucket"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:81
+#: cmd/incus/usage/parse.go:77
 #, c-format
 msgid "cannot parse this argument; unexpected %s"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:84
+#: cmd/incus/usage/parse.go:80
 #, c-format
 msgid "cannot parse this argument; unexpected %s in %s"
 msgstr ""
@@ -9924,7 +9934,7 @@ msgstr "cert.crt"
 msgid "cert.key"
 msgstr "cert.key"
 
-#: cmd/incus/usage/usage.go:775
+#: cmd/incus/usage/usage.go:815
 msgid "client"
 msgstr ""
 
@@ -9936,7 +9946,7 @@ msgstr "kluster"
 msgid "command"
 msgstr "kommando"
 
-#: cmd/incus/usage/usage.go:776
+#: cmd/incus/usage/usage.go:816
 #, fuzzy
 msgid "command-line argument"
 msgstr "Hantera kommandoalias"
@@ -9953,12 +9963,12 @@ msgstr "nuvarande"
 msgid "description"
 msgstr "beskrivning"
 
-#: cmd/incus/usage/usage.go:777
+#: cmd/incus/usage/usage.go:817
 #, fuzzy
 msgid "device"
 msgstr "PCI-enhet:"
 
-#: cmd/incus/usage/usage.go:779
+#: cmd/incus/usage/usage.go:819
 #, fuzzy
 msgid "directory"
 msgstr "%s är inte en katalog"
@@ -9967,7 +9977,7 @@ msgstr "%s är inte en katalog"
 msgid "disabled"
 msgstr "inaktiverad"
 
-#: cmd/incus/storage.go:519 cmd/incus/usage/usage.go:780
+#: cmd/incus/storage.go:519 cmd/incus/usage/usage.go:820
 msgid "driver"
 msgstr "drivrutin"
 
@@ -9984,35 +9994,35 @@ msgstr "efemer"
 msgid "error: %v"
 msgstr "fel: %v"
 
-#: cmd/incus/usage/parse.go:99
+#: cmd/incus/usage/parse.go:95
 #, c-format
 msgid "expected %s"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:782
+#: cmd/incus/usage/usage.go:822
 msgid "expiry"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:783
+#: cmd/incus/usage/usage.go:823
 #, fuzzy
 msgid "file"
 msgstr "Profiler:"
 
-#: cmd/incus/usage/usage.go:784
+#: cmd/incus/usage/usage.go:824
 #, fuzzy
 msgid "filter"
 msgstr "VLAN-filtrering"
 
-#: cmd/incus/usage/usage.go:785
+#: cmd/incus/usage/usage.go:825
 #, fuzzy
 msgid "fingerprint"
 msgstr "Fingeravtryck: %s"
 
-#: cmd/incus/usage/usage.go:786
+#: cmd/incus/usage/usage.go:826
 msgid "group"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:787
+#: cmd/incus/usage/usage.go:827
 #, fuzzy
 msgid "image"
 msgstr "Lista avbilder"
@@ -11004,30 +11014,30 @@ msgstr ""
 msgid "info"
 msgstr "info"
 
-#: cmd/incus/usage/usage.go:788
+#: cmd/incus/usage/usage.go:828
 #, fuzzy
 msgid "instance"
 msgstr "Lista instanser"
 
-#: cmd/incus/usage/usage.go:789
+#: cmd/incus/usage/usage.go:829
 #, fuzzy
 msgid "interface"
 msgstr "Värdgränssnitt"
 
-#: cmd/incus/usage/usage.go:792
+#: cmd/incus/usage/usage.go:832
 msgid "key"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:790
+#: cmd/incus/usage/usage.go:830
 #, fuzzy
 msgid "listen address"
 msgstr "Saknad lyssningsadress"
 
-#: cmd/incus/usage/usage.go:791
+#: cmd/incus/usage/usage.go:831
 msgid "listen port"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:794
+#: cmd/incus/usage/usage.go:834
 msgid "member"
 msgstr ""
 
@@ -11039,12 +11049,12 @@ msgstr "n"
 msgid "name"
 msgstr "namn"
 
-#: cmd/incus/usage/usage.go:795
+#: cmd/incus/usage/usage.go:835
 #, fuzzy
 msgid "network"
 msgstr "Ta bort nätverk"
 
-#: cmd/incus/usage/usage.go:796
+#: cmd/incus/usage/usage.go:836
 #, fuzzy
 msgid "network integration"
 msgstr "nätverk eller integration"
@@ -11053,7 +11063,7 @@ msgstr "nätverk eller integration"
 msgid "network or integration"
 msgstr "nätverk eller integration"
 
-#: cmd/incus/usage/usage.go:854
+#: cmd/incus/usage/usage.go:894
 #, fuzzy, c-format
 msgid "new %s name"
 msgstr "Nätverksnamn"
@@ -11063,7 +11073,7 @@ msgstr "Nätverksnamn"
 msgid "no"
 msgstr "nej"
 
-#: cmd/incus/usage/parse.go:54
+#: cmd/incus/usage/parse.go:50
 #, c-format
 msgid "not enough arguments; expected a value for %s"
 msgstr ""
@@ -11072,34 +11082,38 @@ msgstr ""
 msgid "ok (y/n/[fingerprint])?"
 msgstr "ok (y/n/[fingeravtryck])?"
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 #, c-format
 msgid "one of %s or %s"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:797
+#: cmd/incus/usage/usage.go:837
 #, fuzzy
 msgid "operation"
 msgstr "applikation"
 
-#: cmd/incus/usage/usage.go:798
+#: cmd/incus/usage/usage.go:838
 #, fuzzy
 msgid "path"
 msgstr "API-sökväg"
 
-#: cmd/incus/usage/usage.go:799
+#: cmd/incus/usage/usage.go:839
 msgid "peer"
+msgstr ""
+
+#: cmd/incus/usage/legacysupport.go:8
+msgid "please switch to the “<key>=<value>” syntax"
 msgstr ""
 
 #: cmd/incus/config.go:55
 msgid "please use `incus profile`"
 msgstr "använd `incus profile`"
 
-#: cmd/incus/usage/usage.go:800
+#: cmd/incus/usage/usage.go:840
 msgid "pool"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:801
+#: cmd/incus/usage/usage.go:841
 msgid "port"
 msgstr ""
 
@@ -11107,35 +11121,35 @@ msgstr ""
 msgid "preseed.yaml"
 msgstr "preseed.yaml"
 
-#: cmd/incus/usage/usage.go:802
+#: cmd/incus/usage/usage.go:842
 #, fuzzy
 msgid "profile"
 msgstr "Profiler:"
 
-#: cmd/incus/usage/usage.go:803
+#: cmd/incus/usage/usage.go:843
 #, fuzzy
 msgid "project"
 msgstr "Alla projekt"
 
-#: cmd/incus/usage/usage.go:804
+#: cmd/incus/usage/usage.go:844
 #, fuzzy
 msgid "protocol"
 msgstr "Protokoll: %s"
 
-#: cmd/incus/usage/usage.go:805
+#: cmd/incus/usage/usage.go:845
 msgid "query"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:806
+#: cmd/incus/usage/usage.go:846
 msgid "record"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:807
+#: cmd/incus/usage/usage.go:847
 #, fuzzy
 msgid "remote"
 msgstr "<fjärr>"
 
-#: cmd/incus/usage/usage.go:811
+#: cmd/incus/usage/usage.go:851
 msgid "role"
 msgstr ""
 
@@ -11143,12 +11157,12 @@ msgstr ""
 msgid "rootfs tarball"
 msgstr "rootfs-tarball"
 
-#: cmd/incus/usage/usage.go:812
+#: cmd/incus/usage/usage.go:852
 #, fuzzy
 msgid "snapshot"
 msgstr "Ögonblicksbilder:"
 
-#: cmd/incus/remote_unix.go:36
+#: cmd/incus/remote_unix.go:35
 msgid "socket file"
 msgstr "socket-fil"
 
@@ -11170,29 +11184,29 @@ msgstr "sshfs monterar %q på %q"
 msgid "stdin can only be used once, with no other source arguments"
 msgstr "--all kan inte användas tillsammans med andra argument"
 
-#: cmd/incus/usage/usage.go:814
+#: cmd/incus/usage/usage.go:854
 msgid "symlink target path"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:815
+#: cmd/incus/usage/usage.go:855
 #, fuzzy
 msgid "tarball"
 msgstr "rootfs-tarball"
 
-#: cmd/incus/usage/usage.go:860
+#: cmd/incus/usage/usage.go:900
 #, fuzzy, c-format
 msgid "target %s"
 msgstr "<mål>"
 
-#: cmd/incus/usage/usage.go:816
+#: cmd/incus/usage/usage.go:856
 msgid "template"
 msgstr ""
 
-#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:817
+#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:857
 msgid "token"
 msgstr "token"
 
-#: cmd/incus/usage/parse.go:71
+#: cmd/incus/usage/parse.go:67
 #, c-format
 msgid "too many arguments; unexpected %s"
 msgstr ""
@@ -11201,21 +11215,21 @@ msgstr ""
 msgid "total space"
 msgstr "totalt utrymme"
 
-#: cmd/incus/usage/usage.go:813 cmd/incus/usage/usage.go:818
+#: cmd/incus/usage/usage.go:853 cmd/incus/usage/usage.go:858
 msgid "type"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:95
+#: cmd/incus/usage/parse.go:91
 #, fuzzy, c-format
 msgid "unexpected %s"
 msgstr "Länk upptäckt: %v"
 
-#: cmd/incus/usage/parse.go:102
+#: cmd/incus/usage/parse.go:98
 #, c-format
 msgid "unexpected %s; expected %s"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:51
+#: cmd/incus/usage/parse.go:47
 msgid "unexpected end of argument; did you forget a suffix?"
 msgstr ""
 
@@ -11227,16 +11241,16 @@ msgstr "går inte att nå"
 msgid "used by"
 msgstr "används av"
 
-#: cmd/incus/usage/usage.go:820
+#: cmd/incus/usage/usage.go:860
 msgid "value"
 msgstr ""
 
-#: cmd/incus/usage/usage.go:821
+#: cmd/incus/usage/usage.go:861
 #, fuzzy
 msgid "volume"
 msgstr "Kolumner"
 
-#: cmd/incus/usage/usage.go:822
+#: cmd/incus/usage/usage.go:862
 msgid "warning UUID"
 msgstr ""
 
@@ -11250,11 +11264,11 @@ msgstr "j"
 msgid "yes"
 msgstr "ja"
 
-#: cmd/incus/usage/usage.go:823
+#: cmd/incus/usage/usage.go:863
 msgid "zone"
 msgstr ""
 
-#: cmd/incus/usage/parse.go:25
+#: cmd/incus/usage/utils.go:52
 #, c-format
 msgid "“%s”"
 msgstr ""
