@@ -1,9 +1,8 @@
 package storage
 
 import (
-	"archive/zip"
-	"bytes"
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -11,6 +10,7 @@ import (
 	"io"
 	"io/fs"
 	"maps"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -23,7 +23,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/minio/minio-go/v7"
 	"go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
 
@@ -4289,10 +4288,6 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 		return errors.New("Storage pool does not support buckets")
 	}
 
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
-
 	// Validate config and create database entry for new storage bucket.
 	reverter := revert.New()
 	defer reverter.Fail()
@@ -4311,7 +4306,7 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 	// Create the bucket on the storage device.
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
+		// Handle common implementation for local storage drivers.
 		err := b.driver.CreateVolume(bucketVol, nil, op)
 		if err != nil {
 			return err
@@ -4319,33 +4314,11 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 		reverter.Add(func() { _ = b.driver.DeleteVolume(bucketVol, op) })
 
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// Initialise the on-disk layout for the in-process S3 handler.
+		err = b.initLocalBucketLayout(projectName, bucket.Name, op)
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed initialising bucket on storage: %w", err)
 		}
-
-		s3Client, err := minioProc.S3Client()
-		if err != nil {
-			return err
-		}
-
-		bucketExists, err := s3Client.BucketExists(ctx, bucket.Name)
-		if err != nil {
-			return fmt.Errorf("Failed checking if bucket exists: %w", err)
-		}
-
-		if bucketExists {
-			return api.StatusErrorf(http.StatusConflict, "A bucket for that name already exists")
-		}
-
-		// Create new bucket.
-		err = s3Client.MakeBucket(ctx, bucket.Name, minio.MakeBucketOptions{})
-		if err != nil {
-			return fmt.Errorf("Failed creating bucket: %w", err)
-		}
-
-		reverter.Add(func() { _ = s3Client.RemoveBucket(ctx, bucket.Name) })
 	} else {
 		// Handle per-driver implementation for remote storage drivers.
 		err = b.driver.CreateBucket(bucketVol, op)
@@ -4356,6 +4329,61 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 	reverter.Success()
 	return nil
+}
+
+func generateLocalBucketKey(accessKey, secretKey string) (*drivers.S3Credentials, error) {
+	const accessKeyAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const secretKeyAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+	randomString := func(alphabet string, n int) (string, error) {
+		out := make([]byte, n)
+		maxChar := big.NewInt(int64(len(alphabet)))
+
+		for i := range out {
+			idx, err := rand.Int(rand.Reader, maxChar)
+			if err != nil {
+				return "", err
+			}
+
+			out[i] = alphabet[idx.Int64()]
+		}
+
+		return string(out), nil
+	}
+
+	if accessKey == "" {
+		key, err := randomString(accessKeyAlphabet, 20)
+		if err != nil {
+			return nil, fmt.Errorf("Failed generating access key: %w", err)
+		}
+
+		accessKey = key
+	}
+
+	if secretKey == "" {
+		key, err := randomString(secretKeyAlphabet, 40)
+		if err != nil {
+			return nil, fmt.Errorf("Failed generating secret key: %w", err)
+		}
+
+		secretKey = key
+	}
+
+	return &drivers.S3Credentials{AccessKey: accessKey, SecretKey: secretKey}, nil
+}
+
+// initLocalBucketLayout mounts the bucket volume and ensures the data/
+// directory exists so that the in-process S3 handler can serve writes
+// against it.
+func (b *backend) initLocalBucketLayout(projectName, bucketName string, op *operations.Operation) error {
+	mountPath, unmount, err := b.MountLocalBucket(projectName, bucketName, op)
+	if err != nil {
+		return err
+	}
+
+	defer func() { _ = unmount() }()
+
+	return os.MkdirAll(filepath.Join(mountPath, "data"), 0o700)
 }
 
 // UpdateBucket updates an object bucket.
@@ -4424,19 +4452,6 @@ func (b *backend) UpdateBucket(projectName string, bucketName string, bucket api
 	changedConfig, userOnly := b.detectChangedConfig(curBucket.Config, bucket.Config)
 	if len(changedConfig) > 0 && !userOnly {
 		if memberSpecific {
-			// Stop MinIO process if running so volume can be resized if needed.
-			minioProc, err := miniod.Get(curBucketVol.Name())
-			if err != nil {
-				return err
-			}
-
-			if minioProc != nil {
-				err = minioProc.Stop(context.Background())
-				if err != nil {
-					return fmt.Errorf("Failed stopping bucket: %w", err)
-				}
-			}
-
 			err = b.driver.UpdateVolume(curBucketVol, changedConfig)
 			if err != nil {
 				return err
@@ -4491,21 +4506,7 @@ func (b *backend) DeleteBucket(projectName string, bucketName string, op *operat
 	bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, bucket.Config)
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Stop MinIO process if running.
-		minioProc, err := miniod.Get(bucketVolName)
-		if err != nil {
-			return err
-		}
-
-		if minioProc != nil {
-			err = minioProc.Stop(context.Background())
-			if err != nil {
-				return fmt.Errorf("Failed stopping bucket: %w", err)
-			}
-		}
-
+		// Handle common implementation for local storage drivers.
 		vol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, nil)
 		err = b.driver.DeleteVolume(vol, op)
 		if err != nil {
@@ -4569,132 +4570,13 @@ func (b *backend) ImportBucket(projectName string, poolVol *backupConfig.Config,
 
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
-	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Extract existing bucket keys from MinIO.
-		keys, err := b.recoverMinIOKeys(projectName, bucket.Name, op)
-		if err != nil {
-			return nil, err
-		}
-
-		// Insert keys into the database.
-		for _, key := range keys {
-			var keyID int64
-
-			err := b.state.DB.Cluster.Transaction(b.state.ShutdownCtx, func(ctx context.Context, tx *db.ClusterTx) error {
-				keyID, err = tx.CreateStoragePoolBucketKey(ctx, bucketID, key)
-
-				return err
-			})
-			if err != nil {
-				return nil, err
-			}
-
-			reverter.Add(func() {
-				_ = b.state.DB.Cluster.Transaction(b.state.ShutdownCtx, func(ctx context.Context, tx *db.ClusterTx) error {
-					return tx.DeleteStoragePoolBucketKey(ctx, bucketID, keyID)
-				})
-			})
-		}
-	} else {
+	if !memberSpecific {
 		return nil, errors.New("Importing buckets from a remote storage is not supported")
 	}
 
 	cleanup := reverter.Clone().Fail
 	reverter.Success()
 	return cleanup, nil
-}
-
-// recoverMinIOKeys retrieves existing bucket keys from MinIO for each service account associated with the given bucket.
-func (b *backend) recoverMinIOKeys(projectName string, bucketName string, op *operations.Operation) ([]api.StorageBucketKeysPost, error) {
-	// Start minio process.
-	minioProc, err := b.ActivateBucket(projectName, bucketName, op)
-	if err != nil {
-		return nil, err
-	}
-
-	// Initialize minio client object.
-	adminClient, err := minioProc.AdminClient()
-	if err != nil {
-		return nil, err
-	}
-
-	ctx, ctxCancel := context.WithTimeout(b.state.ShutdownCtx, time.Duration(time.Second*30))
-	defer ctxCancel()
-
-	// Export IAM data (response is ZIP file).
-	iamBytes, err := adminClient.ExportIAM(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	iamZipReader, err := zip.NewReader(bytes.NewReader(iamBytes), int64(len(iamBytes)))
-	if err != nil {
-		return nil, err
-	}
-
-	// We are interested only in a json file that contains service accounts.
-	// Find that file and extract service accounts.
-	svcAccounts := map[string]miniod.AddServiceAccountResp{}
-	for _, file := range iamZipReader.File {
-		if file.Name != "iam-assets/svcaccts.json" {
-			continue
-		}
-
-		f, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-
-		defer f.Close()
-
-		fContent, err := io.ReadAll(f)
-		if err != nil {
-			return nil, err
-		}
-
-		err = json.Unmarshal(fContent, &svcAccounts)
-		if err != nil {
-			return nil, err
-		}
-
-		break
-	}
-
-	var recoveredKeys []api.StorageBucketKeysPost
-
-	// Extract bucket keys for each service account.
-	for _, creds := range svcAccounts {
-		svcAccountInfo, err := adminClient.InfoServiceAccount(ctx, creds.AccessKey)
-		if err != nil {
-			return nil, err
-		}
-
-		jsonBytes, err := json.Marshal(svcAccountInfo.Policy)
-		if err != nil {
-			return nil, err
-		}
-
-		bucketRole, err := s3.BucketPolicyRole(bucketName, string(jsonBytes))
-		if err != nil {
-			return nil, err
-		}
-
-		key := api.StorageBucketKeysPost{
-			Name: creds.AccessKey,
-			StorageBucketKeyPut: api.StorageBucketKeyPut{
-				Description: "Recovered bucket key",
-				Role:        bucketRole,
-				AccessKey:   creds.AccessKey,
-				SecretKey:   creds.SecretKey,
-			},
-		}
-
-		recoveredKeys = append(recoveredKeys, key)
-	}
-
-	return recoveredKeys, nil
 }
 
 // CreateBucketKey creates an object bucket key.
@@ -4711,10 +4593,6 @@ func (b *backend) CreateBucketKey(projectName string, bucketName string, key api
 	if !b.Driver().Info().Buckets {
 		return nil, errors.New("Storage pool does not support buckets")
 	}
-
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
 
 	reverter := revert.New()
 	defer reverter.Fail()
@@ -4747,34 +4625,11 @@ func (b *backend) CreateBucketKey(projectName string, bucketName string, key api
 	var newCreds *drivers.S3Credentials
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// For local buckets the credentials are stored solely in the
+		// Incus database; generate any missing fields here.
+		newCreds, err = generateLocalBucketKey(key.AccessKey, key.SecretKey)
 		if err != nil {
 			return nil, err
-		}
-
-		bucketPolicy, err := s3.BucketPolicy(bucket.Name, key.Role)
-		if err != nil {
-			return nil, err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return nil, err
-		}
-
-		adminCreds, err := adminClient.AddServiceAccount(ctx, minioProc.AdminUser(), key.AccessKey, key.SecretKey, bucketPolicy)
-		if err != nil {
-			return nil, err
-		}
-
-		reverter.Add(func() { _ = adminClient.DeleteServiceAccount(ctx, adminCreds.AccessKey) })
-
-		newCreds = &drivers.S3Credentials{
-			AccessKey: adminCreds.AccessKey,
-			SecretKey: adminCreds.SecretKey,
 		}
 	} else {
 		// Handle per-driver implementation for remote storage drivers.
@@ -4825,10 +4680,6 @@ func (b *backend) UpdateBucketKey(projectName string, bucketName string, keyName
 	if !b.Driver().Info().Buckets {
 		return errors.New("Storage pool does not support buckets")
 	}
-
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
 
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
@@ -4885,43 +4736,11 @@ func (b *backend) UpdateBucketKey(projectName string, bucketName string, keyName
 	}
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// For local buckets the key fields are stored only in the DB;
+		// generate any missing values here.
+		newCreds, err := generateLocalBucketKey(creds.AccessKey, creds.SecretKey)
 		if err != nil {
 			return err
-		}
-
-		bucketPolicy, err := s3.BucketPolicy(bucket.Name, key.Role)
-		if err != nil {
-			return err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return err
-		}
-
-		// Delete service account if exists (this allows changing the access key).
-		_ = adminClient.DeleteServiceAccount(ctx, curBucketKey.AccessKey)
-
-		newCreds, err := adminClient.AddServiceAccount(ctx, minioProc.AdminUser(), creds.AccessKey, creds.SecretKey, bucketPolicy)
-		if err != nil {
-			return err
-		}
-
-		if creds.SecretKey != "" && newCreds.AccessKey != creds.SecretKey {
-			// There seems to be a bug in MinIO where if the AccessKey isn't specified for a new
-			// service account but a secret key is, *both* the AccessKey and the SecreyKey are randomly
-			// generated, even though it should only have been the AccessKey.
-			// So detect this and update the SecretKey back to what it should have been.
-			err := adminClient.UpdateServiceAccount(ctx, newCreds.AccessKey, creds.SecretKey, bucketPolicy)
-			if err != nil {
-				return err
-			}
-
-			newCreds.SecretKey = creds.SecretKey
 		}
 
 		key.AccessKey = newCreds.AccessKey
@@ -4963,10 +4782,6 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 		return errors.New("Storage pool does not support buckets")
 	}
 
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
-
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
 	var bucket *db.StorageBucket
@@ -4988,25 +4803,7 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 		return err
 	}
 
-	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
-		if err != nil {
-			return err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return err
-		}
-
-		err = adminClient.DeleteServiceAccount(ctx, bucketKey.AccessKey)
-		if err != nil {
-			return err
-		}
-	} else {
+	if !memberSpecific {
 		// Handle per-driver implementation for remote storage drivers.
 		bucketVolName := project.StorageVolume(projectName, bucket.Name)
 		bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, bucket.Config)
