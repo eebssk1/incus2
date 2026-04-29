@@ -115,6 +115,7 @@ type Pool interface {
 	UpdateBucketKey(projectName string, bucketName string, keyName string, key api.StorageBucketKeyPut, op *operations.Operation) error
 	DeleteBucketKey(projectName string, bucketName string, keyName string, op *operations.Operation) error
 	ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error)
+	MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error)
 	GetBucketURL(bucketName string) *url.URL
 	GenerateBucketBackupConfig(projectName string, bucketName string, op *operations.Operation) (*backupConfig.Config, error)
 	BackupBucket(projectName string, bucketName string, tarWriter *instancewriter.InstanceTarWriter, op *operations.Operation) error

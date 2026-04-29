@@ -278,6 +278,12 @@ func (b *mockBackend) ActivateBucket(projectName string, bucketName string, op *
 	return nil, nil
 }
 
+// MountLocalBucket mounts the local bucket volume and returns its mount path
+// along with an unmount function that the caller must invoke when finished.
+func (b *mockBackend) MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error) {
+	return "", func() error { return nil }, nil
+}
+
 func (b *mockBackend) GetBucketURL(bucketName string) *url.URL {
 	return nil
 }

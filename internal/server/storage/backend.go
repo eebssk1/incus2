@@ -5044,6 +5044,37 @@ func (b *backend) ActivateBucket(projectName string, bucketName string, op *oper
 	return miniod.EnsureRunning(b.state, bucketVol)
 }
 
+// MountLocalBucket mounts the local bucket volume and returns its mount path
+// along with an unmount function that the caller must invoke when finished.
+func (b *backend) MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error) {
+	if !b.Driver().Info().Buckets {
+		return "", nil, errors.New("Storage pool does not support buckets")
+	}
+
+	if b.Driver().Info().Remote {
+		return "", nil, errors.New("Remote buckets cannot be mounted locally")
+	}
+
+	bucketVolName := project.StorageVolume(projectName, bucketName)
+	bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, nil)
+
+	err := b.driver.MountVolume(bucketVol, op)
+	if err != nil {
+		return "", nil, err
+	}
+
+	unmount := func() error {
+		_, err := b.driver.UnmountVolume(bucketVol, false, op)
+		if err != nil && !errors.Is(err, drivers.ErrInUse) {
+			return err
+		}
+
+		return nil
+	}
+
+	return bucketVol.MountPath(), unmount, nil
+}
+
 // GetBucketURL returns S3 URL for bucket.
 func (b *backend) GetBucketURL(bucketName string) *url.URL {
 	err := b.isStatusReady()
