@@ -47,6 +47,12 @@ type Credential struct {
 type Server struct {
 	bucketDir string
 	creds     []Credential
+
+	// OnAuthenticated, if set, is invoked once the request has been
+	// authenticated and authorised, before any data on disk is touched.
+	// Errors are returned to the client as an internal-error response and
+	// dispatch is aborted.
+	OnAuthenticated func() error
 }
 
 // NewServer returns a Server rooted at bucketDir.
@@ -99,6 +105,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Message: "Operation not permitted by credential role.",
 		}).Response(w)
 		return
+	}
+
+	if s.OnAuthenticated != nil {
+		err := s.OnAuthenticated()
+		if err != nil {
+			(&s3.Error{Code: s3.ErrorCodeInternalError, Message: err.Error()}).Response(w)
+			return
+		}
 	}
 
 	if objectKey == "" {

@@ -393,6 +393,14 @@ func serveLocalBucket(d *Daemon, w http.ResponseWriter, r *http.Request, bucket 
 	}()
 
 	srv := local.NewServer(bucketDir, creds)
+
+	// Migrate any data left over from the legacy minio layout, but only
+	// once the request has cleared authentication. This is a no-op once
+	// the bucket has been migrated.
+	srv.OnAuthenticated = func() error {
+		return local.MigrateMinioBucket(bucketDir, bucket.Name)
+	}
+
 	srv.ServeHTTP(w, r)
 }
 

@@ -1,8 +1,11 @@
 package local
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"time"
@@ -61,4 +64,47 @@ func removeMeta(metaPath string) error {
 	}
 
 	return nil
+}
+
+func loadOrInferMeta(dataPath string) (*objectMeta, error) {
+	meta, err := readMeta(metaPathFor(dataPath))
+	if err == nil {
+		return meta, nil
+	}
+
+	if !errors.Is(err, fs.ErrNotExist) {
+		return nil, err
+	}
+
+	st, err := os.Stat(dataPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if st.IsDir() {
+		return nil, fs.ErrNotExist
+	}
+
+	f, err := os.Open(dataPath)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() { _ = f.Close() }()
+
+	hasher := md5.New()
+	_, err = io.Copy(hasher, f)
+	if err != nil {
+		return nil, err
+	}
+
+	meta = &objectMeta{
+		ETag:    hex.EncodeToString(hasher.Sum(nil)),
+		Size:    st.Size(),
+		LastMod: st.ModTime().UTC(),
+	}
+
+	_ = writeMeta(metaPathFor(dataPath), meta)
+
+	return meta, nil
 }

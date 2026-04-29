@@ -117,9 +117,9 @@ func (s *Server) listObjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dataPath := filepath.Join(s.dataDir(), k)
-		meta, err := readMeta(metaPathFor(dataPath))
+		meta, err := loadOrInferMeta(dataPath)
 		if err != nil {
-			// Object data exists but metadata is missing — skip.
+			// Data file vanished between walk and stat.
 			continue
 		}
 

@@ -43,7 +43,7 @@ func (s *Server) headObject(w http.ResponseWriter, r *http.Request, key string) 
 		return
 	}
 
-	meta, err := readMeta(metaPathFor(dataPath))
+	meta, err := loadOrInferMeta(dataPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			(&s3.Error{Code: s3.ErrorCodeNoSuchBucket, Message: "Object not found."}).Response(w)
@@ -65,7 +65,7 @@ func (s *Server) getObject(w http.ResponseWriter, r *http.Request, key string) {
 		return
 	}
 
-	meta, err := readMeta(metaPathFor(dataPath))
+	meta, err := loadOrInferMeta(dataPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			(&s3.Error{Code: s3.ErrorCodeNoSuchBucket, Message: "Object not found."}).Response(w)
