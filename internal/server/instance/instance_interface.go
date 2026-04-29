@@ -257,6 +257,7 @@ type MigrateSendArgs struct {
 	MigrateArgs
 
 	AllowInconsistent bool
+	Devices           api.DevicesMap
 }
 
 // MigrateReceiveArgs represent arguments for instance migration receive.

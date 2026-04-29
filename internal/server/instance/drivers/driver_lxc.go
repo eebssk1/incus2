@@ -5909,7 +5909,7 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots)
+	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.ClusterMoveSourceName != "")
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 		op.Done(err)
@@ -5958,7 +5958,7 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true)
 	if err != nil {
 		err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 		op.Done(err)
@@ -5968,7 +5968,7 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 	d.logger.Debug("Generate dependent volumes args")
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], nil))
 	}
 
 	volSourceArgs := &localMigration.VolumeSourceArgs{
@@ -6547,7 +6547,8 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	// Add CRIU info to response.
 	respHeader.Criu = criuType
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots)
+	localDevices := d.LocalDevices().CloneNative()
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false)
 	if err != nil {
 		return fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 	}
@@ -6555,7 +6556,8 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
 		respHeader.DependentVolumes = append(respHeader.DependentVolumes, volWithType.Volume)
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		vol := localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], localDevices[*volWithType.Volume.DeviceName])
+		dependentVolumes = append(dependentVolumes, vol)
 	}
 
 	if args.Refresh {
