@@ -702,7 +702,7 @@ type cmdConfigTrustRemove struct {
 	configTrust *cmdConfigTrust
 }
 
-var cmdConfigTrustRemoveUsage = u.Usage{u.LegacyRemote(u.Fingerprint)}
+var cmdConfigTrustRemoveUsage = u.Usage{u.Fingerprint.Remote()}
 
 func (c *cmdConfigTrustRemove) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -722,7 +722,6 @@ func (c *cmdConfigTrustRemove) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	u.LegacyRemoteSynthesize(parsed[0])
 	d := parsed[0].RemoteServer
 	fingerprint := parsed[0].RemoteObject.String
 
@@ -737,7 +736,7 @@ type cmdConfigTrustRevokeToken struct {
 	configTrust *cmdConfigTrust
 }
 
-var cmdConfigTrustRevokeTokenUsage = u.Usage{u.LegacyRemote(u.Token)}
+var cmdConfigTrustRevokeTokenUsage = u.Usage{u.Token.Remote()}
 
 func (c *cmdConfigTrustRevokeToken) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -756,7 +755,6 @@ func (c *cmdConfigTrustRevokeToken) run(cmd *cobra.Command, args []string) error
 		return err
 	}
 
-	u.LegacyRemoteSynthesize(parsed[0])
 	d := parsed[0].RemoteServer
 	remoteName := parsed[0].RemoteName
 	token := parsed[0].RemoteObject.String
