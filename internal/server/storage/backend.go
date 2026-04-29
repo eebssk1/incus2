@@ -1206,21 +1206,26 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 			}
 		}
 
-		dependentVolumesOffer, err := GenerateDependentVolumesOffer(b.state, srcConfig, inst.Project().Name, snapshots)
+		newDevices := inst.LocalDevices().CloneNative()
+		dependentVolumesOffer, err := GenerateDependentVolumesOffer(b.state, srcConfig, inst.Project().Name, snapshots, newDevices, false)
 		if err != nil {
 			err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 			return err
 		}
 
-		volumesWithTypes, err := DependentVolumesMatchMigrationType(b.state, dependentVolumesOffer, snapshots)
+		volumesWithTypes, err := DependentVolumesMatchMigrationType(b.state, dependentVolumesOffer, snapshots, newDevices, false)
 		if err != nil {
 			err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 			return err
 		}
 
-		dependentVolumes := []localMigration.DependentVolumeArgs{}
+		srcDependentVolumes := []localMigration.DependentVolumeArgs{}
+		dstDependentVolumes := []localMigration.DependentVolumeArgs{}
 		for _, volWithType := range volumesWithTypes {
-			dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+			srcDependentVolumes = append(srcDependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], nil))
+
+			vol := localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], newDevices[*volWithType.Volume.DeviceName])
+			dstDependentVolumes = append(dstDependentVolumes, vol)
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -1245,7 +1250,7 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 				VolumeOnly:         !snapshots,
 				Info:               &localMigration.Info{Config: srcConfig},
 				StorageMove:        true,
-				DependentVolumes:   dependentVolumes,
+				DependentVolumes:   srcDependentVolumes,
 			}, op)
 		})
 
@@ -1259,7 +1264,7 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 				TrackProgress:      false,         // Do not use a progress tracker on receiver.
 				VolumeOnly:         !snapshots,
 				StoragePool:        srcPool.Name(),
-				DependentVolumes:   dependentVolumes,
+				DependentVolumes:   dstDependentVolumes,
 			}, op)
 		})
 
@@ -9583,9 +9588,7 @@ func (b *backend) migrateDependentVolumes(inst instance.Instance, conn io.ReadWr
 			return fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMove) {
-			continue
-		}
+		b.logger.Debug("migrateDependentVolumes", logger.Ctx{"name": dependentVol.Name, "pool": dependentVol.Pool, "deviceName": dependentVol.DeviceName, "type": dependentVol.MigrationType})
 
 		diskConfig, err := diskPool.GenerateCustomVolumeBackupConfig(inst.Project().Name, dependentVol.Name, !args.VolumeOnly, op)
 		if err != nil {
@@ -9638,34 +9641,16 @@ func (b *backend) createDependentVolumesFromMigration(inst instance.Instance, co
 
 	reverter.Add(func() { cleanup() })
 
-	devicesMap := DevicesMapFromBackupConfig(info.Config)
-
 	for idx, dependentVol := range args.DependentVolumes {
-		devices := inst.ExpandedDevices().Clone()
-		deviceName := DeviceByPoolAndVolume(devicesMap, dependentVol.Pool, dependentVol.Name)
-		if deviceName == "" {
-			return nil, fmt.Errorf("%s/%s does not exists in source device", dependentVol.Pool, dependentVol.Name)
-		}
-
-		dev, ok := devices[deviceName]
-		if !ok {
-			return nil, fmt.Errorf("Device %s not found for instance %s", deviceName, inst.Name())
-		}
-
-		newDiskPoolName := dev["pool"]
-		diskPool, err := LoadByName(b.state, newDiskPoolName)
+		diskPool, err := LoadByName(b.state, dependentVol.Pool)
 		if err != nil {
 			return nil, fmt.Errorf("Failed loading storage pool: %w", err)
-		}
-
-		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
-			continue
 		}
 
 		b.logger.Debug("createDependentVolumesFromMigration", logger.Ctx{"name": dependentVol.Name, "type": dependentVol.MigrationType, "size": dependentVol.VolumeSize})
 		volumeArgs := localMigration.VolumeTargetArgs{
 			IndexHeaderVersion: localMigration.IndexHeaderVersion,
-			Name:               dev["source"],
+			Name:               dependentVol.Name,
 			MigrationType:      dependentVol.MigrationType,
 			TrackProgress:      true,
 			ContentType:        dependentVol.ContentType,
