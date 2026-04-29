@@ -40,7 +40,7 @@ func (d Nftables) String() string {
 
 // Compat returns whether the driver backend is in use, and any host compatibility errors.
 func (d Nftables) Compat() (bool, error) {
-	// Check if nftables nft command exists, if not use xtables.
+	// Check if nftables nft command exists.
 	_, err := exec.LookPath("nft")
 	if err != nil {
 		return false, fmt.Errorf("Backend command %q missing", "nft")
@@ -1223,7 +1223,7 @@ func (d Nftables) aclRuleSubjectToACLMatch(direction string, ipVersion uint, sub
 }
 
 // aclRulePortToACLMatch converts protocol (tcp/udp), direction (sports/dports) and port criteria list into
-// xtables args.
+// nftables args.
 func (d Nftables) aclRulePortToACLMatch(direction string, portCriteria ...string) []string {
 	fieldParts := make([]string, 0, len(portCriteria))
 

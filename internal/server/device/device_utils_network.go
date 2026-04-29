@@ -595,10 +595,6 @@ func networkSetupHostVethLimits(d *deviceCommon, oldConfig deviceConfig.Device, 
 
 	if oldConfig == nil || oldConfig["limits.priority"] != d.config["limits.priority"] {
 		if networkPriority != 0 {
-			if bridged && d.state.Firewall.String() == "xtables" {
-				return errors.New("Failed to setup instance device network priority. The xtables firewall driver does not support required functionality.")
-			}
-
 			err = d.state.Firewall.InstanceSetupNetPrio(d.inst.Project().Name, d.inst.Name(), veth, uint32(networkPriority))
 			if err != nil {
 				return fmt.Errorf("Failed to setup instance device network priority: %w", err)
