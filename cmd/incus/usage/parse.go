@@ -21,10 +21,6 @@ import (
 // their arguments are parsed.
 var ExplainOnly = false
 
-func quote(s string) string {
-	return fmt.Sprintf(i18n.G("“%s”"), s)
-}
-
 func formatAlternatives(alternatives []string) string {
 	n := len(alternatives)
 	if n == 1 {

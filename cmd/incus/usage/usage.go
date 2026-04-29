@@ -2,6 +2,7 @@ package usage
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	incus "github.com/lxc/incus/v6/client"
+	cliColor "github.com/lxc/incus/v6/cmd/incus/color"
 	"github.com/lxc/incus/v6/internal/i18n"
 	"github.com/lxc/incus/v6/shared/cliconfig"
 )
@@ -312,6 +314,44 @@ func (c compound) Render() string {
 // Remote prefixes the atom with a remote.
 func (c compound) Remote() Atom {
 	return remote{Remote, c, true}
+}
+
+// deprecated represents an atom whose usage is deprecated.
+type deprecated struct {
+	atom    Atom
+	warning string
+}
+
+// List makes the atom accept a list.
+func (d deprecated) List(minOccurrences int, separator ...string) Atom {
+	return deprecated{d.atom.List(minOccurrences, separator...), d.warning}
+}
+
+// Optional makes the atom optional.
+func (d deprecated) Optional(chain ...Atom) Atom {
+	return deprecated{d.atom.Optional(chain...), d.warning}
+}
+
+// Parse parses the atom.
+func (d deprecated) Parse(conf *cliconfig.Config, cmd *cobra.Command, servers map[string]incus.InstanceServer, args *[]string, parseRTL bool) (*Parsed, error) {
+	parsed, err := d.atom.Parse(conf, cmd, servers, args, parseRTL)
+	if err != nil {
+		return nil, err
+	}
+
+	syntax := renderRaw(d.atom)
+	fmt.Fprintf(os.Stderr, i18n.G("%s the %s syntax is deprecated; %s\n"), cliColor.WarningPrefix, quote(syntax), d.warning)
+	return parsed, nil
+}
+
+// Render renders the atom's usage string.
+func (d deprecated) Render() string {
+	return d.atom.Render()
+}
+
+// Remote prefixes the atom with a remote.
+func (d deprecated) Remote() Atom {
+	return remote{Remote, d, true}
 }
 
 // flag represents a command-line flag.
