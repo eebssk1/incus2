@@ -14,7 +14,6 @@ import (
 	"github.com/lxc/incus/v6/internal/server/migration"
 	"github.com/lxc/incus/v6/internal/server/operations"
 	"github.com/lxc/incus/v6/internal/server/storage/drivers"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/revert"
 )
@@ -114,7 +113,6 @@ type Pool interface {
 	CreateBucketKey(projectName string, bucketName string, key api.StorageBucketKeysPost, op *operations.Operation) (*api.StorageBucketKey, error)
 	UpdateBucketKey(projectName string, bucketName string, keyName string, key api.StorageBucketKeyPut, op *operations.Operation) error
 	DeleteBucketKey(projectName string, bucketName string, keyName string, op *operations.Operation) error
-	ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error)
 	MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error)
 	GetBucketURL(bucketName string) *url.URL
 	GenerateBucketBackupConfig(projectName string, bucketName string, op *operations.Operation) (*backupConfig.Config, error)

@@ -15,7 +15,6 @@ import (
 	"github.com/lxc/incus/v6/internal/server/operations"
 	"github.com/lxc/incus/v6/internal/server/state"
 	"github.com/lxc/incus/v6/internal/server/storage/drivers"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/revert"
@@ -272,10 +271,6 @@ func (b *mockBackend) UpdateBucketKey(projectName string, bucketName string, key
 
 func (b *mockBackend) DeleteBucketKey(projectName string, bucketName string, keyName string, op *operations.Operation) error {
 	return nil
-}
-
-func (b *mockBackend) ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error) {
-	return nil, nil
 }
 
 // MountLocalBucket mounts the local bucket volume and returns its mount path

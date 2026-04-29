@@ -51,7 +51,6 @@ import (
 	"github.com/lxc/incus/v6/internal/server/storage/drivers"
 	"github.com/lxc/incus/v6/internal/server/storage/memorypipe"
 	"github.com/lxc/incus/v6/internal/server/storage/s3"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
 	localUtil "github.com/lxc/incus/v6/internal/server/util"
 	internalUtil "github.com/lxc/incus/v6/internal/util"
 	"github.com/lxc/incus/v6/shared/api"
@@ -4823,22 +4822,6 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 	}
 
 	return nil
-}
-
-// ActivateBucket mounts the local bucket volume and returns the MinIO S3 process for it.
-func (b *backend) ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error) {
-	if !b.Driver().Info().Buckets {
-		return nil, errors.New("Storage pool does not support buckets")
-	}
-
-	if b.Driver().Info().Remote {
-		return nil, errors.New("Remote buckets cannot be activated")
-	}
-
-	bucketVolName := project.StorageVolume(projectName, bucketName)
-	bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, nil)
-
-	return miniod.EnsureRunning(b.state, bucketVol)
 }
 
 // MountLocalBucket mounts the local bucket volume and returns its mount path

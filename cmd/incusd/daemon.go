@@ -64,7 +64,6 @@ import (
 	storagePools "github.com/lxc/incus/v6/internal/server/storage"
 	storageDrivers "github.com/lxc/incus/v6/internal/server/storage/drivers"
 	"github.com/lxc/incus/v6/internal/server/storage/linstor"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
 	"github.com/lxc/incus/v6/internal/server/sys"
 	"github.com/lxc/incus/v6/internal/server/syslog"
 	"github.com/lxc/incus/v6/internal/server/task"
@@ -1663,9 +1662,6 @@ func (d *Daemon) Stop(ctx context.Context, sig os.Signal) error {
 	}
 
 	s := d.State()
-
-	// Stop any running minio processes cleanly before unmount storage pools.
-	miniod.StopAll()
 
 	var err error
 	var instances []instance.Instance
