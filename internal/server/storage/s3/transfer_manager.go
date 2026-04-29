@@ -17,6 +17,7 @@ import (
 
 	"github.com/lxc/incus/v6/internal/instancewriter"
 	"github.com/lxc/incus/v6/internal/server/backup"
+	"github.com/lxc/incus/v6/internal/server/storage/s3util"
 	"github.com/lxc/incus/v6/shared/logger"
 	localtls "github.com/lxc/incus/v6/shared/tls"
 	"github.com/lxc/incus/v6/shared/validate"
@@ -171,7 +172,7 @@ func (t TransferManager) getS3Client() (*s3.Client, error) {
 	}
 
 	cfg := aws.Config{
-		Region:      "us-east-1",
+		Region:      s3util.RegionFromURL(t.s3URL),
 		Credentials: credentials.NewStaticCredentialsProvider(t.accessKey, t.secretKey, ""),
 		HTTPClient:  httpClient,
 	}

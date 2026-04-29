@@ -19,6 +19,7 @@ import (
 
 	"github.com/lxc/incus/v6/internal/server/operations"
 	"github.com/lxc/incus/v6/internal/server/project"
+	"github.com/lxc/incus/v6/internal/server/storage/s3util"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/revert"
 	"github.com/lxc/incus/v6/shared/units"
@@ -70,7 +71,7 @@ func (d *cephobject) s3Client(creds S3Credentials) (*s3.Client, error) {
 	}
 
 	cfg := aws.Config{
-		Region:      "us-east-1",
+		Region:      s3util.RegionFromURL(u),
 		Credentials: credentials.NewStaticCredentialsProvider(creds.AccessKey, creds.SecretKey, ""),
 		HTTPClient:  httpClient,
 	}

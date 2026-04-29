@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
+	"github.com/lxc/incus/v6/internal/server/storage/s3util"
 	"github.com/lxc/incus/v6/internal/server/sys"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/archive"
@@ -73,7 +74,7 @@ func Upload(reader *io.PipeReader, req *api.BackupTarget) error {
 	}
 
 	cfg := aws.Config{
-		Region:      "us-east-1",
+		Region:      s3util.RegionFromURL(uri),
 		Credentials: credentials.NewStaticCredentialsProvider(req.AccessKey, req.SecretKey, ""),
 		HTTPClient:  &http.Client{Transport: ts},
 	}
