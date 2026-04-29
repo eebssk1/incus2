@@ -353,6 +353,33 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 		}
 	}
 
+	// Override existing devices with values provided in the request.
+	devs := inst.LocalDevices().CloneNative()
+	if req.Devices != nil {
+		err = inst.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+			reqDevice, ok := req.Devices[dev.Name]
+			if !ok {
+				return nil
+			}
+
+			for k, v := range reqDevice {
+				devs[dev.Name][k] = v
+			}
+
+			return nil
+		})
+		if err != nil {
+			return response.InternalError(err)
+		}
+	}
+
+	// Update devices for the target instance without saving changes to the database,
+	// as the same instance is still being used by the source.
+	err = inst.UpdateDevices(deviceConfig.NewDevices(devs))
+	if err != nil {
+		return response.InternalError(fmt.Errorf("Failed to update instance %q: %w", inst.Name(), err))
+	}
+
 	migrationArgs := migrationSinkArgs{
 		URL:                   req.Source.Operation,
 		Dialer:                dialer,
@@ -399,7 +426,7 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 
 		instOp.Done(nil) // Complete operation that was created earlier, to release lock.
 
-		if migrationArgs.StoragePool != "" {
+		if migrationArgs.StoragePool != "" || req.Devices != nil {
 			// Update root device for the instance if needed.
 			updateNeeded := false
 
@@ -429,6 +456,25 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 				if devs[rootDevKey]["pool"] != storagePool {
 					devs[rootDevKey]["pool"] = storagePool
 					updateNeeded = true
+				}
+			}
+
+			if req.Devices != nil {
+				err = inst.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+					updateNeeded = true
+					reqDevice, ok := req.Devices[dev.Name]
+					if !ok {
+						return nil
+					}
+
+					for k, v := range reqDevice {
+						devs[dev.Name][k] = v
+					}
+
+					return nil
+				})
+				if err != nil {
+					return err
 				}
 			}
 
@@ -504,6 +550,10 @@ func validateDependentVolumes(source instance.Instance, req *api.InstancesPost) 
 		oldDevice, exists := sourceDevices[key]
 		if !exists {
 			return fmt.Errorf("Missing device %s on source", key)
+		}
+
+		if newDevice["pool"] != "" && oldDevice["pool"] != newDevice["pool"] {
+			continue
 		}
 
 		// Check if the source was overridden.
@@ -1578,6 +1628,7 @@ func clusterCopyContainerInternal(ctx context.Context, s *state.State, r *http.R
 			Migration:    true,
 			Live:         req.Source.Live,
 			InstanceOnly: instanceOnly,
+			Devices:      req.Devices,
 		}
 
 		op, err := client.MigrateInstance(req.Source.Source, pullReq)

@@ -165,6 +165,7 @@ type migrationSourceWs struct {
 	migrationFields
 
 	clusterMoveSourceName string
+	devices               api.DevicesMap
 
 	pushCertificate  string
 	pushOperationURL string

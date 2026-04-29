@@ -20,7 +20,7 @@ import (
 	"github.com/lxc/incus/v6/shared/logger"
 )
 
-func newMigrationSource(inst instance.Instance, stateful bool, instanceOnly bool, allowInconsistent bool, clusterMoveSourceName string, storagePool string, pushTarget *api.InstancePostTarget) (*migrationSourceWs, error) {
+func newMigrationSource(inst instance.Instance, stateful bool, instanceOnly bool, allowInconsistent bool, clusterMoveSourceName string, storagePool string, devices api.DevicesMap, pushTarget *api.InstancePostTarget) (*migrationSourceWs, error) {
 	ret := migrationSourceWs{
 		migrationFields: migrationFields{
 			instance:          inst,
@@ -28,6 +28,7 @@ func newMigrationSource(inst instance.Instance, stateful bool, instanceOnly bool
 			storagePool:       storagePool,
 		},
 		clusterMoveSourceName: clusterMoveSourceName,
+		devices:               devices,
 	}
 
 	if pushTarget != nil {
@@ -148,6 +149,7 @@ func (s *migrationSourceWs) do(migrateOp *operations.Operation) error {
 			StoragePool:           s.storagePool,
 		},
 		AllowInconsistent: s.allowInconsistent,
+		Devices:           s.devices,
 	})
 	if err != nil {
 		l.Error("Failed migration on source", logger.Ctx{"err": err})

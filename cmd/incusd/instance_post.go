@@ -505,7 +505,7 @@ func instancePost(d *Daemon, r *http.Request) response.Response {
 	}
 
 	// Cross-server instance migration.
-	ws, err := newMigrationSource(inst, req.Live, req.InstanceOnly, req.AllowInconsistent, "", "", req.Target)
+	ws, err := newMigrationSource(inst, req.Live, req.InstanceOnly, req.AllowInconsistent, "", "", req.Devices, req.Target)
 	if err != nil {
 		return response.InternalError(err)
 	}
@@ -836,17 +836,15 @@ func migrateInstance(ctx context.Context, s *state.State, inst instance.Instance
 			}
 		}
 
+		err = cleanupDependentDisks(s, inst, req.Devices, op)
+		if err != nil {
+			return fmt.Errorf("Failed deleting instance dependent volumes on source member: %w", err)
+		}
+
 		// Reload the instance.
 		inst, err = instance.LoadByProjectAndName(s, targetProject, inst.Name())
 		if err != nil {
 			return err
-		}
-
-		if targetMemberInfo != nil {
-			err = cleanupDependentDisks(s, inst, op)
-			if err != nil {
-				return fmt.Errorf("Failed deleting instance dependent volumes on source member: %w", err)
-			}
 		}
 
 		// Clear the pool and project part of the request.
@@ -890,7 +888,7 @@ func migrateInstance(ctx context.Context, s *state.State, inst instance.Instance
 		}
 
 		// Setup a new migration source.
-		sourceMigration, err := newMigrationSource(inst, req.Live, false, req.AllowInconsistent, inst.Name(), req.Pool, nil)
+		sourceMigration, err := newMigrationSource(inst, req.Live, false, req.AllowInconsistent, inst.Name(), req.Pool, req.Devices, nil)
 		if err != nil {
 			return fmt.Errorf("Failed setting up instance migration on source: %w", err)
 		}
@@ -1071,7 +1069,7 @@ func migrateInstance(ctx context.Context, s *state.State, inst instance.Instance
 			}
 		}
 
-		err = cleanupDependentDisks(s, inst, op)
+		err = cleanupDependentDisks(s, inst, req.Devices, op)
 		if err != nil {
 			return fmt.Errorf("Failed deleting instance dependent volumes on source member: %w", err)
 		}
@@ -1081,26 +1079,32 @@ func migrateInstance(ctx context.Context, s *state.State, inst instance.Instance
 }
 
 // cleanupDependentDisks removes dependent volumes from the source after migration if needed.
-func cleanupDependentDisks(s *state.State, inst instance.Instance, op *operations.Operation) error {
-	for _, dev := range inst.ExpandedDevices() {
-		if dev["type"] != "disk" || util.IsFalseOrEmpty(dev["dependent"]) || dev["path"] == "/" || dev["pool"] == "" {
-			continue
-		}
-
-		diskPool, err := storagePools.LoadByName(s, dev["pool"])
+func cleanupDependentDisks(s *state.State, inst instance.Instance, deviceOverrides api.DevicesMap, op *operations.Operation) error {
+	err := inst.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+		diskPool, err := storagePools.LoadByName(s, dev.Config["pool"])
 		if err != nil {
 			return fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		// Volumes on remote pools cannot be removed.
-		if diskPool.Driver().Info().Remote {
-			continue
+		// If new disk was created than delete source volume.
+		override, ok := deviceOverrides[dev.Name]
+		if ok {
+			if (override["source"] != "" && override["source"] != dev.Config["source"]) || (override["pool"] != "" && override["pool"] != dev.Config["pool"]) {
+				_ = diskPool.DeleteCustomVolume(inst.Project().Name, dev.Config["source"], op)
+			}
 		}
 
-		err = diskPool.DeleteCustomVolume(inst.Project().Name, dev["source"], op)
-		if err != nil {
-			return err
+		// Volumes on remote pools cannot be removed.
+		if diskPool.Driver().Info().Remote {
+			return nil
 		}
+
+		_ = diskPool.DeleteCustomVolume(inst.Project().Name, dev.Config["source"], op)
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil
