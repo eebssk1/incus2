@@ -677,7 +677,7 @@ func migrateInstance(ctx context.Context, s *state.State, inst instance.Instance
 	}
 
 	// Handle pool and project moves for stopped instances.
-	if (req.Project != "" || req.Pool != "") && !req.Live {
+	if (req.Project != "" || req.Pool != "") && !req.Live && (targetMemberInfo == nil || inst.Location() == targetMemberInfo.Name) {
 		// Get a local client.
 		args := &incus.ConnectionArgs{
 			SkipGetServer: true,
