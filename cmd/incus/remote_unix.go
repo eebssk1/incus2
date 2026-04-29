@@ -32,8 +32,7 @@ type cmdRemoteProxy struct {
 	flagTimeout int
 }
 
-// Not the most beautiful way to encode it, but this command is an outlier in that regard.
-var cmdRemoteProxyUsage = u.Usage{u.Either(u.Remote, u.Colon(u.Remote)), u.Target(u.Placeholder(i18n.G("socket file")))}
+var cmdRemoteProxyUsage = u.Usage{u.Colon(u.Remote), u.Target(u.Placeholder(i18n.G("socket file")))}
 
 func (c *cmdRemoteProxy) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -55,23 +54,18 @@ func (c *cmdRemoteProxy) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	remoteName := parsed[0].String
+	remoteName := strings.TrimSuffix(parsed[0].String, ":")
 	path := parsed[1].String
 
-	// Detect remote name.
-	if !strings.HasSuffix(remoteName, ":") {
-		remoteName = remoteName + ":"
-	}
-
-	remote := c.global.conf.Remotes[strings.TrimSuffix(remoteName, ":")]
+	remote := c.global.conf.Remotes[remoteName]
 	remote.KeepAlive = 0
 
 	// Attempt to read stdin for TLS connection details.
 	_ = json.NewDecoder(os.Stdin).Decode(&remote.TLS)
 
-	c.global.conf.Remotes[strings.TrimSuffix(remoteName, ":")] = remote
+	c.global.conf.Remotes[remoteName] = remote
 
-	resources, err := c.global.parseServers(remoteName)
+	resources, err := c.global.parseServers(parsed[0].String)
 	if err != nil {
 		return err
 	}
