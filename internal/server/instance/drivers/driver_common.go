@@ -1080,10 +1080,6 @@ func (d *common) recordLastState() error {
 }
 
 func (d *common) setCoreSched(pids []int) error {
-	if !d.state.OS.CoreScheduling {
-		return nil
-	}
-
 	args := []string{
 		"forkcoresched",
 		"0",

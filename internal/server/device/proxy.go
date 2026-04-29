@@ -613,20 +613,20 @@ func (d *proxy) setupProxyProcInfo() (*proxyProcInfo, error) {
 	containerPid := strconv.Itoa(cc.InitPid())
 	daemonPid := strconv.Itoa(os.Getpid())
 
-	containerPidFd := -1
-	daemonPidFd := -1
-	var inheritFd []*os.File
-	if d.state.OS.PidFds {
-		cPidFd, err := cc.InitPidFd()
-		if err == nil {
-			dPidFd, err := linux.PidFdOpen(os.Getpid(), 0)
-			if err == nil {
-				inheritFd = []*os.File{cPidFd, dPidFd}
-				containerPidFd = 3
-				daemonPidFd = 4
-			}
-		}
+	cPidFd, err := cc.InitPidFd()
+	if err != nil {
+		return nil, err
 	}
+
+	dPidFd, err := linux.PidFdOpen(os.Getpid(), 0)
+	if err != nil {
+		_ = cPidFd.Close()
+		return nil, err
+	}
+
+	inheritFd := []*os.File{cPidFd, dPidFd}
+	containerPidFd := 3
+	daemonPidFd := 4
 
 	var listenPid, listenPidFd, connectPid, connectPidFd string
 

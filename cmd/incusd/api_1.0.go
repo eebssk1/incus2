@@ -345,15 +345,7 @@ func api10Get(d *Daemon, r *http.Request) response.Response {
 		Firewall:               s.Firewall.String(),
 	}
 
-	env.KernelFeatures = map[string]string{
-		"netnsid_getifaddrs":        fmt.Sprintf("%v", s.OS.NetnsGetifaddrs),
-		"uevent_injection":          fmt.Sprintf("%v", s.OS.UeventInjection),
-		"unpriv_binfmt":             fmt.Sprintf("%v", s.OS.UnprivBinfmt),
-		"unpriv_fscaps":             fmt.Sprintf("%v", s.OS.VFS3Fscaps),
-		"seccomp_listener":          fmt.Sprintf("%v", s.OS.SeccompListener),
-		"seccomp_listener_continue": fmt.Sprintf("%v", s.OS.SeccompListenerContinue),
-		"idmapped_mounts":           fmt.Sprintf("%v", s.OS.IdmappedMounts),
-	}
+	env.KernelFeatures = map[string]string{}
 
 	drivers := instanceDrivers.DriverStatuses()
 	for _, driver := range drivers {

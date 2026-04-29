@@ -231,7 +231,7 @@ func (s *execWs) do(op *operations.Operation) error {
 
 			devptsFd, _ = c.DevptsFd()
 
-			if devptsFd != nil && s.s.OS.NativeTerminals {
+			if devptsFd != nil {
 				ptys[0], ttys[0], err = linux.OpenPtyInDevpts(int(devptsFd.Fd()), rootUID, rootGID)
 				_ = devptsFd.Close()
 				devptsFd = nil
