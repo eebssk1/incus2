@@ -176,7 +176,7 @@ type cmdStorageVolumeAttach struct {
 	storageVolume *cmdStorageVolume
 }
 
-var cmdStorageVolumeAttachUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Instance, u.NewName(u.Device).Optional(u.Path.Optional())}
+var cmdStorageVolumeAttachUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Instance, u.NewName(u.Device).Optional(u.Path.Optional())}
 
 func (c *cmdStorageVolumeAttach) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -214,7 +214,7 @@ func (c *cmdStorageVolumeAttach) run(cmd *cobra.Command, args []string) error {
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	instanceName := parsed[2].String
 	devName := volName
 	devPath := ""
@@ -247,7 +247,7 @@ type cmdStorageVolumeAttachProfile struct {
 	storageVolume *cmdStorageVolume
 }
 
-var cmdStorageVolumeAttachProfileUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Profile, u.NewName(u.Device).Optional(u.Path.Optional())}
+var cmdStorageVolumeAttachProfileUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Profile, u.NewName(u.Device).Optional(u.Path.Optional())}
 
 func (c *cmdStorageVolumeAttachProfile) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -285,7 +285,7 @@ func (c *cmdStorageVolumeAttachProfile) run(cmd *cobra.Command, args []string) e
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	profileName := parsed[2].String
 	devName := volName
 	devPath := ""
@@ -537,7 +537,7 @@ type cmdStorageVolumeCreate struct {
 	flagDescription string
 }
 
-var cmdStorageVolumeCreateUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.NewName(u.Volume)), u.KV.List(0)}
+var cmdStorageVolumeCreateUsage = u.Usage{u.Pool.Remote(), u.NewName(u.Volume), u.KV.List(0)}
 
 func (c *cmdStorageVolumeCreate) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -576,7 +576,7 @@ func (c *cmdStorageVolumeCreate) run(cmd *cobra.Command, args []string) error {
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	keys, err := kvToMap(parsed[2])
 	if err != nil {
 		return err
@@ -700,7 +700,7 @@ type cmdStorageVolumeDetach struct {
 	storageVolume *cmdStorageVolume
 }
 
-var cmdStorageVolumeDetachUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Instance, u.Device.Optional()}
+var cmdStorageVolumeDetachUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Instance, u.Device.Optional()}
 
 func (c *cmdStorageVolumeDetach) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -782,7 +782,7 @@ func (c *cmdStorageVolumeDetach) run(cmd *cobra.Command, args []string) error {
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	instanceName := parsed[2].String
 
 	// Get the instance entry
@@ -814,7 +814,7 @@ type cmdStorageVolumeDetachProfile struct {
 	storageVolumeDetach *cmdStorageVolumeDetach
 }
 
-var cmdStorageVolumeDetachProfileUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Profile, u.Device.Optional()}
+var cmdStorageVolumeDetachProfileUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Profile, u.Device.Optional()}
 
 func (c *cmdStorageVolumeDetachProfile) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -852,7 +852,7 @@ func (c *cmdStorageVolumeDetachProfile) run(cmd *cobra.Command, args []string) e
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	profileName := parsed[2].String
 
 	// Get the profile entry
@@ -3036,7 +3036,7 @@ type cmdStorageVolumeSnapshotCreate struct {
 	flagDescription string
 }
 
-var cmdStorageVolumeSnapshotCreateUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.NewName(u.Snapshot).Optional()}
+var cmdStorageVolumeSnapshotCreateUsage = u.Usage{u.Pool.Remote(), u.Volume, u.NewName(u.Snapshot).Optional()}
 
 func (c *cmdStorageVolumeSnapshotCreate) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -3081,7 +3081,7 @@ func (c *cmdStorageVolumeSnapshotCreate) run(cmd *cobra.Command, args []string) 
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	hasSnapName := !parsed[2].Skipped
 	snapName := parsed[2].String
 
@@ -3192,7 +3192,7 @@ type cmdStorageVolumeSnapshotDelete struct {
 	storageVolumeSnapshot *cmdStorageVolumeSnapshot
 }
 
-var cmdStorageVolumeSnapshotDeleteUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Snapshot}
+var cmdStorageVolumeSnapshotDeleteUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Snapshot}
 
 func (c *cmdStorageVolumeSnapshotDelete) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -3231,7 +3231,7 @@ func (c *cmdStorageVolumeSnapshotDelete) run(cmd *cobra.Command, args []string) 
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	snapName := parsed[2].String
 
 	// If a target was specified, delete the volume on the given member.
@@ -3635,7 +3635,7 @@ type cmdStorageVolumeExport struct {
 	flagForce                bool
 }
 
-var cmdStorageVolumeExportUsage = u.Usage{u.Pool.Remote(), u.MakePath(u.Verbatim("custom").Optional(), u.Volume), u.Target(u.File).Optional()}
+var cmdStorageVolumeExportUsage = u.Usage{u.Pool.Remote(), u.Volume, u.Target(u.File).Optional()}
 
 func (c *cmdStorageVolumeExport) command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -3673,7 +3673,7 @@ func (c *cmdStorageVolumeExport) run(cmd *cobra.Command, args []string) error {
 
 	d := parsed[0].RemoteServer
 	poolName := parsed[0].RemoteObject.String
-	volName := parsed[1].List[1].String
+	volName := parsed[1].String
 	hasTarget := !parsed[2].Skipped
 	targetName := parsed[2].Get("." + volName + ".backup")
 
