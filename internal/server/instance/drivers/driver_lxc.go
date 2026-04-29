@@ -75,7 +75,6 @@ import (
 	storageDrivers "github.com/lxc/incus/v6/internal/server/storage/drivers"
 	localUtil "github.com/lxc/incus/v6/internal/server/util"
 	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/idmap"
 	"github.com/lxc/incus/v6/shared/ioprogress"
@@ -2330,9 +2329,8 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 			volatileSet["volatile.container.oci"] = "true"
 		}
 
-		// Allow unprivileged users to use ping (requires a 6.6 kernel at least).
-		minVer, _ := version.NewDottedVersion("6.6.0")
-		if !d.state.OS.RunningInUserNS && d.state.OS.KernelVersion.Compare(minVer) >= 0 {
+		// Allow unprivileged users to use ping.
+		if !d.state.OS.RunningInUserNS {
 			maxGid := int64(4294967294)
 
 			if !d.IsPrivileged() {

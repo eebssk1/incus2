@@ -18,7 +18,6 @@ import (
 	"github.com/lxc/incus/v6/internal/server/db/cluster"
 	localUtil "github.com/lxc/incus/v6/internal/server/util"
 	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
 	"github.com/lxc/incus/v6/shared/idmap"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/osarch"
@@ -83,11 +82,10 @@ type OS struct {
 	LXCFeatures map[string]bool
 
 	// OS info
-	ReleaseInfo   map[string]string
-	KernelVersion version.DottedVersion
-	Uname         *linux.Utsname
-	BootTime      time.Time
-	IncusOS       *incusos.Client
+	ReleaseInfo map[string]string
+	Uname       *linux.Utsname
+	BootTime    time.Time
+	IncusOS     *incusos.Client
 }
 
 // DefaultOS returns a fresh uninitialized OS instance with default values.
@@ -185,11 +183,6 @@ func (s *OS) Init() ([]cluster.Warning, error) {
 	}
 
 	s.Uname = uname
-
-	kernelVersion, err := version.Parse(uname.Release)
-	if err == nil {
-		s.KernelVersion = *kernelVersion
-	}
 
 	if util.PathExists("/var/lib/incus-os/") {
 		c, err := incusos.NewClient()

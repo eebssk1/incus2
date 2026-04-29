@@ -401,12 +401,7 @@ func (d *btrfs) setSubvolumeReadonlyProperty(path string, readonly bool) error {
 		return nil
 	}
 
-	args := []string{"property", "set"}
-	if btrfsPropertyForce {
-		args = append(args, "-f")
-	}
-
-	args = append(args, "-ts", path, "ro", fmt.Sprintf("%t", readonly))
+	args := []string{"property", "set", "-f", "-ts", path, "ro", fmt.Sprintf("%t", readonly)}
 
 	_, err := subprocess.RunCommand("btrfs", args...)
 	return err

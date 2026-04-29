@@ -36,7 +36,6 @@ import (
 	localUtil "github.com/lxc/incus/v6/internal/server/util"
 	"github.com/lxc/incus/v6/internal/server/warnings"
 	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
 	"github.com/lxc/incus/v6/shared/api"
 	"github.com/lxc/incus/v6/shared/logger"
 	"github.com/lxc/incus/v6/shared/revert"
@@ -1369,30 +1368,10 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 		fmt.Sprintf("--interface=%s", n.name),
 	}
 
-	dnsmasqVersion, err := dnsmasq.GetVersion()
-	if err != nil {
-		return err
-	}
-
-	// --dhcp-rapid-commit option is only supported on >2.79.
-	minVer, _ := version.NewDottedVersion("2.79")
-	if dnsmasqVersion.Compare(minVer) > 0 {
-		dnsmasqCmd = append(dnsmasqCmd, "--dhcp-rapid-commit")
-	}
-
-	// --no-negcache option is only supported on >2.47.
-	minVer, _ = version.NewDottedVersion("2.47")
-	if dnsmasqVersion.Compare(minVer) > 0 {
-		dnsmasqCmd = append(dnsmasqCmd, "--no-negcache")
-	}
+	dnsmasqCmd = append(dnsmasqCmd, "--dhcp-rapid-commit", "--no-negcache")
 
 	if !daemon.Debug {
-		// --quiet options are only supported on >2.67.
-		minVer, _ := version.NewDottedVersion("2.67")
-
-		if dnsmasqVersion.Compare(minVer) > 0 {
-			dnsmasqCmd = append(dnsmasqCmd, []string{"--quiet-dhcp", "--quiet-dhcp6", "--quiet-ra"}...)
-		}
+		dnsmasqCmd = append(dnsmasqCmd, "--quiet-dhcp", "--quiet-dhcp6", "--quiet-ra")
 	}
 
 	var dnsIPv4 []string

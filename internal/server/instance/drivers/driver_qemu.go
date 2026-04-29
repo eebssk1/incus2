@@ -4253,18 +4253,8 @@ func (d *qemu) writeQemuConfigFile(configPath string) error {
 
 // getCPUOpts retrieves configuration options for virtualized CPUs and memory.
 func (d *qemu) getCPUOpts(cpuInfo *qemuCPUTopology, memSizeBytes int64) (*qemuCPUOpts, error) {
-	// Figure out what memory object layout we're going to use.
-	// Before v6.0 or if version unknown, we use the "repeated" format, otherwise we use "indexed" format.
-	qemuMemObjectFormat := "repeated"
-	qemuVer6, _ := version.NewDottedVersion("6.0")
-	qemuVer, _ := d.version()
-	if qemuVer != nil && qemuVer.Compare(qemuVer6) >= 0 {
-		qemuMemObjectFormat = "indexed"
-	}
-
 	cpuOpts := qemuCPUOpts{
-		architecture:        d.architectureName,
-		qemuMemObjectFormat: qemuMemObjectFormat,
+		architecture: d.architectureName,
 	}
 
 	hostNodes := []uint64{}
@@ -4595,13 +4585,10 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 	media := "disk"
 	isRBDImage := strings.HasPrefix(driveConf.DevPath, device.RBDFormatPrefix)
 
-	// Check supported features.
-	// Use io_uring over native for added performance (if supported by QEMU and kernel is recent enough).
-	// We've seen issues starting VMs when running with io_ring AIO mode on kernels before 5.13.
+	// Use io_uring over native for added performance when supported by QEMU.
 	info := DriverStatuses()[instancetype.VM].Info
-	minVer, _ := version.NewDottedVersion("5.13.0")
 	_, ioUring := info.Features["io_uring"]
-	if slices.Contains(driveConf.Opts, device.DiskIOUring) && ioUring && d.state.OS.KernelVersion.Compare(minVer) >= 0 {
+	if slices.Contains(driveConf.Opts, device.DiskIOUring) && ioUring {
 		aioMode = "io_uring"
 	}
 
