@@ -461,7 +461,7 @@ func (d *proxy) checkProcStarted(logPath string) (bool, error) {
 
 // Stop is run when the device is removed from the instance.
 func (d *proxy) Stop() (*deviceConfig.RunConfig, error) {
-	// Remove possible iptables entries
+	// Remove possible firewall entries.
 	err := d.state.Firewall.InstanceClearProxyNAT(d.inst.Project().Name, d.inst.Name(), d.name)
 	if err != nil {
 		logger.Errorf("Failed to remove proxy NAT filters: %v", err)
