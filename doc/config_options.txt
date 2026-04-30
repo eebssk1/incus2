@@ -5066,6 +5066,15 @@ If this option is not specified, the daemon falls back to the `NO_PROXY` environ
 
 ```
 
+```{config:option} core.shutdown_action server-core
+:defaultdesc: "`shutdown`"
+:scope: "global"
+:shortdesc: "Action to perform on server shutdown"
+:type: "string"
+Specify the action to take when the daemon is being shut down.
+Supported values are `shutdown` (stop all instances) and `evacuate` (attempt to evacuate the clustered server).
+```
+
 ```{config:option} core.shutdown_timeout server-core
 :defaultdesc: "`5`"
 :scope: "global"
