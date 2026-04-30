@@ -28,6 +28,22 @@ import (
 //	produces:
 //	  - application/json
 //	  - application/octet-stream
+//	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "101":
 //	    description: Switching protocols to SFTP

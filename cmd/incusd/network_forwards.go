@@ -52,6 +52,11 @@ var networkForwardCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -106,6 +111,11 @@ var networkForwardCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -277,6 +287,11 @@ func networkForwardsGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -361,6 +376,16 @@ func networkForwardsPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -434,6 +459,16 @@ func networkForwardDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -560,6 +595,16 @@ func networkForwardGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
+//    - in: path
+//      name: listenAddress
+//      description: Listen address
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -595,6 +640,16 @@ func networkForwardGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

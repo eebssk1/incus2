@@ -41,6 +41,11 @@ import (
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Instance name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -90,6 +95,11 @@ import (
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -195,6 +205,11 @@ func instanceBackupsGet(d *Daemon, r *http.Request) response.Response {
 //	  - application/json
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -425,6 +440,16 @@ func instanceBackupsPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backup
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -504,6 +529,16 @@ func instanceBackupGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backup
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -604,6 +639,16 @@ func instanceBackupPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backup
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -683,6 +728,16 @@ func instanceBackupDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backup
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

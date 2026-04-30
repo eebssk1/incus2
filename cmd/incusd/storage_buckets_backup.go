@@ -64,6 +64,16 @@ var storagePoolBucketBackupsExportCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
+//    - in: path
+//      name: bucketName
+//      description: Storage bucket name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -118,6 +128,16 @@ var storagePoolBucketBackupsExportCmd = APIEndpoint{
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -250,6 +270,16 @@ func storagePoolBucketBackupsGet(d *Daemon, r *http.Request) response.Response {
 //	  - application/json
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -474,6 +504,21 @@ func storagePoolBucketBackupsPost(d *Daemon, r *http.Request) response.Response 
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backupName
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -568,6 +613,21 @@ func storagePoolBucketBackupGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backupName
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -686,6 +746,21 @@ func storagePoolBucketBackupPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backupName
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -782,6 +857,21 @@ func storagePoolBucketBackupDelete(d *Daemon, r *http.Request) response.Response
 //	produces:
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: backupName
+//	    description: Backup name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

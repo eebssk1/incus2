@@ -93,6 +93,11 @@ func instanceFileHandler(d *Daemon, r *http.Request) response.Response {
 //	  - application/json
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Path to the file
@@ -175,6 +180,11 @@ func instanceFileGet(s *state.State, inst instance.Instance, path string, r *htt
 //
 //	---
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Path to the file
@@ -244,6 +254,11 @@ func instanceFileHead(_ *state.State, inst instance.Instance, path string, _ *ht
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Path to the file
@@ -322,6 +337,11 @@ func instanceFilePost(s *state.State, inst instance.Instance, path string, r *ht
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Path to the file

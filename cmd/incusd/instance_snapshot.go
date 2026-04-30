@@ -40,6 +40,11 @@ import (
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Instance name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -89,6 +94,11 @@ import (
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -213,6 +223,11 @@ func instanceSnapshotsGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -401,6 +416,16 @@ func instanceSnapshotHandler(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshot
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -438,6 +463,16 @@ func snapshotPatch(s *state.State, r *http.Request, snapInst instance.Instance) 
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshot
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -545,6 +580,16 @@ func snapshotPut(s *state.State, r *http.Request, snapInst instance.Instance) re
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshot
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -603,6 +648,16 @@ func snapshotGet(snapInst instance.Instance) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshot
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -754,6 +809,16 @@ func snapshotPost(s *state.State, r *http.Request, snapInst instance.Instance) r
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshot
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

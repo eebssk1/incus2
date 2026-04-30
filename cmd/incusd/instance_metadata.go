@@ -37,6 +37,11 @@ import (
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -152,6 +157,11 @@ func instanceMetadataGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -267,6 +277,11 @@ func instanceMetadataPatch(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -372,6 +387,11 @@ func doInstanceMetadataUpdate(s *state.State, inst instance.Instance, metadata a
 //	  - application/json
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -531,6 +551,11 @@ func instanceMetadataTemplatesGet(d *Daemon, r *http.Request) response.Response 
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Template name
@@ -647,6 +672,11 @@ func instanceMetadataTemplatesPost(d *Daemon, r *http.Request) response.Response
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: path
 //	    description: Template name

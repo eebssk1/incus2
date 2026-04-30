@@ -144,6 +144,12 @@ func waitForOperations(ctx context.Context, cluster *db.Cluster, consoleShutdown
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: id
+//	    description: Operation ID
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Operation
@@ -233,6 +239,12 @@ func operationGet(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: id
+//	    description: Operation ID
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    $ref: "#/responses/EmptySyncResponse"
@@ -839,6 +851,11 @@ func operationsGetByType(s *state.State, r *http.Request, projectName string, op
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: id
+//      description: Operation ID
+//      type: string
+//      required: true
 //    - in: query
 //      name: secret
 //      description: Authentication token
@@ -885,6 +902,11 @@ func operationsGetByType(s *state.State, r *http.Request, projectName string, op
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: id
+//	    description: Operation ID
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: timeout
 //	    description: Timeout in seconds (-1 means never)
@@ -1064,6 +1086,11 @@ func (r *operationWebSocket) Code() int {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: id
+//      description: Operation ID
+//      type: string
+//      required: true
 //    - in: query
 //      name: secret
 //      description: Authentication token
@@ -1090,6 +1117,11 @@ func (r *operationWebSocket) Code() int {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: id
+//	    description: Operation ID
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: secret
 //	    description: Authentication token

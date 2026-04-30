@@ -79,6 +79,11 @@ var storagePoolBucketKeyCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -138,6 +143,11 @@ var storagePoolBucketKeyCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -192,6 +202,11 @@ var storagePoolBucketKeyCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -388,6 +403,16 @@ func storagePoolBucketsGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -429,6 +454,16 @@ func storagePoolBucketsGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -579,6 +614,11 @@ func getBucketFull(ctx context.Context, s *state.State, pool storagePools.Pool, 
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -693,6 +733,16 @@ func storagePoolBucketsPost(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Resource name
+//      type: string
+//      required: true
+//    - in: path
+//      name: bucketName
+//      description: Storage bucket name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -733,6 +783,16 @@ func storagePoolBucketsPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Resource name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -838,6 +898,16 @@ func storagePoolBucketPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Resource name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -907,6 +977,16 @@ func storagePoolBucketDelete(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
+//    - in: path
+//      name: bucketName
+//      description: Storage bucket name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -956,6 +1036,16 @@ func storagePoolBucketDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1074,6 +1164,16 @@ func storagePoolBucketKeysGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1150,6 +1250,21 @@ func storagePoolBucketKeysPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Resource name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: keyName
+//	    description: Storage bucket key name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1222,6 +1337,21 @@ func storagePoolBucketKeyDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: keyName
+//	    description: Storage bucket key name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1325,6 +1455,21 @@ func storagePoolBucketKeyGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Resource name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: bucketName
+//	    description: Storage bucket name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: keyName
+//	    description: Storage bucket key name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

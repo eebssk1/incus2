@@ -372,6 +372,12 @@ func networkIntegrationsPost(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: integration
+//	    description: Integration name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    $ref: "#/responses/EmptySyncResponse"
@@ -465,6 +471,12 @@ func networkIntegrationDelete(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: integration
+//	    description: Integration name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: integration
@@ -599,6 +611,11 @@ func networkIntegrationGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: integration
+//      description: Integration name
+//      type: string
+//      required: true
 //    - in: body
 //      name: integration
 //      description: integration configuration
@@ -629,6 +646,11 @@ func networkIntegrationGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: integration
+//	    description: Integration name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: integration
 //	    description: integration configuration
@@ -790,6 +812,11 @@ func networkIntegrationPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: integration
+//	    description: Integration name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: integration
 //	    description: integration configuration

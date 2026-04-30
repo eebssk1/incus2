@@ -677,6 +677,11 @@ func storagePoolsPostCluster(ctx context.Context, s *state.State, pool *api.Stor
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -803,6 +808,11 @@ func storagePoolGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -938,6 +948,11 @@ func storagePoolPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1053,6 +1068,11 @@ func doStoragePoolUpdate(s *state.State, pool storagePools.Pool, req api.Storage
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

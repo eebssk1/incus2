@@ -35,6 +35,11 @@ import (
 //
 //	---
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -150,6 +155,11 @@ func instanceDebugMemoryGet(d *Daemon, r *http.Request) response.Response {
 //
 //	---
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

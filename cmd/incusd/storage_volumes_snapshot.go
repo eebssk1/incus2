@@ -67,6 +67,21 @@ var storagePoolVolumeSnapshotTypeCmd = APIEndpoint{
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -299,6 +314,21 @@ func storagePoolVolumeSnapshotsTypePost(d *Daemon, r *http.Request) response.Res
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
+//    - in: path
+//      name: type
+//      description: Storage volume type
+//      type: string
+//      required: true
+//    - in: path
+//      name: volumeName
+//      description: Storage volume name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -353,6 +383,21 @@ func storagePoolVolumeSnapshotsTypePost(d *Daemon, r *http.Request) response.Res
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -524,6 +569,26 @@ func storagePoolVolumeSnapshotsTypeGet(d *Daemon, r *http.Request) response.Resp
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshotName
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -659,6 +724,26 @@ func storagePoolVolumeSnapshotTypePost(d *Daemon, r *http.Request) response.Resp
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshotName
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -797,6 +882,26 @@ func storagePoolVolumeSnapshotTypeGet(d *Daemon, r *http.Request) response.Respo
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshotName
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -932,6 +1037,26 @@ func storagePoolVolumeSnapshotTypePut(d *Daemon, r *http.Request) response.Respo
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshotName
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1106,6 +1231,26 @@ func doStoragePoolVolumeSnapshotUpdate(s *state.State, r *http.Request, poolName
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: snapshotName
+//	    description: Snapshot name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

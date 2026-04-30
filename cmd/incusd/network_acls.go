@@ -350,6 +350,11 @@ func networkACLsPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: ACL name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -407,6 +412,11 @@ func networkACLDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: ACL name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -476,6 +486,11 @@ func networkACLGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: ACL name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -511,6 +526,11 @@ func networkACLGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: ACL name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -601,6 +621,11 @@ func networkACLPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: ACL name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -674,6 +699,11 @@ func networkACLPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/octet-stream
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: ACL name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
