@@ -3075,3 +3075,11 @@ inside the project. If not specified, all storage pools are accessible.
 Storage pools that are not in the list are treated as equivalent to
 having a pool size limit of 0 (`limits.disk.pool.POOLNAME=0`), making
 them inaccessible and hidden from the project.
+
+## `server_shutdown_action`
+
+This adds a new `core.shutdown_action` server configuration option.
+
+Its default value of `shutdown` keeps the current behavior but
+`evacuate` can be set to have a clustered server attempt an evacuation
+on shutdown with any instance left after it getting shutdown.
