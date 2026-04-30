@@ -13,9 +13,7 @@ import (
 	"github.com/lxc/incus/v6/shared/logger"
 )
 
-var (
-	cgControllers = map[string]bool{}
-)
+var cgControllers = map[string]bool{}
 
 // Resource is a generic type used to abstract resource control features.
 type Resource int

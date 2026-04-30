@@ -510,18 +510,18 @@ type qemuNumaEntry struct {
 }
 
 type qemuCPUOpts struct {
-	architecture        string
-	cpuCount            int
-	cpuRequested        int
-	cpuSockets          int
-	cpuCores            int
-	cpuThreads          int
-	cpuNumaNodes        []uint64
-	cpuNumaMapping      []qemuNumaEntry
-	cpuNumaHostNodes    []uint64
-	hugepages       string
-	memory          int64
-	memoryHostNodes []int64
+	architecture     string
+	cpuCount         int
+	cpuRequested     int
+	cpuSockets       int
+	cpuCores         int
+	cpuThreads       int
+	cpuNumaNodes     []uint64
+	cpuNumaMapping   []qemuNumaEntry
+	cpuNumaHostNodes []uint64
+	hugepages        string
+	memory           int64
+	memoryHostNodes  []int64
 }
 
 func qemuCPUNumaHostNode(opts *qemuCPUOpts, index int) []cfg.Section {
