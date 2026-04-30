@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 18:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:46+0200\n"
 "PO-Revision-Date: 2026-04-21 03:01+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/incus/cli/sv/>\n"
@@ -462,7 +462,7 @@ msgstr ""
 "### Observera att fälten namn, målprojekt, målnätverk och status inte kan "
 "ändras."
 
-#: cmd/incus/network_zone.go:1267
+#: cmd/incus/network_zone.go:1268
 msgid ""
 "### This is a YAML representation of the network zone record.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -487,7 +487,7 @@ msgstr ""
 "### config:\n"
 "###  user.foo: bah\n"
 
-#: cmd/incus/network_zone.go:602
+#: cmd/incus/network_zone.go:603
 msgid ""
 "### This is a YAML representation of the network zone.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -856,7 +856,7 @@ msgstr "Åtgärden %q stöds inte av detta verktyg"
 msgid "Add a cluster member to a cluster group"
 msgstr "Lägg till en klustermedlem till en klustergrupp"
 
-#: cmd/incus/network_zone.go:1441
+#: cmd/incus/network_zone.go:1442
 msgid "Add a network zone record entry"
 msgstr "Lägg till en nätverkszonpost"
 
@@ -872,7 +872,7 @@ msgstr "Lägg till backend till en lastbalanserare"
 msgid "Add backends to a load balancer"
 msgstr "Lägg till backends till en lastbalanserare"
 
-#: cmd/incus/network_zone.go:1442
+#: cmd/incus/network_zone.go:1443
 msgid "Add entries to a network zone record"
 msgstr "Lägg till poster i en nätverkszonpost"
 
@@ -1660,8 +1660,8 @@ msgstr "Konfigurationsflaggan ska ha formatet NYCKEL=VÄRDE"
 #: cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668
 #: cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726
 #: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706
-#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670
-#: cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569
+#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:671
+#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:569
 #: cmd/incus/project.go:394 cmd/incus/storage.go:353
 #: cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202
 #: cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
@@ -1845,7 +1845,7 @@ msgstr ""
 msgid "Could not write server cert file %q: %w"
 msgstr "Kunde inte skriva servercertifikatfilen %q: %w"
 
-#: cmd/incus/network_zone.go:1543
+#: cmd/incus/network_zone.go:1544
 msgid "Couldn't find a matching entry"
 msgstr "Kunde inte hitta någon matchande post"
 
@@ -1963,7 +1963,7 @@ msgstr "Skapa nya nätverkslastbalanserare"
 msgid "Create new network peering"
 msgstr "Skapa nytt nätverkspeering"
 
-#: cmd/incus/network_zone.go:1021 cmd/incus/network_zone.go:1022
+#: cmd/incus/network_zone.go:1022 cmd/incus/network_zone.go:1023
 msgid "Create new network zone record"
 msgstr "Skapa ny nätverkszonpost"
 
@@ -2026,7 +2026,7 @@ msgstr "STANDARDMÅLADRESS"
 #: cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155
 #: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427
 #: cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139
-#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871
+#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:872
 #: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548
 #: cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481
 #: cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
@@ -2157,11 +2157,11 @@ msgstr "Ta bort nätverkslastbalanserare"
 msgid "Delete network peerings"
 msgstr "Ta bort nätverkskopplingar"
 
-#: cmd/incus/network_zone.go:1370 cmd/incus/network_zone.go:1371
+#: cmd/incus/network_zone.go:1371 cmd/incus/network_zone.go:1372
 msgid "Delete network zone record"
 msgstr "Ta bort nätverkszonpost"
 
-#: cmd/incus/network_zone.go:704 cmd/incus/network_zone.go:705
+#: cmd/incus/network_zone.go:705 cmd/incus/network_zone.go:706
 msgid "Delete network zones"
 msgstr "Ta bort nätverkszoner"
 
@@ -2484,7 +2484,7 @@ msgstr ""
 "Under uppdateringen, uteslut källsnapshots som är äldre än den senaste "
 "målsnapshoten"
 
-#: cmd/incus/network_zone.go:872
+#: cmd/incus/network_zone.go:873
 msgid "ENTRIES"
 msgstr "POSTER"
 
@@ -2567,11 +2567,11 @@ msgstr "Redigera konfigurationer för nätverkslastbalanserare som YAML"
 msgid "Edit network peer configurations as YAML"
 msgstr "Redigera nätverkspeerkonfigurationer som YAML"
 
-#: cmd/incus/network_zone.go:585 cmd/incus/network_zone.go:586
+#: cmd/incus/network_zone.go:586 cmd/incus/network_zone.go:587
 msgid "Edit network zone configurations as YAML"
 msgstr "Redigera nätverkszonkonfigurationer som YAML"
 
-#: cmd/incus/network_zone.go:1246 cmd/incus/network_zone.go:1247
+#: cmd/incus/network_zone.go:1247 cmd/incus/network_zone.go:1248
 msgid "Edit network zone record configurations as YAML"
 msgstr "Redigera konfigurationer för nätverkszonposter som YAML"
 
@@ -2676,7 +2676,7 @@ msgstr ""
 msgid "Enter new delay in seconds:"
 msgstr "Ange ny fördröjning i sekunder:"
 
-#: cmd/incus/network_zone.go:1444
+#: cmd/incus/network_zone.go:1445
 msgid "Entry TTL"
 msgstr "Inmatning TTL"
 
@@ -2713,7 +2713,7 @@ msgstr "Fel vid hämtning av alias: %w"
 #: cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368
 #: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
 #: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
-#: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
+#: cmd/incus/network_zone.go:511 cmd/incus/network_zone.go:1168
 #: cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
 #: cmd/incus/storage_volume.go:1914
@@ -2735,7 +2735,7 @@ msgstr "Fel vid avaktivering av egenskaper: %v"
 #: cmd/incus/network.go:1473 cmd/incus/network_acl.go:490
 #: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
 #: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
-#: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
+#: cmd/incus/network_zone.go:505 cmd/incus/network_zone.go:1162
 #: cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
 #: cmd/incus/storage_volume.go:1908
@@ -3497,7 +3497,7 @@ msgstr ""
 #: cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64
 #: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410
 #: cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116
-#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818
+#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:819
 #: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518
 #: cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341
 #: cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462
@@ -3687,7 +3687,7 @@ msgstr "Hämta nyckeln som en nätverksegenskap"
 msgid "Get the key as a network zone property"
 msgstr "Hämta nyckeln som en nätverkszonegenskap"
 
-#: cmd/incus/network_zone.go:951
+#: cmd/incus/network_zone.go:952
 msgid "Get the key as a network zone record property"
 msgstr "Hämta nyckeln som en egenskap för nätverkszonen"
 
@@ -3760,7 +3760,7 @@ msgstr "Hämta värden för konfigurationsnycklar för nätverkspeer"
 msgid "Get values for network zone configuration keys"
 msgstr "Hämta värden för konfigurationsnycklar för nätverkszoner"
 
-#: cmd/incus/network_zone.go:947 cmd/incus/network_zone.go:948
+#: cmd/incus/network_zone.go:948 cmd/incus/network_zone.go:949
 msgid "Get values for network zone record configuration keys"
 msgstr "Hämta värden för konfigurationsnycklar för nätverkszonposter"
 
@@ -4737,7 +4737,7 @@ msgstr ""
 "s - Tillst\n"
 "ånd"
 
-#: cmd/incus/network_zone.go:814 cmd/incus/network_zone.go:815
+#: cmd/incus/network_zone.go:815 cmd/incus/network_zone.go:816
 msgid "List available network zone records"
 msgstr "Lista tillgängliga nätverkszonposter"
 
@@ -6083,11 +6083,11 @@ msgstr "Hantera nätverkslastbalanserare"
 msgid "Manage network peerings"
 msgstr "Hantera nätverkspeeringar"
 
-#: cmd/incus/network_zone.go:1423 cmd/incus/network_zone.go:1424
+#: cmd/incus/network_zone.go:1424 cmd/incus/network_zone.go:1425
 msgid "Manage network zone record entries"
 msgstr "Hantera nätverkszonens postposter"
 
-#: cmd/incus/network_zone.go:755 cmd/incus/network_zone.go:756
+#: cmd/incus/network_zone.go:756 cmd/incus/network_zone.go:757
 msgid "Manage network zone records"
 msgstr "Hantera nätverkszonposter"
 
@@ -6369,7 +6369,7 @@ msgstr "Måste köras som root för att importera från katalogen"
 #: cmd/incus/network.go:1071 cmd/incus/network_acl.go:162
 #: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
 #: cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144
-#: cmd/incus/network_zone.go:870 cmd/incus/profile.go:723
+#: cmd/incus/network_zone.go:871 cmd/incus/profile.go:723
 #: cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984
 #: cmd/incus/snapshot.go:365 cmd/incus/storage.go:683
 #: cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872
@@ -6569,7 +6569,7 @@ msgstr "Nätverks-ACL %s döpt om till %s"
 msgid "Network ACL description"
 msgstr "Beskrivning av nätverks-ACL"
 
-#: cmd/incus/network_zone.go:735
+#: cmd/incus/network_zone.go:736
 #, c-format
 msgid "Network Zone %s deleted"
 msgstr "Nätverkszon %s raderad"
@@ -6669,17 +6669,17 @@ msgstr "Nätverkstyp"
 msgid "Network usage:"
 msgstr "Nätverksanvändning:"
 
-#: cmd/incus/network_zone.go:443
+#: cmd/incus/network_zone.go:444
 #, c-format
 msgid "Network zone %s created"
 msgstr "Nätverkszon %s skapad"
 
-#: cmd/incus/network_zone.go:1097
+#: cmd/incus/network_zone.go:1098
 #, c-format
 msgid "Network zone record %s created"
 msgstr "Nätverkszonpost %s skapad"
 
-#: cmd/incus/network_zone.go:1406
+#: cmd/incus/network_zone.go:1407
 #, c-format
 msgid "Network zone record %s deleted"
 msgstr "Nätverkszonpost %s raderad"
@@ -7001,8 +7001,8 @@ msgstr "Tryck på Ctrl+C för att avsluta"
 #: cmd/incus/network.go:760 cmd/incus/network_acl.go:669
 #: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727
 #: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707
-#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671
-#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570
+#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:672
+#: cmd/incus/network_zone.go:1338 cmd/incus/profile.go:570
 #: cmd/incus/project.go:395 cmd/incus/storage.go:354
 #: cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203
 #: cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
@@ -7250,7 +7250,7 @@ msgstr "Återuppbygg som en tom instans"
 msgid "Rebuild instances"
 msgstr "Återuppbygga instanser"
 
-#: cmd/incus/network_zone.go:1030
+#: cmd/incus/network_zone.go:1031
 msgid "Record description"
 msgstr "Beskrivning av posten"
 
@@ -7367,7 +7367,7 @@ msgstr "Ta bort en klustermedlem från en klustergrupp"
 msgid "Remove a member from the cluster"
 msgstr "Ta bort en medlem från klustret"
 
-#: cmd/incus/network_zone.go:1494
+#: cmd/incus/network_zone.go:1495
 msgid "Remove a network zone record entry"
 msgstr "Ta bort en nätverkszonpost"
 
@@ -7399,7 +7399,7 @@ msgstr "Ta bort backend från en lastbalanserare"
 msgid "Remove backends from a load balancer"
 msgstr "Ta bort backends från en lastbalanserare"
 
-#: cmd/incus/network_zone.go:1495
+#: cmd/incus/network_zone.go:1496
 msgid "Remove entries from a network zone record"
 msgstr "Ta bort poster från en nätverkszonpost"
 
@@ -7949,11 +7949,11 @@ msgstr ""
 "in med:\n"
 "    incus network set [<fjärr>:]<nätverk> <peer_name> <nyckel> <värde>"
 
-#: cmd/incus/network_zone.go:462
+#: cmd/incus/network_zone.go:463
 msgid "Set network zone configuration keys"
 msgstr "Ställ in konfigurationsnycklar för nätverkszoner"
 
-#: cmd/incus/network_zone.go:463
+#: cmd/incus/network_zone.go:464
 msgid ""
 "Set network zone configuration keys\n"
 "\n"
@@ -7967,7 +7967,7 @@ msgstr ""
 "in med:\n"
 "    incus network set [<fjärr>:]<Zon> <nyckel> <värde>"
 
-#: cmd/incus/network_zone.go:1116 cmd/incus/network_zone.go:1117
+#: cmd/incus/network_zone.go:1117 cmd/incus/network_zone.go:1118
 msgid "Set network zone record configuration keys"
 msgstr "Ställ in konfigurationsnycklar för nätverkszonrekord"
 
@@ -8158,11 +8158,11 @@ msgstr "Ställ in nyckeln som en nätverkspeer-egenskap"
 msgid "Set the key as a network property"
 msgstr "Ställ in nyckeln som en nätverksegenskap"
 
-#: cmd/incus/network_zone.go:470
+#: cmd/incus/network_zone.go:471
 msgid "Set the key as a network zone property"
 msgstr "Ställ in nyckeln som en nätverkszonegenskap"
 
-#: cmd/incus/network_zone.go:1122
+#: cmd/incus/network_zone.go:1123
 msgid "Set the key as a network zone record property"
 msgstr "Ställ in nyckeln som en egenskap för nätverkszonens post"
 
@@ -8299,11 +8299,11 @@ msgstr "Visa nätverkskonfigurationer för peer-enheter"
 msgid "Show network zone configurations"
 msgstr "Visa nätverkszonkonfigurationer"
 
-#: cmd/incus/network_zone.go:889
+#: cmd/incus/network_zone.go:890
 msgid "Show network zone record configuration"
 msgstr "Visa konfigurationen för nätverkszonens poster"
 
-#: cmd/incus/network_zone.go:890
+#: cmd/incus/network_zone.go:891
 msgid "Show network zone record configurations"
 msgstr "Visa konfigurationer för nätverkszonposter"
 
@@ -8924,7 +8924,7 @@ msgstr "Egenskapen %q finns inte på nätverkspartnern %q: %v"
 msgid "The property %q does not exist on the network zone %q: %v"
 msgstr "Egenskapen %q finns inte i nätverkszonen %q: %v"
 
-#: cmd/incus/network_zone.go:992
+#: cmd/incus/network_zone.go:993
 #, c-format
 msgid "The property %q does not exist on the network zone record %q: %v"
 msgstr "Egenskapen %q finns inte i nätverkszonposten %q: %v"
@@ -9378,11 +9378,11 @@ msgstr "Avmarkera konfigurationsnycklar för nätverkspeer"
 msgid "Unset network peer keys"
 msgstr "Avmarkera nätverkspeernycklar"
 
-#: cmd/incus/network_zone.go:543 cmd/incus/network_zone.go:544
+#: cmd/incus/network_zone.go:544 cmd/incus/network_zone.go:545
 msgid "Unset network zone configuration keys"
 msgstr "Avmarkera konfigurationsnycklar för nätverkszoner"
 
-#: cmd/incus/network_zone.go:1200 cmd/incus/network_zone.go:1201
+#: cmd/incus/network_zone.go:1201 cmd/incus/network_zone.go:1202
 msgid "Unset network zone record configuration keys"
 msgstr "Konfigurationsnycklar för osatta nätverkszonposter"
 
@@ -9456,11 +9456,11 @@ msgstr "Avmarkera nyckeln som en nätverkspeer-egenskap"
 msgid "Unset the key as a network property"
 msgstr "Inaktivera nyckeln som nätverksegenskap"
 
-#: cmd/incus/network_zone.go:547
+#: cmd/incus/network_zone.go:548
 msgid "Unset the key as a network zone property"
 msgstr "Avmarkera nyckeln som en nätverkszonegenskap"
 
-#: cmd/incus/network_zone.go:1204
+#: cmd/incus/network_zone.go:1205
 msgid "Unset the key as a network zone record property"
 msgstr "Avmarkera nyckeln som en egenskap för nätverkszonens post"
 
@@ -9882,7 +9882,7 @@ msgstr "Du kan inte ange -t eller -T samtidigt som --mode"
 msgid "You must specify a destination instance name"
 msgstr "Du måste ange ett namn på målinstansen"
 
-#: cmd/incus/network_zone.go:381
+#: cmd/incus/network_zone.go:382
 msgid "Zone description"
 msgstr "Zonbeskrivning"
 
@@ -10548,8 +10548,10 @@ msgstr ""
 "i filen config.yaml"
 
 #: cmd/incus/network_zone.go:374
+#, fuzzy
 msgid ""
 "incus network zone create z1\n"
+"    Create network zone z1\n"
 "\n"
 "incus network zone create z1 < config.yaml\n"
 "    Create network zone z1 with configuration from config.yaml"
@@ -10559,7 +10561,7 @@ msgstr ""
 "incus nätverkszon skapa z1 < config.yaml\n"
 "Skapa nätverkszon z1 med konfiguration från config.yaml"
 
-#: cmd/incus/network_zone.go:1023
+#: cmd/incus/network_zone.go:1024
 msgid ""
 "incus network zone record create z1 r1\n"
 "\n"

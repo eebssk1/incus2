@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LXD\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 18:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:46+0200\n"
 "PO-Revision-Date: 2026-04-21 03:04+0000\n"
 "Last-Translator: Dklfajsjfi49wefklsf32 "
 "<nlincus@users.noreply.hosted.weblate.org>\n"
@@ -453,7 +453,7 @@ msgstr ""
 "### Beachten Sie, dass die Felder name, target_project, target_network und "
 "status nicht geändert werden können."
 
-#: cmd/incus/network_zone.go:1267
+#: cmd/incus/network_zone.go:1268
 #, fuzzy
 msgid ""
 "### This is a YAML representation of the network zone record.\n"
@@ -479,7 +479,7 @@ msgstr ""
 "### config:\n"
 "###   size: \"61203283968\""
 
-#: cmd/incus/network_zone.go:602
+#: cmd/incus/network_zone.go:603
 #, fuzzy
 msgid ""
 "### This is a YAML representation of the network zone.\n"
@@ -868,7 +868,7 @@ msgstr "Aktion %q wird von diesem Programm nicht unterstützt"
 msgid "Add a cluster member to a cluster group"
 msgstr "Cluster Mitglied zu einer Cluster Gruppe hinzufügen:"
 
-#: cmd/incus/network_zone.go:1441
+#: cmd/incus/network_zone.go:1442
 #, fuzzy
 msgid "Add a network zone record entry"
 msgstr "Füge einen Netzwerk Zonen Eintrag hinzu"
@@ -886,7 +886,7 @@ msgstr "Backend zu einem Load Balancer hinzufügen"
 msgid "Add backends to a load balancer"
 msgstr "Backends zu einem load balancer hinzufügen"
 
-#: cmd/incus/network_zone.go:1442
+#: cmd/incus/network_zone.go:1443
 msgid "Add entries to a network zone record"
 msgstr "Einträge zu einem Netzwerkzonen-Datensatz hinzufügen"
 
@@ -1706,8 +1706,8 @@ msgstr ""
 #: cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668
 #: cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726
 #: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706
-#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670
-#: cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569
+#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:671
+#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:569
 #: cmd/incus/project.go:394 cmd/incus/storage.go:353
 #: cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202
 #: cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
@@ -1879,7 +1879,7 @@ msgstr ""
 msgid "Could not write server cert file %q: %w"
 msgstr "Kann Verzeichnis für Zertifikate auf dem Server nicht erstellen"
 
-#: cmd/incus/network_zone.go:1543
+#: cmd/incus/network_zone.go:1544
 msgid "Couldn't find a matching entry"
 msgstr ""
 
@@ -2010,7 +2010,7 @@ msgstr "Anhalten des Containers fehlgeschlagen!"
 msgid "Create new network peering"
 msgstr "Anhalten des Containers fehlgeschlagen!"
 
-#: cmd/incus/network_zone.go:1021 cmd/incus/network_zone.go:1022
+#: cmd/incus/network_zone.go:1022 cmd/incus/network_zone.go:1023
 #, fuzzy
 msgid "Create new network zone record"
 msgstr "Anhalten des Containers fehlgeschlagen!"
@@ -2080,7 +2080,7 @@ msgstr ""
 #: cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155
 #: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427
 #: cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139
-#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871
+#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:872
 #: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548
 #: cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481
 #: cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
@@ -2223,12 +2223,12 @@ msgstr "Kein Zertifikat für diese Verbindung"
 msgid "Delete network peerings"
 msgstr ""
 
-#: cmd/incus/network_zone.go:1370 cmd/incus/network_zone.go:1371
+#: cmd/incus/network_zone.go:1371 cmd/incus/network_zone.go:1372
 #, fuzzy
 msgid "Delete network zone record"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/network_zone.go:704 cmd/incus/network_zone.go:705
+#: cmd/incus/network_zone.go:705 cmd/incus/network_zone.go:706
 #, fuzzy
 msgid "Delete network zones"
 msgstr "Kein Zertifikat für diese Verbindung"
@@ -2569,7 +2569,7 @@ msgid ""
 "During refresh, exclude source snapshots earlier than latest target snapshot"
 msgstr ""
 
-#: cmd/incus/network_zone.go:872
+#: cmd/incus/network_zone.go:873
 msgid "ENTRIES"
 msgstr ""
 
@@ -2665,12 +2665,12 @@ msgstr "Alternatives config Verzeichnis."
 msgid "Edit network peer configurations as YAML"
 msgstr "Alternatives config Verzeichnis."
 
-#: cmd/incus/network_zone.go:585 cmd/incus/network_zone.go:586
+#: cmd/incus/network_zone.go:586 cmd/incus/network_zone.go:587
 #, fuzzy
 msgid "Edit network zone configurations as YAML"
 msgstr "Alternatives config Verzeichnis."
 
-#: cmd/incus/network_zone.go:1246 cmd/incus/network_zone.go:1247
+#: cmd/incus/network_zone.go:1247 cmd/incus/network_zone.go:1248
 #, fuzzy
 msgid "Edit network zone record configurations as YAML"
 msgstr "Alternatives config Verzeichnis."
@@ -2762,7 +2762,7 @@ msgstr ""
 msgid "Enter new delay in seconds:"
 msgstr "Legen Sie eine Verzögerungszeit angegeben in Sekunden fest:"
 
-#: cmd/incus/network_zone.go:1444
+#: cmd/incus/network_zone.go:1445
 #, fuzzy
 msgid "Entry TTL"
 msgstr "Eingangs TTL"
@@ -2802,7 +2802,7 @@ msgstr "Fehler beim Abrufen des Aliase/Namen: %w"
 #: cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368
 #: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
 #: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
-#: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
+#: cmd/incus/network_zone.go:511 cmd/incus/network_zone.go:1168
 #: cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
 #: cmd/incus/storage_volume.go:1914
@@ -2824,7 +2824,7 @@ msgstr "Fehler beim Löschen der Parameter: %v"
 #: cmd/incus/network.go:1473 cmd/incus/network_acl.go:490
 #: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
 #: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
-#: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
+#: cmd/incus/network_zone.go:505 cmd/incus/network_zone.go:1162
 #: cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
 #: cmd/incus/storage_volume.go:1908
@@ -3571,7 +3571,7 @@ msgstr ""
 #: cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64
 #: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410
 #: cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116
-#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818
+#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:819
 #: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518
 #: cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341
 #: cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462
@@ -3752,7 +3752,7 @@ msgstr ""
 msgid "Get the key as a network zone property"
 msgstr "Anhalten des Containers fehlgeschlagen!"
 
-#: cmd/incus/network_zone.go:951
+#: cmd/incus/network_zone.go:952
 #, fuzzy
 msgid "Get the key as a network zone record property"
 msgstr "Profil %s erstellt\n"
@@ -3839,7 +3839,7 @@ msgstr "Profil %s erstellt\n"
 msgid "Get values for network zone configuration keys"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:947 cmd/incus/network_zone.go:948
+#: cmd/incus/network_zone.go:948 cmd/incus/network_zone.go:949
 #, fuzzy
 msgid "Get values for network zone record configuration keys"
 msgstr "Profil %s erstellt\n"
@@ -4678,7 +4678,7 @@ msgid ""
 "  s - State"
 msgstr ""
 
-#: cmd/incus/network_zone.go:814 cmd/incus/network_zone.go:815
+#: cmd/incus/network_zone.go:815 cmd/incus/network_zone.go:816
 #, fuzzy
 msgid "List available network zone records"
 msgstr "Kein Zertifikat für diese Verbindung"
@@ -5599,12 +5599,12 @@ msgstr "Kein Zertifikat für diese Verbindung"
 msgid "Manage network peerings"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/network_zone.go:1423 cmd/incus/network_zone.go:1424
+#: cmd/incus/network_zone.go:1424 cmd/incus/network_zone.go:1425
 #, fuzzy
 msgid "Manage network zone record entries"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/network_zone.go:755 cmd/incus/network_zone.go:756
+#: cmd/incus/network_zone.go:756 cmd/incus/network_zone.go:757
 #, fuzzy
 msgid "Manage network zone records"
 msgstr "Kein Zertifikat für diese Verbindung"
@@ -5881,7 +5881,7 @@ msgstr ""
 #: cmd/incus/network.go:1071 cmd/incus/network_acl.go:162
 #: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
 #: cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144
-#: cmd/incus/network_zone.go:870 cmd/incus/profile.go:723
+#: cmd/incus/network_zone.go:871 cmd/incus/profile.go:723
 #: cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984
 #: cmd/incus/snapshot.go:365 cmd/incus/storage.go:683
 #: cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872
@@ -6086,7 +6086,7 @@ msgstr "Profil %s erstellt\n"
 msgid "Network ACL description"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:735
+#: cmd/incus/network_zone.go:736
 #, fuzzy, c-format
 msgid "Network Zone %s deleted"
 msgstr "Profil %s gelöscht\n"
@@ -6191,17 +6191,17 @@ msgstr "Profil %s erstellt\n"
 msgid "Network usage:"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:443
+#: cmd/incus/network_zone.go:444
 #, fuzzy, c-format
 msgid "Network zone %s created"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:1097
+#: cmd/incus/network_zone.go:1098
 #, fuzzy, c-format
 msgid "Network zone record %s created"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:1406
+#: cmd/incus/network_zone.go:1407
 #, fuzzy, c-format
 msgid "Network zone record %s deleted"
 msgstr "Profil %s gelöscht\n"
@@ -6532,8 +6532,8 @@ msgstr ""
 #: cmd/incus/network.go:760 cmd/incus/network_acl.go:669
 #: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727
 #: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707
-#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671
-#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570
+#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:672
+#: cmd/incus/network_zone.go:1338 cmd/incus/profile.go:570
 #: cmd/incus/project.go:395 cmd/incus/storage.go:354
 #: cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203
 #: cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
@@ -6794,7 +6794,7 @@ msgstr "kann nicht zum selben Container Namen kopieren"
 msgid "Rebuild instances"
 msgstr "Anhalten des Containers fehlgeschlagen!"
 
-#: cmd/incus/network_zone.go:1030
+#: cmd/incus/network_zone.go:1031
 #, fuzzy
 msgid "Record description"
 msgstr "Fingerabdruck: %s\n"
@@ -6901,7 +6901,7 @@ msgstr "der Name des Ursprung Containers muss angegeben werden"
 msgid "Remove a member from the cluster"
 msgstr ""
 
-#: cmd/incus/network_zone.go:1494
+#: cmd/incus/network_zone.go:1495
 #, fuzzy
 msgid "Remove a network zone record entry"
 msgstr "Profil %s erstellt\n"
@@ -6939,7 +6939,7 @@ msgstr "der Name des Ursprung Containers muss angegeben werden"
 msgid "Remove backends from a load balancer"
 msgstr "der Name des Ursprung Containers muss angegeben werden"
 
-#: cmd/incus/network_zone.go:1495
+#: cmd/incus/network_zone.go:1496
 #, fuzzy
 msgid "Remove entries from a network zone record"
 msgstr "kann nicht zum selben Container Namen kopieren"
@@ -7487,12 +7487,12 @@ msgid ""
 "    incus network set [<remote>:]<network> <peer_name> <key> <value>"
 msgstr ""
 
-#: cmd/incus/network_zone.go:462
+#: cmd/incus/network_zone.go:463
 #, fuzzy
 msgid "Set network zone configuration keys"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:463
+#: cmd/incus/network_zone.go:464
 msgid ""
 "Set network zone configuration keys\n"
 "\n"
@@ -7501,7 +7501,7 @@ msgid ""
 "    incus network set [<remote>:]<Zone> <key> <value>"
 msgstr ""
 
-#: cmd/incus/network_zone.go:1116 cmd/incus/network_zone.go:1117
+#: cmd/incus/network_zone.go:1117 cmd/incus/network_zone.go:1118
 #, fuzzy
 msgid "Set network zone record configuration keys"
 msgstr "Profil %s erstellt\n"
@@ -7672,12 +7672,12 @@ msgstr "Kein Zertifikat für diese Verbindung"
 msgid "Set the key as a network property"
 msgstr ""
 
-#: cmd/incus/network_zone.go:470
+#: cmd/incus/network_zone.go:471
 #, fuzzy
 msgid "Set the key as a network zone property"
 msgstr "Anhalten des Containers fehlgeschlagen!"
 
-#: cmd/incus/network_zone.go:1122
+#: cmd/incus/network_zone.go:1123
 #, fuzzy
 msgid "Set the key as a network zone record property"
 msgstr "Profil %s erstellt\n"
@@ -7833,12 +7833,12 @@ msgstr "Profil %s erstellt\n"
 msgid "Show network zone configurations"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:889
+#: cmd/incus/network_zone.go:890
 #, fuzzy
 msgid "Show network zone record configuration"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:890
+#: cmd/incus/network_zone.go:891
 #, fuzzy
 msgid "Show network zone record configurations"
 msgstr "Profil %s erstellt\n"
@@ -8440,7 +8440,7 @@ msgstr "der Name des Ursprung Containers muss angegeben werden"
 msgid "The property %q does not exist on the network zone %q: %v"
 msgstr "der Name des Ursprung Containers muss angegeben werden"
 
-#: cmd/incus/network_zone.go:992
+#: cmd/incus/network_zone.go:993
 #, fuzzy, c-format
 msgid "The property %q does not exist on the network zone record %q: %v"
 msgstr "der Name des Ursprung Containers muss angegeben werden"
@@ -8898,12 +8898,12 @@ msgstr "Profil %s erstellt\n"
 msgid "Unset network peer keys"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/network_zone.go:543 cmd/incus/network_zone.go:544
+#: cmd/incus/network_zone.go:544 cmd/incus/network_zone.go:545
 #, fuzzy
 msgid "Unset network zone configuration keys"
 msgstr "Profil %s erstellt\n"
 
-#: cmd/incus/network_zone.go:1200 cmd/incus/network_zone.go:1201
+#: cmd/incus/network_zone.go:1201 cmd/incus/network_zone.go:1202
 #, fuzzy
 msgid "Unset network zone record configuration keys"
 msgstr "Profil %s erstellt\n"
@@ -8984,12 +8984,12 @@ msgstr "Kein Zertifikat für diese Verbindung"
 msgid "Unset the key as a network property"
 msgstr "Kein Zertifikat für diese Verbindung"
 
-#: cmd/incus/network_zone.go:547
+#: cmd/incus/network_zone.go:548
 #, fuzzy
 msgid "Unset the key as a network zone property"
 msgstr "Anhalten des Containers fehlgeschlagen!"
 
-#: cmd/incus/network_zone.go:1204
+#: cmd/incus/network_zone.go:1205
 #, fuzzy
 msgid "Unset the key as a network zone record property"
 msgstr "Profil %s erstellt\n"
@@ -9392,7 +9392,7 @@ msgstr "kann nicht zum selben Container Namen kopieren"
 msgid "You must specify a destination instance name"
 msgstr "der Name des Ursprung Containers muss angegeben werden"
 
-#: cmd/incus/network_zone.go:381
+#: cmd/incus/network_zone.go:382
 #, fuzzy
 msgid "Zone description"
 msgstr "Fingerabdruck: %s\n"
@@ -9898,14 +9898,22 @@ msgid ""
 msgstr ""
 
 #: cmd/incus/network_zone.go:374
+#, fuzzy
 msgid ""
 "incus network zone create z1\n"
+"    Create network zone z1\n"
 "\n"
 "incus network zone create z1 < config.yaml\n"
 "    Create network zone z1 with configuration from config.yaml"
 msgstr ""
+"incus project create p1\n"
+"   Erstellt ein Projekt namens \"p1\"\n"
+"\n"
+"incus project create p1 < config.yaml\n"
+"    Erstellt ein Projekt namens \"p1\" mit der Konfigurationsdatei "
+"\"config.yaml\""
 
-#: cmd/incus/network_zone.go:1023
+#: cmd/incus/network_zone.go:1024
 msgid ""
 "incus network zone record create z1 r1\n"
 "\n"

@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: incus\n"
         "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-        "POT-Creation-Date: 2026-04-30 18:44+0200\n"
+        "POT-Creation-Date: 2026-04-30 18:46+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -254,7 +254,7 @@ msgid   "### This is a YAML representation of the network peer.\n"
         "### Note that the name, target_project, target_network and status fields cannot be changed."
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1267
+#: cmd/incus/network_zone.go:1268
 msgid   "### This is a YAML representation of the network zone record.\n"
         "### Any line starting with a '# will be ignored.\n"
         "###\n"
@@ -267,7 +267,7 @@ msgid   "### This is a YAML representation of the network zone record.\n"
         "###  user.foo: bah\n"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:602
+#: cmd/incus/network_zone.go:603
 msgid   "### This is a YAML representation of the network zone.\n"
         "### Any line starting with a '# will be ignored.\n"
         "###\n"
@@ -564,7 +564,7 @@ msgstr  ""
 msgid   "Add a cluster member to a cluster group"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1441
+#: cmd/incus/network_zone.go:1442
 msgid   "Add a network zone record entry"
 msgstr  ""
 
@@ -580,7 +580,7 @@ msgstr  ""
 msgid   "Add backends to a load balancer"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1442
+#: cmd/incus/network_zone.go:1443
 msgid   "Add entries to a network zone record"
 msgstr  ""
 
@@ -1246,7 +1246,7 @@ msgstr  ""
 msgid   "Config option should be in the format KEY=VALUE"
 msgstr  ""
 
-#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:374 cmd/incus/config.go:265 cmd/incus/config.go:340 cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329 cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668 cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726 cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706 cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670 cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569 cmd/incus/project.go:394 cmd/incus/storage.go:353 cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202 cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
+#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:374 cmd/incus/config.go:265 cmd/incus/config.go:340 cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329 cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668 cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726 cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706 cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:671 cmd/incus/network_zone.go:1337 cmd/incus/profile.go:569 cmd/incus/project.go:394 cmd/incus/storage.go:353 cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202 cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
 #, c-format
 msgid   "Config parsing error: %s"
 msgstr  ""
@@ -1402,7 +1402,7 @@ msgstr  ""
 msgid   "Could not write server cert file %q: %w"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1543
+#: cmd/incus/network_zone.go:1544
 msgid   "Couldn't find a matching entry"
 msgstr  ""
 
@@ -1512,7 +1512,7 @@ msgstr  ""
 msgid   "Create new network peering"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1021 cmd/incus/network_zone.go:1022
+#: cmd/incus/network_zone.go:1022 cmd/incus/network_zone.go:1023
 msgid   "Create new network zone record"
 msgstr  ""
 
@@ -1568,7 +1568,7 @@ msgstr  ""
 msgid   "DEFAULT TARGET ADDRESS"
 msgstr  ""
 
-#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:465 cmd/incus/config_trust.go:417 cmd/incus/image.go:1074 cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076 cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155 cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427 cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139 cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871 cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548 cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481 cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
+#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:465 cmd/incus/config_trust.go:417 cmd/incus/image.go:1074 cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076 cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155 cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427 cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139 cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:872 cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548 cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481 cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
 msgid   "DESCRIPTION"
 msgstr  ""
 
@@ -1695,11 +1695,11 @@ msgstr  ""
 msgid   "Delete network peerings"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1370 cmd/incus/network_zone.go:1371
+#: cmd/incus/network_zone.go:1371 cmd/incus/network_zone.go:1372
 msgid   "Delete network zone record"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:704 cmd/incus/network_zone.go:705
+#: cmd/incus/network_zone.go:705 cmd/incus/network_zone.go:706
 msgid   "Delete network zones"
 msgstr  ""
 
@@ -1984,7 +1984,7 @@ msgstr  ""
 msgid   "During refresh, exclude source snapshots earlier than latest target snapshot"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:872
+#: cmd/incus/network_zone.go:873
 msgid   "ENTRIES"
 msgstr  ""
 
@@ -2065,11 +2065,11 @@ msgstr  ""
 msgid   "Edit network peer configurations as YAML"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:585 cmd/incus/network_zone.go:586
+#: cmd/incus/network_zone.go:586 cmd/incus/network_zone.go:587
 msgid   "Edit network zone configurations as YAML"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1246 cmd/incus/network_zone.go:1247
+#: cmd/incus/network_zone.go:1247 cmd/incus/network_zone.go:1248
 msgid   "Edit network zone record configurations as YAML"
 msgstr  ""
 
@@ -2136,7 +2136,7 @@ msgstr  ""
 msgid   "Enter new delay in seconds:"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1444
+#: cmd/incus/network_zone.go:1445
 msgid   "Entry TTL"
 msgstr  ""
 
@@ -2168,7 +2168,7 @@ msgstr  ""
 msgid   "Error retrieving aliases: %w"
 msgstr  ""
 
-#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:923 cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479 cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368 cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604 cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560 cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167 cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844 cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871 cmd/incus/storage_volume.go:1914
+#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:923 cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479 cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368 cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604 cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560 cmd/incus/network_zone.go:511 cmd/incus/network_zone.go:1168 cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844 cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871 cmd/incus/storage_volume.go:1914
 #, c-format
 msgid   "Error setting properties: %v"
 msgstr  ""
@@ -2183,7 +2183,7 @@ msgstr  ""
 msgid   "Error unsetting properties: %v"
 msgstr  ""
 
-#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:917 cmd/incus/network.go:1473 cmd/incus/network_acl.go:490 cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598 cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554 cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161 cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838 cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865 cmd/incus/storage_volume.go:1908
+#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:917 cmd/incus/network.go:1473 cmd/incus/network_acl.go:490 cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598 cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554 cmd/incus/network_zone.go:505 cmd/incus/network_zone.go:1162 cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838 cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865 cmd/incus/storage_volume.go:1908
 #, c-format
 msgid   "Error unsetting property: %v"
 msgstr  ""
@@ -2823,7 +2823,7 @@ msgstr  ""
 msgid   "Format (csv|json|table|yaml|compact|markdown), use suffix \",noheader\" to disable headers and \",header\" to enable if demanded, e.g. csv,header"
 msgstr  ""
 
-#: cmd/incus/admin_sql.go:57 cmd/incus/alias.go:111 cmd/incus/cluster.go:171 cmd/incus/cluster_group.go:440 cmd/incus/config_template.go:270 cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584 cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141 cmd/incus/network.go:1045 cmd/incus/network.go:1241 cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64 cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410 cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116 cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818 cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518 cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341 cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462 cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466 cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
+#: cmd/incus/admin_sql.go:57 cmd/incus/alias.go:111 cmd/incus/cluster.go:171 cmd/incus/cluster_group.go:440 cmd/incus/config_template.go:270 cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584 cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141 cmd/incus/network.go:1045 cmd/incus/network.go:1241 cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64 cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410 cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116 cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:819 cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518 cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341 cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462 cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466 cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
 msgid   "Format (csv|json|table|yaml|compact|markdown), use suffix \",noheader\" to disable headers and \",header\" to enable it if missing, e.g. csv,header"
 msgstr  ""
 
@@ -2978,7 +2978,7 @@ msgstr  ""
 msgid   "Get the key as a network zone property"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:951
+#: cmd/incus/network_zone.go:952
 msgid   "Get the key as a network zone record property"
 msgstr  ""
 
@@ -3050,7 +3050,7 @@ msgstr  ""
 msgid   "Get values for network zone configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:947 cmd/incus/network_zone.go:948
+#: cmd/incus/network_zone.go:948 cmd/incus/network_zone.go:949
 msgid   "Get values for network zone record configuration keys"
 msgstr  ""
 
@@ -3826,7 +3826,7 @@ msgid   "List available network peers\n"
         "  s - State"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:814 cmd/incus/network_zone.go:815
+#: cmd/incus/network_zone.go:815 cmd/incus/network_zone.go:816
 msgid   "List available network zone records"
 msgstr  ""
 
@@ -4665,11 +4665,11 @@ msgstr  ""
 msgid   "Manage network peerings"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1423 cmd/incus/network_zone.go:1424
+#: cmd/incus/network_zone.go:1424 cmd/incus/network_zone.go:1425
 msgid   "Manage network zone record entries"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:755 cmd/incus/network_zone.go:756
+#: cmd/incus/network_zone.go:756 cmd/incus/network_zone.go:757
 msgid   "Manage network zone records"
 msgstr  ""
 
@@ -4909,7 +4909,7 @@ msgstr  ""
 msgid   "Must run as root to import from directory"
 msgstr  ""
 
-#: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143 cmd/incus/cluster_group.go:463 cmd/incus/config_trust.go:413 cmd/incus/config_trust.go:600 cmd/incus/list.go:484 cmd/incus/network.go:1071 cmd/incus/network_acl.go:162 cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426 cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144 cmd/incus/network_zone.go:870 cmd/incus/profile.go:723 cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984 cmd/incus/snapshot.go:365 cmd/incus/storage.go:683 cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872 cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
+#: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143 cmd/incus/cluster_group.go:463 cmd/incus/config_trust.go:413 cmd/incus/config_trust.go:600 cmd/incus/list.go:484 cmd/incus/network.go:1071 cmd/incus/network_acl.go:162 cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426 cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144 cmd/incus/network_zone.go:871 cmd/incus/profile.go:723 cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984 cmd/incus/snapshot.go:365 cmd/incus/storage.go:683 cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872 cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
 msgid   "NAME"
 msgstr  ""
 
@@ -5096,7 +5096,7 @@ msgstr  ""
 msgid   "Network ACL description"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:735
+#: cmd/incus/network_zone.go:736
 #, c-format
 msgid   "Network Zone %s deleted"
 msgstr  ""
@@ -5195,17 +5195,17 @@ msgstr  ""
 msgid   "Network usage:"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:443
+#: cmd/incus/network_zone.go:444
 #, c-format
 msgid   "Network zone %s created"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1097
+#: cmd/incus/network_zone.go:1098
 #, c-format
 msgid   "Network zone record %s created"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1406
+#: cmd/incus/network_zone.go:1407
 #, c-format
 msgid   "Network zone record %s deleted"
 msgstr  ""
@@ -5506,7 +5506,7 @@ msgstr  ""
 msgid   "Press ctrl+c to finish"
 msgstr  ""
 
-#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:375 cmd/incus/config.go:266 cmd/incus/config.go:341 cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232 cmd/incus/config_trust.go:330 cmd/incus/image.go:459 cmd/incus/network.go:760 cmd/incus/network_acl.go:669 cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727 cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707 cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671 cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570 cmd/incus/project.go:395 cmd/incus/storage.go:354 cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203 cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
+#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:375 cmd/incus/config.go:266 cmd/incus/config.go:341 cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232 cmd/incus/config_trust.go:330 cmd/incus/image.go:459 cmd/incus/network.go:760 cmd/incus/network_acl.go:669 cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727 cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707 cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:672 cmd/incus/network_zone.go:1338 cmd/incus/profile.go:570 cmd/incus/project.go:395 cmd/incus/storage.go:354 cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203 cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
 msgid   "Press enter to open the editor again or ctrl+c to abort change"
 msgstr  ""
 
@@ -5745,7 +5745,7 @@ msgstr  ""
 msgid   "Rebuild instances"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1030
+#: cmd/incus/network_zone.go:1031
 msgid   "Record description"
 msgstr  ""
 
@@ -5839,7 +5839,7 @@ msgstr  ""
 msgid   "Remove a member from the cluster"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1494
+#: cmd/incus/network_zone.go:1495
 msgid   "Remove a network zone record entry"
 msgstr  ""
 
@@ -5871,7 +5871,7 @@ msgstr  ""
 msgid   "Remove backends from a load balancer"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1495
+#: cmd/incus/network_zone.go:1496
 msgid   "Remove entries from a network zone record"
 msgstr  ""
 
@@ -6346,18 +6346,18 @@ msgid   "Set network peer keys\n"
         "    incus network set [<remote>:]<network> <peer_name> <key> <value>"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:462
+#: cmd/incus/network_zone.go:463
 msgid   "Set network zone configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:463
+#: cmd/incus/network_zone.go:464
 msgid   "Set network zone configuration keys\n"
         "\n"
         "For backward compatibility, a single configuration key may still be set with:\n"
         "    incus network set [<remote>:]<Zone> <key> <value>"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1116 cmd/incus/network_zone.go:1117
+#: cmd/incus/network_zone.go:1117 cmd/incus/network_zone.go:1118
 msgid   "Set network zone record configuration keys"
 msgstr  ""
 
@@ -6495,11 +6495,11 @@ msgstr  ""
 msgid   "Set the key as a network property"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:470
+#: cmd/incus/network_zone.go:471
 msgid   "Set the key as a network zone property"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1122
+#: cmd/incus/network_zone.go:1123
 msgid   "Set the key as a network zone record property"
 msgstr  ""
 
@@ -6635,11 +6635,11 @@ msgstr  ""
 msgid   "Show network zone configurations"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:889
+#: cmd/incus/network_zone.go:890
 msgid   "Show network zone record configuration"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:890
+#: cmd/incus/network_zone.go:891
 msgid   "Show network zone record configurations"
 msgstr  ""
 
@@ -7186,7 +7186,7 @@ msgstr  ""
 msgid   "The property %q does not exist on the network zone %q: %v"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:992
+#: cmd/incus/network_zone.go:993
 #, c-format
 msgid   "The property %q does not exist on the network zone record %q: %v"
 msgstr  ""
@@ -7586,11 +7586,11 @@ msgstr  ""
 msgid   "Unset network peer keys"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:543 cmd/incus/network_zone.go:544
+#: cmd/incus/network_zone.go:544 cmd/incus/network_zone.go:545
 msgid   "Unset network zone configuration keys"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1200 cmd/incus/network_zone.go:1201
+#: cmd/incus/network_zone.go:1201 cmd/incus/network_zone.go:1202
 msgid   "Unset network zone record configuration keys"
 msgstr  ""
 
@@ -7657,11 +7657,11 @@ msgstr  ""
 msgid   "Unset the key as a network property"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:547
+#: cmd/incus/network_zone.go:548
 msgid   "Unset the key as a network zone property"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1204
+#: cmd/incus/network_zone.go:1205
 msgid   "Unset the key as a network zone record property"
 msgstr  ""
 
@@ -8017,7 +8017,7 @@ msgstr  ""
 msgid   "You must specify a destination instance name"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:381
+#: cmd/incus/network_zone.go:382
 msgid   "Zone description"
 msgstr  ""
 
@@ -8423,12 +8423,13 @@ msgstr  ""
 
 #: cmd/incus/network_zone.go:374
 msgid   "incus network zone create z1\n"
+        "    Create network zone z1\n"
         "\n"
         "incus network zone create z1 < config.yaml\n"
         "    Create network zone z1 with configuration from config.yaml"
 msgstr  ""
 
-#: cmd/incus/network_zone.go:1023
+#: cmd/incus/network_zone.go:1024
 msgid   "incus network zone record create z1 r1\n"
         "\n"
         "incus network zone record create z1 r1 < config.yaml\n"
