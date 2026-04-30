@@ -978,8 +978,8 @@ func (n *ovn) Validate(config map[string]string, clientType request.ClientType) 
 			continue
 		}
 
-		// Skip if unchanged
-		if config[key] == n.config[key] {
+		// Skip if unchanged and already created
+		if config[key] == n.config[key] && n.status == api.NetworkStatusCreated {
 			continue
 		}
 
