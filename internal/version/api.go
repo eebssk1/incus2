@@ -534,6 +534,7 @@ var APIExtensions = []string{
 	"storage_volume_nbd",
 	"projects_restricted_storage_pool_access",
 	"server_shutdown_action",
+	"instances_placement_scriptlet_rebalance",
 }
 
 // APIExtensionsCount returns the number of available API extensions.
