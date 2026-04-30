@@ -239,6 +239,11 @@ func (d *linstor) createResourceGroup() error {
 		return fmt.Errorf("Could parse config into DRBD props: %w", err)
 	}
 
+	// Some tuning to speed up resync.
+	if props["DrbdOptions/Disk/rs-discard-granularity"] == "" {
+		props["DrbdOptions/Disk/rs-discard-granularity"] = "1048576"
+	}
+
 	err = linstor.Client.ResourceGroups.Modify(context.TODO(), resourceGroup.Name, linstorClient.ResourceGroupModify{
 		OverrideProps: props,
 	})
