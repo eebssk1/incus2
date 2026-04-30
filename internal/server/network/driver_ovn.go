@@ -406,6 +406,64 @@ func (n *ovn) getExternalSubnetInUse(uplinkNetworkName string) ([]externalSubnet
 	return externalSubnets, nil
 }
 
+// validateUplinkAddressNotInUse checks for conflicting externAddresses in other networks/forwards/loadbalancers.
+func (n *ovn) validateUplinkAddressNotInUse(uplinkNetworkName string, ipAddress net.IP) error {
+	if ipAddress == nil {
+		return nil
+	}
+
+	return n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
+		projectNetworks, err := tx.GetCreatedNetworks(ctx)
+		if err != nil {
+			return fmt.Errorf("Failed to load all networks: %w", err)
+		}
+
+		for projectName, networks := range projectNetworks {
+			for _, netInfo := range networks {
+				if netInfo.Type != "ovn" || netInfo.Config["network"] != uplinkNetworkName {
+					continue
+				}
+
+				// Skip our own network so updates that keep the same IP don't conflict with themselves.
+				if projectName == n.project && netInfo.Name == n.name {
+					continue
+				}
+
+				for _, k := range []string{ovnVolatileUplinkIPv4, ovnVolatileUplinkIPv6} {
+					otherIP := net.ParseIP(netInfo.Config[k])
+					if otherIP != nil && otherIP.Equal(ipAddress) {
+						// Vague error to avoid leaking resources from other projects.
+						return fmt.Errorf("Uplink address %q is already in use by another OVN network", ipAddress.String())
+					}
+				}
+			}
+		}
+
+		// Check forward and load balancer listen addresses across networks connected to our uplink.
+		externalSubnetsInUse, err := n.common.getExternalSubnetInUse(ctx, tx, uplinkNetworkName, false)
+		if err != nil {
+			return fmt.Errorf("Failed getting external subnets in use: %w", err)
+		}
+
+		for _, externalSubnetUser := range externalSubnetsInUse {
+			if externalSubnetUser.usageType != subnetUsageNetworkForward && externalSubnetUser.usageType != subnetUsageNetworkLoadBalancer {
+				continue
+			}
+
+			if SubnetContainsIP(&externalSubnetUser.subnet, ipAddress) {
+				kind := "network forward"
+				if externalSubnetUser.usageType == subnetUsageNetworkLoadBalancer {
+					kind = "network load balancer"
+				}
+
+				return fmt.Errorf("Uplink address %q is already in use by a %s", ipAddress.String(), kind)
+			}
+		}
+
+		return nil
+	})
+}
+
 // Validate network config.
 func (n *ovn) Validate(config map[string]string, clientType request.ClientType) error {
 	rules := map[string]func(value string) error{
@@ -909,6 +967,31 @@ func (n *ovn) Validate(config map[string]string, clientType request.ClientType) 
 	// All tests below are related to the uplink network, skip if we don't have one.
 	if uplink == nil {
 		return nil
+	}
+
+	// If a caller has explicitly pinned the OVN router's external uplink IP via the volatile keys,
+	// make sure the chosen address isn't already used elsewhere on the same uplink. Without this
+	// check two networks (or a network and a forward/load balancer) can end up sharing the same
+	// external IP, which silently breaks routing.
+	for _, key := range []string{ovnVolatileUplinkIPv4, ovnVolatileUplinkIPv6} {
+		if config[key] == "" {
+			continue
+		}
+
+		// Skip if unchanged
+		if config[key] == n.config[key] {
+			continue
+		}
+
+		ipAddress := net.ParseIP(config[key])
+		if ipAddress == nil {
+			continue
+		}
+
+		err = n.validateUplinkAddressNotInUse(uplink.Name, ipAddress)
+		if err != nil {
+			return err
+		}
 	}
 
 	// If NAT disabled, parse the external subnets that are being requested.
