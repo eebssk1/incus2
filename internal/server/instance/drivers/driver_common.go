@@ -119,6 +119,17 @@ func (d *common) CreationDate() time.Time {
 	return d.creationDate
 }
 
+// UpdateDevices overrides the instance's devices without persisting changes to the database.
+func (d *common) UpdateDevices(devices deviceConfig.Devices) error {
+	d.localDevices = devices
+
+	for name, devConfig := range devices {
+		d.expandedDevices[name] = devConfig
+	}
+
+	return nil
+}
+
 // Type returns the instance's type.
 func (d *common) Type() instancetype.Type {
 	return d.dbType

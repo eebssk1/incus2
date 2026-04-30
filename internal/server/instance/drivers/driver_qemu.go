@@ -354,6 +354,7 @@ type qemu struct {
 
 	// Indicate whether the root disk will be live-migrated.
 	migrationRootDisk bool
+	disksToMigrate    []localMigration.DependentVolumeArgs
 
 	// Indicates whether this is an inner-cluster or cross-cluster move.
 	migrationClusterMove bool
@@ -1071,20 +1072,11 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 
 				devicesMap := storagePools.DevicesMapFromBackupConfig(config)
 
-				for _, vol := range config.DependentVolumes {
-					diskPool, err := storagePools.LoadByName(d.state, vol.Pool.Name)
-					if err != nil {
-						d.logger.Error("Failed loading storage pool", logger.Ctx{"err": err})
-					}
-
-					if !storagePools.ShouldMigrateDependentVolume(diskPool, d.migrationClusterMove) {
-						continue
-					}
-
-					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Volume.Name, "pool": vol.Pool.Name})
-					deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool.Name, vol.Volume.Name)
+				for _, vol := range d.disksToMigrate {
+					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Name, "pool": vol.Pool})
+					deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
 					if deviceName == "" {
-						d.logger.Error("Failed to find requested device", logger.Ctx{"pool": vol.Pool.Name, "volName": vol.Volume.Name})
+						d.logger.Error("Failed to find requested device", logger.Ctx{"pool": vol.Pool, "volName": vol.Name})
 						return
 					}
 
@@ -7592,7 +7584,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots)
+	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.ClusterMoveSourceName != "")
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 		op.Done(err)
@@ -7661,7 +7653,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true)
 	if err != nil {
 		err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 		op.Done(err)
@@ -7670,7 +7662,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], nil))
 	}
 
 	volSourceArgs := &localMigration.VolumeSourceArgs{
@@ -8073,24 +8065,9 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 	// If we are performing an intra-cluster member move on a Ceph storage pool without storage change
 	// then we can treat this as shared storage and avoid needing to sync the root disk.
 	sameSharedStorage := clusterMoveSourceName != "" && pool.Driver().Info().Remote && storagePool == ""
-	disksToMigrate := false
-
-	for _, vol := range volSourceArgs.DependentVolumes {
-		diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-		if err != nil {
-			return fmt.Errorf("Failed loading storage pool: %w", err)
-		}
-
-		if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-			continue
-		}
-
-		disksToMigrate = true
-		break
-	}
+	disksToMigrate := len(volSourceArgs.DependentVolumes) > 0
 
 	dependentVolumeMove := clusterMoveSourceName != "" && disksToMigrate
-	devicesMap := storagePools.DevicesMapFromBackupConfig(volSourceArgs.Info.Config)
 
 	reverter := revert.New()
 
@@ -8136,21 +8113,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
-			diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-			if err != nil {
-				return fmt.Errorf("Failed loading storage pool: %w", err)
-			}
-
-			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-				continue
-			}
-
-			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
-			if deviceName == "" {
-				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
-			}
-
-			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.DeviceName))
 
 			d.logger.Debug("Create snapshot for dependent volume", logger.Ctx{"name": vol.Name, "size": vol.VolumeSize, "diskName": diskName})
 
@@ -8322,21 +8285,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
-			diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-			if err != nil {
-				return fmt.Errorf("Failed loading storage pool: %w", err)
-			}
-
-			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-				continue
-			}
-
-			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
-			if deviceName == "" {
-				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
-			}
-
-			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.DeviceName))
 
 			_, err = d.sendMigrationSnapshot(diskName, filesystemConn, true)
 			if err != nil {
@@ -8466,7 +8415,8 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	respHeader.Snapshots = offerHeader.Snapshots
 	respHeader.Refresh = &args.Refresh
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots)
+	localDevices := d.localDevices.CloneNative()
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false)
 	if err != nil {
 		return fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 	}
@@ -8474,7 +8424,8 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
 		respHeader.DependentVolumes = append(respHeader.DependentVolumes, volWithType.Volume)
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		vol := localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], localDevices[*volWithType.Volume.DeviceName])
+		dependentVolumes = append(dependentVolumes, vol)
 	}
 
 	if args.Refresh {
@@ -8806,22 +8757,11 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 					api.SecretNameState: stateConn,
 				}
 
-				disksToMigrate := false
 				for _, vol := range dependentVolumes {
-					diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-					if err != nil {
-						return fmt.Errorf("Failed loading storage pool: %w", err)
-					}
-
-					if !storagePools.ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
-						continue
-					}
-
-					disksToMigrate = true
-					break
+					d.disksToMigrate = append(d.disksToMigrate, vol)
 				}
 
-				dependentVolumeMove := args.ClusterMoveSourceName != "" && disksToMigrate
+				dependentVolumeMove := args.ClusterMoveSourceName != "" && len(d.disksToMigrate) > 0
 
 				// Populate the filesystem connection handle if doing non-shared storage migration.
 				sameSharedStorage := args.ClusterMoveSourceName != "" && poolInfo.Remote && args.StoragePool == ""

@@ -110,6 +110,7 @@ type Instance interface {
 	// Config handling.
 	Rename(newName string, applyTemplateTrigger bool) error
 	Update(newConfig db.InstanceArgs, userRequested bool) error
+	UpdateDevices(devices deviceConfig.Devices) error
 
 	Delete(force bool, cleanupDependencies bool) error
 	Export(meta io.Writer, roofs io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error)
@@ -256,6 +257,7 @@ type MigrateSendArgs struct {
 	MigrateArgs
 
 	AllowInconsistent bool
+	Devices           api.DevicesMap
 }
 
 // MigrateReceiveArgs represent arguments for instance migration receive.
