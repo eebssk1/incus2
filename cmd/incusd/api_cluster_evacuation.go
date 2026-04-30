@@ -358,6 +358,30 @@ func evacuateInstancesFunc(ctx context.Context, inst instance.Instance, opts eva
 	return nil
 }
 
+// evacuateShutdown performs an evacuation of the local cluster member as part of the daemon shutdown sequence.
+func evacuateShutdown(ctx context.Context, s *state.State, name string) error {
+	run := func(op *operations.Operation) error {
+		return evacuateClusterMember(ctx, s, op, name, "", evacuateStopInstance, evacuateMigrateInstance(nil))
+	}
+
+	op, err := operations.OperationCreate(s, "", operations.OperationClassTask, operationtype.ClusterMemberEvacuate, nil, nil, run, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf("Failed creating cluster member evacuate operation: %w", err)
+	}
+
+	err = op.Start()
+	if err != nil {
+		return fmt.Errorf("Failed starting cluster member evacuate operation: %w", err)
+	}
+
+	err = op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to evacuate cluster member: %w", err)
+	}
+
+	return nil
+}
+
 func restoreClusterMember(d *Daemon, r *http.Request, skipInstances bool) response.Response {
 	s := d.State()
 
