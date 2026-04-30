@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 18:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:46+0200\n"
 "PO-Revision-Date: 2026-04-29 08:09+0000\n"
 "Last-Translator: Américo Monteiro <a_monteiro@gmx.com>\n"
 "Language-Team: Portuguese <https://hosted.weblate.org/projects/incus/cli/pt/"
@@ -466,7 +466,7 @@ msgstr ""
 "### Note que os campos name, target_project, target_network e status não "
 "podem ser alterados."
 
-#: cmd/incus/network_zone.go:1267
+#: cmd/incus/network_zone.go:1268
 msgid ""
 "### This is a YAML representation of the network zone record.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -491,7 +491,7 @@ msgstr ""
 "### config:\n"
 "###  user.foo: bah\n"
 
-#: cmd/incus/network_zone.go:602
+#: cmd/incus/network_zone.go:603
 msgid ""
 "### This is a YAML representation of the network zone.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -864,7 +864,7 @@ msgstr "Acção %q não é suportada por esta ferramenta"
 msgid "Add a cluster member to a cluster group"
 msgstr "Adiciona um membro de agrupamento a um grupo de agrupamento"
 
-#: cmd/incus/network_zone.go:1441
+#: cmd/incus/network_zone.go:1442
 msgid "Add a network zone record entry"
 msgstr "Adiciona uma entrada de registro de zona de rede"
 
@@ -880,7 +880,7 @@ msgstr "Adiciona backend a um balanceador de carga"
 msgid "Add backends to a load balancer"
 msgstr "Adiciona backends a um balanceador de carga"
 
-#: cmd/incus/network_zone.go:1442
+#: cmd/incus/network_zone.go:1443
 msgid "Add entries to a network zone record"
 msgstr "Adiciona entradas para um registro de zona de rede"
 
@@ -1671,8 +1671,8 @@ msgstr "Opção de confiança deve estar no formato CHAVE=VALOR"
 #: cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668
 #: cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726
 #: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:706
-#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670
-#: cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569
+#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:671
+#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:569
 #: cmd/incus/project.go:394 cmd/incus/storage.go:353
 #: cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202
 #: cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
@@ -1857,7 +1857,7 @@ msgstr ""
 msgid "Could not write server cert file %q: %w"
 msgstr "Incapaz de escrever o ficheiro de certificação do servidor %q: %w"
 
-#: cmd/incus/network_zone.go:1543
+#: cmd/incus/network_zone.go:1544
 msgid "Couldn't find a matching entry"
 msgstr "Não consegui encontrar uma entrada correspondente"
 
@@ -1976,7 +1976,7 @@ msgstr "Cria novos balanceadores de carga de rede"
 msgid "Create new network peering"
 msgstr "Cria novo peer de rede"
 
-#: cmd/incus/network_zone.go:1021 cmd/incus/network_zone.go:1022
+#: cmd/incus/network_zone.go:1022 cmd/incus/network_zone.go:1023
 msgid "Create new network zone record"
 msgstr "Cria novo registro de zona de rede"
 
@@ -2039,7 +2039,7 @@ msgstr "ENDEREÇOS DE ALVO PREDEFINIDOS"
 #: cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155
 #: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427
 #: cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139
-#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871
+#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:872
 #: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548
 #: cmd/incus/storage.go:685 cmd/incus/storage_bucket.go:481
 #: cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
@@ -2170,11 +2170,11 @@ msgstr "Apaga balanceadores de carga de rede"
 msgid "Delete network peerings"
 msgstr "Apaga peerings de rede"
 
-#: cmd/incus/network_zone.go:1370 cmd/incus/network_zone.go:1371
+#: cmd/incus/network_zone.go:1371 cmd/incus/network_zone.go:1372
 msgid "Delete network zone record"
 msgstr "Apaga registro de zona de rede"
 
-#: cmd/incus/network_zone.go:704 cmd/incus/network_zone.go:705
+#: cmd/incus/network_zone.go:705 cmd/incus/network_zone.go:706
 msgid "Delete network zones"
 msgstr "Apaga zonas de rede"
 
@@ -2498,7 +2498,7 @@ msgstr ""
 "Durante o refrescar, exclui os instantâneos da fonte mais cedo que o "
 "instantâneo mais recente do alvo"
 
-#: cmd/incus/network_zone.go:872
+#: cmd/incus/network_zone.go:873
 msgid "ENTRIES"
 msgstr "ENTRADAS"
 
@@ -2581,11 +2581,11 @@ msgstr "Edita configurações de balanceador de carga de rede como YAML"
 msgid "Edit network peer configurations as YAML"
 msgstr "Edita configurações de peer de rede como YAML"
 
-#: cmd/incus/network_zone.go:585 cmd/incus/network_zone.go:586
+#: cmd/incus/network_zone.go:586 cmd/incus/network_zone.go:587
 msgid "Edit network zone configurations as YAML"
 msgstr "Edita configurações de zona de rede como YAML"
 
-#: cmd/incus/network_zone.go:1246 cmd/incus/network_zone.go:1247
+#: cmd/incus/network_zone.go:1247 cmd/incus/network_zone.go:1248
 msgid "Edit network zone record configurations as YAML"
 msgstr "Edita configurações de registo de zona de rede como YAML"
 
@@ -2689,7 +2689,7 @@ msgstr ""
 msgid "Enter new delay in seconds:"
 msgstr "Insira novo atraso em segundos:"
 
-#: cmd/incus/network_zone.go:1444
+#: cmd/incus/network_zone.go:1445
 msgid "Entry TTL"
 msgstr "Entrada TTL"
 
@@ -2726,7 +2726,7 @@ msgstr "Erro ao obter aliases: %w"
 #: cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368
 #: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
 #: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
-#: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
+#: cmd/incus/network_zone.go:511 cmd/incus/network_zone.go:1168
 #: cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:844
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
 #: cmd/incus/storage_volume.go:1914
@@ -2748,7 +2748,7 @@ msgstr "Erro ao remover definições de propriedades: %v"
 #: cmd/incus/network.go:1473 cmd/incus/network_acl.go:490
 #: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
 #: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
-#: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
+#: cmd/incus/network_zone.go:505 cmd/incus/network_zone.go:1162
 #: cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:838
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
 #: cmd/incus/storage_volume.go:1908
@@ -3512,7 +3512,7 @@ msgstr ""
 #: cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64
 #: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410
 #: cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116
-#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818
+#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:819
 #: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518
 #: cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341
 #: cmd/incus/storage.go:660 cmd/incus/storage_bucket.go:462
@@ -3703,7 +3703,7 @@ msgstr "Obtém a chave como uma propriedade de rede"
 msgid "Get the key as a network zone property"
 msgstr "Obtém a chave como uma propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:951
+#: cmd/incus/network_zone.go:952
 msgid "Get the key as a network zone record property"
 msgstr "Obtém a chave como uma propriedade de registo de zona de rede"
 
@@ -3777,7 +3777,7 @@ msgstr "Obtém valores para chaves de configuração de peer de rede"
 msgid "Get values for network zone configuration keys"
 msgstr "Obtém valores para chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:947 cmd/incus/network_zone.go:948
+#: cmd/incus/network_zone.go:948 cmd/incus/network_zone.go:949
 msgid "Get values for network zone record configuration keys"
 msgstr "Obtém valores para chaves de configuração de registo de zona de rede"
 
@@ -4764,7 +4764,7 @@ msgstr ""
 "  t - Tipo\n"
 "  s - Estado"
 
-#: cmd/incus/network_zone.go:814 cmd/incus/network_zone.go:815
+#: cmd/incus/network_zone.go:815 cmd/incus/network_zone.go:816
 msgid "List available network zone records"
 msgstr "Lista registos de zona de rede disponíveis"
 
@@ -6152,11 +6152,11 @@ msgstr "Gerir balanceadores de carga de rede"
 msgid "Manage network peerings"
 msgstr "Gerir peerings de rede"
 
-#: cmd/incus/network_zone.go:1423 cmd/incus/network_zone.go:1424
+#: cmd/incus/network_zone.go:1424 cmd/incus/network_zone.go:1425
 msgid "Manage network zone record entries"
 msgstr "Gerir entradas de registro de zona de rede"
 
-#: cmd/incus/network_zone.go:755 cmd/incus/network_zone.go:756
+#: cmd/incus/network_zone.go:756 cmd/incus/network_zone.go:757
 msgid "Manage network zone records"
 msgstr "Gerir registros de zona de rede"
 
@@ -6441,7 +6441,7 @@ msgstr "Tem de correr como root para importar do diretório"
 #: cmd/incus/network.go:1071 cmd/incus/network_acl.go:162
 #: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
 #: cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144
-#: cmd/incus/network_zone.go:870 cmd/incus/profile.go:723
+#: cmd/incus/network_zone.go:871 cmd/incus/profile.go:723
 #: cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984
 #: cmd/incus/snapshot.go:365 cmd/incus/storage.go:683
 #: cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872
@@ -6639,7 +6639,7 @@ msgstr "ACL de rede %s renomeado para %s"
 msgid "Network ACL description"
 msgstr "Descrição de ACL de rede"
 
-#: cmd/incus/network_zone.go:735
+#: cmd/incus/network_zone.go:736
 #, c-format
 msgid "Network Zone %s deleted"
 msgstr "Zona de Rede %s apagada"
@@ -6740,17 +6740,17 @@ msgstr "Tipo de rede"
 msgid "Network usage:"
 msgstr "Utilização de rede:"
 
-#: cmd/incus/network_zone.go:443
+#: cmd/incus/network_zone.go:444
 #, c-format
 msgid "Network zone %s created"
 msgstr "Zona de rede %s criada"
 
-#: cmd/incus/network_zone.go:1097
+#: cmd/incus/network_zone.go:1098
 #, c-format
 msgid "Network zone record %s created"
 msgstr "Registro de zona de rede %s criado"
 
-#: cmd/incus/network_zone.go:1406
+#: cmd/incus/network_zone.go:1407
 #, c-format
 msgid "Network zone record %s deleted"
 msgstr "Registro de zona de rede %s apagado"
@@ -7075,8 +7075,8 @@ msgstr "Pressione ctrl+c para terminar"
 #: cmd/incus/network.go:760 cmd/incus/network_acl.go:669
 #: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727
 #: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:707
-#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671
-#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570
+#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:672
+#: cmd/incus/network_zone.go:1338 cmd/incus/profile.go:570
 #: cmd/incus/project.go:395 cmd/incus/storage.go:354
 #: cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203
 #: cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
@@ -7324,7 +7324,7 @@ msgstr "Recompila como nova instância"
 msgid "Rebuild instances"
 msgstr "Recompila instâncias"
 
-#: cmd/incus/network_zone.go:1030
+#: cmd/incus/network_zone.go:1031
 msgid "Record description"
 msgstr "Descrição do registo"
 
@@ -7441,7 +7441,7 @@ msgstr "Remove um membro de agrupamento de um grupo de agrupamento"
 msgid "Remove a member from the cluster"
 msgstr "Remove um membro do agrupamento"
 
-#: cmd/incus/network_zone.go:1494
+#: cmd/incus/network_zone.go:1495
 msgid "Remove a network zone record entry"
 msgstr "Remove uma entrada de registro de zona de rede"
 
@@ -7473,7 +7473,7 @@ msgstr "Remove backend de um balanceador de carga"
 msgid "Remove backends from a load balancer"
 msgstr "Remove backends de um balanceador de carga"
 
-#: cmd/incus/network_zone.go:1495
+#: cmd/incus/network_zone.go:1496
 msgid "Remove entries from a network zone record"
 msgstr "Remove entradas de um registro de zona de rede"
 
@@ -8026,11 +8026,11 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<rede> <nome_do_peer> <chave> <valor>"
 
-#: cmd/incus/network_zone.go:462
+#: cmd/incus/network_zone.go:463
 msgid "Set network zone configuration keys"
 msgstr "Define chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:463
+#: cmd/incus/network_zone.go:464
 msgid ""
 "Set network zone configuration keys\n"
 "\n"
@@ -8044,7 +8044,7 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<Zona> <chave> <valor>"
 
-#: cmd/incus/network_zone.go:1116 cmd/incus/network_zone.go:1117
+#: cmd/incus/network_zone.go:1117 cmd/incus/network_zone.go:1118
 msgid "Set network zone record configuration keys"
 msgstr "Define chaves de configuração de registro de zona de rede"
 
@@ -8236,11 +8236,11 @@ msgstr "Define a chave como uma propriedade de peer de rede"
 msgid "Set the key as a network property"
 msgstr "Define a chave como uma propriedade de rede"
 
-#: cmd/incus/network_zone.go:470
+#: cmd/incus/network_zone.go:471
 msgid "Set the key as a network zone property"
 msgstr "Define a chave como uma propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:1122
+#: cmd/incus/network_zone.go:1123
 msgid "Set the key as a network zone record property"
 msgstr "Define a chave como uma propriedade de registro de zona de rede"
 
@@ -8377,11 +8377,11 @@ msgstr "Mostra configurações de peer de rede"
 msgid "Show network zone configurations"
 msgstr "Mostra configurações de zona de rede"
 
-#: cmd/incus/network_zone.go:889
+#: cmd/incus/network_zone.go:890
 msgid "Show network zone record configuration"
 msgstr "Mostra configuração de registro de zona de rede"
 
-#: cmd/incus/network_zone.go:890
+#: cmd/incus/network_zone.go:891
 msgid "Show network zone record configurations"
 msgstr "Mostra configurações de registro de zona de rede"
 
@@ -9007,7 +9007,7 @@ msgstr "A propriedade %q não existe no peer de rede %q: %v"
 msgid "The property %q does not exist on the network zone %q: %v"
 msgstr "A propriedade %q não existe na zona de rede %q: %v"
 
-#: cmd/incus/network_zone.go:992
+#: cmd/incus/network_zone.go:993
 #, c-format
 msgid "The property %q does not exist on the network zone record %q: %v"
 msgstr "A propriedade %q não existe no registro da zona de rede %q: %v"
@@ -9472,11 +9472,11 @@ msgstr "Retira definições de chaves de configuração de peer de rede"
 msgid "Unset network peer keys"
 msgstr "Retira definições de chaves de peer de rede"
 
-#: cmd/incus/network_zone.go:543 cmd/incus/network_zone.go:544
+#: cmd/incus/network_zone.go:544 cmd/incus/network_zone.go:545
 msgid "Unset network zone configuration keys"
 msgstr "Retira definições de chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:1200 cmd/incus/network_zone.go:1201
+#: cmd/incus/network_zone.go:1201 cmd/incus/network_zone.go:1202
 msgid "Unset network zone record configuration keys"
 msgstr "Retira definições de chaves de configuração de registo de zona de rede"
 
@@ -9552,11 +9552,11 @@ msgstr "Retira definições da chave como propriedade de peer de rede"
 msgid "Unset the key as a network property"
 msgstr "Retira definições da chave como propriedade de rede"
 
-#: cmd/incus/network_zone.go:547
+#: cmd/incus/network_zone.go:548
 msgid "Unset the key as a network zone property"
 msgstr "Retira definições da chave como propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:1204
+#: cmd/incus/network_zone.go:1205
 msgid "Unset the key as a network zone record property"
 msgstr "Retira definições da chave como propriedade de registo de zona de rede"
 
@@ -9984,7 +9984,7 @@ msgstr "Você não pode passar -t ou -T ao mesmo tempo como --mode"
 msgid "You must specify a destination instance name"
 msgstr "Você tem de especificar um nome de instância de destino"
 
-#: cmd/incus/network_zone.go:381
+#: cmd/incus/network_zone.go:382
 msgid "Zone description"
 msgstr "Descrição da zona"
 
@@ -10636,8 +10636,10 @@ msgstr ""
 "\tno ficheiro config.yaml"
 
 #: cmd/incus/network_zone.go:374
+#, fuzzy
 msgid ""
 "incus network zone create z1\n"
+"    Create network zone z1\n"
 "\n"
 "incus network zone create z1 < config.yaml\n"
 "    Create network zone z1 with configuration from config.yaml"
@@ -10647,7 +10649,7 @@ msgstr ""
 "incus network zone create z1 < config.yaml\n"
 "    Cria zona de rede z1 com configuração de config.yaml"
 
-#: cmd/incus/network_zone.go:1023
+#: cmd/incus/network_zone.go:1024
 msgid ""
 "incus network zone record create z1 r1\n"
 "\n"
