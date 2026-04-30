@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lxd\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 15:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:44+0200\n"
 "PO-Revision-Date: 2026-04-21 03:03+0000\n"
 "Last-Translator: meipeter <meipeter114514@outlook.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
@@ -125,6 +125,15 @@ msgid ""
 "### Any line starting with a '# will be ignored."
 msgstr ""
 "### 这是集群组的 YAML 表示形式。\n"
+"### 任何以“#”开头的行都会被忽略。"
+
+#: cmd/incus/cluster.go:875
+#, fuzzy
+msgid ""
+"### This is a YAML representation of the cluster member.\n"
+"### Any line starting with a '# will be ignored."
+msgstr ""
+"### 这是集群成员的 YAML 表示形式。\n"
 "### 任何以“#”开头的行都会被忽略。"
 
 #: cmd/incus/config.go:118
@@ -610,14 +619,6 @@ msgstr ""
 "### name: my-project\n"
 "###\n"
 "### 请注意，显示的名称（name）无法更改"
-
-#: cmd/incus/cluster.go:875
-msgid ""
-"### This is a yaml representation of the cluster member.\n"
-"### Any line starting with a '# will be ignored."
-msgstr ""
-"### 这是集群成员的 YAML 表示形式。\n"
-"### 任何以“#”开头的行都会被忽略。"
 
 #: cmd/incus/info.go:333
 #, c-format

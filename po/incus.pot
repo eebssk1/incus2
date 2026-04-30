@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: incus\n"
         "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-        "POT-Creation-Date: 2026-04-30 15:44+0200\n"
+        "POT-Creation-Date: 2026-04-30 18:44+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,6 +78,11 @@ msgstr  ""
 
 #: cmd/incus/cluster_group.go:398
 msgid   "### This is a YAML representation of the cluster group.\n"
+        "### Any line starting with a '# will be ignored."
+msgstr  ""
+
+#: cmd/incus/cluster.go:875
+msgid   "### This is a YAML representation of the cluster member.\n"
         "### Any line starting with a '# will be ignored."
 msgstr  ""
 
@@ -332,11 +337,6 @@ msgid   "### This is a YAML representation of the project.\n"
         "### name: my-project\n"
         "###\n"
         "### Note that the name is shown but cannot be changed"
-msgstr  ""
-
-#: cmd/incus/cluster.go:875
-msgid   "### This is a yaml representation of the cluster member.\n"
-        "### Any line starting with a '# will be ignored."
 msgstr  ""
 
 #: cmd/incus/info.go:333
