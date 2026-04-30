@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 15:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:44+0200\n"
 "PO-Revision-Date: 2026-04-21 03:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Georgian <https://hosted.weblate.org/projects/incus/cli/ka/>\n"
@@ -98,6 +98,15 @@ msgstr ""
 #: cmd/incus/cluster_group.go:398
 msgid ""
 "### This is a YAML representation of the cluster group.\n"
+"### Any line starting with a '# will be ignored."
+msgstr ""
+"### ეს კლასტერის ჯგუფის YAML რეპრეზენტაციაა.\n"
+"### ყველა ხაზი, რომელიც იწყება სიმბოლოთი '#' გამოტოვებული იქნება."
+
+#: cmd/incus/cluster.go:875
+#, fuzzy
+msgid ""
+"### This is a YAML representation of the cluster member.\n"
 "### Any line starting with a '# will be ignored."
 msgstr ""
 "### ეს კლასტერის ჯგუფის YAML რეპრეზენტაციაა.\n"
@@ -372,12 +381,6 @@ msgid ""
 "### name: my-project\n"
 "###\n"
 "### Note that the name is shown but cannot be changed"
-msgstr ""
-
-#: cmd/incus/cluster.go:875
-msgid ""
-"### This is a yaml representation of the cluster member.\n"
-"### Any line starting with a '# will be ignored."
 msgstr ""
 
 #: cmd/incus/info.go:333

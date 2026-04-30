@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LXD\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 15:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:44+0200\n"
 "PO-Revision-Date: 2026-04-21 03:04+0000\n"
 "Last-Translator: Dklfajsjfi49wefklsf32 "
 "<nlincus@users.noreply.hosted.weblate.org>\n"
@@ -130,6 +130,15 @@ msgstr ""
 #, fuzzy
 msgid ""
 "### This is a YAML representation of the cluster group.\n"
+"### Any line starting with a '# will be ignored."
+msgstr ""
+"### Dies ist eine yaml-Repräsentation des Cluster-Mitglieds.\n"
+"### Jede mit '# beginnende Zeile wird ignoriert."
+
+#: cmd/incus/cluster.go:875
+#, fuzzy
+msgid ""
+"### This is a YAML representation of the cluster member.\n"
 "### Any line starting with a '# will be ignored."
 msgstr ""
 "### Dies ist eine yaml-Repräsentation des Cluster-Mitglieds.\n"
@@ -611,14 +620,6 @@ msgstr ""
 "###     type: nic\n"
 "###\n"
 "### Der Name wird zwar angezeigt, lässt sich jedoch nicht ändern.\n"
-
-#: cmd/incus/cluster.go:875
-msgid ""
-"### This is a yaml representation of the cluster member.\n"
-"### Any line starting with a '# will be ignored."
-msgstr ""
-"### Dies ist eine yaml-Repräsentation des Cluster-Mitglieds.\n"
-"### Jede mit '# beginnende Zeile wird ignoriert."
 
 #: cmd/incus/info.go:333
 #, c-format

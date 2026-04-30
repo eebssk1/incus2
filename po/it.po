@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lxd\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-30 15:44+0200\n"
+"POT-Creation-Date: 2026-04-30 18:44+0200\n"
 "PO-Revision-Date: 2026-04-21 02:57+0000\n"
 "Last-Translator: Alberto Donato <ack@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/incus/cli/it/>\n"
@@ -139,6 +139,20 @@ msgstr ""
 #, fuzzy
 msgid ""
 "### This is a YAML representation of the cluster group.\n"
+"### Any line starting with a '# will be ignored."
+msgstr ""
+"### Questa è una rappresentazione yaml delle proprietà di\n"
+"### un'immagine.\n"
+"### Le linee che iniziano con '# saranno ignorate.\n"
+"###\n"
+"### Ogni proprietà è rappresentata da una singola linea.\n"
+"### Un esempio è il seguente:\n"
+"###  description: My custom image"
+
+#: cmd/incus/cluster.go:875
+#, fuzzy
+msgid ""
+"### This is a YAML representation of the cluster member.\n"
 "### Any line starting with a '# will be ignored."
 msgstr ""
 "### Questa è una rappresentazione yaml delle proprietà di\n"
@@ -615,12 +629,6 @@ msgstr ""
 "###   size: \"61203283968\"\n"
 "###   source: /home/chb/mnt/lxd_test/default.img\n"
 "###   zfs.pool_name: default"
-
-#: cmd/incus/cluster.go:875
-msgid ""
-"### This is a yaml representation of the cluster member.\n"
-"### Any line starting with a '# will be ignored."
-msgstr ""
 
 #: cmd/incus/info.go:333
 #, c-format

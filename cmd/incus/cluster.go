@@ -873,7 +873,7 @@ func (c *cmdClusterEdit) command() *cobra.Command {
 
 func (c *cmdClusterEdit) helpTemplate() string {
 	return i18n.G(
-		`### This is a yaml representation of the cluster member.
+		`### This is a YAML representation of the cluster member.
 ### Any line starting with a '# will be ignored.`)
 }
 
