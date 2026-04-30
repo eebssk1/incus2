@@ -1069,6 +1069,8 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 					return
 				}
 
+				devicesMap := storagePools.DevicesMapFromBackupConfig(config)
+
 				for _, vol := range config.DependentVolumes {
 					diskPool, err := storagePools.LoadByName(d.state, vol.Pool.Name)
 					if err != nil {
@@ -1079,9 +1081,14 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 						continue
 					}
 
-					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Volume.Name})
+					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Volume.Name, "pool": vol.Pool.Name})
+					deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool.Name, vol.Volume.Name)
+					if deviceName == "" {
+						d.logger.Error("Failed to find requested device", logger.Ctx{"pool": vol.Pool.Name, "volName": vol.Volume.Name})
+						return
+					}
 
-					diskName := d.blockNodeName(linux.PathNameEncode(vol.Volume.Name))
+					diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
 
 					err = d.receiveMigrationSnapshot(monitor, diskName, filesystemConn)
 					if err != nil {
@@ -2379,7 +2386,10 @@ func (d *qemu) advertiseVsockAddress() error {
 		SkipGetServer: true,
 	}
 
-	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	agent, err := incus.ConnectIncusHTTPWithContext(ctx, agentArgs, client)
 	if err != nil {
 		return fmt.Errorf("Failed connecting to the agent: %w", err)
 	}
@@ -8033,6 +8043,11 @@ func (d *qemu) sendMigrationSnapshot(diskName string, filesystemConn io.ReadWrit
 			return fmt.Errorf("Failed merging migration storage snapshot: %w", err)
 		}
 
+		err = monitor.RemoveBlockDevice(snapshotDiskName)
+		if err != nil {
+			return fmt.Errorf("Failed removing temporary snapshot disk device: %w", err)
+		}
+
 		return nil
 	}
 
@@ -8082,6 +8097,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 	}
 
 	dependentVolumeMove := clusterMoveSourceName != "" && disksToMigrate
+	devicesMap := storagePools.DevicesMapFromBackupConfig(volSourceArgs.Info.Config)
 
 	reverter := revert.New()
 
@@ -8136,7 +8152,12 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				continue
 			}
 
-			diskName := d.blockNodeName(linux.PathNameEncode(vol.Name))
+			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
+			if deviceName == "" {
+				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
+			}
+
+			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
 
 			d.logger.Debug("Create snapshot for dependent volume", logger.Ctx{"name": vol.Name, "size": vol.VolumeSize, "diskName": diskName})
 
@@ -8191,7 +8212,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 
 	// Notify the shared disks that they're going to be accessed from another system,
 	// but only when performing a move within the same storage pool.
-	if storagePool == "" {
+	if storagePool == "" && clusterMoveSourceName != "" {
 		for _, dev := range d.expandedDevices.Sorted() {
 			if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
 				continue
@@ -8317,7 +8338,12 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				continue
 			}
 
-			diskName := d.blockNodeName(linux.PathNameEncode(vol.Name))
+			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
+			if deviceName == "" {
+				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
+			}
+
+			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
 
 			_, err = d.sendMigrationSnapshot(diskName, filesystemConn, true)
 			if err != nil {
@@ -8724,7 +8750,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 		// Notify the shared disks that they're going to be accessed from another system,
 		// but only when performing a move within the same storage pool.
-		if !storageMove {
+		if !storageMove && args.ClusterMoveSourceName != "" {
 			for _, dev := range d.expandedDevices.Sorted() {
 				if dev.Config["type"] != "disk" || dev.Config["path"] == "/" || dev.Config["pool"] == "" {
 					continue
@@ -9271,8 +9297,8 @@ func (d *qemu) renderState(statusCode api.StatusCode) (*api.InstanceState, error
 		StatusCode: statusCode,
 	}
 
-	// If VM is stopped, we're done here.
-	if !d.isRunningStatusCode(statusCode) {
+	// If VM is stopped or errored, we're done here.
+	if d.isErrorStatusCode(statusCode) || !d.isRunningStatusCode(statusCode) {
 		return status, nil
 	}
 
@@ -9413,7 +9439,10 @@ func (d *qemu) agentGetState() (*api.InstanceState, error) {
 		return nil, err
 	}
 
-	agent, err := incus.ConnectIncusHTTP(nil, client)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	agent, err := incus.ConnectIncusHTTPWithContext(ctx, nil, client)
 	if err != nil {
 		return nil, fmt.Errorf("Failed connecting to agent: %w", err)
 	}
@@ -9860,7 +9889,10 @@ func (d *qemu) devIncusEventSend(eventType string, eventMessage map[string]any) 
 		SkipGetServer: true,
 	}
 
-	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	agent, err := incus.ConnectIncusHTTPWithContext(ctx, agentArgs, client)
 	if err != nil {
 		d.logger.Error("Failed to connect to the agent", logger.Ctx{"err": err})
 		return errors.New("Failed to connect to the agent")
@@ -10239,7 +10271,10 @@ func (d *qemu) getAgentMetrics() (*metrics.MetricSet, error) {
 		SkipGetServer: true,
 	}
 
-	agent, err := incus.ConnectIncusHTTP(agentArgs, client)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	agent, err := incus.ConnectIncusHTTPWithContext(ctx, agentArgs, client)
 	if err != nil {
 		d.logger.Error("Failed to connect to the agent", logger.Ctx{"project": d.Project().Name, "instance": d.Name(), "err": err})
 		return nil, errors.New("Failed to connect to the agent")
