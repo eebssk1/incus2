@@ -1906,27 +1906,29 @@ func fillClusterConfig(config *api.InitPreseed) error {
 		// Set server name from join token
 		config.Cluster.ServerName = joinToken.ServerName
 
-		// Attempt to find a working cluster member to use for joining by retrieving the
-		// cluster certificate from each address in the join token until we succeed.
-		for _, clusterAddress := range joinToken.Addresses {
-			// Cluster URL
-			config.Cluster.ClusterAddress = internalUtil.CanonicalNetworkAddress(clusterAddress, ports.HTTPSDefaultPort)
+		if config.Cluster.ClusterCertificate == "" {
+			// Attempt to find a working cluster member to use for joining by retrieving the
+			// cluster certificate from each address in the join token until we succeed.
+			for _, clusterAddress := range joinToken.Addresses {
+				// Cluster URL
+				config.Cluster.ClusterAddress = internalUtil.CanonicalNetworkAddress(clusterAddress, ports.HTTPSDefaultPort)
 
-			// Cluster certificate
-			cert, err := localtls.GetRemoteCertificate(fmt.Sprintf("https://%s", config.Cluster.ClusterAddress), version.UserAgent)
-			if err != nil {
-				fmt.Printf(i18n.G("Error connecting to existing cluster member %q: %v")+"\n", clusterAddress, err)
-				continue
+				// Cluster certificate
+				cert, err := localtls.GetRemoteCertificate(fmt.Sprintf("https://%s", config.Cluster.ClusterAddress), version.UserAgent)
+				if err != nil {
+					fmt.Printf(i18n.G("Error connecting to existing cluster member %q: %v")+"\n", clusterAddress, err)
+					continue
+				}
+
+				certDigest := localtls.CertFingerprint(cert)
+				if joinToken.Fingerprint != certDigest {
+					return fmt.Errorf(i18n.G("Certificate fingerprint mismatch between join token and cluster member %q"), clusterAddress)
+				}
+
+				config.Cluster.ClusterCertificate = string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}))
+
+				break // We've found a working cluster member.
 			}
-
-			certDigest := localtls.CertFingerprint(cert)
-			if joinToken.Fingerprint != certDigest {
-				return fmt.Errorf(i18n.G("Certificate fingerprint mismatch between join token and cluster member %q"), clusterAddress)
-			}
-
-			config.Cluster.ClusterCertificate = string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}))
-
-			break // We've found a working cluster member.
 		}
 
 		if config.Cluster.ClusterCertificate == "" {
