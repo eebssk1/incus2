@@ -7448,6 +7448,12 @@ paths:
         delete:
             description: Removes the certificate from the trust store.
             operationId: certificate_delete
+            parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -7465,6 +7471,12 @@ paths:
         get:
             description: Gets a specific certificate entry from the trust store.
             operationId: certificate_get
+            parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -7501,6 +7513,11 @@ paths:
             description: Updates a subset of the certificate configuration.
             operationId: certificate_patch
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Certificate configuration
                   in: body
                   name: certificate
@@ -7529,6 +7546,11 @@ paths:
             description: Updates the entire certificate configuration.
             operationId: certificate_put
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Certificate configuration
                   in: body
                   name: certificate
@@ -7791,6 +7813,12 @@ paths:
         delete:
             description: Removes the cluster group.
             operationId: cluster_group_delete
+            parameters:
+                - description: Cluster group name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -7808,6 +7836,12 @@ paths:
         get:
             description: Gets a specific cluster group.
             operationId: cluster_group_get
+            parameters:
+                - description: Cluster group name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -7844,6 +7878,11 @@ paths:
             description: Updates the cluster group configuration.
             operationId: cluster_group_patch
             parameters:
+                - description: Cluster group name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: cluster group configuration
                   in: body
                   name: cluster group
@@ -7872,6 +7911,11 @@ paths:
             description: Renames an existing cluster group.
             operationId: cluster_group_post
             parameters:
+                - description: Cluster group name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster group rename request
                   in: body
                   name: name
@@ -7898,6 +7942,11 @@ paths:
             description: Updates the entire cluster group configuration.
             operationId: cluster_group_put
             parameters:
+                - description: Cluster group name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: cluster group configuration
                   in: body
                   name: cluster group
@@ -8035,6 +8084,12 @@ paths:
         delete:
             description: Removes the member from the cluster.
             operationId: cluster_member_delete
+            parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -8052,6 +8107,12 @@ paths:
         get:
             description: Gets a specific cluster member.
             operationId: cluster_member_get
+            parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -8088,6 +8149,11 @@ paths:
             description: Updates a subset of the cluster member configuration.
             operationId: cluster_member_patch
             parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster member configuration
                   in: body
                   name: cluster
@@ -8116,6 +8182,11 @@ paths:
             description: Renames an existing cluster member.
             operationId: cluster_member_post
             parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster member rename request
                   in: body
                   name: cluster
@@ -8142,6 +8213,11 @@ paths:
             description: Updates the entire cluster member configuration.
             operationId: cluster_member_put
             parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster member configuration
                   in: body
                   name: cluster
@@ -8168,6 +8244,12 @@ paths:
         get:
             description: Gets state of a specific cluster member.
             operationId: cluster_member_state_get
+            parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -8204,6 +8286,11 @@ paths:
             description: Evacuates or restores a cluster member.
             operationId: cluster_member_state_post
             parameters:
+                - description: Cluster member name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster member state
                   in: body
                   name: cluster
@@ -8437,6 +8524,11 @@ paths:
             description: Removes the image from the image store.
             operationId: image_delete
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8460,6 +8552,11 @@ paths:
             description: Gets a specific image.
             operationId: image_get
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8501,6 +8598,11 @@ paths:
             description: Updates a subset of the image definition.
             operationId: image_patch
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8534,6 +8636,11 @@ paths:
             description: Updates the entire image definition.
             operationId: image_put
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8568,6 +8675,11 @@ paths:
                 If the image is in split format, a multipart http transfer occurs.
             operationId: image_export_get
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8590,6 +8702,11 @@ paths:
             description: Gets the server to connect to a remote server and push the image to it.
             operationId: images_export_post
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8620,6 +8737,11 @@ paths:
                 If the image is in split format, a multipart http transfer occurs.
             operationId: image_export_get_untrusted
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8651,6 +8773,11 @@ paths:
                 new version.
             operationId: images_refresh_post
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8676,6 +8803,11 @@ paths:
                 client.
             operationId: images_secret_post
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8698,6 +8830,11 @@ paths:
             description: Gets a specific public image.
             operationId: image_get_untrusted
             parameters:
+                - description: Fingerprint
+                  in: path
+                  name: fingerprint
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8822,6 +8959,11 @@ paths:
             description: Deletes a specific image alias.
             operationId: image_alias_delete
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8845,6 +8987,11 @@ paths:
             description: Gets a specific image alias.
             operationId: image_alias_get
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8886,6 +9033,11 @@ paths:
             description: Updates a subset of the image alias configuration.
             operationId: images_alias_patch
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8919,6 +9071,11 @@ paths:
             description: Renames an existing image alias.
             operationId: images_alias_post
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8950,6 +9107,11 @@ paths:
             description: Updates the entire image alias configuration.
             operationId: images_aliases_put
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -8984,6 +9146,11 @@ paths:
                 This untrusted endpoint only works for aliases pointing to public images.
             operationId: image_alias_get_untrusted
             parameters:
+                - description: Alias name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9396,6 +9563,11 @@ paths:
                 This also deletes anything owned by the instance such as snapshots and backups.
             operationId: instance_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9419,6 +9591,11 @@ paths:
             description: Gets a specific instance (basic struct).
             operationId: instance_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9460,6 +9637,11 @@ paths:
             description: Updates a subset of the instance configuration
             operationId: instance_patch
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9497,6 +9679,11 @@ paths:
                 operation with a number of secrets to be passed to the target server.
             operationId: instance_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9527,6 +9714,11 @@ paths:
             description: Updates the instance configuration or trigger a snapshot restore.
             operationId: instance_put
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9556,6 +9748,11 @@ paths:
             description: Gets the access information for the instance.
             operationId: instance_access
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   in: query
                   name: project
@@ -9597,6 +9794,11 @@ paths:
             description: Returns a list of instance backups (URLs).
             operationId: instance_backups_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9650,6 +9852,11 @@ paths:
                 tarball to the client without any intermediate operation.
             operationId: instance_backups_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9682,6 +9889,16 @@ paths:
             description: Deletes the instance backup.
             operationId: instance_backup_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backup
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9705,6 +9922,16 @@ paths:
             description: Gets a specific instance backup.
             operationId: instance_backup_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backup
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9746,6 +9973,16 @@ paths:
             description: Renames an instance backup.
             operationId: instance_backup_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backup
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9775,6 +10012,16 @@ paths:
             description: Download the raw backup file(s) from the server.
             operationId: instance_backup_export
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backup
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9797,6 +10044,11 @@ paths:
             description: Returns a list of instance backups (structs).
             operationId: instance_backups_get_recursion1
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9842,6 +10094,11 @@ paths:
             description: Creates a new bitmap.
             operationId: instance_bitmaps_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9871,6 +10128,11 @@ paths:
             description: Clears the console log buffer.
             operationId: instance_console_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9898,6 +10160,11 @@ paths:
                 screendump.
             operationId: instance_console_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9939,6 +10206,11 @@ paths:
                 The returned operation metadata will contain two websockets, one for data and one for control.
             operationId: instance_console_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9970,6 +10242,11 @@ paths:
                 Only supported for VMs.
             operationId: instance_debug_memory_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -9999,6 +10276,11 @@ paths:
             description: Runs an internal repair action on the instance.
             operationId: instance_debug_repair_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10038,6 +10320,11 @@ paths:
                 This allows sending signals and window sizing information through.
             operationId: instance_exec_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10067,6 +10354,11 @@ paths:
             description: Removes the file.
             operationId: instance_files_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -10103,6 +10395,11 @@ paths:
             description: Gets the file content. If it's a directory, a json list of files will be returned instead.
             operationId: instance_files_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -10145,6 +10442,11 @@ paths:
             description: Gets the file or directory metadata.
             operationId: instance_files_head
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -10186,6 +10488,11 @@ paths:
             description: Creates a new file in the instance.
             operationId: instance_files_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -10250,6 +10557,11 @@ paths:
             description: Returns a list of log files (URLs).
             operationId: instance_logs_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10299,6 +10611,16 @@ paths:
             description: Removes the log file.
             operationId: instance_log_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Log file name
+                  in: path
+                  name: filename
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10324,6 +10646,16 @@ paths:
             description: Gets the log file.
             operationId: instance_log_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Log file name
+                  in: path
+                  name: filename
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10351,6 +10683,11 @@ paths:
             description: Returns a list of exec record-output files (URLs).
             operationId: instance_exec-outputs_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10401,6 +10738,16 @@ paths:
             description: Removes the exec record-output file.
             operationId: instance_exec-output_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Log file name
+                  in: path
+                  name: filename
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10426,6 +10773,16 @@ paths:
             description: Gets the exec-output file.
             operationId: instance_exec-output_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Log file name
+                  in: path
+                  name: filename
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10453,6 +10810,11 @@ paths:
             description: Gets the image metadata for the instance.
             operationId: instance_metadata_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10494,6 +10856,11 @@ paths:
             description: Updates a subset of the instance image metadata.
             operationId: instance_metadata_patch
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10527,6 +10894,11 @@ paths:
             description: Updates the instance image metadata.
             operationId: instance_metadata_put
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10559,6 +10931,11 @@ paths:
             description: Removes the template file.
             operationId: instance_metadata_templates_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Template name
                   example: default
                   in: query
@@ -10591,6 +10968,11 @@ paths:
                 If a path is specified, returns the file content.
             operationId: instance_metadata_templates_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10624,6 +11006,11 @@ paths:
             description: Creates a new image template file for the instance.
             operationId: instance_metadata_templates_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Template name
                   example: default
                   in: query
@@ -10660,6 +11047,11 @@ paths:
             description: Rebuild an instance using an alternate image or as empty.
             operationId: instance_rebuild_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10693,6 +11085,12 @@ paths:
         get:
             description: Upgrades the request to an SFTP connection of the instance's filesystem.
             operationId: instance_sftp
+            parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
                 - application/octet-stream
@@ -10715,6 +11113,11 @@ paths:
             description: Returns a list of instance snapshots (URLs).
             operationId: instance_snapshots_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10764,6 +11167,11 @@ paths:
             description: Creates a new snapshot.
             operationId: instance_snapshots_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10795,6 +11203,16 @@ paths:
             description: Deletes the instance snapshot.
             operationId: instance_snapshot_delete
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshot
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10818,6 +11236,16 @@ paths:
             description: Gets a specific instance snapshot.
             operationId: instance_snapshot_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshot
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10859,6 +11287,16 @@ paths:
             description: Updates a subset of the snapshot config.
             operationId: instance_snapshot_patch
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshot
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10896,6 +11334,16 @@ paths:
                 operation with a number of secrets to be passed to the target server.
             operationId: instance_snapshot_post
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshot
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10926,6 +11374,16 @@ paths:
             description: Updates the snapshot config.
             operationId: instance_snapshot_put
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshot
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -10955,6 +11413,11 @@ paths:
             description: Returns a list of instance snapshots (structs).
             operationId: instance_snapshots_get_recursion1
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11003,6 +11466,11 @@ paths:
                 information.
             operationId: instance_state_get
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   in: query
                   name: project
@@ -11045,6 +11513,11 @@ paths:
             description: Changes the running state of the instance.
             operationId: instance_state_put
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11077,6 +11550,11 @@ paths:
                 recursion=1 also includes information about state, snapshots and backups.
             operationId: instance_get_recursion1
             parameters:
+                - description: Instance name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11378,6 +11856,11 @@ paths:
             description: Removes the network ACL.
             operationId: network_acl_delete
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11401,6 +11884,11 @@ paths:
             description: Gets a specific network ACL.
             operationId: network_acl_get
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11442,6 +11930,11 @@ paths:
             description: Updates a subset of the network ACL configuration.
             operationId: network_acl_patch
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11475,6 +11968,11 @@ paths:
             description: Renames an existing network ACL.
             operationId: network_acl_post
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11506,6 +12004,11 @@ paths:
             description: Updates the entire network ACL configuration.
             operationId: network_acl_put
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11538,6 +12041,11 @@ paths:
             description: Gets a specific network ACL log entries.
             operationId: network_acl_log_get
             parameters:
+                - description: ACL name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11702,6 +12210,11 @@ paths:
             description: Removes the network address set.
             operationId: network_address_set_delete
             parameters:
+                - description: Address set name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11725,6 +12238,11 @@ paths:
             description: Gets a specific network address set.
             operationId: network_address_set_get
             parameters:
+                - description: Address set name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11766,6 +12284,11 @@ paths:
             description: Updates a subset of the network address set configuration.
             operationId: network_address_set_patch
             parameters:
+                - description: Address set name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11799,6 +12322,11 @@ paths:
             description: Renames an existing network address set.
             operationId: network_address_set_post
             parameters:
+                - description: Address set name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -11830,6 +12358,11 @@ paths:
             description: Updates the entire network address set configuration.
             operationId: network_address_set_put
             parameters:
+                - description: Address set name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12034,6 +12567,12 @@ paths:
         delete:
             description: Removes the network integration.
             operationId: network_integration_delete
+            parameters:
+                - description: Integration name
+                  in: path
+                  name: integration
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -12051,6 +12590,12 @@ paths:
         get:
             description: Gets a specific network integration.
             operationId: network_integration_get
+            parameters:
+                - description: Integration name
+                  in: path
+                  name: integration
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -12087,6 +12632,11 @@ paths:
             description: Updates a subset of the network integration configuration.
             operationId: network_integration_patch
             parameters:
+                - description: Integration name
+                  in: path
+                  name: integration
+                  required: true
+                  type: string
                 - description: integration configuration
                   in: body
                   name: integration
@@ -12113,6 +12663,11 @@ paths:
             description: Renames the network integration.
             operationId: network_integration_post
             parameters:
+                - description: Integration name
+                  in: path
+                  name: integration
+                  required: true
+                  type: string
                 - description: integration configuration
                   in: body
                   name: integration
@@ -12139,6 +12694,11 @@ paths:
             description: Updates the entire network integration configuration.
             operationId: network_integration_put
             parameters:
+                - description: Integration name
+                  in: path
+                  name: integration
+                  required: true
+                  type: string
                 - description: integration configuration
                   in: body
                   name: integration
@@ -12298,6 +12858,11 @@ paths:
             description: Removes the network zone.
             operationId: network_zone_delete
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12321,6 +12886,11 @@ paths:
             description: Gets a specific network zone.
             operationId: network_zone_get
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12362,6 +12932,11 @@ paths:
             description: Updates a subset of the network zone configuration.
             operationId: network_zone_patch
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12395,6 +12970,11 @@ paths:
             description: Updates the entire network zone configuration.
             operationId: network_zone_put
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12427,6 +13007,11 @@ paths:
             description: Returns a list of network zone records (URLs).
             operationId: network_zone_records_get
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12481,6 +13066,11 @@ paths:
             description: Creates a new network zone record.
             operationId: network_zone_records_post
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12511,6 +13101,16 @@ paths:
             description: Removes the network zone record.
             operationId: network_zone_record_delete
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
+                - description: Record name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12534,6 +13134,16 @@ paths:
             description: Gets a specific network zone record.
             operationId: network_zone_record_get
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
+                - description: Record name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12575,6 +13185,16 @@ paths:
             description: Updates a subset of the network zone record configuration.
             operationId: network_zone_record_patch
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
+                - description: Record name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12608,6 +13228,16 @@ paths:
             description: Updates the entire network zone record configuration.
             operationId: network_zone_record_put
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
+                - description: Record name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12640,6 +13270,11 @@ paths:
             description: Returns a list of network zone records (structs).
             operationId: network_zone_records_get_recursion1
             parameters:
+                - description: Network zone name
+                  in: path
+                  name: zone
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12837,6 +13472,11 @@ paths:
             description: Removes the network.
             operationId: network_delete
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12860,6 +13500,11 @@ paths:
             description: Gets a specific network.
             operationId: network_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12906,6 +13551,11 @@ paths:
             description: Updates a subset of the network configuration.
             operationId: network_patch
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12944,6 +13594,11 @@ paths:
             description: Renames an existing network.
             operationId: network_post
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -12975,6 +13630,11 @@ paths:
             description: Updates the entire network configuration.
             operationId: network_put
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13012,6 +13672,11 @@ paths:
             description: Returns a list of DHCP leases for the network.
             operationId: networks_leases_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13060,6 +13725,11 @@ paths:
             description: Returns the current network state information.
             operationId: networks_state_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13105,6 +13775,11 @@ paths:
             description: Returns a list of network address forwards (URLs).
             operationId: network_forwards_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13159,6 +13834,11 @@ paths:
             description: Creates a new network address forward.
             operationId: network_forwards_post
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13189,6 +13869,16 @@ paths:
             description: Removes the network address forward.
             operationId: network_forward_delete
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13212,6 +13902,16 @@ paths:
             description: Gets a specific network address forward.
             operationId: network_forward_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13253,6 +13953,16 @@ paths:
             description: Updates a subset of the network address forward configuration.
             operationId: network_forward_patch
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13286,6 +13996,16 @@ paths:
             description: Updates the entire network address forward configuration.
             operationId: network_forward_put
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13318,6 +14038,11 @@ paths:
             description: Returns a list of network address forwards (structs).
             operationId: network_forward_get_recursion1
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13366,6 +14091,11 @@ paths:
             description: Returns a list of network address load balancers (URLs).
             operationId: network_load_balancers_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13420,6 +14150,11 @@ paths:
             description: Creates a new network load balancer.
             operationId: network_load_balancers_post
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13450,6 +14185,16 @@ paths:
             description: Removes the network address load balancer.
             operationId: network_load_balancer_delete
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13473,6 +14218,16 @@ paths:
             description: Gets a specific network address load balancer.
             operationId: network_load_balancer_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13514,6 +14269,16 @@ paths:
             description: Updates a subset of the network address load balancer configuration.
             operationId: network_load_balancer_patch
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13547,6 +14312,16 @@ paths:
             description: Updates the entire network address load balancer configuration.
             operationId: network_load_balancer_put
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13579,6 +14354,16 @@ paths:
             description: Get the current state of a specific network address load balancer.
             operationId: network_load_balancer_state_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Listen address
+                  in: path
+                  name: listenAddress
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13619,6 +14404,11 @@ paths:
             description: Returns a list of network address load balancers (structs).
             operationId: network_load_balancer_get_recursion1
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13667,6 +14457,11 @@ paths:
             description: Returns a list of network peers (URLs).
             operationId: network_peers_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13721,6 +14516,11 @@ paths:
             description: Initiates/creates a new network peering.
             operationId: network_peers_post
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13753,6 +14553,16 @@ paths:
             description: Removes the network peering.
             operationId: network_peer_delete
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Peer name
+                  in: path
+                  name: peerName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13776,6 +14586,16 @@ paths:
             description: Gets a specific network peering.
             operationId: network_peer_get
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Peer name
+                  in: path
+                  name: peerName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13817,6 +14637,16 @@ paths:
             description: Updates a subset of the network peering configuration.
             operationId: network_peer_patch
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Peer name
+                  in: path
+                  name: peerName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13850,6 +14680,16 @@ paths:
             description: Updates the entire network peering configuration.
             operationId: network_peer_put
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
+                - description: Peer name
+                  in: path
+                  name: peerName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -13882,6 +14722,11 @@ paths:
             description: Returns a list of network peers (structs).
             operationId: network_peer_get_recursion1
             parameters:
+                - description: Network name
+                  in: path
+                  name: networkName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14037,6 +14882,12 @@ paths:
         delete:
             description: Cancels the operation if supported.
             operationId: operation_delete
+            parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -14054,6 +14905,12 @@ paths:
         get:
             description: Gets the operation state.
             operationId: operation_get
+            parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -14089,6 +14946,11 @@ paths:
             description: Waits for the operation to reach a final state (or timeout) and retrieve its final state.
             operationId: operation_wait_get
             parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
                 - description: Timeout in seconds (-1 means never)
                   example: -1
                   in: query
@@ -14132,6 +14994,11 @@ paths:
                 When accessed by an untrusted user, the secret token must be provided.
             operationId: operation_wait_get_untrusted
             parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
                 - description: Authentication token
                   example: random-string
                   in: query
@@ -14181,6 +15048,11 @@ paths:
                 connection information to the servers.
             operationId: operation_websocket_get
             parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
                 - description: Authentication token
                   example: random-string
                   in: query
@@ -14210,6 +15082,11 @@ paths:
                 Authentication is performed through the secret token.
             operationId: operation_websocket_get_untrusted
             parameters:
+                - description: Operation ID
+                  in: path
+                  name: id
+                  required: true
+                  type: string
                 - description: Authentication token
                   example: random-string
                   in: query
@@ -14368,6 +15245,11 @@ paths:
             description: Removes the profile.
             operationId: profile_delete
             parameters:
+                - description: Profile name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14391,6 +15273,11 @@ paths:
             description: Gets a specific profile.
             operationId: profile_get
             parameters:
+                - description: Profile name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14432,6 +15319,11 @@ paths:
             description: Updates a subset of the profile configuration.
             operationId: profile_patch
             parameters:
+                - description: Profile name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14465,6 +15357,11 @@ paths:
             description: Renames an existing profile.
             operationId: profile_post
             parameters:
+                - description: Profile name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14496,6 +15393,11 @@ paths:
             description: Updates the entire profile configuration.
             operationId: profile_put
             parameters:
+                - description: Profile name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -14655,6 +15557,11 @@ paths:
             description: Removes the project.
             operationId: project_delete
             parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Delete project and related artifacts
                   in: query
                   name: force
@@ -14676,6 +15583,12 @@ paths:
         get:
             description: Gets a specific project.
             operationId: project_get
+            parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -14712,6 +15625,11 @@ paths:
             description: Updates a subset of the project configuration.
             operationId: project_patch
             parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project configuration
                   in: body
                   name: project
@@ -14740,6 +15658,11 @@ paths:
             description: Renames an existing project.
             operationId: project_post
             parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project rename request
                   in: body
                   name: project
@@ -14766,6 +15689,11 @@ paths:
             description: Updates the entire project configuration.
             operationId: project_put
             parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Project configuration
                   in: body
                   name: project
@@ -14792,6 +15720,12 @@ paths:
         get:
             description: Gets the access information for the project.
             operationId: project_access
+            parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -14828,6 +15762,12 @@ paths:
         get:
             description: Gets a specific project resource consumption information.
             operationId: project_state_get
+            parameters:
+                - description: Project name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -15037,6 +15977,16 @@ paths:
             description: Removes the storage bucket.
             operationId: storage_pool_bucket_delete
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15067,6 +16017,16 @@ paths:
             description: Updates a subset of the storage bucket configuration.
             operationId: storage_pool_bucket_patch
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15105,6 +16065,16 @@ paths:
             description: Updates the entire storage bucket configuration.
             operationId: storage_pool_bucket_put
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15142,6 +16112,21 @@ paths:
             description: Removes the storage bucket key.
             operationId: storage_pool_bucket_key_delete
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Storage bucket key name
+                  in: path
+                  name: keyName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15172,6 +16157,21 @@ paths:
             description: Updates the entire storage bucket key configuration.
             operationId: storage_pool_bucket_key_put
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Storage bucket key name
+                  in: path
+                  name: keyName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15209,6 +16209,11 @@ paths:
             description: Gets the usage information for the storage pool.
             operationId: storage_pool_resources
             parameters:
+                - description: Resource name
+                  in: path
+                  name: name
+                  required: true
+                  type: string
                 - description: Cluster member name
                   example: server01
                   in: query
@@ -15249,6 +16254,11 @@ paths:
             description: Removes the storage pool.
             operationId: storage_pools_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15272,6 +16282,11 @@ paths:
             description: Gets a specific storage pool.
             operationId: storage_pool_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15318,6 +16333,11 @@ paths:
             description: Updates a subset of the storage pool configuration.
             operationId: storage_pool_patch
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15356,6 +16376,11 @@ paths:
             description: Updates the entire storage pool configuration.
             operationId: storage_pool_put
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15393,6 +16418,11 @@ paths:
             description: Returns a list of storage pool buckets (URLs).
             operationId: storage_pool_buckets_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15452,6 +16482,11 @@ paths:
             description: Creates a new storage pool bucket.
             operationId: storage_pool_bucket_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15482,6 +16517,16 @@ paths:
             description: Gets a specific storage pool bucket.
             operationId: storage_pool_bucket_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15522,6 +16567,16 @@ paths:
             description: Returns a list of storage bucket backups (URLs).
             operationId: storage_pool_buckets_backups_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15580,6 +16635,16 @@ paths:
                 tarball to the client without any intermediate operation.
             operationId: storage_pool_buckets_backups_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15618,6 +16683,21 @@ paths:
             description: Deletes a new storage bucket backup.
             operationId: storage_pool_buckets_backup_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15646,6 +16726,21 @@ paths:
             description: Gets a specific storage bucket backup.
             operationId: storage_pool_buckets_backup_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15692,6 +16787,21 @@ paths:
             description: Renames a storage bucket backup.
             operationId: storage_pool_buckets_backup_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15727,6 +16837,21 @@ paths:
             description: Download the raw backup file from the server.
             operationId: storage_pool_buckets_backup_export_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15754,6 +16879,16 @@ paths:
             description: Returns a list of storage bucket backups (structs).
             operationId: storage_pool_buckets_backups_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15802,6 +16937,16 @@ paths:
             description: Returns a list of storage pool bucket keys (URLs).
             operationId: storage_pool_bucket_keys_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15851,6 +16996,16 @@ paths:
             description: Creates a new storage pool bucket key.
             operationId: storage_pool_bucket_key_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15881,6 +17036,21 @@ paths:
             description: Gets a specific storage pool bucket key.
             operationId: storage_pool_bucket_key_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
+                - description: Storage bucket key name
+                  in: path
+                  name: keyName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15921,6 +17091,16 @@ paths:
             description: Returns a list of storage pool bucket keys (structs).
             operationId: storage_pool_bucket_keys_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -15964,6 +17144,16 @@ paths:
             description: Gets a specific storage pool bucket with all details (backups and keys).
             operationId: storage_pool_bucket_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage bucket name
+                  in: path
+                  name: bucketName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16004,6 +17194,11 @@ paths:
             description: Returns a list of storage pool buckets (structs).
             operationId: storage_pool_buckets_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16057,6 +17252,11 @@ paths:
             description: Returns a list of storage pool buckets with all details (structs).
             operationId: storage_pool_buckets_get_recursion2
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16110,6 +17310,11 @@ paths:
             description: Returns a list of storage volumes (URLs).
             operationId: storage_pool_volumes_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16173,6 +17378,11 @@ paths:
                 Will return an empty sync response on simple volume creation but an operation on copy or migration.
             operationId: storage_pool_volumes_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16210,6 +17420,16 @@ paths:
             description: Returns a list of storage volumes (URLs) (type specific endpoint).
             operationId: storage_pool_volumes_type_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16266,6 +17486,16 @@ paths:
                 Will return an empty sync response on simple volume creation but an operation on copy or migration.
             operationId: storage_pool_volumes_type_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16303,6 +17533,21 @@ paths:
             description: Removes the storage volume.
             operationId: storage_pool_volume_type_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16331,6 +17576,21 @@ paths:
             description: Gets a specific storage volume.
             operationId: storage_pool_volume_type_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16377,6 +17637,21 @@ paths:
             description: Updates a subset of the storage volume configuration.
             operationId: storage_pool_volume_type_patch
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16422,6 +17697,21 @@ paths:
                 operation with a number of secrets to be passed to the target server.
             operationId: storage_pool_volume_type_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16457,6 +17747,21 @@ paths:
             description: Updates the entire storage volume configuration.
             operationId: storage_pool_volume_type_put
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16494,6 +17799,21 @@ paths:
             description: Returns a list of storage volume backups (URLs).
             operationId: storage_pool_volumes_type_backups_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16552,6 +17872,21 @@ paths:
                 tarball to the client without any intermediate operation.
             operationId: storage_pool_volumes_type_backups_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16590,6 +17925,26 @@ paths:
             description: Deletes a new storage volume backup.
             operationId: storage_pool_volumes_type_backup_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16618,6 +17973,26 @@ paths:
             description: Gets a specific storage volume backup.
             operationId: storage_pool_volumes_type_backup_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16664,6 +18039,26 @@ paths:
             description: Renames a storage volume backup.
             operationId: storage_pool_volumes_type_backup_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16699,6 +18094,26 @@ paths:
             description: Download the raw backup file from the server.
             operationId: storage_pool_volumes_type_backup_export_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Backup name
+                  in: path
+                  name: backupName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16726,6 +18141,21 @@ paths:
             description: Returns a list of storage volume backups (structs).
             operationId: storage_pool_volumes_type_backups_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16774,6 +18204,21 @@ paths:
             description: Gets a specific storage volume bitmaps
             operationId: storage_pool_volume_type_bitmaps_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16828,6 +18273,21 @@ paths:
             description: Creates a new storage volume bitmap.
             operationId: storage_pool_volumes_type_bitmaps_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16866,6 +18326,26 @@ paths:
             description: Deletes a storage volume bitmap.
             operationId: storage_pool_volumes_type_bitmap_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Bitmap name
+                  in: path
+                  name: bitmapName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16894,6 +18374,26 @@ paths:
             description: Gets a specific storage volume bitmap
             operationId: storage_pool_volume_type_bitmap_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Bitmap name
+                  in: path
+                  name: bitmapName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16939,6 +18439,21 @@ paths:
             description: Gets a specific storage volume bitmaps
             operationId: storage_pool_volume_type_bitmaps_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -16987,6 +18502,21 @@ paths:
             description: Removes the file.
             operationId: storage_pool_volume_type_files_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -17023,6 +18553,21 @@ paths:
             description: Gets the file content. If it's a directory, a json list of files will be returned instead.
             operationId: storage_pool_volume_type_files_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -17065,6 +18610,21 @@ paths:
             description: Gets the file or directory metadata.
             operationId: storage_pool_volume_type_files_head
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -17106,6 +18666,21 @@ paths:
             description: Creates a new file in the storage volume.
             operationId: storage_pool_volume_type_files_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Path to the file
                   example: default
                   in: query
@@ -17169,6 +18744,22 @@ paths:
         get:
             description: Upgrades the request to an NBD connection of the storage volume's block device.
             operationId: storage_pool_volume_type_nbd_get
+            parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
             produces:
                 - application/json
                 - application/octet-stream
@@ -17190,6 +18781,22 @@ paths:
         get:
             description: Upgrades the request to an SFTP connection of the storage volume's filesystem.
             operationId: storage_pool_volume_type_sftp_get
+            parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
             produces:
                 - application/json
                 - application/octet-stream
@@ -17212,6 +18819,21 @@ paths:
             description: Returns a list of storage volume snapshots (URLs).
             operationId: storage_pool_volumes_type_snapshots_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17266,6 +18888,21 @@ paths:
             description: Creates a new storage volume snapshot.
             operationId: storage_pool_volumes_type_snapshots_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17303,6 +18940,26 @@ paths:
             description: Deletes a new storage volume snapshot.
             operationId: storage_pool_volumes_type_snapshot_delete
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshotName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17331,6 +18988,26 @@ paths:
             description: Gets a specific storage volume snapshot.
             operationId: storage_pool_volumes_type_snapshot_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshotName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17377,6 +19054,26 @@ paths:
             description: Updates a subset of the storage volume snapshot configuration.
             operationId: storage_pool_volumes_type_snapshot_patch
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshotName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17415,6 +19112,26 @@ paths:
             description: Renames a storage volume snapshot.
             operationId: storage_pool_volumes_type_snapshot_post
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshotName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17451,6 +19168,26 @@ paths:
             description: Updates the entire storage volume snapshot configuration.
             operationId: storage_pool_volumes_type_snapshot_put
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
+                - description: Snapshot name
+                  in: path
+                  name: snapshotName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17488,6 +19225,21 @@ paths:
             description: Returns a list of storage volume snapshots (structs).
             operationId: storage_pool_volumes_type_snapshots_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17536,6 +19288,21 @@ paths:
             description: Gets a specific storage volume state (usage data).
             operationId: storage_pool_volume_type_state_get
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17581,6 +19348,21 @@ paths:
             description: Gets a specific storage volume with all details (backups, snapshots and state0..
             operationId: storage_pool_volume_type_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
+                - description: Storage volume name
+                  in: path
+                  name: volumeName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17626,6 +19408,16 @@ paths:
             description: Returns a list of storage volumes (structs) (type specific endpoint).
             operationId: storage_pool_volumes_type_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17674,6 +19466,16 @@ paths:
             description: Returns a list of storage volumes (structs) including all details (type specific endpoint).
             operationId: storage_pool_volumes_type_get_recursion2
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
+                - description: Storage volume type
+                  in: path
+                  name: type
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17722,6 +19524,11 @@ paths:
             description: Returns a list of storage volumes (structs).
             operationId: storage_pool_volumes_get_recursion1
             parameters:
+                - description: Storage pool name
+                  in: path
+                  name: poolName
+                  required: true
+                  type: string
                 - description: Project name
                   example: default
                   in: query
@@ -17868,6 +19675,12 @@ paths:
         delete:
             description: Removes the warning.
             operationId: warning_delete
+            parameters:
+                - description: UUID
+                  in: path
+                  name: uuid
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -17881,6 +19694,12 @@ paths:
         get:
             description: Gets a specific warning.
             operationId: warning_get
+            parameters:
+                - description: UUID
+                  in: path
+                  name: uuid
+                  required: true
+                  type: string
             produces:
                 - application/json
             responses:
@@ -17917,6 +19736,11 @@ paths:
             description: Updates a subset of the warning status.
             operationId: warning_patch
             parameters:
+                - description: UUID
+                  in: path
+                  name: uuid
+                  required: true
+                  type: string
                 - description: Warning status
                   in: body
                   name: warning
@@ -17943,6 +19767,11 @@ paths:
             description: Updates the warning status.
             operationId: warning_put
             parameters:
+                - description: UUID
+                  in: path
+                  name: uuid
+                  required: true
+                  type: string
                 - description: Warning status
                   in: body
                   name: warning
