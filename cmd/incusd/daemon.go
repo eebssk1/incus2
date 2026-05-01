@@ -1717,10 +1717,24 @@ func (d *Daemon) Stop(ctx context.Context, sig os.Signal) error {
 
 		// Full shutdown requested.
 		if sig == unix.SIGPWR {
-			instancesShutdown(instances)
+			// Check if we should evacuate the cluster member instead of just shutting down.
+			evacuated := false
+			if d.serverClustered && s.GlobalConfig.ShutdownAction() == "evacuate" && !s.DB.Cluster.LocalNodeIsEvacuated() {
+				logger.Info("Evacuating cluster member")
+				err := evacuateShutdown(ctx, s, d.serverName)
+				if err != nil {
+					logger.Error("Failed to evacuate cluster member, falling back to regular shutdown", logger.Ctx{"err": err})
+				} else {
+					evacuated = true
+				}
+			}
 
-			logger.Info("Stopping networks")
-			networkShutdown(s)
+			if !evacuated {
+				instancesShutdown(instances)
+
+				logger.Info("Stopping networks")
+				networkShutdown(s)
+			}
 
 			// Unmount storage pools after instances stopped.
 			logger.Info("Stopping storage pools")

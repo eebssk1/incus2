@@ -5715,6 +5715,15 @@
 						}
 					},
 					{
+						"core.shutdown_action": {
+							"defaultdesc": "`shutdown`",
+							"longdesc": "Specify the action to take when the daemon is being shut down.\nSupported values are `shutdown` (stop all instances) and `evacuate` (attempt to evacuate the clustered server).",
+							"scope": "global",
+							"shortdesc": "Action to perform on server shutdown",
+							"type": "string"
+						}
+					},
+					{
 						"core.shutdown_timeout": {
 							"defaultdesc": "`5`",
 							"longdesc": "Specify the number of minutes to wait for running operations to complete before the daemon shuts down.",

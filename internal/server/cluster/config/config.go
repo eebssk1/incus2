@@ -173,6 +173,11 @@ func (c *Config) LinstorSSL() (string, string, string) {
 	return c.m.GetString("storage.linstor.ca_cert"), c.m.GetString("storage.linstor.client_cert"), c.m.GetString("storage.linstor.client_key")
 }
 
+// ShutdownAction returns the action to perform when the server is being shut down.
+func (c *Config) ShutdownAction() string {
+	return c.m.GetString("core.shutdown_action")
+}
+
 // ShutdownTimeout returns the number of minutes to wait for running operation to complete
 // before the server shuts down.
 func (c *Config) ShutdownTimeout() time.Duration {
@@ -740,6 +745,16 @@ var ConfigSchema = config.Schema{
 	//  defaultdesc: no expiry
 	//  shortdesc: Time after which a remote add token expires
 	"core.remote_token_expiry": {Type: config.String, Validator: validate.Optional(expiryValidator)},
+
+	// gendoc:generate(entity=server, group=core, key=core.shutdown_action)
+	// Specify the action to take when the daemon is being shut down.
+	// Supported values are `shutdown` (stop all instances) and `evacuate` (attempt to evacuate the clustered server).
+	// ---
+	//  type: string
+	//  scope: global
+	//  defaultdesc: `shutdown`
+	//  shortdesc: Action to perform on server shutdown
+	"core.shutdown_action": {Type: config.String, Default: "shutdown", Validator: validate.IsOneOf("shutdown", "evacuate")},
 
 	// gendoc:generate(entity=server, group=core, key=core.shutdown_timeout)
 	// Specify the number of minutes to wait for running operations to complete before the daemon shuts down.
