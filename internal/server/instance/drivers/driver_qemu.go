@@ -540,19 +540,28 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 
 			fallthrough
 		case qmp.EventVMShutdown:
+			var reason string
+
 			target := "stop"
 			entry, ok := data["reason"]
-			if ok && entry == "guest-reset" {
+			if ok {
+				entryStr, ok := entry.(string)
+				if ok {
+					reason = entryStr
+				}
+			}
+
+			if reason == "guest-reset" {
 				target = "reboot"
 			}
 
-			if entry == qmp.EventVMShutdownReasonDisconnect {
+			if reason == qmp.EventVMShutdownReasonDisconnect {
 				d.logger.Warn("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			} else {
 				d.logger.Debug("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			}
 
-			err = d.onStop(target)
+			err = d.onStop(target, reason)
 			if err != nil {
 				d.logger.Error("Failed to cleanly stop instance", logger.Ctx{"err": err})
 				return
@@ -711,9 +720,9 @@ func (d *qemu) pidWait(timeout time.Duration) bool {
 }
 
 // onStop is run when the instance stops.
-func (d *qemu) onStop(target string) error {
-	d.logger.Debug("onStop hook started", logger.Ctx{"target": target})
-	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target})
+func (d *qemu) onStop(target string, reason string) error {
+	d.logger.Debug("onStop hook started", logger.Ctx{"target": target, "reason": reason})
+	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target, "reason": reason})
 
 	// Create/pick up operation.
 	op, err := d.onStopOperationSetup(target)
@@ -778,8 +787,10 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Determine if instance should be auto-restarted.
+	cleanShutdown := reason == qmp.EventVMShutdownReasonGuestShutdown || reason == qmp.EventVMShutdownReasonQuit
+
 	var autoRestart bool
-	if target != "reboot" && op.GetInstanceInitiated() && d.shouldAutoRestart() {
+	if target != "reboot" && !cleanShutdown && d.shouldAutoRestart() {
 		autoRestart = true
 
 		// Mark current shutdown as complete.
@@ -795,7 +806,7 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Log and emit lifecycle if not user triggered.
-	if target != "reboot" && !autoRestart && op.Action() != operationlock.ActionMigrate {
+	if target != "reboot" && !autoRestart && op.Action() != operationlock.ActionMigrate && op.Action() != operationlock.ActionRestart {
 		if op.GetInstanceInitiated() {
 			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceShutdown.Event(d, nil))
 		} else {
@@ -5636,7 +5647,8 @@ func (d *qemu) Stop(stateful bool) error {
 		}
 
 		// Wait for QEMU process to exit and perform device cleanup.
-		err = d.onStop("stop")
+		// Treat as host-qmp-quit so autoRestart isn't triggered for a user-requested force stop.
+		err = d.onStop("stop", qmp.EventVMShutdownReasonQuit)
 		if err != nil {
 			op.Done(err)
 			return err
@@ -9004,7 +9016,12 @@ func (d *qemu) Console(protocol string) (*os.File, chan error, error) {
 		_ = d.consoleSwapSocketWithRB()
 	}()
 
-	d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	// Only emit a lifecycle event for the text console here. SPICE clients open one socket per channel
+	// (display, cursor, inputs, ...) and would otherwise produce a flurry of instance-console events
+	// for a single user session; the VGA emit is handled once per session by the console request handler.
+	if protocol == instance.ConsoleTypeConsole {
+		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	}
 
 	return file, chDisconnect, nil
 }
