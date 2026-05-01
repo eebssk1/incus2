@@ -895,12 +895,12 @@ func (b *backend) CreateInstanceFromBackup(srcBackup backup.Info, srcData io.Rea
 
 			// Check if snapshot volume config is available for restore and matches snapshot name.
 			if srcBackup.Config != nil {
-				if len(srcBackup.Config.Snapshots) >= i-1 && srcBackup.Config.Snapshots[i] != nil && srcBackup.Config.Snapshots[i].Name == backupFileSnap {
+				if len(srcBackup.Config.Snapshots) > i && srcBackup.Config.Snapshots[i] != nil && srcBackup.Config.Snapshots[i].Name == backupFileSnap {
 					// Use instance snapshot's creation date if snap info available.
 					volumeSnapCreationDate = srcBackup.Config.Snapshots[i].CreatedAt
 				}
 
-				if len(srcBackup.Config.VolumeSnapshots) >= i-1 && srcBackup.Config.VolumeSnapshots[i] != nil && srcBackup.Config.VolumeSnapshots[i].Name == backupFileSnap {
+				if len(srcBackup.Config.VolumeSnapshots) > i && srcBackup.Config.VolumeSnapshots[i] != nil && srcBackup.Config.VolumeSnapshots[i].Name == backupFileSnap {
 					// If the backup restore interface provides volume snapshot config use it,
 					// otherwise use default volume config for the storage pool.
 					volumeSnapDescription = srcBackup.Config.VolumeSnapshots[i].Description
@@ -2117,12 +2117,12 @@ func (b *backend) CreateInstanceFromMigration(inst instance.Instance, conn io.Re
 
 			// If the source snapshot config is available, use that.
 			if srcInfo != nil && srcInfo.Config != nil {
-				if len(srcInfo.Config.Snapshots) >= i-1 && srcInfo.Config.Snapshots[i] != nil && srcInfo.Config.Snapshots[i].Name == snapName {
+				if len(srcInfo.Config.Snapshots) > i && srcInfo.Config.Snapshots[i] != nil && srcInfo.Config.Snapshots[i].Name == snapName {
 					// Use instance snapshot's creation date if snap info available.
 					snapCreationDate = srcInfo.Config.Snapshots[i].CreatedAt
 				}
 
-				if len(srcInfo.Config.VolumeSnapshots) >= i-1 && srcInfo.Config.VolumeSnapshots[i] != nil && srcInfo.Config.VolumeSnapshots[i].Name == snapName {
+				if len(srcInfo.Config.VolumeSnapshots) > i && srcInfo.Config.VolumeSnapshots[i] != nil && srcInfo.Config.VolumeSnapshots[i].Name == snapName {
 					// Check if snapshot volume config is available then use it.
 					snapDescription = srcInfo.Config.VolumeSnapshots[i].Description
 					snapConfig = srcInfo.Config.VolumeSnapshots[i].Config
@@ -7709,6 +7709,10 @@ func (b *backend) CreateCustomVolumeFromBackup(srcBackup backup.Info, srcData io
 
 	// Create database entries for new storage volume snapshots.
 	for _, s := range srcBackup.Config.VolumeSnapshots {
+		if s == nil {
+			return errors.New("Bad snapshot definition found in index")
+		}
+
 		snapshot := s // Local var for revert.
 		snapName := snapshot.Name
 
@@ -7841,6 +7845,10 @@ func (b *backend) CreateBucketFromBackup(srcBackup backup.Info, srcData io.ReadS
 		return errors.New("Storage pool does not support buckets")
 	}
 
+	if srcBackup.Config == nil || srcBackup.Config.Bucket == nil {
+		return errors.New("Valid bucket config not found in index")
+	}
+
 	reverter := revert.New()
 	defer reverter.Fail()
 
@@ -7859,6 +7867,10 @@ func (b *backend) CreateBucketFromBackup(srcBackup backup.Info, srcData io.ReadS
 
 	// Upload all keys from the backup.
 	for _, bucketKey := range srcBackup.Config.BucketKeys {
+		if bucketKey == nil {
+			return errors.New("Bad bucket key found in index")
+		}
+
 		bucketKeyRequest := api.StorageBucketKeysPost{
 			Name:                bucketKey.Name,
 			StorageBucketKeyPut: bucketKey.StorageBucketKeyPut,
@@ -9343,6 +9355,10 @@ func (b *backend) createDependentVolumesFromBackup(srcBackup backup.Info, srcDat
 	}
 
 	for _, disk := range srcBackup.Config.DependentVolumes {
+		if disk == nil {
+			return errors.New("Bad dependent volume definition found in index")
+		}
+
 		optimizedStorage := srcBackup.OptimizedStorage
 		optimizedHeader := srcBackup.OptimizedHeader
 
