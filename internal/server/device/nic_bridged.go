@@ -811,7 +811,7 @@ func (d *nicBridged) Start() (*deviceConfig.RunConfig, error) {
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes"], ",", -1, true)...)
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv4.routes.external"], ",", -1, true)...)
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes.external"], ",", -1, true)...)
-	err = networkNICRouteAdd(d.config["parent"], routes...)
+	err = networkNICRouteAdd(d.config["parent"], d.config["ipv4.address"], d.config["ipv6.address"], routes...)
 	if err != nil {
 		return nil, err
 	}
@@ -1012,7 +1012,7 @@ func (d *nicBridged) Update(oldDevices deviceConfig.Devices, isRunning bool) err
 		oldRoutes = append(oldRoutes, util.SplitNTrimSpace(oldConfig["ipv6.routes"], ",", -1, true)...)
 		oldRoutes = append(oldRoutes, util.SplitNTrimSpace(oldConfig["ipv4.routes.external"], ",", -1, true)...)
 		oldRoutes = append(oldRoutes, util.SplitNTrimSpace(oldConfig["ipv6.routes.external"], ",", -1, true)...)
-		networkNICRouteDelete(oldConfig["parent"], oldRoutes...)
+		networkNICRouteDelete(oldConfig["parent"], oldConfig["ipv4.address"], oldConfig["ipv6.address"], oldRoutes...)
 
 		// Apply host-side routes to bridge interface.
 		routes := []string{}
@@ -1020,7 +1020,7 @@ func (d *nicBridged) Update(oldDevices deviceConfig.Devices, isRunning bool) err
 		routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes"], ",", -1, true)...)
 		routes = append(routes, util.SplitNTrimSpace(d.config["ipv4.routes.external"], ",", -1, true)...)
 		routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes.external"], ",", -1, true)...)
-		err = networkNICRouteAdd(d.config["parent"], routes...)
+		err = networkNICRouteAdd(d.config["parent"], d.config["ipv4.address"], d.config["ipv6.address"], routes...)
 		if err != nil {
 			return err
 		}
@@ -1147,7 +1147,7 @@ func (d *nicBridged) postStop() error {
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes"], ",", -1, true)...)
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv4.routes.external"], ",", -1, true)...)
 	routes = append(routes, util.SplitNTrimSpace(d.config["ipv6.routes.external"], ",", -1, true)...)
-	networkNICRouteDelete(bridgeName, routes...)
+	networkNICRouteDelete(bridgeName, d.config["ipv4.address"], d.config["ipv6.address"], routes...)
 
 	if util.IsTrue(d.config["security.mac_filtering"]) || util.IsTrue(d.config["security.ipv4_filtering"]) || util.IsTrue(d.config["security.ipv6_filtering"]) || d.config["security.acls"] != "" {
 		d.removeFilters(d.config)

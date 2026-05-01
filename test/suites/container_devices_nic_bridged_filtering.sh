@@ -166,10 +166,11 @@ test_container_devices_nic_bridged_filtering() {
         false
     fi
 
-    # Add a fake IP within ipv4.routes range (198.51.100.0/24)
+    # Add an additional IP within ipv4.routes range (198.51.100.0/24) alongside the
+    # configured ipv4.address so the host can still ARP-resolve the NIC's next-hop.
     incus exec "${ctPrefix}A" -- ip a flush dev eth0
+    incus exec "${ctPrefix}A" -- ip a add 192.0.2.2/24 dev eth0
     incus exec "${ctPrefix}A" -- ip a add 198.51.100.1/32 dev eth0
-    incus exec "${ctPrefix}A" -- ip r add 192.0.2.0/24 dev eth0
     incus exec "${ctPrefix}B" -- ip r add 198.51.100.0/24 dev eth0
 
     # Check that ping is still working (i.e the filter did not apply to the ipv4.routes subnet).
@@ -184,10 +185,11 @@ test_container_devices_nic_bridged_filtering() {
         false
     fi
 
-    # Add a fake IP within ipv4.routes.external range (203.0.113.0/24)
+    # Add an additional IP within ipv4.routes.external range (203.0.113.0/24) alongside
+    # the configured ipv4.address so the host can still ARP-resolve the NIC's next-hop.
     incus exec "${ctPrefix}A" -- ip a flush dev eth0
+    incus exec "${ctPrefix}A" -- ip a add 192.0.2.2/24 dev eth0
     incus exec "${ctPrefix}A" -- ip a add 203.0.113.1/32 dev eth0
-    incus exec "${ctPrefix}A" -- ip r add 192.0.2.0/24 dev eth0
     incus exec "${ctPrefix}B" -- ip r add 203.0.113.0/24 dev eth0
 
     # Check that ping is still working (i.e the filter did not apply to the ipv4.routes.external subnet).
@@ -355,10 +357,11 @@ test_container_devices_nic_bridged_filtering() {
         false
     fi
 
-    # Add a fake IP within ipv6.routes range (2001:db8:2::/64)
+    # Add an additional IP within ipv6.routes range (2001:db8:2::/64) alongside the
+    # configured ipv6.address so the host can still NDP-resolve the NIC's next-hop.
     incus exec "${ctPrefix}A" -- ip -6 a flush dev eth0
+    incus exec "${ctPrefix}A" -- ip -6 a add 2001:db8:1::2/64 dev eth0
     incus exec "${ctPrefix}A" -- ip -6 a add 2001:db8:2::1/128 dev eth0
-    incus exec "${ctPrefix}A" -- ip -6 r add 2001:db8:1::/64 dev eth0
     incus exec "${ctPrefix}B" -- ip -6 r add 2001:db8:2::/64 dev eth0
     wait_for_dad "${ctPrefix}A" eth0
 
@@ -374,8 +377,10 @@ test_container_devices_nic_bridged_filtering() {
         false
     fi
 
-    # Add a fake IP within ipv6.routes.external range (2001:db8:0:0:2::/96)
+    # Add an additional IP within ipv6.routes.external range (2001:db8:3::/64) alongside
+    # the configured ipv6.address so the host can still NDP-resolve the NIC's next-hop.
     incus exec "${ctPrefix}A" -- ip -6 a flush dev eth0
+    incus exec "${ctPrefix}A" -- ip -6 a add 2001:db8:1::2/64 dev eth0
     incus exec "${ctPrefix}A" -- ip -6 a add 2001:db8:3::1/128 dev eth0
     incus exec "${ctPrefix}B" -- ip -6 r add 2001:db8:3::/64 dev eth0
     wait_for_dad "${ctPrefix}A" eth0
