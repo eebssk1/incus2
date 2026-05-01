@@ -523,8 +523,10 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 		case qmp.EventVMReset:
 			monitor, err := d.qmpConnect()
 			if err == nil {
-				if !monitor.IsInitialized() {
-					// If the VM isn't fully initialized yet, we want system_reset to be treated internally within QEMU.
+				if monitor.HandleReset() {
+					// This RESET corresponds to a deliberate system_reset we triggered
+					// (e.g. the boot-config rebuild during startup), so let QEMU handle
+					// it internally rather than tearing the VM down.
 					break
 				}
 
