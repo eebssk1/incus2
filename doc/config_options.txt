@@ -85,7 +85,15 @@ User keys can be used in search.
 :required: "no"
 :shortdesc: "Initial volume configuration for instance root disk devices"
 :type: "string"
+For root disk devices, this is used to override the storage pool's default volume
+configuration when creating the instance's root volume.
 
+For custom volumes, only `initial.uid`, `initial.gid` and `initial.mode` are
+accepted and they are used when auto-creating sub-directories inside the custom
+volume (when the `source` includes a sub-path that doesn't exist).
+
+`initial.uid`, `initial.gid` and `initial.mode` are also used to set the ownership
+and mode of the file system when the `source` is `tmpfs:` or `tmpfs-overlay:`.
 ```
 
 ```{config:option} io.bus devices-disk
