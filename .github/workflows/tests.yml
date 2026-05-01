@@ -268,7 +268,7 @@ jobs:
         run: |
           set -x
 
-          # Configure ppa:ubuntu-lxc/daily and ppa:cowsql/stable directly
+          # Configure ppa:ubuntu-lxc/daily directly
           # (apt-add-repository relies on the Launchpad API which is unreliable).
           sudo install -d -m 0755 /etc/apt/keyrings
           codename="$(lsb_release -cs)"
@@ -282,21 +282,14 @@ jobs:
           Signed-By: /etc/apt/keyrings/ubuntu-lxc-daily.asc
           EOF
 
-          curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x0B200649771E886ACFD564A4E1ADC8AA195E4516" | sudo tee /etc/apt/keyrings/cowsql-stable.asc > /dev/null
-          sudo tee /etc/apt/sources.list.d/cowsql-stable.sources > /dev/null <<EOF
-          Types: deb
-          URIs: https://ppa.launchpadcontent.net/cowsql/stable/ubuntu
-          Suites: ${codename}
-          Components: main
-          Signed-By: /etc/apt/keyrings/cowsql-stable.asc
-          EOF
-
           sudo apt-get update
 
           sudo systemctl mask lxc.service lxc-net.service
 
           sudo apt-get install --no-install-recommends -y \
             apparmor \
+            autoconf \
+            automake \
             bsdextrautils \
             bzip2 \
             curl \
@@ -305,14 +298,15 @@ jobs:
             libacl1-dev \
             libcap-dev \
             libdbus-1-dev \
-            libcowsql-dev \
             libelf-dev \
             liblxc-dev \
+            liblz4-dev \
             libseccomp-dev \
             libselinux-dev \
             libsqlite3-dev \
             libtool \
             libudev-dev \
+            libuv1-dev \
             linux-modules-extra-$(uname -r) \
             llvm \
             make \
@@ -362,9 +356,21 @@ jobs:
         run: |
           go mod download
 
+      - name: Build cowsql and raft
+        run: |
+          set -x
+          make deps
+
+          raft_path="$(go env GOPATH)/deps/raft"
+          cowsql_path="$(go env GOPATH)/deps/cowsql"
+          {
+            echo "CGO_CFLAGS=-I${raft_path}/include/ -I${cowsql_path}/include/"
+            echo "CGO_LDFLAGS=-L${raft_path}/.libs -L${cowsql_path}/.libs/"
+            echo "LD_LIBRARY_PATH=${raft_path}/.libs/:${cowsql_path}/.libs/"
+            echo "CGO_LDFLAGS_ALLOW=(-Wl,-wrap,pthread_create)|(-Wl,-z,now)"
+          } >> "$GITHUB_ENV"
+
       - name: Run Incus build
-        env:
-          CGO_LDFLAGS_ALLOW: "(-Wl,-wrap,pthread_create)|(-Wl,-z,now)"
         run: |
           make
 
@@ -492,7 +498,7 @@ jobs:
           chmod +x ~
           echo "root:1000000:1000000000" | sudo tee /etc/subuid /etc/subgid
           cd test
-          sudo --preserve-env=PATH,GOPATH,GITHUB_ACTIONS,INCUS_VERBOSE,INCUS_BACKEND,INCUS_CEPH_CLUSTER,INCUS_CEPH_CEPHFS,INCUS_CEPH_CEPHOBJECT_RADOSGW,INCUS_LINSTOR_LOCAL_SATELLITE,INCUS_LINSTOR_CLUSTER,INCUS_OFFLINE,INCUS_SKIP_TESTS,INCUS_REQUIRED_TESTS, INCUS_BACKEND=${{ matrix.backend }} ./main.sh ${{ matrix.suite }}
+          sudo --preserve-env=PATH,GOPATH,GITHUB_ACTIONS,INCUS_VERBOSE,INCUS_BACKEND,INCUS_CEPH_CLUSTER,INCUS_CEPH_CEPHFS,INCUS_CEPH_CEPHOBJECT_RADOSGW,INCUS_LINSTOR_LOCAL_SATELLITE,INCUS_LINSTOR_CLUSTER,INCUS_OFFLINE,INCUS_SKIP_TESTS,INCUS_REQUIRED_TESTS, INCUS_BACKEND=${{ matrix.backend }} env LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ./main.sh ${{ matrix.suite }}
 
   client:
     name: Client
