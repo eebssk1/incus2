@@ -13,6 +13,9 @@ const InstancePlacementReasonRelocation = "relocation"
 // InstancePlacementReasonEvacuation is when an existing instance is temporarily migrated because a cluster member is being evacuated.
 const InstancePlacementReasonEvacuation = "evacuation"
 
+// InstancePlacementReasonRebalance is when an existing instance is being migrated as part of automatic cluster re-balancing.
+const InstancePlacementReasonRebalance = "rebalance"
+
 // InstanceResources represents the required resources for an instance.
 //
 // API extension: instances_placement_scriptlet.

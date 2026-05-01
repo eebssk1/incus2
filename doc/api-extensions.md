@@ -3083,3 +3083,7 @@ This adds a new `core.shutdown_action` server configuration option.
 Its default value of `shutdown` keeps the current behavior but
 `evacuate` can be set to have a clustered server attempt an evacuation
 on shutdown with any instance left after it getting shutdown.
+
+## `instances_placement_scriptlet_rebalance`
+
+Add a new placement scriptlet trigger for cluster re-balancing.
