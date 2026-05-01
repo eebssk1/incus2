@@ -238,6 +238,12 @@ func warningsGet(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: uuid
+//	    description: UUID
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Warning
@@ -304,6 +310,11 @@ func warningGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: uuid
+//	    description: UUID
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: warning
 //	    description: Warning status
@@ -335,6 +346,11 @@ func warningPatch(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: uuid
+//	    description: UUID
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: warning
 //	    description: Warning status
@@ -406,6 +422,12 @@ func warningPut(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: uuid
+//	    description: UUID
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    $ref: "#/responses/EmptySyncResponse"

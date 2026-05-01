@@ -93,6 +93,11 @@ func api10ResourcesGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Resource name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: target
 //	    description: Cluster member name

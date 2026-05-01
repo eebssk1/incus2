@@ -2828,6 +2828,11 @@ func pruneExpiredImages(ctx context.Context, s *state.State, op *operations.Oper
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3118,6 +3123,11 @@ func imageValidSecret(s *state.State, r *http.Request, projectName string, finge
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: fingerprint
+//      description: Fingerprint
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -3164,6 +3174,11 @@ func imageValidSecret(s *state.State, r *http.Request, projectName string, finge
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3259,6 +3274,11 @@ func imageGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3368,6 +3388,11 @@ func imagePut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3726,6 +3751,11 @@ func imageAliasesGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Alias name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -3767,6 +3797,11 @@ func imageAliasesGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Alias name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3839,6 +3874,11 @@ func imageAliasGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Alias name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3903,6 +3943,11 @@ func imageAliasDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Alias name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -3994,6 +4039,11 @@ func imageAliasPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Alias name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -4100,6 +4150,11 @@ func imageAliasPatch(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Alias name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -4188,6 +4243,11 @@ func imageAliasPost(d *Daemon, r *http.Request) response.Response {
 //    - application/octet-stream
 //    - multipart/form-data
 //  parameters:
+//    - in: path
+//      name: fingerprint
+//      description: Fingerprint
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -4218,6 +4278,11 @@ func imageAliasPost(d *Daemon, r *http.Request) response.Response {
 //	  - application/octet-stream
 //	  - multipart/form-data
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -4378,6 +4443,11 @@ func imageExport(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -4532,6 +4602,11 @@ func imageExportPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -4651,6 +4726,11 @@ func imageImportFromNode(imagesDir string, client incus.InstanceServer, fingerpr
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

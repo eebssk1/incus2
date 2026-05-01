@@ -58,6 +58,11 @@ var networkLoadBalancerStateCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -112,6 +117,11 @@ var networkLoadBalancerStateCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -287,6 +297,11 @@ func networkLoadBalancersGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -371,6 +386,16 @@ func networkLoadBalancersPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -444,6 +469,16 @@ func networkLoadBalancerDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -555,6 +590,16 @@ func networkLoadBalancerGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
+//    - in: path
+//      name: listenAddress
+//      description: Listen address
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -590,6 +635,16 @@ func networkLoadBalancerGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -733,6 +788,16 @@ func networkLoadBalancerPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: listenAddress
+//	    description: Listen address
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

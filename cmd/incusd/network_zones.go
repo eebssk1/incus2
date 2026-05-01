@@ -342,6 +342,11 @@ func networkZonesPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -399,6 +404,11 @@ func networkZoneDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -468,6 +478,11 @@ func networkZoneGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: zone
+//      description: Network zone name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -503,6 +518,11 @@ func networkZoneGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

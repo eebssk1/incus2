@@ -105,6 +105,11 @@ var storagePoolVolumeTypeFileCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -166,6 +171,11 @@ var storagePoolVolumeTypeFileCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -220,6 +230,16 @@ var storagePoolVolumeTypeFileCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: poolName
+//      description: Storage pool name
+//      type: string
+//      required: true
+//    - in: path
+//      name: type
+//      description: Storage volume type
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -274,6 +294,16 @@ var storagePoolVolumeTypeFileCmd = APIEndpoint{
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -323,6 +353,16 @@ var storagePoolVolumeTypeFileCmd = APIEndpoint{
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -684,6 +724,11 @@ func filterVolumes(volumes []*db.StorageVolume, clauses *filter.ClauseSet, allPr
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -725,6 +770,16 @@ func filterVolumes(volumes []*db.StorageVolume, clauses *filter.ClauseSet, allPr
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1147,6 +1202,21 @@ func doVolumeMigration(s *state.State, r *http.Request, requestProjectName strin
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1795,6 +1865,21 @@ func storagePoolVolumeTypePostMove(s *state.State, r *http.Request, poolName str
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -1841,6 +1926,21 @@ func storagePoolVolumeTypePostMove(s *state.State, r *http.Request, poolName str
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -2084,6 +2184,21 @@ func getVolumeFull(ctx context.Context, s *state.State, poolName string, vol api
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -2255,6 +2370,21 @@ func storagePoolVolumePut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -2395,6 +2525,21 @@ func storagePoolVolumePatch(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: poolName
+//	    description: Storage pool name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: type
+//	    description: Storage volume type
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: volumeName
+//	    description: Storage volume name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

@@ -795,6 +795,12 @@ func certificatesPost(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Certificate
@@ -855,6 +861,11 @@ func certificateGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: certificate
 //	    description: Certificate configuration
@@ -924,6 +935,11 @@ func certificatePut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: certificate
 //	    description: Certificate configuration
@@ -1131,6 +1147,12 @@ func doCertificateUpdate(d *Daemon, dbInfo api.Certificate, req api.CertificateP
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: fingerprint
+//	    description: Fingerprint
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    $ref: "#/responses/EmptySyncResponse"

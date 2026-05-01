@@ -1531,6 +1531,12 @@ func clusterNodesPost(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Cluster member
@@ -1639,6 +1645,11 @@ func clusterNodeGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: cluster
 //	    description: Cluster member configuration
@@ -1672,6 +1683,11 @@ func clusterNodePatch(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: cluster
 //	    description: Cluster member configuration
@@ -1985,6 +2001,11 @@ func clusterValidateConfig(config map[string]string) error {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: cluster
 //	    description: Cluster member rename request
@@ -2058,6 +2079,12 @@ func clusterNodePost(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    $ref: "#/responses/EmptySyncResponse"
@@ -2888,6 +2915,12 @@ func internalClusterRaftNodeDelete(d *Daemon, r *http.Request) response.Response
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Cluster member state
@@ -2947,6 +2980,11 @@ func clusterNodeStateGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Cluster member name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: cluster
 //	    description: Cluster member state

@@ -52,6 +52,11 @@ var networkPeerCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -106,6 +111,11 @@ var networkPeerCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -280,6 +290,11 @@ func networkPeersGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -368,6 +383,16 @@ func networkPeersPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: peerName
+//	    description: Peer name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -439,6 +464,16 @@ func networkPeerDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: peerName
+//	    description: Peer name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -543,6 +578,16 @@ func networkPeerGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: networkName
+//      description: Network name
+//      type: string
+//      required: true
+//    - in: path
+//      name: peerName
+//      description: Peer name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -578,6 +623,16 @@ func networkPeerGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: networkName
+//	    description: Network name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: peerName
+//	    description: Peer name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

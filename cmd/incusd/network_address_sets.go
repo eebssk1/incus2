@@ -333,6 +333,11 @@ func networkAddressSetsPost(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Address set name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -391,6 +396,11 @@ func networkAddressSetDelete(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Address set name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -461,6 +471,11 @@ func networkAddressSetGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Address set name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -496,6 +511,11 @@ func networkAddressSetGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Address set name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -585,6 +605,11 @@ func networkAddressSetPut(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Address set name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name

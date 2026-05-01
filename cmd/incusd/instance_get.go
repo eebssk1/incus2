@@ -25,6 +25,11 @@ import (
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: name
+//      description: Instance name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -68,6 +73,11 @@ import (
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

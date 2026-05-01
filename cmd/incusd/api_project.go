@@ -448,6 +448,12 @@ func projectCreateDefaultProfile(ctx context.Context, tx *db.ClusterTx, project 
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Project
@@ -521,6 +527,11 @@ func projectGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: project
 //	    description: Project configuration
@@ -607,6 +618,11 @@ func projectPut(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: project
 //	    description: Project configuration
@@ -825,6 +841,11 @@ func projectChange(ctx context.Context, s *state.State, project *api.Project, re
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	  - in: body
 //	    name: project
 //	    description: Project rename request
@@ -938,6 +959,11 @@ func projectPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: force
 //	    description: Delete project and related artifacts
@@ -1282,6 +1308,12 @@ func projectDelete(d *Daemon, r *http.Request) response.Response {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Project state
@@ -1981,6 +2013,12 @@ func projectValidateRestrictedSubnets(s *state.State, value string) error {
 //	---
 //	produces:
 //	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Project name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "200":
 //	    description: Access

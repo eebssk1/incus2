@@ -49,6 +49,11 @@ var networkZoneRecordCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: zone
+//      description: Network zone name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -103,6 +108,11 @@ var networkZoneRecordCmd = APIEndpoint{
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: zone
+//      description: Network zone name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -218,6 +228,11 @@ func networkZoneRecordsGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -286,6 +301,16 @@ func networkZoneRecordsPost(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: name
+//	    description: Record name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -345,6 +370,16 @@ func networkZoneRecordDelete(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: name
+//	    description: Record name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name
@@ -420,6 +455,16 @@ func networkZoneRecordGet(d *Daemon, r *http.Request) response.Response {
 //  produces:
 //    - application/json
 //  parameters:
+//    - in: path
+//      name: zone
+//      description: Network zone name
+//      type: string
+//      required: true
+//    - in: path
+//      name: name
+//      description: Record name
+//      type: string
+//      required: true
 //    - in: query
 //      name: project
 //      description: Project name
@@ -455,6 +500,16 @@ func networkZoneRecordGet(d *Daemon, r *http.Request) response.Response {
 //	produces:
 //	  - application/json
 //	parameters:
+//	  - in: path
+//	    name: zone
+//	    description: Network zone name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: name
+//	    description: Record name
+//	    type: string
+//	    required: true
 //	  - in: query
 //	    name: project
 //	    description: Project name

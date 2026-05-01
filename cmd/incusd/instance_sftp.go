@@ -26,6 +26,12 @@ import (
 //	produces:
 //	  - application/json
 //	  - application/octet-stream
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
 //	responses:
 //	  "101":
 //	    description: Switching protocols to SFTP
