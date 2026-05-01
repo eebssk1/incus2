@@ -540,19 +540,28 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 
 			fallthrough
 		case qmp.EventVMShutdown:
+			var reason string
+
 			target := "stop"
 			entry, ok := data["reason"]
-			if ok && entry == "guest-reset" {
+			if ok {
+				entryStr, ok := entry.(string)
+				if ok {
+					reason = entryStr
+				}
+			}
+
+			if reason == "guest-reset" {
 				target = "reboot"
 			}
 
-			if entry == qmp.EventVMShutdownReasonDisconnect {
+			if reason == qmp.EventVMShutdownReasonDisconnect {
 				d.logger.Warn("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			} else {
 				d.logger.Debug("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			}
 
-			err = d.onStop(target)
+			err = d.onStop(target, reason)
 			if err != nil {
 				d.logger.Error("Failed to cleanly stop instance", logger.Ctx{"err": err})
 				return
@@ -711,9 +720,9 @@ func (d *qemu) pidWait(timeout time.Duration) bool {
 }
 
 // onStop is run when the instance stops.
-func (d *qemu) onStop(target string) error {
-	d.logger.Debug("onStop hook started", logger.Ctx{"target": target})
-	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target})
+func (d *qemu) onStop(target string, reason string) error {
+	d.logger.Debug("onStop hook started", logger.Ctx{"target": target, "reason": reason})
+	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target, "reason": reason})
 
 	// Create/pick up operation.
 	op, err := d.onStopOperationSetup(target)
@@ -778,8 +787,10 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Determine if instance should be auto-restarted.
+	cleanShutdown := reason == qmp.EventVMShutdownReasonGuestShutdown || reason == qmp.EventVMShutdownReasonQuit
+
 	var autoRestart bool
-	if target != "reboot" && op.GetInstanceInitiated() && d.shouldAutoRestart() {
+	if target != "reboot" && !cleanShutdown && d.shouldAutoRestart() {
 		autoRestart = true
 
 		// Mark current shutdown as complete.
@@ -5636,7 +5647,8 @@ func (d *qemu) Stop(stateful bool) error {
 		}
 
 		// Wait for QEMU process to exit and perform device cleanup.
-		err = d.onStop("stop")
+		// Treat as host-qmp-quit so autoRestart isn't triggered for a user-requested force stop.
+		err = d.onStop("stop", qmp.EventVMShutdownReasonQuit)
 		if err != nil {
 			op.Done(err)
 			return err
