@@ -149,6 +149,7 @@ type cmdImageCopy struct {
 	flagAliases       []string
 	flagPublic        bool
 	flagCopyAliases   bool
+	flagReuse         bool
 	flagAutoUpdate    bool
 	flagVM            bool
 	flagMode          string
@@ -171,6 +172,7 @@ It requires the source to be an alias and for it to be public.`))
 
 	cli.AddBoolFlag(cmd.Flags(), &c.flagPublic, "public", i18n.G("Make image public"))
 	cli.AddBoolFlag(cmd.Flags(), &c.flagCopyAliases, "copy-aliases", i18n.G("Copy aliases from source"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagReuse, "reuse", i18n.G("If an alias already exists, delete and recreate it"))
 	cli.AddBoolFlag(cmd.Flags(), &c.flagAutoUpdate, "auto-update", i18n.G("Keep the image up to date after initial copy"))
 	cli.AddStringArrayFlag(cmd.Flags(), &c.flagAliases, "alias", i18n.G("New aliases to add to the image"))
 	cli.AddBoolFlag(cmd.Flags(), &c.flagVM, "vm", i18n.G("Copy virtual machine images"))
@@ -209,6 +211,10 @@ func (c *cmdImageCopy) run(cmd *cobra.Command, args []string) error {
 
 	if c.flagMode != "pull" && c.flagAutoUpdate {
 		return errors.New(i18n.G("Auto update is only available in pull mode"))
+	}
+
+	if c.flagReuse && !c.flagCopyAliases {
+		return errors.New(i18n.G("--reuse requires --copy-aliases"))
 	}
 
 	sourceServer, err := c.global.conf.GetImageServer(imgRemoteName)
@@ -265,6 +271,24 @@ func (c *cmdImageCopy) run(cmd *cobra.Command, args []string) error {
 		Type:        imageType,
 		Mode:        c.flagMode,
 		Profiles:    c.flagProfile,
+	}
+
+	// If --reuse was passed, delete any conflicting aliases on the target so they can be recreated.
+	if c.flagReuse {
+		conflicting := append([]api.ImageAlias{}, imgInfo.Aliases...)
+		conflicting = append(conflicting, aliases...)
+
+		existing, err := getCommonAliases(d, conflicting...)
+		if err != nil {
+			return fmt.Errorf(i18n.G("Failed to check for existing aliases: %w"), err)
+		}
+
+		for _, alias := range existing {
+			err := d.DeleteImageAlias(alias.Name)
+			if err != nil {
+				return fmt.Errorf(i18n.G("Failed to remove alias %s: %w"), alias.Name, err)
+			}
+		}
 	}
 
 	// Do the copy
