@@ -9,10 +9,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	incus "github.com/lxc/incus/v6/client"
-	cliColor "github.com/lxc/incus/v6/cmd/incus/color"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/shared/cliconfig"
+	incus "github.com/lxc/incus/v7/client"
+	cliColor "github.com/lxc/incus/v7/cmd/incus/color"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/shared/cliconfig"
 )
 
 // makeList is a helper function building list atoms.

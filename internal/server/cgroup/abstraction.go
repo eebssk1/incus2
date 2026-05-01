@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lxc/incus/v6/internal/linux"
+	"github.com/lxc/incus/v7/internal/linux"
 )
 
 // CGroup represents the main cgroup abstraction.

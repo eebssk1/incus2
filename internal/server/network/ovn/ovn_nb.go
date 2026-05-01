@@ -16,7 +16,7 @@ import (
 	ovsdbClient "github.com/ovn-kubernetes/libovsdb/client"
 	ovsdbModel "github.com/ovn-kubernetes/libovsdb/model"
 
-	ovnNB "github.com/lxc/incus/v6/internal/server/network/ovn/schema/ovn-nb"
+	ovnNB "github.com/lxc/incus/v7/internal/server/network/ovn/schema/ovn-nb"
 )
 
 // NB client.

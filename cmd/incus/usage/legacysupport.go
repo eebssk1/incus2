@@ -1,7 +1,7 @@
 package usage
 
 import (
-	"github.com/lxc/incus/v6/internal/i18n"
+	"github.com/lxc/incus/v7/internal/i18n"
 )
 
 // LegacyKV is a backward-compatible key/value parsing atom.

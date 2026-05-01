@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/lxc/incus/v6/internal/server/storage/s3"
+	"github.com/lxc/incus/v7/internal/server/storage/s3"
 )
 
 const (

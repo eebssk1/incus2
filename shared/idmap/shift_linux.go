@@ -409,9 +409,9 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	_ "github.com/lxc/incus/v6/shared/cgo" // Used by cgo
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/util"
+	_ "github.com/lxc/incus/v7/shared/cgo" // Used by cgo
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 // ShiftOwner updates the uid and gid for a file within a specific basepath.

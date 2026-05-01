@@ -1,8 +1,8 @@
 package firewall
 
 import (
-	"github.com/lxc/incus/v6/internal/server/firewall/drivers"
-	"github.com/lxc/incus/v6/shared/logger"
+	"github.com/lxc/incus/v7/internal/server/firewall/drivers"
+	"github.com/lxc/incus/v7/shared/logger"
 )
 
 // New returns the nftables firewall implementation.

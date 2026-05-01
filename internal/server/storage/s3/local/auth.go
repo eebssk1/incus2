@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lxc/incus/v6/internal/server/storage/s3"
+	"github.com/lxc/incus/v7/internal/server/storage/s3"
 )
 
 // Hardcoded body hash sentinels used by AWS clients.

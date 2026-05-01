@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/cfg"
-	"github.com/lxc/incus/v6/shared/osarch"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/cfg"
+	"github.com/lxc/incus/v7/shared/osarch"
 )
 
 func TestQemuConfigTemplates(t *testing.T) {

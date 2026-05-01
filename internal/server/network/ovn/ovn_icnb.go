@@ -14,7 +14,7 @@ import (
 	"github.com/go-logr/logr"
 	ovsdbClient "github.com/ovn-kubernetes/libovsdb/client"
 
-	ovnICNB "github.com/lxc/incus/v6/internal/server/network/ovn/schema/ovn-ic-nb"
+	ovnICNB "github.com/lxc/incus/v7/internal/server/network/ovn/schema/ovn-ic-nb"
 )
 
 // ICNB client.

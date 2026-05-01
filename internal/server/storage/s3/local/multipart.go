@@ -18,7 +18,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/lxc/incus/v6/internal/server/storage/s3"
+	"github.com/lxc/incus/v7/internal/server/storage/s3"
 )
 
 // uploadInfo is persisted in upload.json under each in-flight upload directory.

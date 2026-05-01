@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/subprocess"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/subprocess"
 )
 
 // ClearBlock fully resets a block device or disk file using the most efficient mechanism available.
