@@ -742,12 +742,22 @@ func (d *disk) validateConfig(instConf instance.ConfigReader, partialValidation 
 			}
 
 			// Extract initial configuration from the profile and validate them against appropriate
-			// storage driver. Currently initial configuration is only applicable to root disk devices.
+			// storage driver. Initial configuration is applicable to root disk devices and to non-root
+			// custom volume disks (where initial.uid/gid/mode are used when auto-creating sub-directories).
 			initialConfig := make(map[string]string)
 			for k, v := range d.config {
 
 				// gendoc:generate(entity=devices, group=disk, key=initial.*)
 				//
+				// For root disk devices, this is used to override the storage pool's default volume
+				// configuration when creating the instance's root volume.
+				//
+				// For custom volumes, only `initial.uid`, `initial.gid` and `initial.mode` are
+				// accepted and they are used when auto-creating sub-directories inside the custom
+				// volume (when the `source` includes a sub-path that doesn't exist).
+				//
+				// `initial.uid`, `initial.gid` and `initial.mode` are also used to set the ownership
+				// and mode of the file system when the `source` is `tmpfs:` or `tmpfs-overlay:`.
 				// ---
 				//  type: string
 				//  required: no
@@ -760,27 +770,33 @@ func (d *disk) validateConfig(instConf instance.ConfigReader, partialValidation 
 
 			if len(initialConfig) > 0 {
 				if !internalInstance.IsRootDiskDevice(d.config) {
-					return errors.New("Non-root disk device cannot contain initial.* configuration")
-				}
+					// For non-root disks, only allow initial.uid/gid/mode (used for auto-creating
+					// missing sub-directories on custom volumes).
+					for k := range initialConfig {
+						if k != "uid" && k != "gid" && k != "mode" {
+							return fmt.Errorf("Non-root disk device only supports initial.uid, initial.gid and initial.mode configuration, not %q", "initial."+k)
+						}
+					}
+				} else {
+					volumeType, err := storagePools.InstanceTypeToVolumeType(d.inst.Type())
+					if err != nil {
+						return err
+					}
 
-				volumeType, err := storagePools.InstanceTypeToVolumeType(d.inst.Type())
-				if err != nil {
-					return err
-				}
+					// Create temporary volume definition.
+					vol := storageDrivers.NewVolume(
+						d.pool.Driver(),
+						d.pool.Name(),
+						volumeType,
+						storagePools.InstanceContentType(d.inst),
+						d.name,
+						initialConfig,
+						d.pool.Driver().Config())
 
-				// Create temporary volume definition.
-				vol := storageDrivers.NewVolume(
-					d.pool.Driver(),
-					d.pool.Name(),
-					volumeType,
-					storagePools.InstanceContentType(d.inst),
-					d.name,
-					initialConfig,
-					d.pool.Driver().Config())
-
-				err = d.pool.Driver().ValidateVolume(vol, true)
-				if err != nil {
-					return fmt.Errorf("Invalid initial device configuration: %v", err)
+					err = d.pool.Driver().ValidateVolume(vol, true)
+					if err != nil {
+						return fmt.Errorf("Invalid initial device configuration: %v", err)
+					}
 				}
 			}
 		}
@@ -2194,8 +2210,23 @@ func (d *disk) createDevice(srcPath string) (func(), string, bool, error) {
 		}
 	} else if d.config["source"] != "" {
 		// Handle mounting a sub-path.
-		_, volPath := internalInstance.SplitVolumeSource(d.config["source"])
+		volName, volPath := internalInstance.SplitVolumeSource(d.config["source"])
 		if volPath != "" {
+			// Get the parent volume.
+			storageProjectName, err := project.StorageVolumeProject(d.state.DB.Cluster, d.inst.Project().Name, db.StoragePoolVolumeTypeCustom)
+			if err != nil {
+				return nil, "", false, err
+			}
+
+			var dbVolume *db.StorageVolume
+			err = d.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
+				dbVolume, err = tx.GetStoragePoolVolume(ctx, d.pool.ID(), storageProjectName, db.StoragePoolVolumeTypeCustom, volName, true)
+				return err
+			})
+			if err != nil {
+				return nil, "", false, err
+			}
+
 			// Open file handle to parent for use with openat2 later.
 			// Has to use unix.O_PATH to support directories and sockets.
 			srcVolPath, err := os.OpenFile(srcPath, unix.O_PATH, 0)
@@ -2205,17 +2236,33 @@ func (d *disk) createDevice(srcPath string) (func(), string, bool, error) {
 
 			defer func() { _ = srcVolPath.Close() }()
 
-			// Use openat2 to prevent resolving to a mount path outside of the volume.
-			fd, err := unix.Openat2(int(srcVolPath.Fd()), volPath, &unix.OpenHow{
+			openHow := &unix.OpenHow{
 				Flags:   unix.O_PATH | unix.O_CLOEXEC,
 				Resolve: unix.RESOLVE_BENEATH | unix.RESOLVE_NO_MAGICLINKS,
-			})
+			}
+
+			// Use openat2 to prevent resolving to a mount path outside of the volume.
+			fd, err := unix.Openat2(int(srcVolPath.Fd()), volPath, openHow)
 			if err != nil {
 				if errors.Is(err, unix.EXDEV) {
 					return nil, "", false, fmt.Errorf("Volume sub-path %q resolves outside of the volume", volPath)
 				}
 
-				return nil, "", false, fmt.Errorf("Failed opening volume sub-path %q: %w", volPath, err)
+				if !errors.Is(err, unix.ENOENT) {
+					return nil, "", false, fmt.Errorf("Failed opening volume sub-path %q: %w", volPath, err)
+				}
+
+				// Sub-path doesn't exist, attempt to create the missing directories
+				// using the initial.* configuration (if provided).
+				err = d.createVolumeSubPath(dbVolume.Config, srcPath, volPath)
+				if err != nil {
+					return nil, "", false, err
+				}
+
+				fd, err = unix.Openat2(int(srcVolPath.Fd()), volPath, openHow)
+				if err != nil {
+					return nil, "", false, fmt.Errorf("Failed opening volume sub-path %q: %w", volPath, err)
+				}
 			}
 
 			srcPathFd := os.NewFile(uintptr(fd), volPath)
@@ -2283,6 +2330,118 @@ func (d *disk) createDevice(srcPath string) (func(), string, bool, error) {
 	reverter.Success()
 
 	return cleanup, devPath, isFile, err
+}
+
+// createVolumeSubPath creates any missing directory components of volPath, anchored at volRootPath.
+// It uses os.Root to ensure that path resolution stays within the volume root. Newly created
+// directories use the initial.uid, initial.gid and initial.mode configuration when provided.
+func (d *disk) createVolumeSubPath(volConfig map[string]string, volRootPath string, volPath string) error {
+	// Get the instance idmap.
+	var nextIdmap *idmap.Set
+
+	if util.IsFalseOrEmpty(volConfig["security.shifted"]) {
+		var err error
+
+		c, ok := d.inst.(instance.Container)
+		// Get the container's idmap.
+		if ok {
+			if c.IsRunning() {
+				nextIdmap, err = c.CurrentIdmap()
+				if err != nil {
+					return err
+				}
+			} else {
+				nextIdmap, err = c.NextIdmap()
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	mode := os.FileMode(0o711)
+	if d.config["initial.mode"] != "" {
+		m, err := strconv.ParseInt(d.config["initial.mode"], 8, 0)
+		if err != nil {
+			return fmt.Errorf(`Invalid "initial.mode" value %q: %w`, d.config["initial.mode"], err)
+		}
+
+		mode = os.FileMode(m)
+	}
+
+	uid := int64(0)
+	if d.config["initial.uid"] != "" {
+		v, err := strconv.Atoi(d.config["initial.uid"])
+		if err != nil {
+			return fmt.Errorf(`Invalid "initial.uid" value %q: %w`, d.config["initial.uid"], err)
+		}
+
+		uid = int64(v)
+	}
+
+	gid := int64(0)
+	if d.config["initial.gid"] != "" {
+		v, err := strconv.Atoi(d.config["initial.gid"])
+		if err != nil {
+			return fmt.Errorf(`Invalid "initial.gid" value %q: %w`, d.config["initial.gid"], err)
+		}
+
+		gid = int64(v)
+	}
+
+	if nextIdmap != nil {
+		uid, gid = nextIdmap.ShiftIntoNS(uid, gid)
+	}
+
+	volRoot, err := os.OpenRoot(volRootPath)
+	if err != nil {
+		return fmt.Errorf("Failed opening volume path %q: %w", volRootPath, err)
+	}
+
+	defer func() { _ = volRoot.Close() }()
+
+	var current string
+	for _, component := range strings.Split(volPath, "/") {
+		if component == "" || component == "." {
+			continue
+		}
+
+		if component == ".." {
+			return fmt.Errorf("Volume sub-path %q must not contain %q components", volPath, "..")
+		}
+
+		if current == "" {
+			current = component
+		} else {
+			current = current + "/" + component
+		}
+
+		_, err := volRoot.Lstat(current)
+		if err == nil {
+			continue
+		}
+
+		if !errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("Failed checking volume sub-path component %q: %w", current, err)
+		}
+
+		err = volRoot.Mkdir(current, mode.Perm())
+		if err != nil {
+			return fmt.Errorf("Failed creating volume sub-path component %q: %w", current, err)
+		}
+
+		err = volRoot.Lchown(current, int(uid), int(gid))
+		if err != nil {
+			return fmt.Errorf("Failed setting ownership on volume sub-path component %q: %w", current, err)
+		}
+
+		err = volRoot.Chmod(current, mode.Perm())
+		if err != nil {
+			return fmt.Errorf("Failed setting permissions on volume sub-path component %q: %w", current, err)
+		}
+	}
+
+	return nil
 }
 
 // localSourceOpen opens a local disk source path and returns a file handle to it.
