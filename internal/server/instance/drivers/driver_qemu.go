@@ -6412,6 +6412,10 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 					continue
 				}
 
+				if newDev["pool"] != "" && newDev["path"] != "/" && strings.Contains(newDev["source"], "/") {
+					continue
+				}
+
 				oldDev, ok := removeDevices[devName]
 				if !ok {
 					return errors.New("New device with initial configuration cannot be added once the instance is created")
