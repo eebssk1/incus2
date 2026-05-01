@@ -113,7 +113,7 @@ test_storage_buckets() {
 
     # Test putting a file into a bucket.
     incusTestFile="bucketfile_${bucketPrefix}.txt"
-    head -c 2M /dev/urandom > "${incusTestFile}"
+    head -c 5M /dev/urandom > "${incusTestFile}"
     s3cmdrun "${incus_backend}" "${adAccessKey}" "${adSecretKey}" put "${incusTestFile}" "s3://${bucketPrefix}.foo"
     ! s3cmdrun "${incus_backend}" "${roAccessKey}" "${roSecretKey}" put "${incusTestFile}" "s3://${bucketPrefix}.foo" || false
 
