@@ -9012,7 +9012,12 @@ func (d *qemu) Console(protocol string) (*os.File, chan error, error) {
 		_ = d.consoleSwapSocketWithRB()
 	}()
 
-	d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	// Only emit a lifecycle event for the text console here. SPICE clients open one socket per channel
+	// (display, cursor, inputs, ...) and would otherwise produce a flurry of instance-console events
+	// for a single user session; the VGA emit is handled once per session by the console request handler.
+	if protocol == instance.ConsoleTypeConsole {
+		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	}
 
 	return file, chDisconnect, nil
 }
