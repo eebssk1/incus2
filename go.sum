@@ -394,6 +394,8 @@ github.com/lxc/go-lxc v0.0.0-20260316180011-3af4ce000ed7 h1:MXZvjx5IYff3AacumHgm
 github.com/lxc/go-lxc v0.0.0-20260316180011-3af4ce000ed7/go.mod h1:3UTWXVcHfgxE7JM4ZUnsy6bDA8L1vuzwJbJRF6dlB90=
 github.com/lxc/incus-os/incus-osd v0.0.0-20260426171132-5b5f02e943ee h1:fVYJ6NWsCk7K3I+1poS0Jzofqn1valLBZ1Ftf5d8Mrg=
 github.com/lxc/incus-os/incus-osd v0.0.0-20260426171132-5b5f02e943ee/go.mod h1:ITvI7wOwUbS9QeuFVXlGVgrBa/JEO5HdfO72u6lUlL8=
+github.com/lxc/incus/v6 v6.23.1-0.20260327174201-6acde8bd711a h1:jquoHV4ziNNU5xDent4Ki9B6YJ8Ybq/yfeaTjubfJyU=
+github.com/lxc/incus/v6 v6.23.1-0.20260327174201-6acde8bd711a/go.mod h1:efEbxmSexfg8VyYQnBgNQz0dZZLci3s90xcU+VXoCYc=
 github.com/magiconair/properties v1.8.5/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.1/go.mod h1:FuOcm+DKB9mbwrcAfNl7/TZVBZ6rcnceauSikq3lYCQ=
