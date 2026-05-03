@@ -1104,6 +1104,17 @@ func (d *common) setCoreSched(pids []int) error {
 	return err
 }
 
+func (d *common) setCoreSchedTest() error {
+	args := []string{
+		"forkcoresched",
+		"2",
+		"0"
+	}
+
+	_, err := subprocess.RunCommand(d.state.OS.ExecPath, args...)
+	return err
+}
+
 // getRootDiskDevice gets the name and configuration of the root disk device of an instance.
 func (d *common) getRootDiskDevice() (string, map[string]string, error) {
 	devices := d.ExpandedDevices()

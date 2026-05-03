@@ -74,6 +74,9 @@ void forkcoresched(void)
 		if (!core_scheduling_cookie_valid(cookie))
 			_exit(EXIT_FAILURE);
 		break;
+	case 2:
+		// do nothing here, because if CS is not supported,it will exit early.
+		break;
 	default:
 		_exit(EXIT_FAILURE);
 	}

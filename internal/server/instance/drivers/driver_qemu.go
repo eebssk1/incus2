@@ -2124,9 +2124,7 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 		// Create a core scheduling group.
 		err = d.setCoreSched(pids)
 		if err != nil {
-			err = fmt.Errorf("Failed to allocate new core scheduling domain for vCPU threads: %w", err)
-			op.Done(err)
-			return err
+			_ = fmt.Errorf("Failed to allocate new core scheduling domain for vCPU threads: %w", err)
 		}
 	}
 
@@ -10554,7 +10552,7 @@ func (d *qemu) postCPUHotplug(monitor *qmp.Monitor) error {
 	// Create a core scheduling group.
 	err = d.setCoreSched(pids)
 	if err != nil {
-		return fmt.Errorf("Failed to allocate new core scheduling domain for vCPU threads: %w", err)
+		_ = fmt.Errorf("Failed to allocate new core scheduling domain for vCPU threads: %w", err)
 	}
 
 	return nil
