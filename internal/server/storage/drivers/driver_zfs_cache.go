@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/subprocess"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/subprocess"
 )
 
 // This is a global ZFS cache for the system, used to limit the number

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
 )
 
 // ChardevChangeInfo contains information required to change the backend of a chardev.
@@ -1049,8 +1049,17 @@ func (m *Monitor) SetAction(actions map[string]string) error {
 
 // Reset VM.
 func (m *Monitor) Reset() error {
+	// Announce that we're triggering a reset so the event handler can distinguish
+	// our deliberate system_reset from a guest-initiated reboot. This must be set
+	// before sending the command, since the RESET event is processed asynchronously
+	// and may otherwise arrive after the startup goroutine has already flipped
+	// the initialized flag.
+	m.ExpectReset()
+
 	err := m.Run("system_reset", nil, nil)
 	if err != nil {
+		m.HandleReset()
+
 		return fmt.Errorf("Failed resetting: %w", err)
 	}
 

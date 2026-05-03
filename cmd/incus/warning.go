@@ -10,11 +10,11 @@ import (
 	"github.com/spf13/cobra"
 	yaml "go.yaml.in/yaml/v4"
 
-	"github.com/lxc/incus/v6/cmd/incus/color"
-	u "github.com/lxc/incus/v6/cmd/incus/usage"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/shared/api"
-	cli "github.com/lxc/incus/v6/shared/cmd"
+	"github.com/lxc/incus/v7/cmd/incus/color"
+	u "github.com/lxc/incus/v7/cmd/incus/usage"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/shared/api"
+	cli "github.com/lxc/incus/v7/shared/cmd"
 )
 
 type warningColumn struct {
@@ -95,9 +95,9 @@ Column shorthand chars:
     u - UUID
     t - Type`))
 
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultWarningColumns, i18n.G("Columns")+"``")
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
-	cmd.Flags().BoolVarP(&c.flagAll, "all", "a", false, i18n.G("List all warnings")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultWarningColumns, "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all|a", i18n.G("List all warnings"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -342,7 +342,7 @@ func (c *cmdWarningDelete) command() *cobra.Command {
 	cmd.Short = i18n.G("Delete warnings")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Delete warnings`))
 
-	cmd.Flags().BoolVarP(&c.flagAll, "all", "a", false, i18n.G("Delete all warnings")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagAll, "all|a", i18n.G("Delete all warnings"))
 
 	cmd.RunE = c.run
 

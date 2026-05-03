@@ -11,15 +11,15 @@ import (
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
 
-	incus "github.com/lxc/incus/v6/client"
-	"github.com/lxc/incus/v6/cmd/incus/color"
-	u "github.com/lxc/incus/v6/cmd/incus/usage"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/internal/instance"
-	"github.com/lxc/incus/v6/shared/api"
-	cli "github.com/lxc/incus/v6/shared/cmd"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
+	incus "github.com/lxc/incus/v7/client"
+	"github.com/lxc/incus/v7/cmd/incus/color"
+	u "github.com/lxc/incus/v7/cmd/incus/usage"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/internal/instance"
+	"github.com/lxc/incus/v7/shared/api"
+	cli "github.com/lxc/incus/v7/shared/cmd"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 type cmdInfo struct {
@@ -47,11 +47,10 @@ incus info [<remote>:] [--resources]
     For server information.`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVar(&c.flagShowAccess, "show-access", false, i18n.G("Show the instance's access list"))
-	cmd.Flags().StringVar(&c.flagShowLog, "show-log", "", i18n.G("Show the instance's recent log entries")+"``")
-	cmd.Flags().Lookup("show-log").NoOptDefVal = "default"
-	cmd.Flags().BoolVar(&c.flagResources, "resources", false, i18n.G("Show the resources available to the server"))
-	cmd.Flags().StringVar(&c.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagShowAccess, "show-access", i18n.G("Show the instance's access list"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagShowLog, "show-log", "", "default", i18n.G("Show the instance's recent log entries"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagResources, "resources", i18n.G("Show the resources available to the server"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {

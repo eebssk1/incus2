@@ -85,7 +85,15 @@ User keys can be used in search.
 :required: "no"
 :shortdesc: "Initial volume configuration for instance root disk devices"
 :type: "string"
+For root disk devices, this is used to override the storage pool's default volume
+configuration when creating the instance's root volume.
 
+For custom volumes, only `initial.uid`, `initial.gid` and `initial.mode` are
+accepted and they are used when auto-creating sub-directories inside the custom
+volume (when the `source` includes a sub-path that doesn't exist).
+
+`initial.uid`, `initial.gid` and `initial.mode` are also used to set the ownership
+and mode of the file system when the `source` is `tmpfs:` or `tmpfs-overlay:`.
 ```
 
 ```{config:option} io.bus devices-disk
@@ -5064,6 +5072,15 @@ If this option is not specified, the daemon falls back to the `NO_PROXY` environ
 :shortdesc: "Time after which a remote add token expires"
 :type: "string"
 
+```
+
+```{config:option} core.shutdown_action server-core
+:defaultdesc: "`shutdown`"
+:scope: "global"
+:shortdesc: "Action to perform on server shutdown"
+:type: "string"
+Specify the action to take when the daemon is being shut down.
+Supported values are `shutdown` (stop all instances) and `evacuate` (attempt to evacuate the clustered server).
 ```
 
 ```{config:option} core.shutdown_timeout server-core

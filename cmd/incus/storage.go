@@ -15,13 +15,13 @@ import (
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
 
-	"github.com/lxc/incus/v6/cmd/incus/color"
-	u "github.com/lxc/incus/v6/cmd/incus/usage"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/shared/api"
-	cli "github.com/lxc/incus/v6/shared/cmd"
-	"github.com/lxc/incus/v6/shared/termios"
-	"github.com/lxc/incus/v6/shared/units"
+	"github.com/lxc/incus/v7/cmd/incus/color"
+	u "github.com/lxc/incus/v7/cmd/incus/usage"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/shared/api"
+	cli "github.com/lxc/incus/v7/shared/cmd"
+	"github.com/lxc/incus/v7/shared/termios"
+	"github.com/lxc/incus/v7/shared/units"
 )
 
 type cmdStorage struct {
@@ -108,13 +108,14 @@ func (c *cmdStorageCreate) command() *cobra.Command {
 	cmd.Short = i18n.G("Create storage pools")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Create storage pools`))
 	cmd.Example = cli.FormatSection("", i18n.G(`incus storage create s1 dir
+    Create a storage pool s1
 
 incus storage create s1 dir < config.yaml
-    Create a storage pool using the content of config.yaml.
+    Create a storage pool s1 using the content of config.yaml
 	`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().StringVar(&c.flagDescription, "description", "", i18n.G("Storage pool description")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagDescription, "description", "", "", i18n.G("Storage pool description"))
 
 	cmd.RunE = c.run
 
@@ -389,8 +390,8 @@ func (c *cmdStorageGet) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Get values for storage pool configuration keys`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a storage property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a storage property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -464,8 +465,8 @@ func (c *cmdStorageInfo) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Show useful information about storage pools`))
 
-	cmd.Flags().BoolVar(&c.flagBytes, "bytes", false, i18n.G("Show the used and free space in bytes"))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagBytes, "bytes", i18n.G("Show the used and free space in bytes"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -641,7 +642,7 @@ Default column layout: nDdus
 
 == Columns ==
 The -c option takes a comma separated list of arguments that control
-which instance attributes to output when displaying in table or csv
+which storage pools attributes to output when displaying in table or csv
 format.
 
 Column arguments are either pre-defined shorthand chars (see below),
@@ -656,9 +657,8 @@ Pre-defined column shorthand chars:
   S - Source
   u - used by
   s - state`))
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultStorageColumns, i18n.G("Columns")+"``")
-
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultStorageColumns, "", i18n.G("Columns"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -796,8 +796,8 @@ func (c *cmdStorageSet) command() *cobra.Command {
 For backward compatibility, a single configuration key may still be set with:
     incus storage set [<remote>:]<pool> <key> <value>`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a storage property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a storage property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -888,8 +888,8 @@ func (c *cmdStorageShow) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Show storage pool configurations and resources`))
 
-	cmd.Flags().BoolVar(&c.flagResources, "resources", false, i18n.G("Show the resources available to the storage pool"))
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
+	cli.AddBoolFlag(cmd.Flags(), &c.flagResources, "resources", i18n.G("Show the resources available to the storage pool"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -968,8 +968,8 @@ func (c *cmdStorageUnset) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
 		`Unset storage pool configuration keys`))
 
-	cmd.Flags().StringVar(&c.storage.flagTarget, "target", "", i18n.G("Cluster member name")+"``")
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a storage property"))
+	cli.AddStringFlag(cmd.Flags(), &c.storage.flagTarget, "target", "", "", i18n.G("Cluster member name"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a storage property"))
 	cmd.RunE = c.run
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

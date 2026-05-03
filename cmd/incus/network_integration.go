@@ -12,12 +12,12 @@ import (
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
 
-	"github.com/lxc/incus/v6/cmd/incus/color"
-	u "github.com/lxc/incus/v6/cmd/incus/usage"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/shared/api"
-	cli "github.com/lxc/incus/v6/shared/cmd"
-	"github.com/lxc/incus/v6/shared/termios"
+	"github.com/lxc/incus/v7/cmd/incus/color"
+	u "github.com/lxc/incus/v7/cmd/incus/usage"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/shared/api"
+	cli "github.com/lxc/incus/v7/shared/cmd"
+	"github.com/lxc/incus/v7/shared/termios"
 )
 
 type cmdNetworkIntegration struct {
@@ -88,11 +88,12 @@ func (c *cmdNetworkIntegrationCreate) command() *cobra.Command {
 	cmd.Short = i18n.G("Create network integrations")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Create network integrations`))
 	cmd.Example = cli.FormatSection("", i18n.G(`incus network integration create o1 ovn
+   Create network integration o1 of type ovn
 
 incus network integration create o1 ovn < config.yaml
     Create network integration o1 of type ovn with configuration from config.yaml`))
 
-	cmd.Flags().StringArrayVarP(&c.flagConfig, "config", "c", nil, i18n.G("Config key/value to apply to the new network integration")+"``")
+	cli.AddStringArrayFlag(cmd.Flags(), &c.flagConfig, "config|c", i18n.G("Config key/value to apply to the new network integration"))
 
 	cmd.RunE = c.run
 
@@ -335,7 +336,7 @@ func (c *cmdNetworkIntegrationGet) command() *cobra.Command {
 		`Get values for network integration configuration keys`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Get the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Get the key as a network integration property"))
 	return cmd
 }
 
@@ -393,7 +394,7 @@ Default column layout: ndtu
 
 == Columns ==
 The -c option takes a comma separated list of arguments that control
-which network zone attributes to output when displaying in table or csv
+which network integrations attributes to output when displaying in table or csv
 format.
 
 Column arguments are either pre-defined shorthand chars (see below),
@@ -407,8 +408,8 @@ Pre-defined column shorthand chars:
 	t - Type
 	u - Used by`))
 
-	cmd.Flags().StringVarP(&c.flagFormat, "format", "f", c.global.defaultListFormat(), i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`)+"``")
-	cmd.Flags().StringVarP(&c.flagColumns, "columns", "c", defaultNetworkIntegrationColumns, i18n.G("Columns")+"``")
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", c.global.defaultListFormat(), "", i18n.G(`Format (csv|json|table|yaml|compact|markdown), use suffix ",noheader" to disable headers and ",header" to enable it if missing, e.g. csv,header`))
+	cli.AddStringFlag(cmd.Flags(), &c.flagColumns, "columns|c", defaultNetworkIntegrationColumns, "", i18n.G("Columns"))
 
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
 		return cli.ValidateFlagFormatForListOutput(cmd.Flag("format").Value.String())
@@ -570,7 +571,7 @@ For backward compatibility, a single configuration key may still be set with:
     incus network integration set [<remote>:]<network integration> <key> <value>`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Set the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a network integration property"))
 	return cmd
 }
 
@@ -639,7 +640,7 @@ func (c *cmdNetworkIntegrationUnset) command() *cobra.Command {
 		`Unset network integration configuration keys`))
 
 	cmd.RunE = c.run
-	cmd.Flags().BoolVarP(&c.flagIsProperty, "property", "p", false, i18n.G("Unset the key as a network integration property"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Unset the key as a network integration property"))
 	return cmd
 }
 

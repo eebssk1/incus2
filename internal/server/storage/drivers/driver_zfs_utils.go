@@ -13,12 +13,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/ioprogress"
-	"github.com/lxc/incus/v6/shared/subprocess"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
+	"github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/ioprogress"
+	"github.com/lxc/incus/v7/shared/subprocess"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 const (
@@ -336,13 +336,9 @@ func (d *zfs) sendDataset(dataset string, parent string, volSrcArgs *migration.V
 	args := []string{"send"}
 
 	// Check if nesting is required.
-	// We only want to use recursion (and possible raw) mode if required as it can interfere with ZFS encryption.
+	// We only want to use recursion (and possibly raw) mode if required as it can interfere with ZFS encryption.
 	if d.needsRecursion(dataset) {
-		args = append(args, "-R")
-
-		if zfsRaw {
-			args = append(args, "-w")
-		}
+		args = append(args, "-R", "-w")
 	}
 
 	if slices.Contains(volSrcArgs.MigrationType.Features, "compress") {

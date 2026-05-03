@@ -5,10 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lxc/incus/v6/cmd/incus/color"
-	"github.com/lxc/incus/v6/internal/i18n"
-	"github.com/lxc/incus/v6/shared/api"
-	cli "github.com/lxc/incus/v6/shared/cmd"
+	"github.com/lxc/incus/v7/cmd/incus/color"
+	"github.com/lxc/incus/v7/internal/i18n"
+	"github.com/lxc/incus/v7/shared/api"
+	cli "github.com/lxc/incus/v7/shared/cmd"
 )
 
 type cmdLaunch struct {
@@ -26,6 +26,7 @@ func (c *cmdLaunch) command() *cobra.Command {
 		`Create and start instances from images`))
 	cmd.Example = cli.FormatSection("", i18n.G(
 		`incus launch images:debian/12 u1
+    Create and start a container named u1
 
 incus launch images:debian/12 u1 < config.yaml
     Create and start a container with configuration from config.yaml
@@ -42,8 +43,7 @@ incus launch images:debian/12 v2 --vm -d root,size=50GiB -d root,io.bus=nvme
 
 	cmd.RunE = c.run
 
-	cmd.Flags().StringVar(&c.flagConsole, "console", "", i18n.G("Immediately attach to the console")+"``")
-	cmd.Flags().Lookup("console").NoOptDefVal = "console"
+	cli.AddStringFlag(cmd.Flags(), &c.flagConsole, "console", "", "console", i18n.G("Immediately attach to the console"))
 
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {

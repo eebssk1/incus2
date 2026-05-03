@@ -12,17 +12,17 @@ import (
 	"github.com/pkg/sftp"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/lxc/incus/v6/internal/server/backup"
-	"github.com/lxc/incus/v6/internal/server/cgroup"
-	"github.com/lxc/incus/v6/internal/server/db"
-	deviceConfig "github.com/lxc/incus/v6/internal/server/device/config"
-	"github.com/lxc/incus/v6/internal/server/instance/instancetype"
-	"github.com/lxc/incus/v6/internal/server/instance/operationlock"
-	"github.com/lxc/incus/v6/internal/server/metrics"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/idmap"
-	"github.com/lxc/incus/v6/shared/ioprogress"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	"github.com/lxc/incus/v7/internal/server/cgroup"
+	"github.com/lxc/incus/v7/internal/server/db"
+	deviceConfig "github.com/lxc/incus/v7/internal/server/device/config"
+	"github.com/lxc/incus/v7/internal/server/instance/instancetype"
+	"github.com/lxc/incus/v7/internal/server/instance/operationlock"
+	"github.com/lxc/incus/v7/internal/server/metrics"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/idmap"
+	"github.com/lxc/incus/v7/shared/ioprogress"
 )
 
 // HookStart hook used when instance has started.
@@ -110,6 +110,7 @@ type Instance interface {
 	// Config handling.
 	Rename(newName string, applyTemplateTrigger bool) error
 	Update(newConfig db.InstanceArgs, userRequested bool) error
+	UpdateDevices(devices deviceConfig.Devices) error
 
 	Delete(force bool, cleanupDependencies bool) error
 	Export(meta io.Writer, roofs io.Writer, properties map[string]string, expiration time.Time, tracker *ioprogress.ProgressTracker) (*api.ImageMetadata, error)
@@ -256,6 +257,7 @@ type MigrateSendArgs struct {
 	MigrateArgs
 
 	AllowInconsistent bool
+	Devices           api.DevicesMap
 }
 
 // MigrateReceiveArgs represent arguments for instance migration receive.

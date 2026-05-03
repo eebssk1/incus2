@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/cfg"
-	"github.com/lxc/incus/v6/shared/osarch"
-	"github.com/lxc/incus/v6/shared/resources"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/cfg"
+	"github.com/lxc/incus/v7/shared/osarch"
+	"github.com/lxc/incus/v7/shared/resources"
 )
 
 func writeHeader(sb *strings.Builder, comment string, name string) {
@@ -510,19 +510,18 @@ type qemuNumaEntry struct {
 }
 
 type qemuCPUOpts struct {
-	architecture        string
-	cpuCount            int
-	cpuRequested        int
-	cpuSockets          int
-	cpuCores            int
-	cpuThreads          int
-	cpuNumaNodes        []uint64
-	cpuNumaMapping      []qemuNumaEntry
-	cpuNumaHostNodes    []uint64
-	hugepages           string
-	memory              int64
-	memoryHostNodes     []int64
-	qemuMemObjectFormat string
+	architecture     string
+	cpuCount         int
+	cpuRequested     int
+	cpuSockets       int
+	cpuCores         int
+	cpuThreads       int
+	cpuNumaNodes     []uint64
+	cpuNumaMapping   []qemuNumaEntry
+	cpuNumaHostNodes []uint64
+	hugepages        string
+	memory           int64
+	memoryHostNodes  []int64
 }
 
 func qemuCPUNumaHostNode(opts *qemuCPUOpts, index int) []cfg.Section {
@@ -600,13 +599,7 @@ func qemuCPU(opts *qemuCPUOpts, pinning bool) []cfg.Section {
 			numaHostNode[0].Entries["policy"] = "bind"
 
 			for index, element := range opts.memoryHostNodes {
-				var hostNodesKey string
-				if opts.qemuMemObjectFormat == "indexed" {
-					hostNodesKey = fmt.Sprintf("host-nodes.%d", index)
-				} else {
-					hostNodesKey = "host-nodes"
-				}
-
+				hostNodesKey := fmt.Sprintf("host-nodes.%d", index)
 				numaHostNode[0].Entries[hostNodesKey] = fmt.Sprintf("%d", element)
 			}
 		}
@@ -624,14 +617,7 @@ func qemuCPU(opts *qemuCPUOpts, pinning bool) []cfg.Section {
 			numaHostNode[0].Entries["share"] = "on"
 		}
 
-		var hostNodesKey string
-		if opts.qemuMemObjectFormat == "indexed" {
-			hostNodesKey = "host-nodes.0"
-		} else {
-			hostNodesKey = "host-nodes"
-		}
-
-		numaHostNode[0].Entries[hostNodesKey] = fmt.Sprintf("%d", element)
+		numaHostNode[0].Entries["host-nodes.0"] = fmt.Sprintf("%d", element)
 		sections = append(sections, numaHostNode...)
 	}
 

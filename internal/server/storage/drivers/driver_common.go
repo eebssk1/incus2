@@ -11,18 +11,18 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/lxc/incus/v6/internal/instancewriter"
-	"github.com/lxc/incus/v6/internal/linux"
-	"github.com/lxc/incus/v6/internal/migration"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	localMigration "github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/internal/server/project"
-	"github.com/lxc/incus/v6/internal/server/state"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/subprocess"
-	"github.com/lxc/incus/v6/shared/util"
+	"github.com/lxc/incus/v7/internal/instancewriter"
+	"github.com/lxc/incus/v7/internal/linux"
+	"github.com/lxc/incus/v7/internal/migration"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	localMigration "github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/internal/server/project"
+	"github.com/lxc/incus/v7/internal/server/state"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/subprocess"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 type common struct {
@@ -451,6 +451,11 @@ func (d *common) UnmountVolumeSnapshot(snapVol Volume, op *operations.Operation)
 // VolumeSnapshots returns a list of snapshots for the volume (in no particular order).
 func (d *common) VolumeSnapshots(vol Volume, op *operations.Operation) ([]string, error) {
 	return nil, ErrNotSupported
+}
+
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *common) CanRestoreVolume(vol Volume, snapshotName string) error {
+	return nil
 }
 
 // RestoreVolume resets a volume to its snapshotted state.

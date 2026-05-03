@@ -20,13 +20,14 @@ import (
 	"go.yaml.in/yaml/v4"
 	"golang.org/x/sys/unix"
 
-	"github.com/lxc/incus/v6/internal/linux"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/ioprogress"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/subprocess"
+	"github.com/lxc/incus/v7/internal/linux"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	localUtil "github.com/lxc/incus/v7/internal/server/util"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/ioprogress"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/subprocess"
 )
 
 // Errors.
@@ -401,12 +402,7 @@ func (d *btrfs) setSubvolumeReadonlyProperty(path string, readonly bool) error {
 		return nil
 	}
 
-	args := []string{"property", "set"}
-	if btrfsPropertyForce {
-		args = append(args, "-f")
-	}
-
-	args = append(args, "-ts", path, "ro", fmt.Sprintf("%t", readonly))
+	args := []string{"property", "set", "-f", "-ts", path, "ro", fmt.Sprintf("%t", readonly)}
 
 	_, err := subprocess.RunCommand("btrfs", args...)
 	return err
@@ -592,7 +588,7 @@ func (d *btrfs) loadOptimizedBackupHeader(r io.ReadSeeker, mountPath string, bas
 		}
 
 		if hdr.Name == filepath.Join(basePrefix, "optimized_header.yaml") {
-			loader, err := yaml.NewLoader(tr)
+			loader, err := yaml.NewLoader(localUtil.MaxBytesReader(tr, 1024*1024))
 			if err != nil {
 				return nil, fmt.Errorf("Error parsing optimized backup header file: %w", err)
 			}
