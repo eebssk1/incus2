@@ -97,7 +97,7 @@
 					},
 					{
 						"initial.*": {
-							"longdesc": "",
+							"longdesc": "For root disk devices, this is used to override the storage pool's default volume\nconfiguration when creating the instance's root volume.\n\nFor custom volumes, only `initial.uid`, `initial.gid` and `initial.mode` are\naccepted and they are used when auto-creating sub-directories inside the custom\nvolume (when the `source` includes a sub-path that doesn't exist).\n\n`initial.uid`, `initial.gid` and `initial.mode` are also used to set the ownership\nand mode of the file system when the `source` is `tmpfs:` or `tmpfs-overlay:`.",
 							"required": "no",
 							"shortdesc": "Initial volume configuration for instance root disk devices",
 							"type": "string"
@@ -5711,6 +5711,15 @@
 							"longdesc": "",
 							"scope": "global",
 							"shortdesc": "Time after which a remote add token expires",
+							"type": "string"
+						}
+					},
+					{
+						"core.shutdown_action": {
+							"defaultdesc": "`shutdown`",
+							"longdesc": "Specify the action to take when the daemon is being shut down.\nSupported values are `shutdown` (stop all instances) and `evacuate` (attempt to evacuate the clustered server).",
+							"scope": "global",
+							"shortdesc": "Action to perform on server shutdown",
 							"type": "string"
 						}
 					},

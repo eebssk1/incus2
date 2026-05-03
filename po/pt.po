@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: incus\n"
 "Report-Msgid-Bugs-To: lxc-devel@lists.linuxcontainers.org\n"
-"POT-Creation-Date: 2026-04-25 19:43+0200\n"
-"PO-Revision-Date: 2026-04-23 23:09+0000\n"
+"POT-Creation-Date: 2026-05-01 14:24+0200\n"
+"PO-Revision-Date: 2026-04-29 08:09+0000\n"
 "Last-Translator: Américo Monteiro <a_monteiro@gmx.com>\n"
 "Language-Team: Portuguese <https://hosted.weblate.org/projects/incus/cli/pt/"
 ">\n"
@@ -19,15 +19,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 5.17.1-dev\n"
 
-#: cmd/incus/info.go:438
+#: cmd/incus/info.go:437
 msgid "  Chassis:"
 msgstr "  Chassis:"
 
-#: cmd/incus/info.go:478
+#: cmd/incus/info.go:477
 msgid "  Firmware:"
 msgstr "  Firmware:"
 
-#: cmd/incus/info.go:458
+#: cmd/incus/info.go:457
 msgid "  Motherboard:"
 msgstr "  Placa principal:"
 
@@ -54,7 +54,7 @@ msgstr ""
 "### config:\n"
 "###   size: \"61203283968\""
 
-#: cmd/incus/storage.go:285
+#: cmd/incus/storage.go:286
 msgid ""
 "### This is a YAML representation of a storage pool.\n"
 "### Any line starting with a '#' will be ignored.\n"
@@ -122,13 +122,22 @@ msgstr ""
 "###\n"
 "### Note que a impressão digital é mostrada mas não pode ser alterada"
 
-#: cmd/incus/cluster_group.go:397
+#: cmd/incus/cluster_group.go:398
 msgid ""
 "### This is a YAML representation of the cluster group.\n"
 "### Any line starting with a '# will be ignored."
 msgstr ""
 "###Isto é uma representação YAML do grupo de agrupamento.\n"
 "### Qualquer linha começada com '# será ignorada."
+
+#: cmd/incus/cluster.go:875
+#, fuzzy
+msgid ""
+"### This is a YAML representation of the cluster member.\n"
+"### Any line starting with a '# will be ignored."
+msgstr ""
+"### Esta é uma representação yaml do membro de agrupamento.\n"
+"### Qualquer linha começada com '# é ignorada."
 
 #: cmd/incus/config.go:118
 msgid ""
@@ -168,7 +177,7 @@ msgstr ""
 "###\n"
 "### Note que o nome é mostrado mas não pode ser alterado"
 
-#: cmd/incus/image.go:390
+#: cmd/incus/image.go:414
 msgid ""
 "### This is a YAML representation of the image properties.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -228,7 +237,7 @@ msgstr ""
 "###     template: template.tpl\n"
 "###     properties: {}"
 
-#: cmd/incus/network_acl.go:588
+#: cmd/incus/network_acl.go:589
 msgid ""
 "### This is a YAML representation of the network ACL.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -280,7 +289,7 @@ msgstr ""
 "### Note que apenas as regras ingress e egress, descrição e chaves de "
 "configuração podem ser mudadas."
 
-#: cmd/incus/network_address_set.go:459
+#: cmd/incus/network_address_set.go:460
 msgid ""
 "### This is a YAML representation of the network address set.\n"
 "### Any line starting with '#' will be ignored.\n"
@@ -351,7 +360,7 @@ msgstr ""
 "###\n"
 "### Note que os endereços de escuta e localização não poder ser alterados."
 
-#: cmd/incus/network_integration.go:234
+#: cmd/incus/network_integration.go:235
 msgid ""
 "### This is a YAML representation of the network integration.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -363,7 +372,7 @@ msgstr ""
 "###\n"
 "### Note que o nome é mostrado mas não pode ser alterado"
 
-#: cmd/incus/network_load_balancer.go:609
+#: cmd/incus/network_load_balancer.go:610
 msgid ""
 "### This is a YAML representation of the network load balancer.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -457,7 +466,7 @@ msgstr ""
 "### Note que os campos name, target_project, target_network e status não "
 "podem ser alterados."
 
-#: cmd/incus/network_zone.go:1267
+#: cmd/incus/network_zone.go:1269
 msgid ""
 "### This is a YAML representation of the network zone record.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -482,7 +491,7 @@ msgstr ""
 "### config:\n"
 "###  user.foo: bah\n"
 
-#: cmd/incus/network_zone.go:602
+#: cmd/incus/network_zone.go:603
 msgid ""
 "### This is a YAML representation of the network zone.\n"
 "### Any line starting with a '# will be ignored.\n"
@@ -619,15 +628,7 @@ msgstr ""
 "###\n"
 "### Note que o nome é mostrado mas não pode ser alterado"
 
-#: cmd/incus/cluster.go:875
-msgid ""
-"### This is a yaml representation of the cluster member.\n"
-"### Any line starting with a '# will be ignored."
-msgstr ""
-"### Esta é uma representação yaml do membro de agrupamento.\n"
-"### Qualquer linha começada com '# é ignorada."
-
-#: cmd/incus/info.go:334
+#: cmd/incus/info.go:333
 #, c-format
 msgid "%d (id: %d, online: %v, NUMA node: %v)"
 msgstr "%d (id: %d, online: %v, nó NUMA: %v)"
@@ -647,12 +648,12 @@ msgstr "%q não é um endereço IP"
 msgid "%s %q on pool %q in project %q (includes %d snapshots)"
 msgstr "%s %q em pool %q em projeto %q (inclui %d instantâneos)"
 
-#: cmd/incus/image.go:1111
+#: cmd/incus/image.go:1135
 #, c-format
 msgid "%s (%d more)"
 msgstr "%s (%d mais)"
 
-#: cmd/incus/info.go:176
+#: cmd/incus/info.go:175
 #, c-format
 msgid "%s (%s) (%d available)"
 msgstr "%s (%s) (%d disponível)"
@@ -663,40 +664,45 @@ msgid "%s (backend=%q, source=%q)"
 msgstr "%s (backend=%q, fonte=%q)"
 
 #: cmd/incus/file.go:724 cmd/incus/storage_volume.go:2828
-#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:372
+#: cmd/incus/utils_copy.go:96 cmd/incus/utils_sftp.go:391
 #, c-format
 msgid "%s is not a directory"
 msgstr "%s não é um diretório"
 
-#: cmd/incus/utils_sftp.go:261
+#: cmd/incus/usage/usage.go:343
+#, c-format
+msgid "%s the %s syntax is deprecated; %s\n"
+msgstr ""
+
+#: cmd/incus/utils_sftp.go:280
 #, c-format
 msgid "'%s' isn't a supported file type"
 msgstr "'%s' não é um tipo de ficheiro suportado"
 
-#: cmd/incus/usage/parse.go:242
+#: cmd/incus/usage/parse.go:238
 #, c-format
 msgid "(skipped: %s)\n"
 msgstr "(saltado: %s)\n"
 
-#: cmd/incus/usage/parse.go:244
+#: cmd/incus/usage/parse.go:240
 msgid "(skipped: no value given)"
 msgstr "(saltado: nenhum valor dado)"
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 msgid ", "
 msgstr ", "
 
-#: cmd/incus/info.go:324
+#: cmd/incus/info.go:323
 #, c-format
 msgid "- Level %d (type: %s): %s"
 msgstr "- Nível %d (tipo: %s): %s"
 
-#: cmd/incus/info.go:303
+#: cmd/incus/info.go:302
 #, c-format
 msgid "- Partition %d"
 msgstr "- Partição %d"
 
-#: cmd/incus/info.go:212
+#: cmd/incus/info.go:211
 #, c-format
 msgid "- Port %d (%s)"
 msgstr "- Porto %d (%s)"
@@ -705,16 +711,16 @@ msgstr "- Porto %d (%s)"
 msgid "--all cannot be used together with other arguments"
 msgstr "--all não pode ser usado juntamente com outros argumentos"
 
-#: cmd/incus/action.go:247
+#: cmd/incus/action.go:246
 msgid "--console can't be used while forcing instance shutdown"
 msgstr ""
 "--console não pode ser usado quando se força o encerramento da instância"
 
-#: cmd/incus/action.go:413
+#: cmd/incus/action.go:412
 msgid "--console can't be used with --all"
 msgstr "--console não pode ser usado com --all"
 
-#: cmd/incus/action.go:417
+#: cmd/incus/action.go:416
 msgid "--console only works with a single instance"
 msgstr "-- console só funciona com uma única instância"
 
@@ -762,21 +768,25 @@ msgstr "--recursive/-r é requerido quando se puxam directórios"
 msgid "--refresh can only be used with instances"
 msgstr "--refresh só pode ser usado com instâncias"
 
+#: cmd/incus/image.go:217
+msgid "--reuse requires --copy-aliases"
+msgstr ""
+
 #: cmd/incus/move.go:213
 msgid "--target can only be used with clusters"
 msgstr "--target só pode ser usado com agrupamentos"
 
 #: cmd/incus/config.go:154 cmd/incus/config.go:419 cmd/incus/config.go:557
-#: cmd/incus/config.go:744 cmd/incus/info.go:636
+#: cmd/incus/config.go:744 cmd/incus/info.go:635
 msgid "--target cannot be used with instances"
 msgstr "--target não pode ser usado com instâncias"
 
-#: cmd/incus/admin_sql.go:129
+#: cmd/incus/admin_sql.go:128
 #, c-format
 msgid "=> Query %d:"
 msgstr "=> Consultar %d:"
 
-#: cmd/incus/remote.go:693
+#: cmd/incus/remote.go:689
 msgid "A client certificate is already present"
 msgstr "Um certificado de cliente já está presente"
 
@@ -788,7 +798,7 @@ msgstr ""
 "Tem de ser especificado um nome de ficheiro alvo quando se empurra para o "
 "stdin; o alvo é um directório"
 
-#: cmd/incus/usage/usage.go:768
+#: cmd/incus/usage/usage.go:808
 msgid "ACL"
 msgstr "ACL"
 
@@ -800,11 +810,11 @@ msgstr "ENDEREÇO"
 msgid "ADDRESSES"
 msgstr "ENDEREÇOS"
 
-#: cmd/incus/alias.go:148 cmd/incus/image.go:1078 cmd/incus/image_alias.go:246
+#: cmd/incus/alias.go:148 cmd/incus/image.go:1102 cmd/incus/image_alias.go:246
 msgid "ALIAS"
 msgstr "NOME ALTERNATIVO (ALIAS)"
 
-#: cmd/incus/image.go:1079
+#: cmd/incus/image.go:1103
 msgid "ALIASES"
 msgstr "NOMES ALTERNATIVOS"
 
@@ -816,11 +826,11 @@ msgstr "Caminho do API"
 msgid "APP"
 msgstr "APLICAÇÃO"
 
-#: cmd/incus/cluster.go:198 cmd/incus/image.go:1073 cmd/incus/list.go:473
+#: cmd/incus/cluster.go:198 cmd/incus/image.go:1097 cmd/incus/list.go:473
 msgid "ARCHITECTURE"
 msgstr "ARQUITECTURA"
 
-#: cmd/incus/remote.go:991
+#: cmd/incus/remote.go:987
 msgid "AUTH TYPE"
 msgstr "TIPO DE AUTORIZAÇÃO"
 
@@ -845,36 +855,36 @@ msgstr "Acesso à configuração expandida"
 msgid "Acknowledge warning"
 msgstr "Aviso de reconhecimento"
 
+#: cmd/incus/query.go:48
+msgid "Action"
+msgstr "Ação"
+
 #: cmd/incus/query.go:81
 #, c-format
 msgid "Action %q isn't supported by this tool"
 msgstr "Acção %q não é suportada por esta ferramenta"
 
-#: cmd/incus/query.go:48
-msgid "Action (defaults to GET)"
-msgstr "Acção (predefine para GET)"
-
-#: cmd/incus/cluster_group.go:739
+#: cmd/incus/cluster_group.go:740
 msgid "Add a cluster member to a cluster group"
 msgstr "Adiciona um membro de agrupamento a um grupo de agrupamento"
 
-#: cmd/incus/network_zone.go:1441
+#: cmd/incus/network_zone.go:1443
 msgid "Add a network zone record entry"
 msgstr "Adiciona uma entrada de registro de zona de rede"
 
-#: cmd/incus/network_address_set.go:652 cmd/incus/network_address_set.go:653
+#: cmd/incus/network_address_set.go:653 cmd/incus/network_address_set.go:654
 msgid "Add addresses to a network address set"
 msgstr "Adiciona endereços a um conjunto de endereços de rede"
 
-#: cmd/incus/network_load_balancer.go:817
+#: cmd/incus/network_load_balancer.go:818
 msgid "Add backend to a load balancer"
 msgstr "Adiciona backend a um balanceador de carga"
 
-#: cmd/incus/network_load_balancer.go:816
+#: cmd/incus/network_load_balancer.go:817
 msgid "Add backends to a load balancer"
 msgstr "Adiciona backends a um balanceador de carga"
 
-#: cmd/incus/network_zone.go:1442
+#: cmd/incus/network_zone.go:1444
 msgid "Add entries to a network zone record"
 msgstr "Adiciona entradas para um registro de zona de rede"
 
@@ -882,7 +892,7 @@ msgstr "Adiciona entradas para um registro de zona de rede"
 msgid "Add instance devices"
 msgstr "Adiciona dispositivos de instância"
 
-#: cmd/incus/cluster_group.go:738
+#: cmd/incus/cluster_group.go:739
 msgid "Add member to group"
 msgstr "Adiciona membro a grupo"
 
@@ -952,8 +962,8 @@ msgstr ""
 msgid "Add ports to a forward"
 msgstr "Adiciona portos para um reencaminhador"
 
-#: cmd/incus/network_load_balancer.go:975
 #: cmd/incus/network_load_balancer.go:976
+#: cmd/incus/network_load_balancer.go:977
 msgid "Add ports to a load balancer"
 msgstr "Adiciona portos a um balanceador de carga"
 
@@ -965,11 +975,11 @@ msgstr "Adiciona perfis a instâncias"
 msgid "Add roles to a cluster member"
 msgstr "Adiciona funções a um membro do agrupamento"
 
-#: cmd/incus/network_acl.go:823 cmd/incus/network_acl.go:824
+#: cmd/incus/network_acl.go:824 cmd/incus/network_acl.go:825
 msgid "Add rules to an ACL"
 msgstr "Adiciona regras a um ACL"
 
-#: cmd/incus/color/color.go:42
+#: cmd/incus/color/color.go:44
 msgid "Additional Help Topics:"
 msgstr "Tópicos de Ajuda Adicionais:"
 
@@ -988,12 +998,12 @@ msgstr "Endereço a onde unir (predefinido: nenhum)"
 msgid "Address to bind to (not including port)"
 msgstr "Endereço a onde unir (não incluindo o porto)"
 
-#: cmd/incus/info.go:216
+#: cmd/incus/info.go:215
 #, c-format
 msgid "Address: %s"
 msgstr "Endereço: %s"
 
-#: cmd/incus/info.go:360
+#: cmd/incus/info.go:359
 #, c-format
 msgid "Address: %v"
 msgstr "Endereço: %v"
@@ -1018,7 +1028,7 @@ msgstr "Alias %s já existe"
 msgid "Alias %s doesn't exist"
 msgstr "Alias %s não existe"
 
-#: cmd/incus/image.go:987
+#: cmd/incus/image.go:1011
 #, c-format
 msgid "Alias: %s"
 msgstr "Alias: %s"
@@ -1028,7 +1038,7 @@ msgstr "Alias: %s"
 msgid "Aliases already exists: %s"
 msgstr "Aliases já existem: %s"
 
-#: cmd/incus/image.go:971 cmd/incus/color/color.go:37
+#: cmd/incus/image.go:995 cmd/incus/color/color.go:39
 msgid "Aliases:"
 msgstr "Nomes alternativos (Aliases):"
 
@@ -1065,13 +1075,13 @@ msgstr "Seguir sempre os links simbólicos no caminho da fonte"
 msgid "An instance path is required for %s"
 msgstr "E necessário um caminho de instância para %s"
 
-#: cmd/incus/image.go:943 cmd/incus/info.go:502 cmd/incus/info.go:506
-#: cmd/incus/info.go:664
+#: cmd/incus/image.go:967 cmd/incus/info.go:501 cmd/incus/info.go:505
+#: cmd/incus/info.go:663
 #, c-format
 msgid "Architecture: %s"
 msgstr "Arquitetura: %s"
 
-#: cmd/incus/info.go:142
+#: cmd/incus/info.go:141
 #, c-format
 msgid "Architecture: %v"
 msgstr "Arquitetura: %v"
@@ -1092,7 +1102,7 @@ msgid "As neither could be found, the raw SPICE socket can be found at:"
 msgstr ""
 "Como nenhum pode ser encontrado, o socket SPICE cru pode ser encontrado em:"
 
-#: cmd/incus/create.go:338 cmd/incus/rebuild.go:99
+#: cmd/incus/create.go:339 cmd/incus/rebuild.go:99
 msgid "Asked for a VM but image is of type container"
 msgstr "Pedido por um VM mas a imagem é de tipo recipiente"
 
@@ -1141,21 +1151,21 @@ msgstr ""
 "instância\n"
 "assim como recuperar entradas de relatório do passado dela."
 
-#: cmd/incus/remote.go:601
+#: cmd/incus/remote.go:597
 #, c-format
 msgid "Authentication type '%s' not supported by server"
 msgstr "Tipo de autenticação '%s' não suportado pelo servidor"
 
-#: cmd/incus/info.go:235
+#: cmd/incus/info.go:234
 #, c-format
 msgid "Auto negotiation: %v"
 msgstr "Negociação automática: %v"
 
-#: cmd/incus/image.go:211
+#: cmd/incus/image.go:213
 msgid "Auto update is only available in pull mode"
 msgstr "A atualização automática só está disponível no modo pull"
 
-#: cmd/incus/image.go:981
+#: cmd/incus/image.go:1005
 #, c-format
 msgid "Auto update: %s"
 msgstr "Atualização automática: %s"
@@ -1164,7 +1174,7 @@ msgstr "Atualização automática: %s"
 msgid "Automatic (non-interactive) mode"
 msgstr "Modo automático (não interativo)"
 
-#: cmd/incus/color/color.go:39
+#: cmd/incus/color/color.go:41
 msgid "Available Commands:"
 msgstr "Comandos Disponíveis:"
 
@@ -1172,7 +1182,7 @@ msgstr "Comandos Disponíveis:"
 msgid "Available projects:"
 msgstr "Projetos disponíveis:"
 
-#: cmd/incus/info.go:496
+#: cmd/incus/info.go:495
 #, c-format
 msgid "Average: %.2f %.2f %.2f"
 msgstr "Média: %.2f %.2f %.2f"
@@ -1181,15 +1191,15 @@ msgstr "Média: %.2f %.2f %.2f"
 msgid "BASE IMAGE"
 msgstr "IMAGEM BASE"
 
-#: cmd/incus/network_load_balancer.go:821
+#: cmd/incus/network_load_balancer.go:822
 msgid "Backend description"
 msgstr "Descrição do backend"
 
-#: cmd/incus/network_load_balancer.go:1158
+#: cmd/incus/network_load_balancer.go:1159
 msgid "Backend health:"
 msgstr "Saúde de backend:"
 
-#: cmd/incus/export.go:106
+#: cmd/incus/export.go:103
 #, c-format
 msgid "Backing up instance: %s"
 msgstr "A salvaguardar instância: %s"
@@ -1199,17 +1209,17 @@ msgstr "A salvaguardar instância: %s"
 msgid "Backing up storage bucket: %s"
 msgstr "A salvaguardar bucket de armazenamento: %s"
 
-#: cmd/incus/storage_volume.go:3729
+#: cmd/incus/storage_volume.go:3728
 #, c-format
 msgid "Backing up storage volume: %s"
 msgstr "A salvaguardar volume de armazenamento: %s"
 
-#: cmd/incus/export.go:210 cmd/incus/storage_bucket.go:1456
-#: cmd/incus/storage_volume.go:3833
+#: cmd/incus/export.go:207 cmd/incus/storage_bucket.go:1456
+#: cmd/incus/storage_volume.go:3832
 msgid "Backup exported successfully!"
 msgstr "Salvaguarda exportada com sucesso!"
 
-#: cmd/incus/info.go:856 cmd/incus/storage_volume.go:1369
+#: cmd/incus/info.go:855 cmd/incus/storage_volume.go:1369
 msgid "Backups:"
 msgstr "Salvaguardas:"
 
@@ -1220,8 +1230,8 @@ msgstr ""
 "Má sintaxe de sobreposição de dispositivo, esperando <dispositivo>,"
 "<chave>=<valor>: %s"
 
-#: cmd/incus/copy.go:137 cmd/incus/create.go:204 cmd/incus/move.go:250
-#: cmd/incus/network_integration.go:138 cmd/incus/project.go:168
+#: cmd/incus/copy.go:137 cmd/incus/create.go:205 cmd/incus/move.go:250
+#: cmd/incus/network_integration.go:139 cmd/incus/project.go:168
 #, c-format
 msgid "Bad key=value pair: %q"
 msgstr "Mau par de chave=valor: %q"
@@ -1234,11 +1244,11 @@ msgstr "Ajudante binário para recuperar credenciais"
 msgid "Bond:"
 msgstr "Vínculo:"
 
-#: cmd/incus/action.go:354
+#: cmd/incus/action.go:353
 msgid "Both --all and instance name given"
 msgstr "Ambos --tudo e nome de instância dado"
 
-#: cmd/incus/info.go:143
+#: cmd/incus/info.go:142
 #, c-format
 msgid "Brand: %v"
 msgstr "Marca: %v"
@@ -1251,16 +1261,16 @@ msgstr "Ponte:"
 msgid "Bucket description"
 msgstr "Descrição de bucket"
 
-#: cmd/incus/info.go:352
+#: cmd/incus/info.go:351
 #, c-format
 msgid "Bus Address: %v"
 msgstr "Endereço de barramento: %v"
 
-#: cmd/incus/info.go:779 cmd/incus/network.go:932
+#: cmd/incus/info.go:778 cmd/incus/network.go:932
 msgid "Bytes received"
 msgstr "Bytes recebidos"
 
-#: cmd/incus/info.go:780 cmd/incus/network.go:933
+#: cmd/incus/info.go:779 cmd/incus/network.go:933
 msgid "Bytes sent"
 msgstr "Bytes enviados"
 
@@ -1288,19 +1298,19 @@ msgstr "TEMPO(s) da CPU"
 msgid "CPU USAGE"
 msgstr "UTILIZAÇÃO da CPU"
 
-#: cmd/incus/info.go:720
+#: cmd/incus/info.go:719
 msgid "CPU usage (in seconds)"
 msgstr "Utilização da CPU (em segundos)"
 
-#: cmd/incus/info.go:724
+#: cmd/incus/info.go:723
 msgid "CPU usage:"
 msgstr "Utilização da CPU:"
 
-#: cmd/incus/info.go:501
+#: cmd/incus/info.go:500
 msgid "CPU:"
 msgstr "CPU:"
 
-#: cmd/incus/info.go:505
+#: cmd/incus/info.go:504
 msgid "CPUs:"
 msgstr "CPUs:"
 
@@ -1312,17 +1322,17 @@ msgstr "CRIADO"
 msgid "CREATED AT"
 msgstr "CRIADO EM"
 
-#: cmd/incus/info.go:145
+#: cmd/incus/info.go:144
 #, c-format
 msgid "CUDA Version: %v"
 msgstr "CUDA Versão: %v"
 
-#: cmd/incus/image.go:980
+#: cmd/incus/image.go:1004
 #, c-format
 msgid "Cached: %s"
 msgstr "Em cache: %s"
 
-#: cmd/incus/info.go:322
+#: cmd/incus/info.go:321
 msgid "Caches:"
 msgstr "Caches:"
 
@@ -1349,7 +1359,7 @@ msgstr "Incapaz de ler do arquivo de ambiente: %w"
 msgid "Can't read from stdin: %w"
 msgstr "Incapaz de ler de stdin: %w"
 
-#: cmd/incus/remote.go:1244
+#: cmd/incus/remote.go:1240
 msgid "Can't remove the default remote"
 msgstr "Incapaz de remover o remoto predefinido"
 
@@ -1391,7 +1401,7 @@ msgstr "Não pode usar --minimal e --preseed juntos"
 msgid "Can't use both --no-expiry and --expiry"
 msgstr "Não pode usar ambos --no-expiry e --expiry"
 
-#: cmd/incus/create.go:313
+#: cmd/incus/create.go:314
 #, c-format
 msgid ""
 "Cannot override config for device %q: Device not found in profile devices"
@@ -1419,22 +1429,22 @@ msgstr ""
 msgid "Cannot set --volume-only when copying a snapshot"
 msgstr "Não pode definir --volume-only quando copia um instantâneo"
 
-#: cmd/incus/network_acl.go:896
+#: cmd/incus/network_acl.go:897
 #, c-format
 msgid "Cannot set key: %s"
 msgstr "Não pode definir a chave: %s"
 
-#: cmd/incus/info.go:550 cmd/incus/info.go:562
+#: cmd/incus/info.go:549 cmd/incus/info.go:561
 #, c-format
 msgid "Card %d:"
 msgstr "Cartão %d:"
 
-#: cmd/incus/info.go:128
+#: cmd/incus/info.go:127
 #, c-format
 msgid "Card: %s (%s)"
 msgstr "Cartão: %s (%s)"
 
-#: cmd/incus/config_trust.go:792
+#: cmd/incus/config_trust.go:790
 #, c-format
 msgid "Certificate add token for %s deleted"
 msgstr "Testemunho de adição de certificado para %s apagado"
@@ -1451,7 +1461,7 @@ msgstr ""
 "Não correspondência da impressão digital do certificado entre testemunho de "
 "certificado e servidor %q"
 
-#: cmd/incus/cluster.go:1731 cmd/incus/cluster.go:1924
+#: cmd/incus/cluster.go:1731 cmd/incus/cluster.go:1925
 #, c-format
 msgid ""
 "Certificate fingerprint mismatch between join token and cluster member %q"
@@ -1459,7 +1469,7 @@ msgstr ""
 "Não correspondência da impressão digital do certificado entre testemunho de "
 "junção e membro de agrupamento %q"
 
-#: cmd/incus/remote.go:498
+#: cmd/incus/remote.go:494
 #, c-format
 msgid "Certificate fingerprint: %s"
 msgstr "Impressão digital do certificado: %s"
@@ -1483,7 +1493,7 @@ msgstr "Escolher %s:"
 msgid "Client %s certificate add token:"
 msgstr "Certificado e testemunho do cliente %s:"
 
-#: cmd/incus/remote.go:647
+#: cmd/incus/remote.go:643
 msgid "Client certificate now trusted by server:"
 msgstr "Certificado de cliente agora confiado pelo servidor:"
 
@@ -1492,27 +1502,27 @@ msgstr "Certificado de cliente agora confiado pelo servidor:"
 msgid "Client version: %s\n"
 msgstr "Versão de cliente: %s\n"
 
-#: cmd/incus/cluster_group.go:233
+#: cmd/incus/cluster_group.go:234
 #, c-format
 msgid "Cluster group %s created"
 msgstr "Grupo de agrupamento %s criado"
 
-#: cmd/incus/cluster_group.go:278
+#: cmd/incus/cluster_group.go:279
 #, c-format
 msgid "Cluster group %s deleted"
 msgstr "Grupo de agrupamento %s apagado"
 
-#: cmd/incus/cluster_group.go:599
+#: cmd/incus/cluster_group.go:600
 #, c-format
 msgid "Cluster group %s isn't currently applied to %s"
 msgstr "Grupo de agrupamento %s não é atualmente aplicado a %s"
 
-#: cmd/incus/cluster_group.go:670
+#: cmd/incus/cluster_group.go:671
 #, c-format
 msgid "Cluster group %s renamed to %s"
 msgstr "Grupo de agrupamento %s renomeado para %s"
 
-#: cmd/incus/cluster_group.go:179
+#: cmd/incus/cluster_group.go:180
 msgid "Cluster group description"
 msgstr "Descrição do grupo de agrupamento"
 
@@ -1526,24 +1536,24 @@ msgstr "Testemunho de junção a agrupamento para %s apagado"
 msgid "Cluster member %s added to cluster groups %v"
 msgstr "Membro de agrupamento %s adicionado a grupos de agrupamento %v"
 
-#: cmd/incus/cluster_group.go:787
+#: cmd/incus/cluster_group.go:788
 #, c-format
 msgid "Cluster member %s added to group %s"
 msgstr "Membro do agrupamento %s adicionado ao grupo %s"
 
-#: cmd/incus/cluster_group.go:776
+#: cmd/incus/cluster_group.go:777
 #, c-format
 msgid "Cluster member %s is already in group %s"
 msgstr "Membro do agrupamento %s já está no grupo %s"
 
-#: cmd/incus/cluster_group.go:619
+#: cmd/incus/cluster_group.go:620
 #, c-format
 msgid "Cluster member %s removed from group %s"
 msgstr "Membro do agrupamento %s removido do grupo %s"
 
 #: cmd/incus/config.go:102 cmd/incus/config.go:382 cmd/incus/config.go:522
 #: cmd/incus/config.go:689 cmd/incus/config.go:809 cmd/incus/copy.go:66
-#: cmd/incus/create.go:69 cmd/incus/info.go:54 cmd/incus/move.go:67
+#: cmd/incus/create.go:70 cmd/incus/info.go:53 cmd/incus/move.go:67
 #: cmd/incus/network.go:348 cmd/incus/network.go:798 cmd/incus/network.go:871
 #: cmd/incus/network.go:1047 cmd/incus/network.go:1428
 #: cmd/incus/network.go:1512 cmd/incus/network.go:1574
@@ -1551,15 +1561,15 @@ msgstr "Membro do agrupamento %s removido do grupo %s"
 #: cmd/incus/network_forward.go:484 cmd/incus/network_forward.go:623
 #: cmd/incus/network_forward.go:764 cmd/incus/network_forward.go:842
 #: cmd/incus/network_forward.go:915 cmd/incus/network_load_balancer.go:251
-#: cmd/incus/network_load_balancer.go:321
-#: cmd/incus/network_load_balancer.go:469
-#: cmd/incus/network_load_balancer.go:591
-#: cmd/incus/network_load_balancer.go:743
-#: cmd/incus/network_load_balancer.go:820
-#: cmd/incus/network_load_balancer.go:885
-#: cmd/incus/network_load_balancer.go:979
-#: cmd/incus/network_load_balancer.go:1045 cmd/incus/storage.go:116
-#: cmd/incus/storage.go:392 cmd/incus/storage.go:468 cmd/incus/storage.go:799
+#: cmd/incus/network_load_balancer.go:322
+#: cmd/incus/network_load_balancer.go:470
+#: cmd/incus/network_load_balancer.go:592
+#: cmd/incus/network_load_balancer.go:744
+#: cmd/incus/network_load_balancer.go:821
+#: cmd/incus/network_load_balancer.go:886
+#: cmd/incus/network_load_balancer.go:980
+#: cmd/incus/network_load_balancer.go:1046 cmd/incus/storage.go:117
+#: cmd/incus/storage.go:393 cmd/incus/storage.go:469 cmd/incus/storage.go:799
 #: cmd/incus/storage.go:892 cmd/incus/storage.go:971
 #: cmd/incus/storage_bucket.go:114 cmd/incus/storage_bucket.go:203
 #: cmd/incus/storage_bucket.go:253 cmd/incus/storage_bucket.go:371
@@ -1576,7 +1586,7 @@ msgstr "Membro do agrupamento %s removido do grupo %s"
 #: cmd/incus/storage_volume.go:2057 cmd/incus/storage_volume.go:3056
 #: cmd/incus/storage_volume.go:3204 cmd/incus/storage_volume.go:3440
 #: cmd/incus/storage_volume.go:3509 cmd/incus/storage_volume.go:3573
-#: cmd/incus/storage_volume.go:3650 cmd/incus/storage_volume.go:3858
+#: cmd/incus/storage_volume.go:3649 cmd/incus/storage_volume.go:3857
 msgid "Cluster member name"
 msgstr "Nome de membro do agrupamento"
 
@@ -1585,15 +1595,15 @@ msgid "Clustering enabled"
 msgstr "Ativado o agrupamento"
 
 #: cmd/incus/cluster.go:170 cmd/incus/cluster.go:1124
-#: cmd/incus/cluster_group.go:438 cmd/incus/config_trust.go:399
-#: cmd/incus/config_trust.go:585 cmd/incus/image.go:1045
+#: cmd/incus/cluster_group.go:439 cmd/incus/config_trust.go:399
+#: cmd/incus/config_trust.go:585 cmd/incus/image.go:1069
 #: cmd/incus/image_alias.go:209 cmd/incus/list.go:140 cmd/incus/network.go:1044
 #: cmd/incus/network.go:1242 cmd/incus/network_allocations.go:67
-#: cmd/incus/network_forward.go:121 cmd/incus/network_integration.go:411
+#: cmd/incus/network_forward.go:121 cmd/incus/network_integration.go:412
 #: cmd/incus/network_load_balancer.go:128 cmd/incus/network_peer.go:117
 #: cmd/incus/network_zone.go:122 cmd/incus/operation.go:149
-#: cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:975
-#: cmd/incus/snapshot.go:342 cmd/incus/storage.go:659
+#: cmd/incus/profile.go:697 cmd/incus/project.go:517 cmd/incus/remote.go:971
+#: cmd/incus/snapshot.go:342 cmd/incus/storage.go:660
 #: cmd/incus/storage_bucket.go:464 cmd/incus/storage_bucket.go:857
 #: cmd/incus/storage_volume.go:1439 cmd/incus/storage_volume.go:3284
 #: cmd/incus/top.go:67 cmd/incus/warning.go:98
@@ -1627,11 +1637,11 @@ msgstr ""
 msgid "Compression algorithm to use (`none` for uncompressed)"
 msgstr "Algoritmo de compressão a usar (`none` para não comprimido)"
 
-#: cmd/incus/export.go:55
+#: cmd/incus/export.go:52
 msgid "Compression algorithm to use (none for uncompressed)"
 msgstr "Algoritmo de compressão a usar (nenhum para não comprimido)"
 
-#: cmd/incus/storage_volume.go:3649
+#: cmd/incus/storage_volume.go:3648
 msgid ""
 "Compression algorithm to use (none for uncompressed, ignored for ISO storage "
 "volumes)"
@@ -1639,11 +1649,11 @@ msgstr ""
 "Algoritmo de compressão a usar (nenhum para não comprimido, ignorado para "
 "volumes de armazenamento ISO)"
 
-#: cmd/incus/copy.go:58 cmd/incus/create.go:61 cmd/incus/import.go:40
+#: cmd/incus/copy.go:58 cmd/incus/create.go:62 cmd/incus/import.go:40
 msgid "Config key/value to apply to the new instance"
 msgstr "Configurar chave/valor para aplicar à nova instância"
 
-#: cmd/incus/network_integration.go:95
+#: cmd/incus/network_integration.go:96
 msgid "Config key/value to apply to the new network integration"
 msgstr "Configurar chave/valor para aplicar à nova integração de rede"
 
@@ -1659,15 +1669,15 @@ msgstr "Configurar chave/valor para aplicar à instância alvo"
 msgid "Config option should be in the format KEY=VALUE"
 msgstr "Opção de confiança deve estar no formato CHAVE=VALOR"
 
-#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:373
+#: cmd/incus/cluster.go:934 cmd/incus/cluster_group.go:374
 #: cmd/incus/config.go:265 cmd/incus/config.go:340
 #: cmd/incus/config_metadata.go:147 cmd/incus/config_trust.go:329
-#: cmd/incus/image.go:458 cmd/incus/network.go:759 cmd/incus/network_acl.go:668
-#: cmd/incus/network_address_set.go:523 cmd/incus/network_forward.go:726
-#: cmd/incus/network_integration.go:293 cmd/incus/network_load_balancer.go:705
-#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:670
-#: cmd/incus/network_zone.go:1336 cmd/incus/profile.go:569
-#: cmd/incus/project.go:394 cmd/incus/storage.go:353
+#: cmd/incus/image.go:482 cmd/incus/network.go:759 cmd/incus/network_acl.go:669
+#: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:726
+#: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:706
+#: cmd/incus/network_peer.go:729 cmd/incus/network_zone.go:671
+#: cmd/incus/network_zone.go:1338 cmd/incus/profile.go:569
+#: cmd/incus/project.go:394 cmd/incus/storage.go:354
 #: cmd/incus/storage_bucket.go:333 cmd/incus/storage_bucket.go:1202
 #: cmd/incus/storage_volume.go:1031 cmd/incus/storage_volume.go:1063
 #, c-format
@@ -1700,7 +1710,7 @@ msgstr "Tipo de conteúdo, bloco ou sistema de ficheiros"
 msgid "Content type: %s"
 msgstr "Tipo de conteúdo: %s"
 
-#: cmd/incus/info.go:132
+#: cmd/incus/info.go:131
 #, c-format
 msgid "Control: %s (%s)"
 msgstr "Controle: %s (%s)"
@@ -1709,7 +1719,7 @@ msgstr "Controle: %s (%s)"
 msgid "Copy a stateful instance stateless"
 msgstr "Copiar uma instância de estado sem estado"
 
-#: cmd/incus/image.go:173
+#: cmd/incus/image.go:174
 msgid "Copy aliases from source"
 msgstr "Copia nomes alternativos (aliases) da fonte"
 
@@ -1717,11 +1727,11 @@ msgstr "Copia nomes alternativos (aliases) da fonte"
 msgid "Copy custom storage volumes"
 msgstr "Copiar volumes de armazenamento personalizados"
 
-#: cmd/incus/image.go:165
+#: cmd/incus/image.go:166
 msgid "Copy images between servers"
 msgstr "Copiar imagens entre servidores"
 
-#: cmd/incus/image.go:166
+#: cmd/incus/image.go:167
 msgid ""
 "Copy images between servers\n"
 "\n"
@@ -1783,16 +1793,16 @@ msgstr "Copia a instância sem seus instantâneos"
 msgid "Copy the volume without its snapshots"
 msgstr "Copia o volume sem seus instantâneos"
 
-#: cmd/incus/copy.go:67 cmd/incus/image.go:178 cmd/incus/move.go:68
+#: cmd/incus/copy.go:67 cmd/incus/image.go:180 cmd/incus/move.go:68
 #: cmd/incus/profile.go:273 cmd/incus/storage_volume.go:350
 msgid "Copy to a project different from the source"
 msgstr "Copiar para um projeto diferente a partir da fonte"
 
-#: cmd/incus/image.go:176
+#: cmd/incus/image.go:178
 msgid "Copy virtual machine images"
 msgstr "Copia imagens de máquina virtual"
 
-#: cmd/incus/image.go:278
+#: cmd/incus/image.go:302
 #, c-format
 msgid "Copying the image: %s"
 msgstr "A copiar a imagem: %s"
@@ -1802,21 +1812,21 @@ msgstr "A copiar a imagem: %s"
 msgid "Copying the storage volume: %s"
 msgstr "A copiar o volume de armazenamento: %s"
 
-#: cmd/incus/info.go:330
+#: cmd/incus/info.go:329
 #, c-format
 msgid "Core %d"
 msgstr "Núcleo %d"
 
-#: cmd/incus/info.go:328
+#: cmd/incus/info.go:327
 msgid "Cores:"
 msgstr "Núcleos:"
 
-#: cmd/incus/remote.go:534
+#: cmd/incus/remote.go:530
 #, c-format
 msgid "Could not close server cert file %q: %w"
 msgstr "Não pode fechar o ficheiro de certificação do servidor %q: %w"
 
-#: cmd/incus/remote.go:267 cmd/incus/remote.go:518
+#: cmd/incus/remote.go:267 cmd/incus/remote.go:514
 msgid "Could not create server cert dir"
 msgstr "Incapaz de criar o directório de certificado do servidor"
 
@@ -1846,12 +1856,12 @@ msgid "Could not write new remote certificate for remote '%s' with error: %v"
 msgstr ""
 "Incapaz de escrever novo certificado remoto para remoto '%s' com erro: %v"
 
-#: cmd/incus/remote.go:529
+#: cmd/incus/remote.go:525
 #, c-format
 msgid "Could not write server cert file %q: %w"
 msgstr "Incapaz de escrever o ficheiro de certificação do servidor %q: %w"
 
-#: cmd/incus/network_zone.go:1543
+#: cmd/incus/network_zone.go:1545
 msgid "Couldn't find a matching entry"
 msgstr "Não consegui encontrar uma entrada correspondente"
 
@@ -1869,7 +1879,7 @@ msgstr "Criar um grupo de agrupamento"
 msgid "Create a new %s pool?"
 msgstr "Criar uma nova pool %s?"
 
-#: cmd/incus/create.go:72
+#: cmd/incus/create.go:73
 msgid "Create a virtual machine"
 msgstr "Criar uma máquina virtual"
 
@@ -1877,7 +1887,7 @@ msgstr "Criar uma máquina virtual"
 msgid "Create aliases for existing images"
 msgstr "Criar aliases para imagens existentes"
 
-#: cmd/incus/create.go:71
+#: cmd/incus/create.go:72
 msgid "Create an empty instance"
 msgstr "Cria uma instância vazia"
 
@@ -1903,7 +1913,7 @@ msgstr "Cria ficheiros e directórios volume personalizado"
 msgid "Create files and directories in instances"
 msgstr "Cria ficheiros e directórios em instâncias"
 
-#: cmd/incus/export.go:101
+#: cmd/incus/export.go:98
 #, c-format
 msgid "Create instance backup: %w"
 msgstr "Cria salvaguarda da instância: %w"
@@ -1970,7 +1980,7 @@ msgstr "Cria novos balanceadores de carga de rede"
 msgid "Create new network peering"
 msgstr "Cria novo peer de rede"
 
-#: cmd/incus/network_zone.go:1021 cmd/incus/network_zone.go:1022
+#: cmd/incus/network_zone.go:1022 cmd/incus/network_zone.go:1023
 msgid "Create new network zone record"
 msgstr "Cria novo registro de zona de rede"
 
@@ -1994,17 +2004,17 @@ msgstr "Criar projetos"
 msgid "Create storage pools"
 msgstr "Criar pools de armazenamento"
 
-#: cmd/incus/copy.go:68 cmd/incus/create.go:70
+#: cmd/incus/copy.go:68 cmd/incus/create.go:71
 msgid "Create the instance with no profiles applied"
 msgstr "Criar a instância sem perfis aplicados"
 
-#: cmd/incus/image.go:949 cmd/incus/info.go:675
+#: cmd/incus/image.go:973 cmd/incus/info.go:674
 #: cmd/incus/storage_volume.go:1323
 #, c-format
 msgid "Created: %s"
 msgstr "Criado: %s"
 
-#: cmd/incus/create.go:134
+#: cmd/incus/create.go:135
 #, c-format
 msgid "Creating %s"
 msgstr "A criar %s"
@@ -2014,11 +2024,11 @@ msgstr "A criar %s"
 msgid "Creating %s: %%s"
 msgstr "A criar %s: %%s"
 
-#: cmd/incus/create.go:136
+#: cmd/incus/create.go:137
 msgid "Creating the instance"
 msgstr "A criar a instância"
 
-#: cmd/incus/info.go:152 cmd/incus/info.go:261
+#: cmd/incus/info.go:151 cmd/incus/info.go:260
 #, c-format
 msgid "Current number of VFs: %d"
 msgstr "Número atual de VFs: %d"
@@ -2027,14 +2037,14 @@ msgstr "Número atual de VFs: %d"
 msgid "DEFAULT TARGET ADDRESS"
 msgstr "ENDEREÇOS DE ALVO PREDEFINIDOS"
 
-#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:464
-#: cmd/incus/config_trust.go:417 cmd/incus/image.go:1074
+#: cmd/incus/cluster.go:200 cmd/incus/cluster_group.go:465
+#: cmd/incus/config_trust.go:417 cmd/incus/image.go:1098
 #: cmd/incus/image_alias.go:249 cmd/incus/list.go:476 cmd/incus/network.go:1076
 #: cmd/incus/network_acl.go:163 cmd/incus/network_address_set.go:155
-#: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:427
+#: cmd/incus/network_forward.go:143 cmd/incus/network_integration.go:428
 #: cmd/incus/network_load_balancer.go:150 cmd/incus/network_peer.go:139
-#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:871
-#: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:549
+#: cmd/incus/network_zone.go:145 cmd/incus/network_zone.go:872
+#: cmd/incus/operation.go:166 cmd/incus/profile.go:725 cmd/incus/project.go:548
 #: cmd/incus/storage.go:686 cmd/incus/storage_bucket.go:481
 #: cmd/incus/storage_bucket.go:873 cmd/incus/storage_volume.go:1569
 msgid "DESCRIPTION"
@@ -2052,7 +2062,7 @@ msgstr "UTILIZAÇÃO DO DISCO"
 msgid "DRIVER"
 msgstr "DRIVER"
 
-#: cmd/incus/info.go:124
+#: cmd/incus/info.go:123
 msgid "DRM:"
 msgstr "DRM:"
 
@@ -2066,7 +2076,7 @@ msgstr "Daemon ainda não a correr após %ds tempo limite (%v)"
 msgid "Daemon still running after %ds timeout"
 msgstr "Daemon ainda a correr após o tempo limite %d"
 
-#: cmd/incus/info.go:488
+#: cmd/incus/info.go:487
 #, c-format
 msgid "Date: %s"
 msgstr "Data: %s"
@@ -2099,7 +2109,7 @@ msgstr "Apaga todos os avisos"
 msgid "Delete background operations (will attempt to cancel)"
 msgstr "Apaga operações nos bastidores (irá tentar cancelar)"
 
-#: cmd/incus/cluster_group.go:251 cmd/incus/cluster_group.go:252
+#: cmd/incus/cluster_group.go:252 cmd/incus/cluster_group.go:253
 msgid "Delete cluster groups"
 msgstr "Apaga grupos de agrupamento (cluster)"
 
@@ -2119,11 +2129,11 @@ msgstr "Apaga ficheiros em instâncias"
 msgid "Delete image aliases"
 msgstr "Apaga aliases de imagem"
 
-#: cmd/incus/image.go:312 cmd/incus/image.go:313
+#: cmd/incus/image.go:336 cmd/incus/image.go:337
 msgid "Delete images"
 msgstr "Apaga imagens"
 
-#: cmd/incus/config_template.go:129 cmd/incus/config_template.go:130
+#: cmd/incus/config_template.go:130 cmd/incus/config_template.go:131
 msgid "Delete instance file templates"
 msgstr "Apaga modelos de ficheiro de instância"
 
@@ -2139,11 +2149,11 @@ msgstr "Apaga instâncias"
 msgid "Delete key from a storage bucket"
 msgstr "Apaga chave de um bucket de armazenamento"
 
-#: cmd/incus/network_acl.go:752 cmd/incus/network_acl.go:753
+#: cmd/incus/network_acl.go:753 cmd/incus/network_acl.go:754
 msgid "Delete network ACLs"
 msgstr "Apaga ACLs de rede"
 
-#: cmd/incus/network_address_set.go:606 cmd/incus/network_address_set.go:607
+#: cmd/incus/network_address_set.go:607 cmd/incus/network_address_set.go:608
 msgid "Delete network address sets"
 msgstr "Apaga conjuntos de endereços de rede"
 
@@ -2151,12 +2161,12 @@ msgstr "Apaga conjuntos de endereços de rede"
 msgid "Delete network forwards"
 msgstr "Apaga encaminhamentos de rede"
 
-#: cmd/incus/network_integration.go:171 cmd/incus/network_integration.go:172
+#: cmd/incus/network_integration.go:172 cmd/incus/network_integration.go:173
 msgid "Delete network integrations"
 msgstr "Apaga integrações de rede"
 
-#: cmd/incus/network_load_balancer.go:739
 #: cmd/incus/network_load_balancer.go:740
+#: cmd/incus/network_load_balancer.go:741
 msgid "Delete network load balancers"
 msgstr "Apaga balanceadores de carga de rede"
 
@@ -2164,11 +2174,11 @@ msgstr "Apaga balanceadores de carga de rede"
 msgid "Delete network peerings"
 msgstr "Apaga peerings de rede"
 
-#: cmd/incus/network_zone.go:1370 cmd/incus/network_zone.go:1371
+#: cmd/incus/network_zone.go:1372 cmd/incus/network_zone.go:1373
 msgid "Delete network zone record"
 msgstr "Apaga registro de zona de rede"
 
-#: cmd/incus/network_zone.go:704 cmd/incus/network_zone.go:705
+#: cmd/incus/network_zone.go:705 cmd/incus/network_zone.go:706
 msgid "Delete network zones"
 msgstr "Apaga zonas de rede"
 
@@ -2188,7 +2198,7 @@ msgstr "Apaga projetos"
 msgid "Delete storage buckets"
 msgstr "Apaga buckets de armazenamento"
 
-#: cmd/incus/storage.go:210 cmd/incus/storage.go:211
+#: cmd/incus/storage.go:211 cmd/incus/storage.go:212
 msgid "Delete storage pools"
 msgstr "Apaga pools de armazenamento"
 
@@ -2204,11 +2214,11 @@ msgstr "Apaga avisos"
 msgid "Description"
 msgstr "Descrição"
 
-#: cmd/incus/color/color.go:34
+#: cmd/incus/color/color.go:36
 msgid "Description:"
 msgstr "Descrição:"
 
-#: cmd/incus/info.go:646 cmd/incus/storage_volume.go:1296
+#: cmd/incus/info.go:645 cmd/incus/storage_volume.go:1296
 #, c-format
 msgid "Description: %s"
 msgstr "Descrição: %s"
@@ -2233,7 +2243,7 @@ msgstr "Desacopla interfaces de rede de instâncias"
 msgid "Detach network interfaces from profiles"
 msgstr "Desacopla interfaces de rede de perfis"
 
-#: cmd/incus/info.go:586 cmd/incus/info.go:598 cmd/incus/info.go:610
+#: cmd/incus/info.go:585 cmd/incus/info.go:597 cmd/incus/info.go:609
 #, c-format
 msgid "Device %d:"
 msgstr "Dispositivo %d:"
@@ -2253,7 +2263,7 @@ msgstr "Dispositivo %s sobreposto por %s"
 msgid "Device %s removed from %s"
 msgstr "Dispositivo %s removido de %s"
 
-#: cmd/incus/info.go:353
+#: cmd/incus/info.go:352
 #, c-format
 msgid "Device Address: %v"
 msgstr "Endereço do Dispositivo: %v"
@@ -2295,27 +2305,27 @@ msgstr ""
 msgid "Device “%s” doesn't exist"
 msgstr "Dispositivo “%s” não existe"
 
-#: cmd/incus/info.go:281 cmd/incus/info.go:305
+#: cmd/incus/info.go:280 cmd/incus/info.go:304
 #, c-format
 msgid "Device: %s"
 msgstr "Dispositivo: %s"
 
-#: cmd/incus/info.go:372
+#: cmd/incus/info.go:371
 #, c-format
 msgid "Device: %v"
 msgstr "Dispositivo: %v"
 
-#: cmd/incus/info.go:373
+#: cmd/incus/info.go:372
 #, c-format
 msgid "DeviceID: %v"
 msgstr "ID de Dispositivo: %v"
 
-#: cmd/incus/info.go:374
+#: cmd/incus/info.go:373
 #, c-format
 msgid "DevicePath: %v"
 msgstr "Caminho de Dispositivo: %v"
 
-#: cmd/incus/create.go:395
+#: cmd/incus/create.go:396
 msgid "Didn't get name of new instance from the server"
 msgstr "Não recebi o nome da nova instância do servidor"
 
@@ -2328,7 +2338,7 @@ msgstr ""
 msgid "Didn't get name of new volume snapshot from the server"
 msgstr "Não recebi o nome do novo instantâneo de volume a partir do servidor"
 
-#: cmd/incus/image.go:694
+#: cmd/incus/image.go:718
 msgid "Directory import is not available on this platform"
 msgstr "Importação de diretório não está disponível nesta plataforma"
 
@@ -2348,20 +2358,20 @@ msgstr "Desativa alocação pseudo-terminal"
 msgid "Disable stdin (reads from /dev/null)"
 msgstr "Desativa stdin (lê de /dev/null)"
 
-#: cmd/incus/info.go:574
+#: cmd/incus/info.go:573
 #, c-format
 msgid "Disk %d:"
 msgstr "Disco %d:"
 
-#: cmd/incus/info.go:713
+#: cmd/incus/info.go:712
 msgid "Disk usage:"
 msgstr "Utilização do disco:"
 
-#: cmd/incus/info.go:569
+#: cmd/incus/info.go:568
 msgid "Disk:"
 msgstr "Disco:"
 
-#: cmd/incus/info.go:572
+#: cmd/incus/info.go:571
 msgid "Disks:"
 msgstr "Discos:"
 
@@ -2369,7 +2379,7 @@ msgstr "Discos:"
 msgid "Display clusters from all projects"
 msgstr "Mostra agrupamentos de todos os projetos"
 
-#: cmd/incus/image.go:1047
+#: cmd/incus/image.go:1071
 msgid "Display images from all projects"
 msgstr "Mostra imagens de todos os projetos"
 
@@ -2463,12 +2473,12 @@ msgstr "Não mostra informações de progresso"
 msgid "Down delay"
 msgstr "Atraso em baixo"
 
-#: cmd/incus/info.go:367 cmd/incus/info.go:379
+#: cmd/incus/info.go:366 cmd/incus/info.go:378
 #, c-format
 msgid "Driver: %v"
 msgstr "Driver: %v"
 
-#: cmd/incus/info.go:120 cmd/incus/info.go:206
+#: cmd/incus/info.go:119 cmd/incus/info.go:205
 #, c-format
 msgid "Driver: %v (%v)"
 msgstr "Driver: %v (%v)"
@@ -2492,7 +2502,7 @@ msgstr ""
 "Durante o refrescar, exclui os instantâneos da fonte mais cedo que o "
 "instantâneo mais recente do alvo"
 
-#: cmd/incus/network_zone.go:872
+#: cmd/incus/network_zone.go:873
 msgid "ENTRIES"
 msgstr "ENTRADAS"
 
@@ -2514,7 +2524,7 @@ msgstr "EXPIRA EM"
 msgid "EXPIRY DATE"
 msgstr "DATA DE EXPIRAÇÃO"
 
-#: cmd/incus/cluster_group.go:303 cmd/incus/cluster_group.go:304
+#: cmd/incus/cluster_group.go:304 cmd/incus/cluster_group.go:305
 msgid "Edit a cluster group"
 msgstr "Edita um grupo de agrupamento"
 
@@ -2530,11 +2540,11 @@ msgstr "Edita ficheiros em instâncias"
 msgid "Edit files in storage volumes"
 msgstr "Edita ficheiros em volumes de armazenamento"
 
-#: cmd/incus/image.go:367 cmd/incus/image.go:368
+#: cmd/incus/image.go:391 cmd/incus/image.go:392
 msgid "Edit image properties"
 msgstr "Edita propriedades de imagem"
 
-#: cmd/incus/config_template.go:175 cmd/incus/config_template.go:176
+#: cmd/incus/config_template.go:176 cmd/incus/config_template.go:177
 msgid "Edit instance file templates"
 msgstr "Edita modelos de ficheiro de instância"
 
@@ -2546,11 +2556,11 @@ msgstr "Edita ficheiros de metadados de instância"
 msgid "Edit instance or server configurations as YAML"
 msgstr "Edita configurações de instância ou servidor como YAML"
 
-#: cmd/incus/network_acl.go:571 cmd/incus/network_acl.go:572
+#: cmd/incus/network_acl.go:572 cmd/incus/network_acl.go:573
 msgid "Edit network ACL configurations as YAML"
 msgstr "Edita configurações ACL de rede como YAML"
 
-#: cmd/incus/network_address_set.go:442 cmd/incus/network_address_set.go:443
+#: cmd/incus/network_address_set.go:443 cmd/incus/network_address_set.go:444
 msgid "Edit network address set configurations as YAML"
 msgstr "Edita configurações de conjunto de endereços de rede como YAML"
 
@@ -2562,12 +2572,12 @@ msgstr "Edita configurações de rede como YAML"
 msgid "Edit network forward configurations as YAML"
 msgstr "Edita configurações de encaminhamento de rede como YAML"
 
-#: cmd/incus/network_integration.go:221 cmd/incus/network_integration.go:222
+#: cmd/incus/network_integration.go:222 cmd/incus/network_integration.go:223
 msgid "Edit network integration configurations as YAML"
 msgstr "Edita configurações de integração de rede como YAML"
 
-#: cmd/incus/network_load_balancer.go:587
 #: cmd/incus/network_load_balancer.go:588
+#: cmd/incus/network_load_balancer.go:589
 msgid "Edit network load balancer configurations as YAML"
 msgstr "Edita configurações de balanceador de carga de rede como YAML"
 
@@ -2575,11 +2585,11 @@ msgstr "Edita configurações de balanceador de carga de rede como YAML"
 msgid "Edit network peer configurations as YAML"
 msgstr "Edita configurações de peer de rede como YAML"
 
-#: cmd/incus/network_zone.go:585 cmd/incus/network_zone.go:586
+#: cmd/incus/network_zone.go:586 cmd/incus/network_zone.go:587
 msgid "Edit network zone configurations as YAML"
 msgstr "Edita configurações de zona de rede como YAML"
 
-#: cmd/incus/network_zone.go:1246 cmd/incus/network_zone.go:1247
+#: cmd/incus/network_zone.go:1248 cmd/incus/network_zone.go:1249
 msgid "Edit network zone record configurations as YAML"
 msgstr "Edita configurações de registo de zona de rede como YAML"
 
@@ -2599,7 +2609,7 @@ msgstr "Edita configurações do bucket de armazenamento como YAML"
 msgid "Edit storage bucket key as YAML"
 msgstr "Edita a chave do bucket de armazenamento como YAML"
 
-#: cmd/incus/storage.go:264 cmd/incus/storage.go:265
+#: cmd/incus/storage.go:265 cmd/incus/storage.go:266
 msgid "Edit storage pool configurations as YAML"
 msgstr "Edita configurações de pool de armazenamento como YAML"
 
@@ -2626,14 +2636,14 @@ msgid "Edit trust configurations as YAML"
 msgstr "Edita configurações de confiança como YAML"
 
 #: cmd/incus/cluster.go:211 cmd/incus/cluster.go:1153
-#: cmd/incus/cluster_group.go:472 cmd/incus/config_trust.go:429
-#: cmd/incus/config_trust.go:610 cmd/incus/image.go:1092
+#: cmd/incus/cluster_group.go:473 cmd/incus/config_trust.go:429
+#: cmd/incus/config_trust.go:610 cmd/incus/image.go:1116
 #: cmd/incus/image_alias.go:258 cmd/incus/list.go:528 cmd/incus/network.go:1091
 #: cmd/incus/network.go:1280 cmd/incus/network_allocations.go:92
-#: cmd/incus/network_forward.go:157 cmd/incus/network_integration.go:437
+#: cmd/incus/network_forward.go:157 cmd/incus/network_integration.go:438
 #: cmd/incus/network_load_balancer.go:163 cmd/incus/network_peer.go:150
 #: cmd/incus/network_zone.go:158 cmd/incus/operation.go:181
-#: cmd/incus/profile.go:741 cmd/incus/project.go:559 cmd/incus/remote.go:1002
+#: cmd/incus/profile.go:741 cmd/incus/project.go:558 cmd/incus/remote.go:998
 #: cmd/incus/snapshot.go:376 cmd/incus/storage.go:698
 #: cmd/incus/storage_bucket.go:498 cmd/incus/storage_bucket.go:882
 #: cmd/incus/storage_volume.go:1597 cmd/incus/storage_volume.go:3387
@@ -2683,7 +2693,7 @@ msgstr ""
 msgid "Enter new delay in seconds:"
 msgstr "Insira novo atraso em segundos:"
 
-#: cmd/incus/network_zone.go:1444
+#: cmd/incus/network_zone.go:1446
 msgid "Entry TTL"
 msgstr "Entrada TTL"
 
@@ -2691,11 +2701,11 @@ msgstr "Entrada TTL"
 msgid "Environment variable to set (e.g. HOME=/home/foo)"
 msgstr "Variável do ambiente a definir (ex. HOME=/home/foo)"
 
-#: cmd/incus/copy.go:61 cmd/incus/create.go:64
+#: cmd/incus/copy.go:61 cmd/incus/create.go:65
 msgid "Ephemeral instance"
 msgstr "Instância efêmera"
 
-#: cmd/incus/cluster.go:1725 cmd/incus/cluster.go:1918
+#: cmd/incus/cluster.go:1725 cmd/incus/cluster.go:1919
 #, c-format
 msgid "Error connecting to existing cluster member %q: %v"
 msgstr "Erro ao ligar a membro de agrupamento existente %q: %v"
@@ -2715,13 +2725,13 @@ msgstr "Erro ao descodificar dados: %v"
 msgid "Error retrieving aliases: %w"
 msgstr "Erro ao obter aliases: %w"
 
-#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:922
+#: cmd/incus/cluster.go:556 cmd/incus/cluster_group.go:923
 #: cmd/incus/config.go:578 cmd/incus/config.go:610 cmd/incus/network.go:1479
-#: cmd/incus/network_acl.go:496 cmd/incus/network_address_set.go:368
-#: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:604
-#: cmd/incus/network_load_balancer.go:523 cmd/incus/network_peer.go:560
-#: cmd/incus/network_zone.go:510 cmd/incus/network_zone.go:1167
-#: cmd/incus/profile.go:1031 cmd/incus/project.go:810 cmd/incus/storage.go:845
+#: cmd/incus/network_acl.go:497 cmd/incus/network_address_set.go:369
+#: cmd/incus/network_forward.go:538 cmd/incus/network_integration.go:605
+#: cmd/incus/network_load_balancer.go:524 cmd/incus/network_peer.go:560
+#: cmd/incus/network_zone.go:511 cmd/incus/network_zone.go:1169
+#: cmd/incus/profile.go:1031 cmd/incus/project.go:809 cmd/incus/storage.go:845
 #: cmd/incus/storage_bucket.go:664 cmd/incus/storage_volume.go:1871
 #: cmd/incus/storage_volume.go:1914
 #, c-format
@@ -2738,19 +2748,19 @@ msgstr "Erro ao definir o tamanho do termo %s"
 msgid "Error unsetting properties: %v"
 msgstr "Erro ao remover definições de propriedades: %v"
 
-#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:916
-#: cmd/incus/network.go:1473 cmd/incus/network_acl.go:490
-#: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:598
-#: cmd/incus/network_load_balancer.go:517 cmd/incus/network_peer.go:554
-#: cmd/incus/network_zone.go:504 cmd/incus/network_zone.go:1161
-#: cmd/incus/profile.go:1025 cmd/incus/project.go:804 cmd/incus/storage.go:839
+#: cmd/incus/cluster.go:550 cmd/incus/cluster_group.go:917
+#: cmd/incus/network.go:1473 cmd/incus/network_acl.go:491
+#: cmd/incus/network_forward.go:532 cmd/incus/network_integration.go:599
+#: cmd/incus/network_load_balancer.go:518 cmd/incus/network_peer.go:554
+#: cmd/incus/network_zone.go:505 cmd/incus/network_zone.go:1163
+#: cmd/incus/profile.go:1025 cmd/incus/project.go:803 cmd/incus/storage.go:839
 #: cmd/incus/storage_bucket.go:658 cmd/incus/storage_volume.go:1865
 #: cmd/incus/storage_volume.go:1908
 #, c-format
 msgid "Error unsetting property: %v"
 msgstr "Erro ao remover definição: %v"
 
-#: cmd/incus/config_template.go:231
+#: cmd/incus/config_template.go:232
 #, c-format
 msgid "Error updating template file: %s"
 msgstr "Erro ao atualizar ficheiro modelo: %s"
@@ -2760,7 +2770,7 @@ msgstr "Erro ao atualizar ficheiro modelo: %s"
 msgid "Error while executing alias expansion: %s\n"
 msgstr "Erro ao executar a expansão de alias: %s\n"
 
-#: cmd/incus/color/color.go:33
+#: cmd/incus/color/color.go:34
 msgid "Error:"
 msgstr "Erro:"
 
@@ -2777,7 +2787,7 @@ msgstr "A evacuar membro do agrupamento: %s"
 msgid "Event type to listen for"
 msgstr "Tipo de evento para escutar"
 
-#: cmd/incus/color/color.go:38
+#: cmd/incus/color/color.go:40
 msgid "Examples:"
 msgstr "Exemplos:"
 
@@ -2796,8 +2806,7 @@ msgid ""
 "  The global database is common to all members in the cluster, and contains\n"
 "  cluster-specific data (such as profiles, containers, etc).\n"
 "\n"
-"  If you are running a non-clustered server, the same applies, as that\n"
-"  instance is effectively a single-member cluster.\n"
+"  Non-clustered servers still have both local and global databases.\n"
 "\n"
 "  If <query> is the special value \"-\", then the query is read from\n"
 "  standard input.\n"
@@ -2828,10 +2837,9 @@ msgstr ""
 "contém\n"
 "  dados específicos do agrupamento (tais como perfis, contentores, etc).\n"
 "\n"
-"  Se você está a correr um servidor não agrupado, aplica-se o mesmo, pois "
-"essa\n"
-"  instância é efetivamente um membro único de agrupamento.\n"
-"\n"
+"  Os servidores não-agrupados ainda têm ambas bases de dados local e "
+"global.\n"
+"  \n"
 "  Se <query> for o valor especial \"-\", então a consulta é lida a partir "
 "da\n"
 "  entrada standard.\n"
@@ -2892,17 +2900,17 @@ msgstr ""
 msgid "Expected a struct, got a %v"
 msgstr "Esperado uma estrutura, obtido %v"
 
-#: cmd/incus/info.go:842 cmd/incus/info.go:893 cmd/incus/storage_volume.go:1356
+#: cmd/incus/info.go:841 cmd/incus/info.go:892 cmd/incus/storage_volume.go:1356
 #: cmd/incus/storage_volume.go:1406
 msgid "Expires at"
 msgstr "Expira em"
 
-#: cmd/incus/image.go:955
+#: cmd/incus/image.go:979
 #, c-format
 msgid "Expires: %s"
 msgstr "Expira: %s"
 
-#: cmd/incus/image.go:957
+#: cmd/incus/image.go:981
 msgid "Expires: never"
 msgstr "Expira: nunca"
 
@@ -2914,11 +2922,11 @@ msgstr "Data de validade ou tempo de envergadura para o novo instantâneo"
 msgid "Export a virtual machine's memory state"
 msgstr "Exporta estado de memória de uma máquina virtual"
 
-#: cmd/incus/image.go:493
+#: cmd/incus/image.go:517
 msgid "Export and download images"
 msgstr "Exporta e descarrega imagens"
 
-#: cmd/incus/image.go:494
+#: cmd/incus/image.go:518
 msgid ""
 "Export and download images\n"
 "\n"
@@ -2974,12 +2982,12 @@ msgstr ""
 msgid "Exporting backup of storage bucket: %s"
 msgstr "A exportar salvaguarda do bucket de armazenamento: %s"
 
-#: cmd/incus/export.go:170 cmd/incus/storage_volume.go:3793
+#: cmd/incus/export.go:167 cmd/incus/storage_volume.go:3792
 #, c-format
 msgid "Exporting the backup: %s"
 msgstr "A exportar a salvaguarda: %s"
 
-#: cmd/incus/image.go:565
+#: cmd/incus/image.go:589
 #, c-format
 msgid "Exporting the image: %s"
 msgstr "A exportar a imagem: %s"
@@ -2988,12 +2996,12 @@ msgstr "A exportar a imagem: %s"
 msgid "FAILURE DOMAIN"
 msgstr "DOMÍNIO DE FALHA"
 
-#: cmd/incus/config_template.go:313
+#: cmd/incus/config_template.go:314
 msgid "FILENAME"
 msgstr "NOME DE FICHEIRO"
 
-#: cmd/incus/config_trust.go:416 cmd/incus/image.go:1076
-#: cmd/incus/image.go:1077 cmd/incus/image_alias.go:247
+#: cmd/incus/config_trust.go:416 cmd/incus/image.go:1100
+#: cmd/incus/image.go:1101 cmd/incus/image_alias.go:247
 msgid "FINGERPRINT"
 msgstr "IMPRESSÃO DIGITAL"
 
@@ -3001,7 +3009,7 @@ msgstr "IMPRESSÃO DIGITAL"
 msgid "FIRST SEEN"
 msgstr "VISTO PRIMEIRO"
 
-#: cmd/incus/info.go:694 cmd/incus/remote.go:120
+#: cmd/incus/info.go:693 cmd/incus/remote.go:120
 msgid "FQDN"
 msgstr "FQDN"
 
@@ -3094,17 +3102,17 @@ msgstr "Falhou ao obter estado do peer: %w"
 msgid "Failed import request: %w"
 msgstr "Falhou ao importar pedido: %w"
 
-#: cmd/incus/create.go:151
+#: cmd/incus/create.go:152
 #, c-format
 msgid "Failed loading network %q: %w"
 msgstr "Falhou ao carregar rede %q:%w"
 
-#: cmd/incus/create.go:296
+#: cmd/incus/create.go:297
 #, c-format
 msgid "Failed loading profile %q for device override: %w"
 msgstr "Falhou ao carregar perfil %q para sobreposição de dispositivo: %w"
 
-#: cmd/incus/create.go:214
+#: cmd/incus/create.go:215
 #, c-format
 msgid "Failed loading storage pool %q: %w"
 msgstr "Falhou ao carregar pool de armazenamento %q:%w"
@@ -3129,7 +3137,7 @@ msgstr "Falhou ao iniciar comando: %w"
 msgid "Failed starting sshfs: %w"
 msgstr "Falhou ao iniciar sshfs: %w"
 
-#: cmd/incus/storage_volume.go:4043 cmd/incus/utils.go:675
+#: cmd/incus/storage_volume.go:4042 cmd/incus/utils.go:675
 #, c-format
 msgid "Failed to accept incoming connection: %w"
 msgstr "Falhou ao aceitar ligação a chegar: %w"
@@ -3143,13 +3151,18 @@ msgstr "Falhou ao adicionar remoto"
 msgid "Failed to add server cert to cluster: %w"
 msgstr "Falhou a adicionar certificado de servidor ao agrupamento: %w"
 
+#: cmd/incus/image.go:283
+#, fuzzy, c-format
+msgid "Failed to check for existing aliases: %w"
+msgstr "Falhou ao criar alias %s: %w"
+
 #: cmd/incus/admin_waitready.go:85
 #, c-format
 msgid "Failed to check if the daemon is ready (attempt %d): %v"
 msgstr "Falhou ao verificar se o daemon está pronto (tentativa %d): %v"
 
-#: cmd/incus/export.go:207 cmd/incus/storage_bucket.go:1453
-#: cmd/incus/storage_volume.go:3830
+#: cmd/incus/export.go:204 cmd/incus/storage_bucket.go:1453
+#: cmd/incus/storage_volume.go:3829
 #, c-format
 msgid "Failed to close export file: %w"
 msgstr "Falhou ao fechar ficheiro de exportação: %w"
@@ -3199,7 +3212,7 @@ msgstr "Falhou ao criar salvaguarda: %v"
 msgid "Failed to create certificate: %w"
 msgstr "Falhou ao criar certificado: %w"
 
-#: cmd/incus/storage_volume.go:3724
+#: cmd/incus/storage_volume.go:3723
 #, c-format
 msgid "Failed to create storage volume backup: %w"
 msgstr "Falhou ao criar salvaguarda de volume de armazenamento: %w"
@@ -3219,7 +3232,7 @@ msgstr "Falhou ao despejar memória de instância: %w"
 msgid "Failed to fetch storage bucket backup: %w"
 msgstr "Falhou ao procurar salvaguarda de bucket de armazenamento: %w"
 
-#: cmd/incus/storage_volume.go:3807
+#: cmd/incus/storage_volume.go:3806
 #, c-format
 msgid "Failed to fetch storage volume backup file: %w"
 msgstr ""
@@ -3230,12 +3243,12 @@ msgstr ""
 msgid "Failed to find project: %w"
 msgstr "Falhou ao encontrar projeto: %w"
 
-#: cmd/incus/cluster.go:1961 cmd/incus/cluster.go:1966
+#: cmd/incus/cluster.go:1963 cmd/incus/cluster.go:1968
 #, c-format
 msgid "Failed to join cluster: %w"
 msgstr "Falhou ao juntar a agrupamento: %w"
 
-#: cmd/incus/storage_volume.go:4035 cmd/incus/utils.go:660
+#: cmd/incus/storage_volume.go:4034 cmd/incus/utils.go:660
 #, c-format
 msgid "Failed to listen for connection: %w"
 msgstr "Falhou ao escutar por ligação: %w"
@@ -3246,17 +3259,17 @@ msgid "Failed to load configuration: %s"
 msgstr "Falhou ao carregar configuração: %s"
 
 #: cmd/incus/file.go:786 cmd/incus/storage_volume.go:2878
-#: cmd/incus/utils_sftp.go:292
+#: cmd/incus/utils_sftp.go:311
 #, c-format
 msgid "Failed to open source file %q: %v"
 msgstr "Falhou ao abrir ficheiro fonte %q: %v"
 
-#: cmd/incus/utils_sftp.go:73
+#: cmd/incus/utils_sftp.go:74
 #, c-format
 msgid "Failed to open target file %q: %w"
 msgstr "Falhou ao abrir ficheiro alvo %q: %w"
 
-#: cmd/incus/admin_sql.go:104
+#: cmd/incus/admin_sql.go:103
 #, c-format
 msgid "Failed to parse dump response: %w"
 msgstr "Falhou ao analisar resposta de despejo: %w"
@@ -3271,7 +3284,7 @@ msgstr "Falhou ao analisar o preseed: %w"
 msgid "Failed to read from file: %w"
 msgstr "Falhou ao ler do ficheiro: %w"
 
-#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:81
+#: cmd/incus/admin_init_preseed.go:25 cmd/incus/admin_sql.go:80
 #, c-format
 msgid "Failed to read from stdin: %w"
 msgstr "Falhou ao ler do stdin: %w"
@@ -3281,13 +3294,13 @@ msgstr "Falhou ao ler do stdin: %w"
 msgid "Failed to refresh target instance '%s': %v"
 msgstr "Falhou ao refrescar instância alvo: '%s': %v"
 
-#: cmd/incus/utils.go:168
+#: cmd/incus/image.go:289 cmd/incus/utils.go:168
 #, c-format
 msgid "Failed to remove alias %s: %w"
 msgstr "Falhou ao remover alias %s: %w"
 
-#: cmd/incus/export.go:201 cmd/incus/storage_bucket.go:1447
-#: cmd/incus/storage_volume.go:3824
+#: cmd/incus/export.go:198 cmd/incus/storage_bucket.go:1447
+#: cmd/incus/storage_volume.go:3823
 #, c-format
 msgid "Failed to rename export file: %w"
 msgstr "Falhou ao renomear ficheiro de exportação: %w"
@@ -3297,7 +3310,7 @@ msgstr "Falhou ao renomear ficheiro de exportação: %w"
 msgid "Failed to render the config: %w"
 msgstr "Falhou ao renderizar a configuração: %w"
 
-#: cmd/incus/admin_sql.go:98
+#: cmd/incus/admin_sql.go:97
 #, c-format
 msgid "Failed to request dump: %w"
 msgstr "Falhou ao pedir despejo: %w"
@@ -3346,7 +3359,7 @@ msgstr "Falhou ao configurar relação de confiança com agrupamento: %w"
 msgid "Failed to update cluster member state: %w"
 msgstr "Falhou ao atualizar estado de membro de agrupamento: %w"
 
-#: cmd/incus/utils_sftp.go:256
+#: cmd/incus/utils_sftp.go:275
 #, c-format
 msgid "Failed to walk path for %s: %s"
 msgstr "Falhou ao andar caminho para %s: %s"
@@ -3361,7 +3374,7 @@ msgstr "Falhou ao escrever ficheiro de cerificado de servidor %q: %w"
 msgid "Failed validation request: %w"
 msgstr "Falhou ao requisitar validação: %w"
 
-#: cmd/incus/info.go:417
+#: cmd/incus/info.go:416
 #, c-format
 msgid "Family: %v"
 msgstr "Família: %v"
@@ -3370,17 +3383,17 @@ msgstr "Família: %v"
 msgid "Fast mode (same as --columns=nsacPt)"
 msgstr "Modo rápido (mesmo que --columns=nsacPt)"
 
-#: cmd/incus/export.go:184
+#: cmd/incus/export.go:181
 #, c-format
 msgid "Fetch instance backup file: %w"
 msgstr "Procura ficheiro de salvaguarda de instância: %w"
 
-#: cmd/incus/image.go:941
+#: cmd/incus/image.go:965
 #, c-format
 msgid "Fingerprint: %s"
 msgstr "Impressão digital: %s"
 
-#: cmd/incus/color/color.go:40
+#: cmd/incus/color/color.go:42
 msgid "Flags:"
 msgstr "Bandeiras:"
 
@@ -3413,8 +3426,8 @@ msgstr "Força apagar de ficheiros, diretórios e subdiretórios"
 msgid "Force evacuation without user confirmation"
 msgstr "Força evacuação sem confirmação do utilizador"
 
-#: cmd/incus/export.go:56 cmd/incus/storage_bucket.go:1300
-#: cmd/incus/storage_volume.go:3651
+#: cmd/incus/export.go:53 cmd/incus/storage_bucket.go:1300
+#: cmd/incus/storage_volume.go:3650
 msgid "Force overwriting existing backup file"
 msgstr "Forçar sobrescrever de ficheiro de salvaguarda existente"
 
@@ -3426,7 +3439,7 @@ msgstr "Força alocação de pseudo-terminal"
 msgid "Force removing a member, even if degraded"
 msgstr "Força a remoção de um membro, mesmo que degradado"
 
-#: cmd/incus/action.go:166
+#: cmd/incus/action.go:165
 msgid "Force the instance to stop"
 msgstr "Força a instância a parar"
 
@@ -3500,17 +3513,17 @@ msgstr ""
 "para desativar cabeçalhos e \",header\" para os ativar se preciso, ex. "
 "csv,header"
 
-#: cmd/incus/admin_sql.go:58 cmd/incus/alias.go:111 cmd/incus/cluster.go:171
-#: cmd/incus/cluster_group.go:439 cmd/incus/config_template.go:270
+#: cmd/incus/admin_sql.go:57 cmd/incus/alias.go:111 cmd/incus/cluster.go:171
+#: cmd/incus/cluster_group.go:440 cmd/incus/config_template.go:271
 #: cmd/incus/config_trust.go:400 cmd/incus/config_trust.go:584
-#: cmd/incus/image.go:1046 cmd/incus/image_alias.go:208 cmd/incus/list.go:141
+#: cmd/incus/image.go:1070 cmd/incus/image_alias.go:208 cmd/incus/list.go:141
 #: cmd/incus/network.go:1045 cmd/incus/network.go:1241
 #: cmd/incus/network_acl.go:104 cmd/incus/network_allocations.go:64
-#: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:410
+#: cmd/incus/network_forward.go:120 cmd/incus/network_integration.go:411
 #: cmd/incus/network_load_balancer.go:127 cmd/incus/network_peer.go:116
-#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:818
-#: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:519
-#: cmd/incus/project.go:994 cmd/incus/remote.go:974 cmd/incus/snapshot.go:341
+#: cmd/incus/network_zone.go:120 cmd/incus/network_zone.go:819
+#: cmd/incus/operation.go:147 cmd/incus/profile.go:698 cmd/incus/project.go:518
+#: cmd/incus/project.go:993 cmd/incus/remote.go:970 cmd/incus/snapshot.go:341
 #: cmd/incus/storage.go:661 cmd/incus/storage_bucket.go:462
 #: cmd/incus/storage_bucket.go:855 cmd/incus/storage_volume.go:1466
 #: cmd/incus/storage_volume.go:3297 cmd/incus/warning.go:99
@@ -3530,7 +3543,7 @@ msgstr "Formato (json|pretty|yaml)"
 msgid "Format (man|md|rest|yaml)"
 msgstr "Formato (man|md|rest|yaml)"
 
-#: cmd/incus/remote.go:756
+#: cmd/incus/remote.go:752
 msgid "Format (pem|pfx)"
 msgstr "Formato (pem|pfx)"
 
@@ -3554,39 +3567,39 @@ msgstr "Atraso de encaminhamento"
 msgid "Found alias %q references an argument outside the given number"
 msgstr "Encontrado alias %q a referenciar um argumento fora do número dado"
 
-#: cmd/incus/info.go:517 cmd/incus/info.go:528 cmd/incus/info.go:533
-#: cmd/incus/info.go:539
+#: cmd/incus/info.go:516 cmd/incus/info.go:527 cmd/incus/info.go:532
+#: cmd/incus/info.go:538
 #, c-format
 msgid "Free: %v"
 msgstr "Livre: %v"
 
-#: cmd/incus/info.go:331 cmd/incus/info.go:342
+#: cmd/incus/info.go:330 cmd/incus/info.go:341
 #, c-format
 msgid "Frequency: %vMhz"
 msgstr "Frequência: %vMhz"
 
-#: cmd/incus/info.go:340
+#: cmd/incus/info.go:339
 #, c-format
 msgid "Frequency: %vMhz (min: %vMhz, max: %vMhz)"
 msgstr "Frequência: %vMhz (min: %vMhz, max: %vMhz)"
 
-#: cmd/incus/remote.go:994
+#: cmd/incus/remote.go:990
 msgid "GLOBAL"
 msgstr "GLOBAL"
 
-#: cmd/incus/info.go:545
+#: cmd/incus/info.go:544
 msgid "GPU:"
 msgstr "GPU:"
 
-#: cmd/incus/info.go:548
+#: cmd/incus/info.go:547
 msgid "GPUs:"
 msgstr "GPUs:"
 
-#: cmd/incus/remote.go:862
+#: cmd/incus/remote.go:858
 msgid "Generate a client token derived from the client certificate"
 msgstr "Gera um testemunho de cliente derivado do certificado de cliente"
 
-#: cmd/incus/remote.go:863
+#: cmd/incus/remote.go:859
 msgid ""
 "Generate a client trust token derived from the existing client certificate "
 "and private key.\n"
@@ -3600,11 +3613,11 @@ msgstr ""
 "Isso é útil para fluxos de trabalho de autenticação remotos onde um "
 "testemunho é passado para outro servidor Incus."
 
-#: cmd/incus/image.go:1705
+#: cmd/incus/image.go:1729
 msgid "Generate a metadata tarball"
 msgstr "Gerar um tarball de metadados"
 
-#: cmd/incus/image.go:1707
+#: cmd/incus/image.go:1731
 msgid ""
 "Generate a metadata tarball\n"
 "\n"
@@ -3634,28 +3647,28 @@ msgstr ""
 msgid "Generate manpages for all commands"
 msgstr "Gera manuais para todos os comandos"
 
-#: cmd/incus/remote.go:675
+#: cmd/incus/remote.go:671
 msgid "Generate the client certificate"
 msgstr "Gera o certificado de cliente"
 
-#: cmd/incus/remote.go:196 cmd/incus/remote.go:439 cmd/incus/remote.go:698
-#: cmd/incus/remote.go:782 cmd/incus/remote.go:887
+#: cmd/incus/remote.go:196 cmd/incus/remote.go:435 cmd/incus/remote.go:694
+#: cmd/incus/remote.go:778 cmd/incus/remote.go:883
 msgid "Generating a client certificate. This may take a minute..."
 msgstr "A gerar um certificado de cliente. Isto pode demorar um minuto..."
 
-#: cmd/incus/project.go:990 cmd/incus/project.go:991
+#: cmd/incus/project.go:989 cmd/incus/project.go:990
 msgid "Get a summary of resource allocations"
 msgstr "Obtém um resumo das alocações de recursos"
 
-#: cmd/incus/network_load_balancer.go:1129
+#: cmd/incus/network_load_balancer.go:1130
 msgid "Get current load balancer status"
 msgstr "Obtém o status do balanceador de carga atual"
 
-#: cmd/incus/network_load_balancer.go:1130
+#: cmd/incus/network_load_balancer.go:1131
 msgid "Get current load-balancer status"
 msgstr "Obtém o status do balanceador-de-carga atual"
 
-#: cmd/incus/image.go:1500 cmd/incus/image.go:1501
+#: cmd/incus/image.go:1524 cmd/incus/image.go:1525
 msgid "Get image properties"
 msgstr "Obtém propriedades de imagem"
 
@@ -3663,7 +3676,7 @@ msgstr "Obtém propriedades de imagem"
 msgid "Get runtime information on networks"
 msgstr "Obtém informações em tempo de execução em redes"
 
-#: cmd/incus/cluster_group.go:809
+#: cmd/incus/cluster_group.go:810
 msgid "Get the key as a cluster group property"
 msgstr "Obtém a chave como uma propriedade de grupo de agrupamento"
 
@@ -3679,11 +3692,11 @@ msgstr "Obtém a chave como uma propriedade ACL de rede"
 msgid "Get the key as a network forward property"
 msgstr "Obtém a chave como uma propriedade de encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:338
+#: cmd/incus/network_integration.go:339
 msgid "Get the key as a network integration property"
 msgstr "Obtém a chave como uma propriedade de integração de rede"
 
-#: cmd/incus/network_load_balancer.go:407
+#: cmd/incus/network_load_balancer.go:408
 msgid "Get the key as a network load balancer property"
 msgstr "Obtém a chave como uma propriedade de balanceador de carga de rede"
 
@@ -3699,7 +3712,7 @@ msgstr "Obtém a chave como uma propriedade de rede"
 msgid "Get the key as a network zone property"
 msgstr "Obtém a chave como uma propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:951
+#: cmd/incus/network_zone.go:952
 msgid "Get the key as a network zone record property"
 msgstr "Obtém a chave como uma propriedade de registo de zona de rede"
 
@@ -3715,7 +3728,7 @@ msgstr "Obtém a chave como uma propriedade de projeto"
 msgid "Get the key as a storage bucket property"
 msgstr "Obtém a chave como uma propriedade de bucket de armazenamento"
 
-#: cmd/incus/storage.go:393
+#: cmd/incus/storage.go:394
 msgid "Get the key as a storage property"
 msgstr "Obtém a chave como uma propriedade de armazenamento"
 
@@ -3727,7 +3740,7 @@ msgstr "Obtém a chave como uma propriedade de volume de armazenamento"
 msgid "Get the key as an instance property"
 msgstr "Obtém a chave como uma propriedade de instância"
 
-#: cmd/incus/cluster_group.go:806
+#: cmd/incus/cluster_group.go:807
 msgid "Get values for cluster group configuration keys"
 msgstr "Obtém valores para chaves de configuração de grupo de agrupamento"
 
@@ -3755,12 +3768,12 @@ msgstr "Obtém valores para chaves de configuração de rede"
 msgid "Get values for network forward configuration keys"
 msgstr "Obtém valores para chaves de configuração de encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:333 cmd/incus/network_integration.go:334
+#: cmd/incus/network_integration.go:334 cmd/incus/network_integration.go:335
 msgid "Get values for network integration configuration keys"
 msgstr "Obtém valores para chaves de configuração de integração de rede"
 
-#: cmd/incus/network_load_balancer.go:403
 #: cmd/incus/network_load_balancer.go:404
+#: cmd/incus/network_load_balancer.go:405
 msgid "Get values for network load balancer configuration keys"
 msgstr ""
 "Obtém valores para chaves de configuração de balanceador de carga de rede"
@@ -3773,7 +3786,7 @@ msgstr "Obtém valores para chaves de configuração de peer de rede"
 msgid "Get values for network zone configuration keys"
 msgstr "Obtém valores para chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:947 cmd/incus/network_zone.go:948
+#: cmd/incus/network_zone.go:948 cmd/incus/network_zone.go:949
 msgid "Get values for network zone record configuration keys"
 msgstr "Obtém valores para chaves de configuração de registo de zona de rede"
 
@@ -3789,7 +3802,7 @@ msgstr "Obtém valores para chaves de configuração de projeto"
 msgid "Get values for storage bucket configuration keys"
 msgstr "Obtém valores para chaves de configuração de bucket de armazenamento"
 
-#: cmd/incus/storage.go:388 cmd/incus/storage.go:389
+#: cmd/incus/storage.go:389 cmd/incus/storage.go:390
 msgid "Get values for storage pool configuration keys"
 msgstr "Obtém valores para chaves de configuração de pool de armazenamento"
 
@@ -3817,7 +3830,7 @@ msgstr ""
 "Para instantâneos, adicione o nome do instantâneo (apenas se o tipo for um "
 "de custom, container ou virtual-machine)."
 
-#: cmd/incus/storage_volume.go:3988
+#: cmd/incus/storage_volume.go:3987
 msgid "Get write access to the disk"
 msgstr "Obter acesso de escrita ao disco"
 
@@ -3826,7 +3839,7 @@ msgstr "Obter acesso de escrita ao disco"
 msgid "Given target %q does not match source volume location %q"
 msgstr "Alvo fornecido %q não corresponde à localização do volume fonte %q"
 
-#: cmd/incus/color/color.go:41
+#: cmd/incus/color/color.go:43
 msgid "Global Flags:"
 msgstr "Bandeiras Globais:"
 
@@ -3838,15 +3851,15 @@ msgstr "ID de grupo para correr o comando como (predefinição 0)"
 msgid "HOSTNAME"
 msgstr "NOME DE MÁQUINA"
 
-#: cmd/incus/info.go:768
+#: cmd/incus/info.go:767
 msgid "Host interface"
 msgstr "Interface de máquina"
 
-#: cmd/incus/info.go:693
+#: cmd/incus/info.go:692
 msgid "Hostname"
 msgstr "Nome de máquina"
 
-#: cmd/incus/info.go:516 cmd/incus/info.go:527
+#: cmd/incus/info.go:515 cmd/incus/info.go:526
 msgid "Hugepages:\n"
 msgstr "Hugepages:\n"
 
@@ -3874,17 +3887,17 @@ msgstr "I/O cópia de sshfs para instância falhou: %v"
 msgid "ID"
 msgstr "ID"
 
-#: cmd/incus/info.go:125
+#: cmd/incus/info.go:124
 #, c-format
 msgid "ID: %d"
 msgstr "ID: %d"
 
-#: cmd/incus/info.go:213 cmd/incus/info.go:280 cmd/incus/info.go:304
+#: cmd/incus/info.go:212 cmd/incus/info.go:279 cmd/incus/info.go:303
 #, c-format
 msgid "ID: %s"
 msgstr "ID: %s"
 
-#: cmd/incus/project.go:543
+#: cmd/incus/project.go:542
 msgid "IMAGES"
 msgstr "IMAGENS"
 
@@ -3892,7 +3905,7 @@ msgstr "IMAGENS"
 msgid "INSTANCE NAME"
 msgstr "NOME DE INSTÂNCIA"
 
-#: cmd/incus/info.go:366
+#: cmd/incus/info.go:365
 #, c-format
 msgid "IOMMU group: %v"
 msgstr "Grupo IOMMU: %v"
@@ -3905,7 +3918,7 @@ msgstr "IP"
 msgid "IP ADDRESS"
 msgstr "ENDEREÇO IP"
 
-#: cmd/incus/info.go:784
+#: cmd/incus/info.go:783
 msgid "IP addresses"
 msgstr "Endereços IP"
 
@@ -3933,10 +3946,15 @@ msgstr "Endereço uplink IPv6"
 msgid "ISSUE DATE"
 msgstr "DATA DO PROBLEMA"
 
-#: cmd/incus/info.go:371
+#: cmd/incus/info.go:370
 #, c-format
 msgid "Id: %v"
 msgstr "Id: %v"
+
+#: cmd/incus/image.go:175
+#, fuzzy
+msgid "If an alias already exists, delete and recreate it"
+msgstr "Se o alias da imagem já existir, apaga e cria um novo"
 
 #: cmd/incus/rebuild.go:33
 msgid "If an instance is running, stop it and then rebuild it"
@@ -3949,7 +3967,7 @@ msgstr ""
 "Se o comando for válido, explica os seus argumentos analisados em vez de os "
 "executar"
 
-#: cmd/incus/image.go:672 cmd/incus/publish.go:46
+#: cmd/incus/image.go:696 cmd/incus/publish.go:46
 msgid "If the image alias already exists, delete and create a new one"
 msgstr "Se o alias da imagem já existir, apaga e cria um novo"
 
@@ -3986,11 +4004,11 @@ msgstr "Ignorar o estado de instância"
 msgid "Image alias description"
 msgstr "Descrição do alias de imagem"
 
-#: cmd/incus/image.go:1416
+#: cmd/incus/image.go:1440
 msgid "Image already up to date."
 msgstr "Imagem já atualizada."
 
-#: cmd/incus/image.go:295
+#: cmd/incus/image.go:319
 msgid "Image copied successfully!"
 msgstr "Imagem copiada com sucesso!"
 
@@ -3998,7 +4016,7 @@ msgstr "Imagem copiada com sucesso!"
 msgid "Image expiration date (format: rfc3339)"
 msgstr "Data de validade da imagem (formato: rfc3339)"
 
-#: cmd/incus/image.go:641
+#: cmd/incus/image.go:665
 msgid "Image exported successfully!"
 msgstr "Imagem exportada com sucesso!"
 
@@ -4006,16 +4024,16 @@ msgstr "Imagem exportada com sucesso!"
 msgid "Image format"
 msgstr "Formato de imagem"
 
-#: cmd/incus/image.go:835
+#: cmd/incus/image.go:859
 #, c-format
 msgid "Image imported with fingerprint: %s"
 msgstr "Imagem importada com impressão digital: %s"
 
-#: cmd/incus/image.go:1414
+#: cmd/incus/image.go:1438
 msgid "Image refreshed successfully!"
 msgstr "Imagem refrescada com sucesso!"
 
-#: cmd/incus/action.go:161 cmd/incus/launch.go:45
+#: cmd/incus/action.go:161 cmd/incus/launch.go:46
 msgid "Immediately attach to the console"
 msgstr "Anexar imediatamente à consola"
 
@@ -4027,15 +4045,15 @@ msgstr "Importa backups de instâncias incluindo seus instantâneos."
 msgid "Import backups of storage buckets."
 msgstr "Importa salvaguardas de buckets de armazenamento."
 
-#: cmd/incus/storage_volume.go:3851
+#: cmd/incus/storage_volume.go:3850
 msgid "Import custom storage volumes"
 msgstr "Importa volumes de armazenamento personalizados"
 
-#: cmd/incus/storage_volume.go:3852
+#: cmd/incus/storage_volume.go:3851
 msgid "Import custom storage volumes."
 msgstr "Importa volumes de armazenamento personalizados."
 
-#: cmd/incus/image.go:666
+#: cmd/incus/image.go:690
 msgid ""
 "Import image into the image store\n"
 "\n"
@@ -4046,7 +4064,7 @@ msgstr ""
 "A importação do diretório só está disponível em Linux e deve ser executada "
 "como root."
 
-#: cmd/incus/image.go:665
+#: cmd/incus/image.go:689
 msgid "Import images into the image store"
 msgstr "Importa imagem para a loja de imagens"
 
@@ -4058,11 +4076,11 @@ msgstr "Importa salvaguardas da instância"
 msgid "Import storage bucket"
 msgstr "Importa bucket de armazenamento"
 
-#: cmd/incus/storage_volume.go:3917
+#: cmd/incus/storage_volume.go:3916
 msgid "Import type needs to be \"backup\" or \"iso\""
 msgstr "Tipo de importação precisa ser \"backup\" ou \"iso\""
 
-#: cmd/incus/storage_volume.go:3860
+#: cmd/incus/storage_volume.go:3859
 msgid "Import type, backup or iso (default \"backup\")"
 msgstr "Tipo de importação, backup ou iso (predefinição \"backup\")"
 
@@ -4071,7 +4089,7 @@ msgstr "Tipo de importação, backup ou iso (predefinição \"backup\")"
 msgid "Importing bucket: %s"
 msgstr "A importar bucket: %s"
 
-#: cmd/incus/storage_volume.go:3926
+#: cmd/incus/storage_volume.go:3925
 #, c-format
 msgid "Importing custom volume: %s"
 msgstr "A importar volume personalizado: %s"
@@ -4081,7 +4099,7 @@ msgstr "A importar volume personalizado: %s"
 msgid "Importing instance: %s"
 msgstr "A importar instância: %s"
 
-#: cmd/incus/create.go:65
+#: cmd/incus/create.go:66
 msgid "Include environment variables from file"
 msgstr "Incluir variáveis de ambiente do ficheiro"
 
@@ -4093,7 +4111,7 @@ msgstr "Incluir comandos menos comuns"
 msgid "Incus - Command line client"
 msgstr "Incus - Cliente de linha de comandos"
 
-#: cmd/incus/info.go:242
+#: cmd/incus/info.go:241
 msgid "Infiniband:"
 msgstr "Infiniband:"
 
@@ -4101,11 +4119,11 @@ msgstr "Infiniband:"
 msgid "Input data"
 msgstr "Dados de entrada"
 
-#: cmd/incus/info.go:894
+#: cmd/incus/info.go:893
 msgid "Instance Only"
 msgstr "Apenas Instância"
 
-#: cmd/incus/create.go:73
+#: cmd/incus/create.go:74
 msgid "Instance description"
 msgstr "Descrição da instância"
 
@@ -4118,7 +4136,7 @@ msgstr "Instância desligada"
 msgid "Instance disconnected for client %q"
 msgstr "Instância desligada para cliente %q"
 
-#: cmd/incus/create.go:405
+#: cmd/incus/create.go:406
 #, c-format
 msgid "Instance name is: %s"
 msgstr "Nome da instância é: %s"
@@ -4137,7 +4155,7 @@ msgstr "Instância publicada com impressão digital: %s"
 msgid "Instance snapshot name is: %s"
 msgstr "Nome de instantâneo de instância é: %s"
 
-#: cmd/incus/create.go:68
+#: cmd/incus/create.go:69
 msgid "Instance type"
 msgstr "Tipo de instância"
 
@@ -4145,13 +4163,13 @@ msgstr "Tipo de instância"
 msgid "Invalid IP address or DNS name"
 msgstr "Endereço IP ou nome DNS inválido"
 
-#: cmd/incus/export.go:134 cmd/incus/storage_bucket.go:1380
-#: cmd/incus/storage_volume.go:3757
+#: cmd/incus/export.go:131 cmd/incus/storage_bucket.go:1380
+#: cmd/incus/storage_volume.go:3756
 #, c-format
 msgid "Invalid URL %q: %w"
 msgstr "URL inválido %q: %w"
 
-#: cmd/incus/remote.go:391
+#: cmd/incus/remote.go:387
 #, c-format
 msgid "Invalid URL scheme \"%s\" in \"%s\""
 msgstr "Esquema de URL inválido \"%s\" em \"%s\""
@@ -4161,8 +4179,8 @@ msgstr "Esquema de URL inválido \"%s\" em \"%s\""
 msgid "Invalid argument %q"
 msgstr "Argumento inválido %q"
 
-#: cmd/incus/export.go:139 cmd/incus/storage_bucket.go:1385
-#: cmd/incus/storage_volume.go:3762
+#: cmd/incus/export.go:136 cmd/incus/storage_bucket.go:1385
+#: cmd/incus/storage_volume.go:3761
 #, c-format
 msgid "Invalid backup name segment in path %q: %w"
 msgstr "Segmento de nome de salvaguarda inválido no caminho %q: %w"
@@ -4176,7 +4194,7 @@ msgstr "Valor booleano inválido: %s"
 msgid "Invalid certificate"
 msgstr "Certificado inválido"
 
-#: cmd/incus/remote.go:772
+#: cmd/incus/remote.go:768
 #, c-format
 msgid "Invalid certificate format %q"
 msgstr "Formato de certificado inválido %q"
@@ -4253,7 +4271,7 @@ msgstr "Número inválido de argumentos"
 msgid "Invalid peer type"
 msgstr "Tipo de peer inválido"
 
-#: cmd/incus/remote.go:380
+#: cmd/incus/remote.go:376
 #, c-format
 msgid "Invalid protocol: %s"
 msgstr "Protocolo inválido: %s"
@@ -4271,7 +4289,7 @@ msgstr "Tipo de ordenação inválido fornecido"
 msgid "Invalid type %q"
 msgstr "Tipo inválido %q"
 
-#: cmd/incus/info.go:245
+#: cmd/incus/info.go:244
 #, c-format
 msgid "IsSM: %s (%s)"
 msgstr "IsSM: %s (%s)"
@@ -4284,11 +4302,11 @@ msgstr "Juntar um servidor existente a um agrupamento"
 msgid "Joining an existing cluster requires root privileges"
 msgstr "A adesão a um agrupamento existente requer privilégios de root"
 
-#: cmd/incus/image.go:174
+#: cmd/incus/image.go:176
 msgid "Keep the image up to date after initial copy"
 msgstr "Manter a imagem atualizada após a cópia inicial"
 
-#: cmd/incus/info.go:692
+#: cmd/incus/info.go:691
 msgid "Kernel Version"
 msgstr "Versão do kernel"
 
@@ -4304,7 +4322,7 @@ msgstr "ÚLTIMA VEZ VISTO"
 msgid "LAST USED AT"
 msgstr "ÚLTIMA VEZ USADO EM"
 
-#: cmd/incus/project.go:1078
+#: cmd/incus/project.go:1077
 msgid "LIMIT"
 msgstr "LIMITE"
 
@@ -4319,35 +4337,35 @@ msgstr "ENDEREÇO DE ESCUTA"
 msgid "LOCATION"
 msgstr "LOCALIZAÇÃO"
 
-#: cmd/incus/info.go:679
+#: cmd/incus/info.go:678
 #, c-format
 msgid "Last Used: %s"
 msgstr "Última vez Usado: %s"
 
-#: cmd/incus/image.go:961
+#: cmd/incus/image.go:985
 #, c-format
 msgid "Last used: %s"
 msgstr "Última vez usado: %s"
 
-#: cmd/incus/image.go:963
+#: cmd/incus/image.go:987
 msgid "Last used: never"
 msgstr "Última vez usado: nunca"
 
-#: cmd/incus/create.go:128
+#: cmd/incus/create.go:129
 #, c-format
 msgid "Launching %s"
 msgstr "A lançar %s"
 
-#: cmd/incus/create.go:130
+#: cmd/incus/create.go:131
 msgid "Launching the instance"
 msgstr "A lançar a instância"
 
-#: cmd/incus/info.go:236
+#: cmd/incus/info.go:235
 #, c-format
 msgid "Link detected: %v"
 msgstr "Link detectado: %v"
 
-#: cmd/incus/info.go:238
+#: cmd/incus/info.go:237
 #, c-format
 msgid "Link speed: %dMbit/s (%s duplex)"
 msgstr "Velocidade do Link: %dMbit/s (%s duplex)"
@@ -4502,11 +4520,11 @@ msgstr ""
 "  t - Testemunho (Token)\n"
 "  E - Expira Em"
 
-#: cmd/incus/cluster_group.go:417
+#: cmd/incus/cluster_group.go:418
 msgid "List all the cluster groups"
 msgstr "Lista todos os grupos de agrupamento"
 
-#: cmd/incus/cluster_group.go:418
+#: cmd/incus/cluster_group.go:419
 msgid ""
 "List all the cluster groups\n"
 "\n"
@@ -4557,7 +4575,8 @@ msgid ""
 "List all the cluster members\n"
 "\n"
 "\tThe -c option takes a (optionally comma-separated) list of arguments\n"
-"\tthat control which image attributes to output when displaying in table\n"
+"\tthat control which cluster members attributes to output when displaying in "
+"table\n"
 "\tor csv format.\n"
 "\n"
 "\tDefault column layout is: nurafdsm\n"
@@ -4575,11 +4594,11 @@ msgid ""
 msgstr ""
 "Lista todos os membros de agrupamento\n"
 "\n"
-"\tA opção -c recebe uma lista (opcionalmente separada por vírgulas de "
+"\tA opção -c recebe uma lista (opcionalmente separada por vírgulas) de "
 "argumentos\n"
-"\tque controlam quais atributos de imagem são incluídos ao mostrar em "
-"formato\n"
-"\tde tabela ou csv.\n"
+"\tque controlam quais atributos de membros de agrupamento são incluídos ao "
+"mostrar\n"
+"\tem tabela ou formato csv.\n"
 "\n"
 "\tDisposição predefinida de coluna é: nurafdsm\n"
 "\n"
@@ -4672,8 +4691,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which network load balancer attributes to output when displaying\n"
+"in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -4686,23 +4705,24 @@ msgid ""
 "  p - Ports\n"
 "  L - Location of the operation (e.g. its cluster member)"
 msgstr ""
-"Lista balanceadores de carga de rede disponíveis\n"
+"Lista equilibradores de carga de rede disponíveis\n"
 "\n"
 "Disposição predefinida de coluna: ldp\n"
 "\n"
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de equilibrador de carga de rede são incluídos ao mostrar "
+"em \n"
+"tabela ou formato csv.\n"
 "\n"
-"Os argumentos de coluna são ou caracteres curtos predefinidos(veja abaixo),\n"
-"ou chaves de configuração (estendidas).\n"
+"Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
+"abaixo),\n"
+"ou chaves de configuração (alargadas).\n"
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  l - Endereço de Escuta\n"
 "  d - Descrição\n"
 "  p - Portos\n"
@@ -4720,7 +4740,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which network peer attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4742,23 +4762,23 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de peer de rede são incluídos ao mostrar em tabela ou\n"
+"formato csv.\n"
 "\n"
-"Os argumentos de coluna são ou caracteres curtos predefinidos(veja abaixo),\n"
-"ou chaves de configuração (estendidas).\n"
+"Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
+"abaixo),\n"
+"ou chaves de configuração (alargadas).\n"
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  n - Nome\n"
 "  d - Descrição\n"
 "  p - Peer\n"
 "  t - Tipo\n"
 "  s - Estado"
 
-#: cmd/incus/network_zone.go:814 cmd/incus/network_zone.go:815
+#: cmd/incus/network_zone.go:815 cmd/incus/network_zone.go:816
 msgid "List available network zone records"
 msgstr "Lista registos de zona de rede disponíveis"
 
@@ -4871,11 +4891,12 @@ msgstr ""
 "t - Tipo de Interface\n"
 "u - Usado por (contagem)"
 
-#: cmd/incus/storage.go:636
+#: cmd/incus/storage.go:637
 msgid "List available storage pools"
 msgstr "Lista pools de armazenamento disponíveis"
 
-#: cmd/incus/storage.go:637
+#: cmd/incus/storage.go:638
+#, fuzzy
 msgid ""
 "List available storage pools\n"
 "\n"
@@ -4883,7 +4904,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
+"which storage pools attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -4935,8 +4956,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which attributes of background operations to output when displaying\n"
+"in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -4952,20 +4973,20 @@ msgid ""
 "  C - Created\n"
 "  L - Location of the operation (e.g. its cluster member)"
 msgstr ""
-"Lista operações nos bastidores\n"
+"Lista operações que correm nos bastidores\n"
 "\n"
 "Disposição predefinida de coluna: itdscCl\n"
 "\n"
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
+"quais atributos de operações nos bastidores são incluídos ao mostrar em "
 "tabela\n"
-"ou csv.\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
-"ou chaves de configuração (estendidas).\n"
+"ou chaves de configuração (alargadas).\n"
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
@@ -4991,7 +5012,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
+"which attributes of image aliases to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5005,7 +5026,7 @@ msgid ""
 "  t - Type\n"
 "  d - Description"
 msgstr ""
-"Lista aliases de imagem\n"
+"Lista nomes alternativos de imagem\n"
 "\n"
 "Filtros podem ser parte do hash da imagem ou parte do nome alias da imagem.\n"
 "Disposição predefinida de coluna: aftd\n"
@@ -5013,9 +5034,8 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de alias de imagem são incluídos ao mostrar em tabela\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
@@ -5023,17 +5043,17 @@ msgstr ""
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  a - Alias\n"
 "  f - Impressão digital\n"
 "  t - Tipo\n"
 "  d - Descrição"
 
-#: cmd/incus/image.go:1018
+#: cmd/incus/image.go:1042
 msgid "List images"
 msgstr "Lista imagens"
 
-#: cmd/incus/image.go:1019
+#: cmd/incus/image.go:1043
 msgid ""
 "List images\n"
 "\n"
@@ -5093,7 +5113,7 @@ msgstr ""
 msgid "List instance devices"
 msgstr "Lista dispositivos de instância"
 
-#: cmd/incus/config_template.go:268 cmd/incus/config_template.go:269
+#: cmd/incus/config_template.go:269 cmd/incus/config_template.go:270
 msgid "List instance file templates"
 msgstr "Lista modelos de ficheiro de instância"
 
@@ -5109,7 +5129,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which snapshots attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5130,9 +5150,8 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de instantâneos são incluídos ao mostrar em tabela\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
@@ -5140,7 +5159,7 @@ msgstr ""
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  n - Nome\n"
 "  T - Tomado Em\n"
 "  E - Expira Em\n"
@@ -5335,8 +5354,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
-"format.\n"
+"which network allocations attribute attributes to output when\n"
+"displaying in table or csv format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
 "or (extended) config keys.\n"
@@ -5356,9 +5375,8 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de alocações de rede são incluídos ao mostrar em tabela\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
@@ -5366,18 +5384,18 @@ msgstr ""
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  u - Usado por\n"
 "  a - Endereço\n"
 "  t - Tipo\n"
 "  n - NAT\n"
 "  m - Endereço Mac"
 
-#: cmd/incus/network_integration.go:388
+#: cmd/incus/network_integration.go:389
 msgid "List network integrations"
 msgstr "Lista integrações de rede"
 
-#: cmd/incus/network_integration.go:389
+#: cmd/incus/network_integration.go:390
 msgid ""
 "List network integrations\n"
 "\n"
@@ -5385,7 +5403,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which network integrations attributes to output when displaying in table or "
+"csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5406,9 +5425,8 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos de integrações de rede são incluídos ao mostrar em tabela\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
@@ -5416,7 +5434,7 @@ msgstr ""
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "\tn - Nome\n"
 "\td - Descrição\n"
 "\tt - Tipo\n"
@@ -5452,7 +5470,7 @@ msgid ""
 "contains \"bar\"\n"
 "\n"
 "The -c option takes a (optionally comma-separated) list of arguments\n"
-"that control which image attributes to output when displaying in table\n"
+"that control which profile attributes to output when displaying in table\n"
 "or csv format.\n"
 "\n"
 "Default column layout is: ndu\n"
@@ -5466,7 +5484,7 @@ msgstr ""
 "\n"
 "Os filtros podem ser do formato <chave>=<valor> para filtragem baseada em "
 "propriedade,\n"
-"ou parte do nome do perfil. Os filtros têm de ser delimitados por um ','.\n"
+"ou parte do nome do perfil. Os filtros têm de ser delimitados por uma ','.\n"
 "\n"
 "Exemplos:\n"
 "  - \"foo\" lista todos os perfis que começam com o nome foo\n"
@@ -5476,9 +5494,8 @@ msgstr ""
 "\n"
 "A opção -c recebe uma lista (opcionalmente separada por vírgulas) de "
 "argumentos\n"
-"que controlam quais atributos de zona de rede são incluídos ao mostrar em "
-"formato\n"
-"de tabela ou csv.\n"
+"que controlam quais atributos de perfil são incluídos ao mostrar em tabela \n"
+"ou formato csv.\n"
 "\n"
 "Disposição predefinida de coluna: ndu\n"
 "\n"
@@ -5536,6 +5553,7 @@ msgid "List storage bucket keys"
 msgstr "Lista de chaves de bucket de armazenamento"
 
 #: cmd/incus/storage_bucket.go:836
+#, fuzzy
 msgid ""
 "List storage bucket keys\n"
 "\n"
@@ -5543,7 +5561,8 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which storage bucket keys attributes to output when displaying in table or "
+"csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5583,6 +5602,7 @@ msgid "List storage buckets"
 msgstr "Lista buckets de armazenamento"
 
 #: cmd/incus/storage_bucket.go:441
+#, fuzzy
 msgid ""
 "List storage buckets\n"
 "\n"
@@ -5590,7 +5610,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which network zone attributes to output when displaying in table or csv\n"
+"which storage bucket attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5722,11 +5742,11 @@ msgstr ""
 "    u - Numero de referências (usado por)\n"
 "    U - Utilização de disco atual"
 
-#: cmd/incus/remote.go:948
+#: cmd/incus/remote.go:944
 msgid "List the available remotes"
 msgstr "Lista os remotos disponíveis"
 
-#: cmd/incus/remote.go:949
+#: cmd/incus/remote.go:945
 msgid ""
 "List the available remotes\n"
 "\n"
@@ -5734,7 +5754,7 @@ msgid ""
 "\n"
 "== Columns ==\n"
 "The -c option takes a comma separated list of arguments that control\n"
-"which instance attributes to output when displaying in table or csv\n"
+"which remote attributes to output when displaying in table or csv\n"
 "format.\n"
 "\n"
 "Column arguments are either pre-defined shorthand chars (see below),\n"
@@ -5758,9 +5778,8 @@ msgstr ""
 "== Colunas ==\n"
 "A opção -c recebe uma lista separada por vírgulas de argumentos que "
 "controlam\n"
-"quais atributos de zona de rede são incluídos ao mostrar em formato de "
-"tabela\n"
-"ou csv.\n"
+"quais atributos remotos são incluídos ao mostrar em tabela\n"
+"ou formato csv.\n"
 "\n"
 "Os argumentos de coluna são ou caracteres curtos predefinidos (veja "
 "abaixo),\n"
@@ -5768,7 +5787,7 @@ msgstr ""
 "\n"
 "As vírgulas entre caracteres curtos consecutivos são opcionais.\n"
 "\n"
-"Caracteres curtos pre-definidos da coluna:\n"
+"Caracteres curtos pré-definidos da coluna:\n"
 "  n - Nome\n"
 "  u - URL\n"
 "  p - Protocolo\n"
@@ -5878,20 +5897,20 @@ msgstr ""
 msgid "List, show and delete background operations"
 msgstr "Lista, mostra e apaga operações dos bastidores"
 
-#: cmd/incus/network_load_balancer.go:322
+#: cmd/incus/network_load_balancer.go:323
 msgid "Load balancer description"
 msgstr "Carrega descrição do balanceador"
 
-#: cmd/incus/info.go:493
+#: cmd/incus/info.go:492
 msgid "Load:"
 msgstr "Carga:"
 
-#: cmd/incus/info.go:667 cmd/incus/storage_volume.go:1312
+#: cmd/incus/info.go:666 cmd/incus/storage_volume.go:1312
 #, c-format
 msgid "Location: %s"
 msgstr "Localização: %s"
 
-#: cmd/incus/info.go:927
+#: cmd/incus/info.go:926
 #, c-format
 msgid "Log (%s):"
 msgstr "Registo (%s):"
@@ -5940,7 +5959,7 @@ msgstr "Dispositivos baixos"
 msgid "MAC ADDRESS"
 msgstr "ENDEREÇO MAC"
 
-#: cmd/incus/info.go:772
+#: cmd/incus/info.go:771
 msgid "MAC address"
 msgstr "Endereço MAC"
 
@@ -5949,7 +5968,7 @@ msgstr "Endereço MAC"
 msgid "MAC address: %s"
 msgstr "Endereço MAC: %s"
 
-#: cmd/incus/info.go:249
+#: cmd/incus/info.go:248
 #, c-format
 msgid "MAD: %s (%s)"
 msgstr "MAD: %s (%s)"
@@ -5958,7 +5977,7 @@ msgstr "MAD: %s (%s)"
 msgid "MANAGED"
 msgstr "GERIDO"
 
-#: cmd/incus/cluster_group.go:463
+#: cmd/incus/cluster_group.go:464
 msgid "MEMBERS"
 msgstr "MEMBROS"
 
@@ -5987,7 +6006,7 @@ msgstr "Frequência MII"
 msgid "MII state"
 msgstr "Estado MII"
 
-#: cmd/incus/info.go:776
+#: cmd/incus/info.go:775
 msgid "MTU"
 msgstr "MTU"
 
@@ -6000,7 +6019,7 @@ msgstr "MTU: %d"
 msgid "Maintain remote connection for faster commands"
 msgstr "Mantem ligação remota para comandos mais rápidos"
 
-#: cmd/incus/image.go:172 cmd/incus/image.go:671
+#: cmd/incus/image.go:173 cmd/incus/image.go:695
 msgid "Make image public"
 msgstr "Torna a imagem pública"
 
@@ -6108,7 +6127,7 @@ msgstr "Gerir ficheiros de metadados da instância"
 msgid "Manage instance snapshots"
 msgstr "Gerir instantâneos da instância"
 
-#: cmd/incus/network_acl.go:805 cmd/incus/network_acl.go:806
+#: cmd/incus/network_acl.go:806 cmd/incus/network_acl.go:807
 msgid "Manage network ACL rules"
 msgstr "Gerir regras ACL de rede"
 
@@ -6132,13 +6151,13 @@ msgstr "Gerir encaminhamentos de rede"
 msgid "Manage network integrations"
 msgstr "Gerir integrações de rede"
 
-#: cmd/incus/network_load_balancer.go:798
 #: cmd/incus/network_load_balancer.go:799
+#: cmd/incus/network_load_balancer.go:800
 msgid "Manage network load balancer backends"
 msgstr "Gerir backends de balanceador de carga de rede"
 
-#: cmd/incus/network_load_balancer.go:957
 #: cmd/incus/network_load_balancer.go:958
+#: cmd/incus/network_load_balancer.go:959
 msgid "Manage network load balancer ports"
 msgstr "Gerir portos de balanceador de carga de rede"
 
@@ -6150,11 +6169,11 @@ msgstr "Gerir balanceadores de carga de rede"
 msgid "Manage network peerings"
 msgstr "Gerir peerings de rede"
 
-#: cmd/incus/network_zone.go:1423 cmd/incus/network_zone.go:1424
+#: cmd/incus/network_zone.go:1425 cmd/incus/network_zone.go:1426
 msgid "Manage network zone record entries"
 msgstr "Gerir entradas de registro de zona de rede"
 
-#: cmd/incus/network_zone.go:755 cmd/incus/network_zone.go:756
+#: cmd/incus/network_zone.go:756 cmd/incus/network_zone.go:757
 msgid "Manage network zone records"
 msgstr "Gerir registros de zona de rede"
 
@@ -6222,11 +6241,11 @@ msgstr "Gerir clientes de confiança"
 msgid "Manage warnings"
 msgstr "Gerir avisos"
 
-#: cmd/incus/remote.go:676
+#: cmd/incus/remote.go:672
 msgid "Manually trigger the generation of a client certificate"
 msgstr "Acionar manualmente a geração de um certificado de cliente"
 
-#: cmd/incus/info.go:153 cmd/incus/info.go:262
+#: cmd/incus/info.go:152 cmd/incus/info.go:261
 #, c-format
 msgid "Maximum number of VFs: %d"
 msgstr "Número máximo de VFs: %d"
@@ -6235,7 +6254,7 @@ msgstr "Número máximo de VFs: %d"
 msgid "Maximum wait time"
 msgstr "Tempo de espera máximo"
 
-#: cmd/incus/info.go:164
+#: cmd/incus/info.go:163
 msgid "Mdev profiles:"
 msgstr "Perfil de Mdev:"
 
@@ -6264,19 +6283,19 @@ msgstr "Membro %s removido"
 msgid "Member %s renamed to %s"
 msgstr "Membro %s renomeado para %s"
 
-#: cmd/incus/info.go:731
+#: cmd/incus/info.go:730
 msgid "Memory (current)"
 msgstr "Memória (atual)"
 
-#: cmd/incus/info.go:735
+#: cmd/incus/info.go:734
 msgid "Memory (peak)"
 msgstr "Memória (pico)"
 
-#: cmd/incus/info.go:747
+#: cmd/incus/info.go:746
 msgid "Memory usage:"
 msgstr "Utilização de memória:"
 
-#: cmd/incus/info.go:514
+#: cmd/incus/info.go:513
 msgid "Memory:"
 msgstr "Memória:"
 
@@ -6313,12 +6332,12 @@ msgstr "Directório alvo em falta"
 msgid "Mode"
 msgstr "Modo"
 
-#: cmd/incus/info.go:284
+#: cmd/incus/info.go:283
 #, c-format
 msgid "Model: %s"
 msgstr "Modelo: %s"
 
-#: cmd/incus/info.go:144
+#: cmd/incus/info.go:143
 #, c-format
 msgid "Model: %v"
 msgstr "Modelo: %v"
@@ -6421,26 +6440,26 @@ msgstr "Move para um projeto diferente a partir da fonte"
 msgid "Moving the storage volume: %s"
 msgstr "A mover o volume de armazenamento: %s"
 
-#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1101
+#: cmd/incus/network_forward.go:975 cmd/incus/network_load_balancer.go:1102
 msgid "Multiple ports match. Use --force to remove them all"
 msgstr "Múltiplos portos correspondem. Use --force para removê-los a todos"
 
-#: cmd/incus/network_acl.go:1043
+#: cmd/incus/network_acl.go:1044
 msgid "Multiple rules match. Use --force to remove them all"
 msgstr "Múltiplas regras correspondem. Use --force para removê-las a todas"
 
-#: cmd/incus/image.go:696
+#: cmd/incus/image.go:720
 msgid "Must run as root to import from directory"
 msgstr "Tem de correr como root para importar do diretório"
 
 #: cmd/incus/cluster.go:195 cmd/incus/cluster.go:1143
-#: cmd/incus/cluster_group.go:462 cmd/incus/config_trust.go:413
+#: cmd/incus/cluster_group.go:463 cmd/incus/config_trust.go:413
 #: cmd/incus/config_trust.go:600 cmd/incus/list.go:484
 #: cmd/incus/network.go:1071 cmd/incus/network_acl.go:162
-#: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:426
+#: cmd/incus/network_address_set.go:154 cmd/incus/network_integration.go:427
 #: cmd/incus/network_peer.go:138 cmd/incus/network_zone.go:144
-#: cmd/incus/network_zone.go:870 cmd/incus/profile.go:723
-#: cmd/incus/project.go:542 cmd/incus/project.go:671 cmd/incus/remote.go:988
+#: cmd/incus/network_zone.go:871 cmd/incus/profile.go:723
+#: cmd/incus/project.go:541 cmd/incus/project.go:670 cmd/incus/remote.go:984
 #: cmd/incus/snapshot.go:365 cmd/incus/storage.go:684
 #: cmd/incus/storage_bucket.go:480 cmd/incus/storage_bucket.go:872
 #: cmd/incus/storage_volume.go:1568 cmd/incus/storage_volume.go:3377
@@ -6451,39 +6470,39 @@ msgstr "NOME"
 msgid "NAT"
 msgstr "NAT"
 
-#: cmd/incus/storage_volume.go:3983
+#: cmd/incus/storage_volume.go:3982
 msgid "NBD access to a block storage volume"
 msgstr "Acesso NBD a volume de armazenamento de bloco"
 
-#: cmd/incus/storage_volume.go:3984
+#: cmd/incus/storage_volume.go:3983
 msgid "NBD access to a block storage volume."
 msgstr "Acesso NBD a volume de armazenamento de bloco."
 
-#: cmd/incus/storage_volume.go:4048
+#: cmd/incus/storage_volume.go:4047
 #, c-format
 msgid "NBD client connected %q"
 msgstr "Cliente NBD ligado %q"
 
-#: cmd/incus/storage_volume.go:4049
+#: cmd/incus/storage_volume.go:4048
 #, c-format
 msgid "NBD client disconnected %q"
 msgstr "Cliente NBD desligado %q"
 
-#: cmd/incus/storage_volume.go:4054
+#: cmd/incus/storage_volume.go:4053
 #, c-format
 msgid "NBD connection failed: %v"
 msgstr "Ligação NBD falhou: %v"
 
-#: cmd/incus/storage_volume.go:4038
+#: cmd/incus/storage_volume.go:4037
 #, c-format
 msgid "NBD listening on %v"
 msgstr "NBD a escutar em %v"
 
-#: cmd/incus/project.go:548
+#: cmd/incus/project.go:547
 msgid "NETWORK ZONES"
 msgstr "ZONAS DE REDE"
 
-#: cmd/incus/project.go:547
+#: cmd/incus/project.go:546
 msgid "NETWORKS"
 msgstr "REDES"
 
@@ -6492,41 +6511,41 @@ msgstr "REDES"
 msgid "NEW: %q (backend=%q, source=%q)"
 msgstr "NOVO: %q (backend=%q, source=%q)"
 
-#: cmd/incus/info.go:557
+#: cmd/incus/info.go:556
 msgid "NIC:"
 msgstr "NIC:"
 
-#: cmd/incus/info.go:560
+#: cmd/incus/info.go:559
 msgid "NICs:"
 msgstr "NICs:"
 
 #: cmd/incus/network.go:1120 cmd/incus/operation.go:214
-#: cmd/incus/project.go:580 cmd/incus/project.go:589 cmd/incus/project.go:598
-#: cmd/incus/project.go:607 cmd/incus/project.go:616 cmd/incus/project.go:625
-#: cmd/incus/remote.go:1052 cmd/incus/remote.go:1061 cmd/incus/remote.go:1070
+#: cmd/incus/project.go:579 cmd/incus/project.go:588 cmd/incus/project.go:597
+#: cmd/incus/project.go:606 cmd/incus/project.go:615 cmd/incus/project.go:624
+#: cmd/incus/remote.go:1048 cmd/incus/remote.go:1057 cmd/incus/remote.go:1066
 msgid "NO"
 msgstr "NÃO"
 
-#: cmd/incus/info.go:105 cmd/incus/info.go:191 cmd/incus/info.go:278
-#: cmd/incus/info.go:365
+#: cmd/incus/info.go:104 cmd/incus/info.go:190 cmd/incus/info.go:277
+#: cmd/incus/info.go:364
 #, c-format
 msgid "NUMA node: %v"
 msgstr "nó NUMA: %v"
 
-#: cmd/incus/info.go:523
+#: cmd/incus/info.go:522
 msgid "NUMA nodes:\n"
 msgstr "nós NUMA:\n"
 
-#: cmd/incus/info.go:141
+#: cmd/incus/info.go:140
 msgid "NVIDIA information:"
 msgstr "Informação da NVIDIA:"
 
-#: cmd/incus/info.go:146
+#: cmd/incus/info.go:145
 #, c-format
 msgid "NVRM Version: %v"
 msgstr "Versão NVRM: %v"
 
-#: cmd/incus/info.go:840 cmd/incus/info.go:891 cmd/incus/storage_volume.go:1354
+#: cmd/incus/info.go:839 cmd/incus/info.go:890 cmd/incus/storage_volume.go:1354
 #: cmd/incus/storage_volume.go:1404
 msgid "Name"
 msgstr "Nome"
@@ -6587,13 +6606,13 @@ msgstr "Nome do backend de armazenamento a usar (%s)"
 msgid "Name of the storage pool:"
 msgstr "Nome da pool de armazenamento:"
 
-#: cmd/incus/info.go:645 cmd/incus/network.go:909
+#: cmd/incus/info.go:644 cmd/incus/network.go:909
 #: cmd/incus/storage_volume.go:1294
 #, c-format
 msgid "Name: %s"
 msgstr "Nome: %s"
 
-#: cmd/incus/info.go:318
+#: cmd/incus/info.go:317
 #, c-format
 msgid "Name: %v"
 msgstr "Nome: %v"
@@ -6618,46 +6637,46 @@ msgstr "Rede %s pendente de membro %s"
 msgid "Network %s renamed to %s"
 msgstr "Rede %s renomeada para %s"
 
-#: cmd/incus/network_acl.go:429
+#: cmd/incus/network_acl.go:430
 #, c-format
 msgid "Network ACL %s created"
 msgstr "ACL de rede %s criado"
 
-#: cmd/incus/network_acl.go:783
+#: cmd/incus/network_acl.go:784
 #, c-format
 msgid "Network ACL %s deleted"
 msgstr "ACL de rede %s apagado"
 
-#: cmd/incus/network_acl.go:734
+#: cmd/incus/network_acl.go:735
 #, c-format
 msgid "Network ACL %s renamed to %s"
 msgstr "ACL de rede %s renomeado para %s"
 
-#: cmd/incus/network_acl.go:363
+#: cmd/incus/network_acl.go:364
 msgid "Network ACL description"
 msgstr "Descrição de ACL de rede"
 
-#: cmd/incus/network_zone.go:735
+#: cmd/incus/network_zone.go:736
 #, c-format
 msgid "Network Zone %s deleted"
 msgstr "Zona de Rede %s apagada"
 
-#: cmd/incus/network_address_set.go:308
+#: cmd/incus/network_address_set.go:309
 #, c-format
 msgid "Network address set %s created"
 msgstr "Conjunto de endereços de rede %s criado"
 
-#: cmd/incus/network_address_set.go:634
+#: cmd/incus/network_address_set.go:635
 #, c-format
 msgid "Network address set %s deleted"
 msgstr "Conjunto de endereços de rede %s apagado"
 
-#: cmd/incus/network_address_set.go:588
+#: cmd/incus/network_address_set.go:589
 #, c-format
 msgid "Network address set %s renamed to %s"
 msgstr "Conjunto de endereços de rede %s renomeado para %s"
 
-#: cmd/incus/network_address_set.go:238
+#: cmd/incus/network_address_set.go:239
 msgid "Network address set description"
 msgstr "Descrição do conjunto de endereços de rede"
 
@@ -6679,32 +6698,32 @@ msgstr "Encaminhamento de rede %s apagado"
 msgid "Network forward description"
 msgstr "Descrição do encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:153
+#: cmd/incus/network_integration.go:154
 #, c-format
 msgid "Network integration %s created"
 msgstr "Integração de rede %s criada"
 
-#: cmd/incus/network_integration.go:199
+#: cmd/incus/network_integration.go:200
 #, c-format
 msgid "Network integration %s deleted"
 msgstr "Integração de rede %s apagada"
 
-#: cmd/incus/network_integration.go:546
+#: cmd/incus/network_integration.go:547
 #, c-format
 msgid "Network integration %s renamed to %s"
 msgstr "Integração de rede %s renomeada para %s"
 
-#: cmd/incus/network_load_balancer.go:384
+#: cmd/incus/network_load_balancer.go:385
 #, c-format
 msgid "Network load balancer %s created"
 msgstr "Balanceador de carga de rede %s criado"
 
-#: cmd/incus/network_load_balancer.go:782
+#: cmd/incus/network_load_balancer.go:783
 #, c-format
 msgid "Network load balancer %s deleted"
 msgstr "Balanceador de carga de rede %s apagado"
 
-#: cmd/incus/create.go:66
+#: cmd/incus/create.go:67
 msgid "Network name"
 msgstr "Nome da rede"
 
@@ -6734,21 +6753,21 @@ msgstr ""
 msgid "Network type"
 msgstr "Tipo de rede"
 
-#: cmd/incus/info.go:797 cmd/incus/network.go:931
+#: cmd/incus/info.go:796 cmd/incus/network.go:931
 msgid "Network usage:"
 msgstr "Utilização de rede:"
 
-#: cmd/incus/network_zone.go:443
+#: cmd/incus/network_zone.go:444
 #, c-format
 msgid "Network zone %s created"
 msgstr "Zona de rede %s criada"
 
-#: cmd/incus/network_zone.go:1097
+#: cmd/incus/network_zone.go:1099
 #, c-format
 msgid "Network zone record %s created"
 msgstr "Registro de zona de rede %s criado"
 
-#: cmd/incus/network_zone.go:1406
+#: cmd/incus/network_zone.go:1408
 #, c-format
 msgid "Network zone record %s deleted"
 msgstr "Registro de zona de rede %s apagado"
@@ -6762,11 +6781,11 @@ msgstr "Nunca seguir os links simbólicos no caminho da fonte"
 msgid "New alias to define at target"
 msgstr "Novo alias para definir no alvo"
 
-#: cmd/incus/image.go:175 cmd/incus/image.go:673
+#: cmd/incus/image.go:177 cmd/incus/image.go:697
 msgid "New aliases to add to the image"
 msgstr "Novos aliases para adicionar à imagem"
 
-#: cmd/incus/copy.go:59 cmd/incus/create.go:63 cmd/incus/import.go:41
+#: cmd/incus/copy.go:59 cmd/incus/create.go:64 cmd/incus/import.go:41
 #: cmd/incus/move.go:60
 msgid "New key/value to apply to a specific device"
 msgstr "Nova chave/valor para aplicar a um dispositivo específico"
@@ -6776,7 +6795,7 @@ msgstr "Nova chave/valor para aplicar a um dispositivo específico"
 msgid "No %s storage backends available"
 msgstr "Nenhum %s backend de armazenamento disponível"
 
-#: cmd/incus/config_trust.go:799
+#: cmd/incus/config_trust.go:797
 #, c-format
 msgid "No certificate add token for member %s on remote: %s"
 msgstr ""
@@ -6795,19 +6814,19 @@ msgstr "Nenhum dispositivo encontrado para esta rede"
 msgid "No device found for this storage volume"
 msgstr "Nenhum dispositivo encontrado para este volume de armazenamento"
 
-#: cmd/incus/network_load_balancer.go:1155
+#: cmd/incus/network_load_balancer.go:1156
 msgid "No load-balancer health information available"
 msgstr "Nenhuma informação sobre a saúde do balanceador de carga disponível"
 
-#: cmd/incus/network_load_balancer.go:937
+#: cmd/incus/network_load_balancer.go:938
 msgid "No matching backend found"
 msgstr "Nenhum backend correspondente encontrado"
 
-#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1109
+#: cmd/incus/network_forward.go:983 cmd/incus/network_load_balancer.go:1110
 msgid "No matching port(s) found"
 msgstr "Nenhuns porto(s) correspondente encontrados"
 
-#: cmd/incus/network_acl.go:1054
+#: cmd/incus/network_acl.go:1055
 msgid "No matching rule(s) found"
 msgstr "Nenhuma regra(s) correspondente encontrada"
 
@@ -6821,7 +6840,7 @@ msgstr ""
 "Nenhuns pools ou volumes de armazenamento desconhecidos encontrados. Nada "
 "para fazer."
 
-#: cmd/incus/info.go:525
+#: cmd/incus/info.go:524
 #, c-format
 msgid "Node %d:\n"
 msgstr "Nó %d:\n"
@@ -6838,11 +6857,11 @@ msgstr ""
 msgid "Number of placement groups"
 msgstr "Número de grupos de colocação"
 
-#: cmd/incus/info.go:690
+#: cmd/incus/info.go:689
 msgid "OS"
 msgstr "OS"
 
-#: cmd/incus/info.go:691
+#: cmd/incus/info.go:690
 msgid "OS Version"
 msgstr "Versão do OS"
 
@@ -6850,15 +6869,15 @@ msgstr "Versão do OS"
 msgid "OVN:"
 msgstr "OVN:"
 
-#: cmd/incus/network_address_set.go:746
+#: cmd/incus/network_address_set.go:747
 msgid "One or more provided address isn't currently in the set"
 msgstr "Um ou mais endereços fornecidos não está atualmente no conjunto"
 
-#: cmd/incus/remote.go:367
+#: cmd/incus/remote.go:363
 msgid "Only https URLs are supported for oci and simplestreams"
 msgstr "Apenas URLs https são suportados para oci e simplestreams"
 
-#: cmd/incus/image.go:732
+#: cmd/incus/image.go:756
 msgid "Only https:// is supported for remote image import"
 msgstr "Apenas https:// é suportado para importação de imagem remota"
 
@@ -6877,7 +6896,7 @@ msgstr ""
 msgid "Open the web interface"
 msgstr "Abrir a interface web"
 
-#: cmd/incus/info.go:689
+#: cmd/incus/info.go:688
 msgid "Operating System:"
 msgstr "Sistema Operativo:"
 
@@ -6886,7 +6905,7 @@ msgstr "Sistema Operativo:"
 msgid "Operation %s deleted"
 msgstr "Operação %s apagada"
 
-#: cmd/incus/info.go:895 cmd/incus/storage_volume.go:1408
+#: cmd/incus/info.go:894 cmd/incus/storage_volume.go:1408
 msgid "Optimized Storage"
 msgstr "Armazenamento Otimizado"
 
@@ -6898,16 +6917,16 @@ msgstr "Sobrepor o projeto fonte"
 msgid "Override the terminal mode (auto, interactive or non-interactive)"
 msgstr "Sobrepor o modo do terminal (auto, interativo ou não interativo)"
 
-#: cmd/incus/info.go:116 cmd/incus/info.go:202
+#: cmd/incus/info.go:115 cmd/incus/info.go:201
 #, c-format
 msgid "PCI address: %v"
 msgstr "Endereço PCI: %v"
 
-#: cmd/incus/info.go:593
+#: cmd/incus/info.go:592
 msgid "PCI device:"
 msgstr "Dispositivo PCI:"
 
-#: cmd/incus/info.go:596
+#: cmd/incus/info.go:595
 msgid "PCI devices:"
 msgstr "Dispositivos PCI:"
 
@@ -6919,7 +6938,7 @@ msgstr "PEER"
 msgid "PID"
 msgstr "PID"
 
-#: cmd/incus/info.go:671
+#: cmd/incus/info.go:670
 #, c-format
 msgid "PID: %d"
 msgstr "PID: %d"
@@ -6932,11 +6951,11 @@ msgstr "PORTOS"
 msgid "PROCESSES"
 msgstr "PROCESSOS"
 
-#: cmd/incus/list.go:487 cmd/incus/project.go:544
+#: cmd/incus/list.go:487 cmd/incus/project.go:543
 msgid "PROFILES"
 msgstr "PERFIS"
 
-#: cmd/incus/image.go:1075 cmd/incus/list.go:478 cmd/incus/network.go:1070
+#: cmd/incus/image.go:1099 cmd/incus/list.go:478 cmd/incus/network.go:1070
 #: cmd/incus/network_acl.go:168 cmd/incus/network_address_set.go:161
 #: cmd/incus/network_zone.go:143 cmd/incus/profile.go:724
 #: cmd/incus/storage_bucket.go:479 cmd/incus/storage_volume.go:1587
@@ -6948,27 +6967,27 @@ msgstr "PROJETO"
 msgid "PROJECTS"
 msgstr "PROJETOS"
 
-#: cmd/incus/remote.go:990
+#: cmd/incus/remote.go:986
 msgid "PROTOCOL"
 msgstr "PROTOCOLO"
 
-#: cmd/incus/image.go:1080 cmd/incus/remote.go:992
+#: cmd/incus/image.go:1104 cmd/incus/remote.go:988
 msgid "PUBLIC"
 msgstr "PÚBLICO"
 
-#: cmd/incus/info.go:781 cmd/incus/network.go:934
+#: cmd/incus/info.go:780 cmd/incus/network.go:934
 msgid "Packets received"
 msgstr "Pacotes recebidos"
 
-#: cmd/incus/info.go:782 cmd/incus/network.go:935
+#: cmd/incus/info.go:781 cmd/incus/network.go:935
 msgid "Packets sent"
 msgstr "Pacotes enviados"
 
-#: cmd/incus/info.go:301
+#: cmd/incus/info.go:300
 msgid "Partitions:"
 msgstr "Partições:"
 
-#: cmd/incus/main.go:481 cmd/incus/remote.go:821
+#: cmd/incus/main.go:481 cmd/incus/remote.go:817
 #, c-format
 msgid "Password for %s: "
 msgstr "Palavra passe para %s : "
@@ -7012,7 +7031,7 @@ msgstr ""
 msgid "Please provide join token:"
 msgstr "Por favor forneça testemunho de adesão:"
 
-#: cmd/incus/remote.go:510
+#: cmd/incus/remote.go:506
 msgid "Please type 'y', 'n' or the fingerprint:"
 msgstr "Por favor digite 's', 'n' ou a impressão digital:"
 
@@ -7024,7 +7043,7 @@ msgstr "Intervalo de polling (em segundos)"
 msgid "Pool name cannot be empty"
 msgstr "Nome da pool não pode ser vazio"
 
-#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:980
+#: cmd/incus/network_forward.go:843 cmd/incus/network_load_balancer.go:981
 msgid "Port description"
 msgstr "Descrição do porto"
 
@@ -7037,12 +7056,12 @@ msgstr "Porto a onde unir"
 msgid "Port to bind to (default: %d)"
 msgstr "Porto a onde unir (predefinição: %d)"
 
-#: cmd/incus/info.go:228
+#: cmd/incus/info.go:227
 #, c-format
 msgid "Port type: %s"
 msgstr "Tipo de porto: %s"
 
-#: cmd/incus/info.go:210
+#: cmd/incus/info.go:209
 msgid "Ports:"
 msgstr "Portos:"
 
@@ -7066,16 +7085,16 @@ msgstr "Pressione CTRL-C para sair"
 msgid "Press ctrl+c to finish"
 msgstr "Pressione ctrl+c para terminar"
 
-#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:374
+#: cmd/incus/cluster.go:935 cmd/incus/cluster_group.go:375
 #: cmd/incus/config.go:266 cmd/incus/config.go:341
-#: cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:232
-#: cmd/incus/config_trust.go:330 cmd/incus/image.go:459
-#: cmd/incus/network.go:760 cmd/incus/network_acl.go:669
-#: cmd/incus/network_address_set.go:524 cmd/incus/network_forward.go:727
-#: cmd/incus/network_integration.go:294 cmd/incus/network_load_balancer.go:706
-#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:671
-#: cmd/incus/network_zone.go:1337 cmd/incus/profile.go:570
-#: cmd/incus/project.go:395 cmd/incus/storage.go:354
+#: cmd/incus/config_metadata.go:148 cmd/incus/config_template.go:233
+#: cmd/incus/config_trust.go:330 cmd/incus/image.go:483
+#: cmd/incus/network.go:760 cmd/incus/network_acl.go:670
+#: cmd/incus/network_address_set.go:525 cmd/incus/network_forward.go:727
+#: cmd/incus/network_integration.go:295 cmd/incus/network_load_balancer.go:707
+#: cmd/incus/network_peer.go:730 cmd/incus/network_zone.go:672
+#: cmd/incus/network_zone.go:1339 cmd/incus/profile.go:570
+#: cmd/incus/project.go:395 cmd/incus/storage.go:355
 #: cmd/incus/storage_bucket.go:334 cmd/incus/storage_bucket.go:1203
 #: cmd/incus/storage_volume.go:1032 cmd/incus/storage_volume.go:1064
 msgid "Press enter to open the editor again or ctrl+c to abort change"
@@ -7091,7 +7110,7 @@ msgstr "Renderização bonita (curto para --format=pretty)"
 msgid "Print help"
 msgstr "Escreve ajuda"
 
-#: cmd/incus/remote.go:753
+#: cmd/incus/remote.go:749
 msgid "Print or retrieve the client certificate used by this Incus client"
 msgstr ""
 "Escreve ou recupera o certificado de cliente utilizado por este cliente Incus"
@@ -7104,7 +7123,7 @@ msgstr "Escreve a resposta crua"
 msgid "Print version number"
 msgstr "Escreve número da versão"
 
-#: cmd/incus/info.go:495 cmd/incus/info.go:700
+#: cmd/incus/info.go:494 cmd/incus/info.go:699
 #, c-format
 msgid "Processes: %d"
 msgstr "Processos: %d"
@@ -7114,23 +7133,23 @@ msgstr "Processos: %d"
 msgid "Processing aliases failed: %s"
 msgstr "Processamento de aliases falhou: %s"
 
-#: cmd/incus/info.go:351 cmd/incus/info.go:364 cmd/incus/info.go:378
+#: cmd/incus/info.go:350 cmd/incus/info.go:363 cmd/incus/info.go:377
 #, c-format
 msgid "Product ID: %v"
 msgstr "ID do Produto: %v"
 
-#: cmd/incus/info.go:464
+#: cmd/incus/info.go:463
 #, c-format
 msgid "Product: %s"
 msgstr "Produto: %s"
 
-#: cmd/incus/info.go:350 cmd/incus/info.go:363 cmd/incus/info.go:377
-#: cmd/incus/info.go:413
+#: cmd/incus/info.go:349 cmd/incus/info.go:362 cmd/incus/info.go:376
+#: cmd/incus/info.go:412
 #, c-format
 msgid "Product: %v"
 msgstr "Produto: %v"
 
-#: cmd/incus/info.go:112 cmd/incus/info.go:198
+#: cmd/incus/info.go:111 cmd/incus/info.go:197
 #, c-format
 msgid "Product: %v (%v)"
 msgstr "Produto: %v (%v)"
@@ -7169,11 +7188,11 @@ msgstr "Perfil %s renomeado para %s"
 msgid "Profile description"
 msgstr "Descrição do perfil"
 
-#: cmd/incus/image.go:179
+#: cmd/incus/image.go:181
 msgid "Profile to apply to the new image"
 msgstr "Perfil a aplicar à nova imagem"
 
-#: cmd/incus/copy.go:60 cmd/incus/create.go:62
+#: cmd/incus/copy.go:60 cmd/incus/create.go:63
 msgid "Profile to apply to the new instance"
 msgstr "Perfil a aplicar à nova instância"
 
@@ -7186,11 +7205,11 @@ msgstr "Perfil a aplicar à instância alvo"
 msgid "Profiles %s applied to %s"
 msgstr "Perfis %s aplicados a %s"
 
-#: cmd/incus/image.go:993
+#: cmd/incus/image.go:1017
 msgid "Profiles:"
 msgstr "Perfis:"
 
-#: cmd/incus/image.go:991
+#: cmd/incus/image.go:1015
 msgid "Profiles: "
 msgstr "Perfis: "
 
@@ -7204,7 +7223,7 @@ msgstr "Projeto %s criado"
 msgid "Project %s deleted"
 msgstr "Projeto %s apagado"
 
-#: cmd/incus/project.go:743
+#: cmd/incus/project.go:742
 #, c-format
 msgid "Project %s renamed to %s"
 msgstr "Projeto %s renomeado para %s"
@@ -7217,15 +7236,15 @@ msgstr "Descrição do projeto"
 msgid "Project to use for the remote"
 msgstr "Projeto a usar para o remoto"
 
-#: cmd/incus/image.go:966
+#: cmd/incus/image.go:990
 msgid "Properties:"
 msgstr "Propriedades:"
 
-#: cmd/incus/image.go:1545
+#: cmd/incus/image.go:1569
 msgid "Property not found"
 msgstr "Propriedade não encontrada"
 
-#: cmd/incus/image.go:986
+#: cmd/incus/image.go:1010
 #, c-format
 msgid "Protocol: %s"
 msgstr "Protocolo: %s"
@@ -7235,7 +7254,7 @@ msgstr "Protocolo: %s"
 msgid "Provided certificate path doesn't exist: %s"
 msgstr "O caminho do certificado fornecido não existe: %s"
 
-#: cmd/incus/remote_unix.go:47
+#: cmd/incus/remote_unix.go:46
 msgid "Proxy timeout (exits when no connections)"
 msgstr "Tempo limite do Proxy (termina quando não há ligações)"
 
@@ -7243,7 +7262,7 @@ msgstr "Tempo limite do Proxy (termina quando não há ligações)"
 msgid "Public image server"
 msgstr "Servidor de imagem público"
 
-#: cmd/incus/image.go:945
+#: cmd/incus/image.go:969
 #, c-format
 msgid "Public: %s"
 msgstr "Público: %s"
@@ -7266,7 +7285,7 @@ msgid "Pull files from instances"
 msgstr "Puxa ficheiros de instâncias"
 
 #: cmd/incus/file.go:582 cmd/incus/storage_volume.go:2701
-#: cmd/incus/utils_sftp.go:191
+#: cmd/incus/utils_sftp.go:210
 #, c-format
 msgid "Pulling %s from %s: %%s"
 msgstr "A puxar %s de %s: %%s"
@@ -7280,7 +7299,7 @@ msgid "Push files into instances"
 msgstr "Envia ficheiros para instâncias"
 
 #: cmd/incus/file.go:853 cmd/incus/storage_volume.go:2945
-#: cmd/incus/utils_sftp.go:303
+#: cmd/incus/utils_sftp.go:322
 #, c-format
 msgid "Pushing %s to %s: %%s"
 msgstr "A enviar %s to %s: %%s"
@@ -7289,11 +7308,11 @@ msgstr "A enviar %s to %s: %%s"
 msgid "Query path must start with /"
 msgstr "Caminho de consulta tem de começar com /"
 
-#: cmd/incus/image.go:499 cmd/incus/image.go:881 cmd/incus/image.go:1439
+#: cmd/incus/image.go:523 cmd/incus/image.go:905 cmd/incus/image.go:1463
 msgid "Query virtual machine images"
 msgstr "Consulta imagens de máquinas virtuais"
 
-#: cmd/incus/project.go:1077
+#: cmd/incus/project.go:1076
 msgid "RESOURCE"
 msgstr "RECURSO"
 
@@ -7309,7 +7328,7 @@ msgstr "FUNÇÃO"
 msgid "ROLES"
 msgstr "FUNÇÕES"
 
-#: cmd/incus/info.go:297 cmd/incus/info.go:306
+#: cmd/incus/info.go:296 cmd/incus/info.go:305
 #, c-format
 msgid "Read-Only: %v"
 msgstr "Só-Leitura: %v"
@@ -7322,7 +7341,7 @@ msgstr "Recompila como nova instância"
 msgid "Rebuild instances"
 msgstr "Recompila instâncias"
 
-#: cmd/incus/network_zone.go:1030
+#: cmd/incus/network_zone.go:1032
 msgid "Record description"
 msgstr "Descrição do registo"
 
@@ -7364,7 +7383,7 @@ msgstr "Transfere ficheiros recursivamente"
 msgid "Refresh and update the existing storage volume copies"
 msgstr "Refresca e atualiza as cópias de volume de armazenamento existentes"
 
-#: cmd/incus/image.go:1359 cmd/incus/image.go:1360
+#: cmd/incus/image.go:1383 cmd/incus/image.go:1384
 msgid "Refresh images"
 msgstr "Refresca imagens"
 
@@ -7373,18 +7392,18 @@ msgstr "Refresca imagens"
 msgid "Refreshing instance: %s"
 msgstr "A refrescar instância: %s"
 
-#: cmd/incus/image.go:1383
+#: cmd/incus/image.go:1407
 #, c-format
 msgid "Refreshing the image: %s"
 msgstr "A refrescar a imagem: %s"
 
-#: cmd/incus/remote.go:1161
+#: cmd/incus/remote.go:1157
 #, c-format
 msgid "Remote %s already exists"
 msgstr "Remoto %s já existe"
 
-#: cmd/incus/remote.go:1152 cmd/incus/remote.go:1232 cmd/incus/remote.go:1296
-#: cmd/incus/remote.go:1344
+#: cmd/incus/remote.go:1148 cmd/incus/remote.go:1228 cmd/incus/remote.go:1292
+#: cmd/incus/remote.go:1340
 #, c-format
 msgid "Remote %s doesn't exist"
 msgstr "Remoto %s não existe"
@@ -7394,12 +7413,12 @@ msgstr "Remoto %s não existe"
 msgid "Remote %s exists as <%s>"
 msgstr "Remoto %s existe como <%s>"
 
-#: cmd/incus/remote.go:1240
+#: cmd/incus/remote.go:1236
 #, c-format
 msgid "Remote %s is global and cannot be removed"
 msgstr "Remoto %s é global e não pode ser removido"
 
-#: cmd/incus/remote.go:1156 cmd/incus/remote.go:1236 cmd/incus/remote.go:1348
+#: cmd/incus/remote.go:1152 cmd/incus/remote.go:1232 cmd/incus/remote.go:1344
 #, c-format
 msgid "Remote %s is static and cannot be modified"
 msgstr "Remoto %s é estático e não pode ser modificado"
@@ -7412,7 +7431,7 @@ msgstr "Nomes remotos podem não conter dois pontos"
 msgid "Remote trust token"
 msgstr "Testemunho de confiança de remoto"
 
-#: cmd/incus/info.go:298
+#: cmd/incus/info.go:297
 #, c-format
 msgid "Removable: %v"
 msgstr "Removível: %v"
@@ -7431,7 +7450,7 @@ msgstr ""
 "Remover %s e tudo o que contém (instâncias, imagens, volumes, redes, ...) "
 "(sim/não): "
 
-#: cmd/incus/cluster_group.go:562
+#: cmd/incus/cluster_group.go:563
 msgid "Remove a cluster member from a cluster group"
 msgstr "Remove um membro de agrupamento de um grupo de agrupamento"
 
@@ -7439,11 +7458,11 @@ msgstr "Remove um membro de agrupamento de um grupo de agrupamento"
 msgid "Remove a member from the cluster"
 msgstr "Remove um membro do agrupamento"
 
-#: cmd/incus/network_zone.go:1494
+#: cmd/incus/network_zone.go:1496
 msgid "Remove a network zone record entry"
 msgstr "Remove uma entrada de registro de zona de rede"
 
-#: cmd/incus/network_address_set.go:699 cmd/incus/network_address_set.go:700
+#: cmd/incus/network_address_set.go:700 cmd/incus/network_address_set.go:701
 msgid "Remove addresses from a network address set"
 msgstr "Remove endereços de um conjunto de endereços de rede"
 
@@ -7451,7 +7470,7 @@ msgstr "Remove endereços de um conjunto de endereços de rede"
 msgid "Remove aliases"
 msgstr "Remove aliases"
 
-#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1042
+#: cmd/incus/network_forward.go:912 cmd/incus/network_load_balancer.go:1043
 msgid "Remove all ports that match"
 msgstr "Remove todos os portos que correspondem"
 
@@ -7459,19 +7478,19 @@ msgstr "Remove todos os portos que correspondem"
 msgid "Remove all profiles from the instance"
 msgstr "Remove todos os perfis da instância"
 
-#: cmd/incus/network_acl.go:960
+#: cmd/incus/network_acl.go:961
 msgid "Remove all rules that match"
 msgstr "Remove todas as regras que correspondem"
 
-#: cmd/incus/network_load_balancer.go:882
+#: cmd/incus/network_load_balancer.go:883
 msgid "Remove backend from a load balancer"
 msgstr "Remove backend de um balanceador de carga"
 
-#: cmd/incus/network_load_balancer.go:881
+#: cmd/incus/network_load_balancer.go:882
 msgid "Remove backends from a load balancer"
 msgstr "Remove backends de um balanceador de carga"
 
-#: cmd/incus/network_zone.go:1495
+#: cmd/incus/network_zone.go:1497
 msgid "Remove entries from a network zone record"
 msgstr "Remove entradas de um registro de zona de rede"
 
@@ -7479,7 +7498,7 @@ msgstr "Remove entradas de um registro de zona de rede"
 msgid "Remove instance devices"
 msgstr "Remove dispositivos de instância"
 
-#: cmd/incus/cluster_group.go:561
+#: cmd/incus/cluster_group.go:562
 msgid "Remove member from group"
 msgstr "Remove membro de grupo"
 
@@ -7487,8 +7506,8 @@ msgstr "Remove membro de grupo"
 msgid "Remove ports from a forward"
 msgstr "Remove portos de um encaminhamento"
 
-#: cmd/incus/network_load_balancer.go:1040
 #: cmd/incus/network_load_balancer.go:1041
+#: cmd/incus/network_load_balancer.go:1042
 msgid "Remove ports from a load balancer"
 msgstr "Remove portos de um balanceador de carga"
 
@@ -7496,7 +7515,7 @@ msgstr "Remove portos de um balanceador de carga"
 msgid "Remove profiles from instances"
 msgstr "Remove perfis de instâncias"
 
-#: cmd/incus/remote.go:1204 cmd/incus/remote.go:1205
+#: cmd/incus/remote.go:1200 cmd/incus/remote.go:1201
 msgid "Remove remotes"
 msgstr "Remove remotos"
 
@@ -7504,7 +7523,7 @@ msgstr "Remove remotos"
 msgid "Remove roles from a cluster member"
 msgstr "Remove funções de um membro do agrupamento"
 
-#: cmd/incus/network_acl.go:958 cmd/incus/network_acl.go:959
+#: cmd/incus/network_acl.go:959 cmd/incus/network_acl.go:960
 msgid "Remove rules from an ACL"
 msgstr "Remove regras de um ACL"
 
@@ -7517,7 +7536,7 @@ msgstr "Remover instantâneo %s de %s (sim/não): "
 msgid "Remove trusted client"
 msgstr "Remove cliente de confiança"
 
-#: cmd/incus/cluster_group.go:637 cmd/incus/cluster_group.go:638
+#: cmd/incus/cluster_group.go:638 cmd/incus/cluster_group.go:639
 msgid "Rename a cluster group"
 msgstr "Renomeia um grupo do agrupamento"
 
@@ -7542,15 +7561,15 @@ msgstr "Renomeia instantâneos de instância"
 msgid "Rename instances"
 msgstr "Renomeia instâncias"
 
-#: cmd/incus/network_acl.go:702 cmd/incus/network_acl.go:703
+#: cmd/incus/network_acl.go:703 cmd/incus/network_acl.go:704
 msgid "Rename network ACLs"
 msgstr "Renomeia ACLs de rede"
 
-#: cmd/incus/network_address_set.go:557 cmd/incus/network_address_set.go:558
+#: cmd/incus/network_address_set.go:558 cmd/incus/network_address_set.go:559
 msgid "Rename network address sets"
 msgstr "Renomeia conjuntos de endereços de rede"
 
-#: cmd/incus/network_integration.go:521 cmd/incus/network_integration.go:522
+#: cmd/incus/network_integration.go:522 cmd/incus/network_integration.go:523
 msgid "Rename network integrations"
 msgstr "Renomeia integrações de rede"
 
@@ -7562,11 +7581,11 @@ msgstr "Renomeia redes"
 msgid "Rename profiles"
 msgstr "Renomeia perfis"
 
-#: cmd/incus/project.go:705 cmd/incus/project.go:706
+#: cmd/incus/project.go:704 cmd/incus/project.go:705
 msgid "Rename projects"
 msgstr "Renomeia projetos"
 
-#: cmd/incus/remote.go:1123 cmd/incus/remote.go:1124
+#: cmd/incus/remote.go:1119 cmd/incus/remote.go:1120
 msgid "Rename remotes"
 msgstr "Renomeia remotos"
 
@@ -7584,7 +7603,7 @@ msgstr "A renomear volume de armazenamento de \"%s\" para \"%s\""
 msgid "Renamed storage volume snapshot from \"%s\" to \"%s\""
 msgstr "Instantâneo de volume de armazenamento renomeado de \"%s\" para \"%s\""
 
-#: cmd/incus/info.go:136
+#: cmd/incus/info.go:135
 #, c-format
 msgid "Render: %s (%s)"
 msgstr "Renderização: %s (%s)"
@@ -7598,7 +7617,7 @@ msgstr ""
 msgid "Require user confirmation"
 msgstr "Requer confirmação do utilizador"
 
-#: cmd/incus/info.go:698
+#: cmd/incus/info.go:697
 msgid "Resources:"
 msgstr "Recursos:"
 
@@ -7648,12 +7667,12 @@ msgstr "Resumir instâncias"
 msgid "Retrieve the instance's console log"
 msgstr "Obter o relatório de consola da instância"
 
-#: cmd/incus/create.go:352
+#: cmd/incus/create.go:353
 #, c-format
 msgid "Retrieving image: %s"
 msgstr "A obter imagem: %s"
 
-#: cmd/incus/config_trust.go:745 cmd/incus/config_trust.go:746
+#: cmd/incus/config_trust.go:744 cmd/incus/config_trust.go:745
 msgid "Revoke certificate add token"
 msgstr "Revoga testemunho de adição de certificado"
 
@@ -7665,20 +7684,20 @@ msgstr "Revoga testemunho de adesão de membro de agrupamento"
 msgid "Role (admin or read-only)"
 msgstr "Função (administrar ou só leitura)"
 
-#: cmd/incus/admin_sql.go:138
+#: cmd/incus/admin_sql.go:137
 #, c-format
 msgid "Rows affected: %d"
 msgstr "Linhas afetadas: %d"
 
-#: cmd/incus/network_acl.go:826
+#: cmd/incus/network_acl.go:827
 msgid "Rule description"
 msgstr "Descrição de regra"
 
-#: cmd/incus/remote_unix.go:41
+#: cmd/incus/remote_unix.go:40
 msgid "Run a local API proxy"
 msgstr "Corre o proxy API local"
 
-#: cmd/incus/remote_unix.go:42
+#: cmd/incus/remote_unix.go:41
 msgid "Run a local API proxy for the remote"
 msgstr "Corre o proxy API local para o remoto"
 
@@ -7698,11 +7717,11 @@ msgstr "Corre contra todos os projetos"
 msgid "SEVERITY"
 msgstr "GRAVIDADE"
 
-#: cmd/incus/image.go:1081
+#: cmd/incus/image.go:1105
 msgid "SIZE"
 msgstr "TAMANHO"
 
-#: cmd/incus/info.go:425
+#: cmd/incus/info.go:424
 #, c-format
 msgid "SKU: %v"
 msgstr "SKU: %v"
@@ -7715,7 +7734,7 @@ msgstr "INSTANTÂNEOS"
 msgid "SOURCE"
 msgstr "FONTE"
 
-#: cmd/incus/info.go:151 cmd/incus/info.go:260
+#: cmd/incus/info.go:150 cmd/incus/info.go:259
 msgid "SR-IOV information:"
 msgstr "Informação de SR-IOV:"
 
@@ -7748,7 +7767,7 @@ msgstr "ESTADO"
 msgid "STATEFUL"
 msgstr "STATEFUL"
 
-#: cmd/incus/remote.go:993
+#: cmd/incus/remote.go:989
 msgid "STATIC"
 msgstr "ESTÁTICO"
 
@@ -7756,7 +7775,7 @@ msgstr "ESTÁTICO"
 msgid "STATUS"
 msgstr "ESTATÍSTICAS"
 
-#: cmd/incus/project.go:546
+#: cmd/incus/project.go:545
 msgid "STORAGE BUCKETS"
 msgstr "BUCKETS DE ARMAZENAMENTO"
 
@@ -7764,7 +7783,7 @@ msgstr "BUCKETS DE ARMAZENAMENTO"
 msgid "STORAGE POOL"
 msgstr "POOL DE ARMAZENAMENTO"
 
-#: cmd/incus/project.go:545
+#: cmd/incus/project.go:544
 msgid "STORAGE VOLUMES"
 msgstr "VOLUMES DE ARMAZENAMENTO"
 
@@ -7789,25 +7808,25 @@ msgstr "Chave secreta: %s"
 msgid "Send a raw query to the server"
 msgstr "Envia uma consulta em cru para o servidor"
 
-#: cmd/incus/info.go:355
+#: cmd/incus/info.go:354
 #, c-format
 msgid "Serial Number: %v"
 msgstr "Número de Série: %v"
 
-#: cmd/incus/info.go:605
+#: cmd/incus/info.go:604
 msgid "Serial device:"
 msgstr "Dispositivo série:"
 
-#: cmd/incus/info.go:608
+#: cmd/incus/info.go:607
 msgid "Serial devices:"
 msgstr "Dispositivos série:"
 
-#: cmd/incus/info.go:429
+#: cmd/incus/info.go:428
 #, c-format
 msgid "Serial number: %v"
 msgstr "Número de série: %v"
 
-#: cmd/incus/info.go:452 cmd/incus/info.go:468
+#: cmd/incus/info.go:451 cmd/incus/info.go:467
 #, c-format
 msgid "Serial: %s"
 msgstr "Série: %s"
@@ -7816,16 +7835,16 @@ msgstr "Série: %s"
 msgid "Server authentication type (tls or oidc)"
 msgstr "Tipo de autenticação do servidor (tls ou oidc)"
 
-#: cmd/incus/remote.go:508
+#: cmd/incus/remote.go:504
 msgid "Server certificate NACKed by user"
 msgstr "Certificado de servidor NACKed pelo utilizador"
 
-#: cmd/incus/remote.go:643
+#: cmd/incus/remote.go:639
 msgid "Server doesn't trust us after authentication"
 msgstr "O servidor não confia em nós após a autenticação"
 
 #: cmd/incus/cluster.go:286 cmd/incus/cluster.go:1196 cmd/incus/cluster.go:1291
-#: cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:515
+#: cmd/incus/cluster.go:1387 cmd/incus/cluster_group.go:516
 msgid "Server isn't part of a cluster"
 msgstr "Servidor não faz parte de um agrupamento"
 
@@ -7838,12 +7857,12 @@ msgstr "Protocolo de servidor (incus, oci ou simplestreams)"
 msgid "Server version: %s\n"
 msgstr "Versão do servidor: %s\n"
 
-#: cmd/incus/image.go:985
+#: cmd/incus/image.go:1009
 #, c-format
 msgid "Server: %s"
 msgstr "Servidor: %s"
 
-#: cmd/incus/cluster_group.go:876
+#: cmd/incus/cluster_group.go:877
 msgid "Set a cluster group's configuration keys"
 msgstr "Define as chaves de configuração de um grupo dum agrupamento"
 
@@ -7888,7 +7907,7 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus config device set [<remoto>:]<perfil> <dispositivo> <chave> <valor>"
 
-#: cmd/incus/image.go:1563 cmd/incus/image.go:1564
+#: cmd/incus/image.go:1587 cmd/incus/image.go:1588
 msgid "Set image properties"
 msgstr "Define propriedades de imagem"
 
@@ -7910,11 +7929,11 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus config set [<remoto>:][<instância>] <chave> <valor>"
 
-#: cmd/incus/network_acl.go:448
+#: cmd/incus/network_acl.go:449
 msgid "Set network ACL configuration keys"
 msgstr "Define chaves de configuração de ACL de rede"
 
-#: cmd/incus/network_acl.go:449
+#: cmd/incus/network_acl.go:450
 msgid ""
 "Set network ACL configuration keys\n"
 "\n"
@@ -7928,7 +7947,7 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<ACL> <chave> <valor>"
 
-#: cmd/incus/network_address_set.go:327 cmd/incus/network_address_set.go:328
+#: cmd/incus/network_address_set.go:328 cmd/incus/network_address_set.go:329
 msgid "Set network address set configuration keys"
 msgstr "Define chaves de configuração de conjunto de endereço de rede"
 
@@ -7968,11 +7987,11 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<rede> <endereço_de_escuta> <chave> <valor>"
 
-#: cmd/incus/network_integration.go:565
+#: cmd/incus/network_integration.go:566
 msgid "Set network integration configuration keys"
 msgstr "Define chaves de configuração de integração de rede"
 
-#: cmd/incus/network_integration.go:566
+#: cmd/incus/network_integration.go:567
 msgid ""
 "Set network integration configuration keys\n"
 "\n"
@@ -7988,11 +8007,11 @@ msgstr ""
 "    incus network integration set [<remoto>:]<integração de rede> <chave> "
 "<valor>"
 
-#: cmd/incus/network_load_balancer.go:460
+#: cmd/incus/network_load_balancer.go:461
 msgid "Set network load balancer keys"
 msgstr "Define chaves do balanceador de carga de rede"
 
-#: cmd/incus/network_load_balancer.go:461
+#: cmd/incus/network_load_balancer.go:462
 msgid ""
 "Set network load balancer keys\n"
 "\n"
@@ -8024,11 +8043,11 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<rede> <nome_do_peer> <chave> <valor>"
 
-#: cmd/incus/network_zone.go:462
+#: cmd/incus/network_zone.go:463
 msgid "Set network zone configuration keys"
 msgstr "Define chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:463
+#: cmd/incus/network_zone.go:464
 msgid ""
 "Set network zone configuration keys\n"
 "\n"
@@ -8042,7 +8061,7 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus network set [<remoto>:]<Zona> <chave> <valor>"
 
-#: cmd/incus/network_zone.go:1116 cmd/incus/network_zone.go:1117
+#: cmd/incus/network_zone.go:1118 cmd/incus/network_zone.go:1119
 msgid "Set network zone record configuration keys"
 msgstr "Define chaves de configuração de registro de zona de rede"
 
@@ -8064,11 +8083,11 @@ msgstr ""
 "única chave de configuração com:\n"
 "    incus profile set [<remoto>:]<perfil> <chave> <valor>"
 
-#: cmd/incus/project.go:762
+#: cmd/incus/project.go:761
 msgid "Set project configuration keys"
 msgstr "Define chaves de configuração do projeto"
 
-#: cmd/incus/project.go:763
+#: cmd/incus/project.go:762
 msgid ""
 "Set project configuration keys\n"
 "\n"
@@ -8146,7 +8165,7 @@ msgstr ""
 "Valores suportados para tipo são \"custom\", \"container\" e \"virtual-"
 "machine\"."
 
-#: cmd/incus/remote.go:1315 cmd/incus/remote.go:1316
+#: cmd/incus/remote.go:1311 cmd/incus/remote.go:1312
 msgid "Set the URL for the remote"
 msgstr "Define a URL para o remoto"
 
@@ -8198,7 +8217,7 @@ msgstr ""
 "Define as UIDs dos ficheiros ao empurrar (em modo recursivo, apenas define a "
 "UID do directório alvo se este não existir e se -p for usado)"
 
-#: cmd/incus/cluster_group.go:879
+#: cmd/incus/cluster_group.go:880
 msgid "Set the key as a cluster group property"
 msgstr "Define a chave como uma propriedade de grupo de agrupamento"
 
@@ -8206,11 +8225,11 @@ msgstr "Define a chave como uma propriedade de grupo de agrupamento"
 msgid "Set the key as a cluster property"
 msgstr "Define a chave como uma propriedade de agrupamento"
 
-#: cmd/incus/network_acl.go:455
+#: cmd/incus/network_acl.go:456
 msgid "Set the key as a network ACL property"
 msgstr "Define a chave como uma propriedade de ACL de rede"
 
-#: cmd/incus/network_address_set.go:330
+#: cmd/incus/network_address_set.go:331
 msgid "Set the key as a network address set property"
 msgstr "Define a chave como uma propriedade de conjunto de endereços de rede"
 
@@ -8218,11 +8237,11 @@ msgstr "Define a chave como uma propriedade de conjunto de endereços de rede"
 msgid "Set the key as a network forward property"
 msgstr "Define a chave como uma propriedade de encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:573
+#: cmd/incus/network_integration.go:574
 msgid "Set the key as a network integration property"
 msgstr "Define a chave como uma propriedade de integração de rede"
 
-#: cmd/incus/network_load_balancer.go:468
+#: cmd/incus/network_load_balancer.go:469
 msgid "Set the key as a network load balancer property"
 msgstr "Define a chave como uma propriedade de balanceador de carga de rede"
 
@@ -8234,11 +8253,11 @@ msgstr "Define a chave como uma propriedade de peer de rede"
 msgid "Set the key as a network property"
 msgstr "Define a chave como uma propriedade de rede"
 
-#: cmd/incus/network_zone.go:470
+#: cmd/incus/network_zone.go:471
 msgid "Set the key as a network zone property"
 msgstr "Define a chave como uma propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:1122
+#: cmd/incus/network_zone.go:1124
 msgid "Set the key as a network zone record property"
 msgstr "Define a chave como uma propriedade de registro de zona de rede"
 
@@ -8246,7 +8265,7 @@ msgstr "Define a chave como uma propriedade de registro de zona de rede"
 msgid "Set the key as a profile property"
 msgstr "Define a chave como uma propriedade de perfil"
 
-#: cmd/incus/project.go:770
+#: cmd/incus/project.go:769
 msgid "Set the key as a project property"
 msgstr "Define a chave como uma propriedade de projeto"
 
@@ -8286,11 +8305,11 @@ msgstr "Mostra todas as mensagens de depuração"
 msgid "Show all information messages"
 msgstr "Mostra todas as mensagens de informação"
 
-#: cmd/incus/cluster_group.go:687 cmd/incus/cluster_group.go:688
+#: cmd/incus/cluster_group.go:688 cmd/incus/cluster_group.go:689
 msgid "Show cluster group configurations"
 msgstr "Mostra configurações de grupo de agrupamento"
 
-#: cmd/incus/config_template.go:331 cmd/incus/config_template.go:332
+#: cmd/incus/config_template.go:332 cmd/incus/config_template.go:333
 msgid "Show content of instance file templates"
 msgstr "Mostrar conteúdo de modelos de ficheiro de instância"
 
@@ -8310,7 +8329,7 @@ msgstr "Mostra eventos de todos os projetos"
 msgid "Show full device configuration"
 msgstr "Mostra configuração completa do dispositivo"
 
-#: cmd/incus/image.go:1436 cmd/incus/image.go:1437
+#: cmd/incus/image.go:1460 cmd/incus/image.go:1461
 msgid "Show image properties"
 msgstr "Mostra propriedades de imagem"
 
@@ -8358,7 +8377,7 @@ msgstr "Mostra configurações de rede"
 msgid "Show network forward configurations"
 msgstr "Mostra configurações de encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:667 cmd/incus/network_integration.go:668
+#: cmd/incus/network_integration.go:668 cmd/incus/network_integration.go:669
 msgid "Show network integration options"
 msgstr "Mostra opções de integração de rede"
 
@@ -8375,11 +8394,11 @@ msgstr "Mostra configurações de peer de rede"
 msgid "Show network zone configurations"
 msgstr "Mostra configurações de zona de rede"
 
-#: cmd/incus/network_zone.go:889
+#: cmd/incus/network_zone.go:890
 msgid "Show network zone record configuration"
 msgstr "Mostra configuração de registro de zona de rede"
 
-#: cmd/incus/network_zone.go:890
+#: cmd/incus/network_zone.go:891
 msgid "Show network zone record configurations"
 msgstr "Mostra configurações de registro de zona de rede"
 
@@ -8387,7 +8406,7 @@ msgstr "Mostra configurações de registro de zona de rede"
 msgid "Show profile configurations"
 msgstr "Mostra configurações de perfil"
 
-#: cmd/incus/project.go:885 cmd/incus/project.go:886
+#: cmd/incus/project.go:884 cmd/incus/project.go:885
 msgid "Show project options"
 msgstr "Mostra opções de projeto"
 
@@ -8453,11 +8472,11 @@ msgstr ""
 "Valores suportados para tipo são \"custom\", \"container\" e \"virtual-"
 "machine\"."
 
-#: cmd/incus/project.go:1096 cmd/incus/project.go:1097
+#: cmd/incus/project.go:1095 cmd/incus/project.go:1096
 msgid "Show the current project"
 msgstr "Mostra o projeto atual"
 
-#: cmd/incus/remote.go:720 cmd/incus/remote.go:721
+#: cmd/incus/remote.go:716 cmd/incus/remote.go:717
 msgid "Show the default remote"
 msgstr "Mostra o remoto predefinido"
 
@@ -8465,7 +8484,7 @@ msgstr "Mostra o remoto predefinido"
 msgid "Show the expanded configuration"
 msgstr "Mostra a configuração expandida"
 
-#: cmd/incus/info.go:50 cmd/incus/project.go:993
+#: cmd/incus/info.go:50 cmd/incus/project.go:992
 msgid "Show the instance's access list"
 msgstr "Mostra a lista de acesso da instância"
 
@@ -8473,7 +8492,7 @@ msgstr "Mostra a lista de acesso da instância"
 msgid "Show the instance's recent log entries"
 msgstr "Mostra as entradas de relatório recentes da instância"
 
-#: cmd/incus/info.go:53
+#: cmd/incus/info.go:52
 msgid "Show the resources available to the server"
 msgstr "Mostra os recursos disponíveis para o servidor"
 
@@ -8481,11 +8500,11 @@ msgstr "Mostra os recursos disponíveis para o servidor"
 msgid "Show the resources available to the storage pool"
 msgstr "Mostra os recursos disponíveis para a piscina de armazenamento"
 
-#: cmd/incus/storage.go:467
+#: cmd/incus/storage.go:468
 msgid "Show the used and free space in bytes"
 msgstr "Mostra o espaço usado e livre em bytes"
 
-#: cmd/incus/config_trust.go:814 cmd/incus/config_trust.go:815
+#: cmd/incus/config_trust.go:812 cmd/incus/config_trust.go:813
 msgid "Show trust configurations"
 msgstr "Mostra configurações de confiança"
 
@@ -8493,11 +8512,11 @@ msgstr "Mostra configurações de confiança"
 msgid "Show useful information about a cluster member"
 msgstr "Mostra informação útil sobre um membro do agrupamento"
 
-#: cmd/incus/image.go:877 cmd/incus/image.go:878
+#: cmd/incus/image.go:901 cmd/incus/image.go:902
 msgid "Show useful information about images"
 msgstr "Mostra informações úteis sobre imagens"
 
-#: cmd/incus/storage.go:463 cmd/incus/storage.go:464
+#: cmd/incus/storage.go:464 cmd/incus/storage.go:465
 msgid "Show useful information about storage pools"
 msgstr "Mostra informações úteis sobre piscinas de armazenamento"
 
@@ -8509,12 +8528,12 @@ msgstr "Mostra aviso"
 msgid "Size in GiB of the new loop device"
 msgstr "Tamanho em GiB do novo dispositivo de loop"
 
-#: cmd/incus/image.go:942
+#: cmd/incus/image.go:966
 #, c-format
 msgid "Size: %.2fMiB"
 msgstr "Tamanho: %.2fMiB"
 
-#: cmd/incus/info.go:291 cmd/incus/info.go:307
+#: cmd/incus/info.go:290 cmd/incus/info.go:306
 #, c-format
 msgid "Size: %s"
 msgstr "Tamanho: %s"
@@ -8532,16 +8551,16 @@ msgid "Snapshots are read-only and can't have their configuration changed"
 msgstr ""
 "Os instantâneos são só leitura e não se pode alterar a sua configuração"
 
-#: cmd/incus/info.go:809 cmd/incus/storage_volume.go:1333
+#: cmd/incus/info.go:808 cmd/incus/storage_volume.go:1333
 msgid "Snapshots:"
 msgstr "Instantâneos:"
 
-#: cmd/incus/info.go:508
+#: cmd/incus/info.go:507
 #, c-format
 msgid "Socket %d:"
 msgstr "Socket %d:"
 
-#: cmd/incus/action.go:455
+#: cmd/incus/action.go:454
 #, c-format
 msgid "Some instances failed to %s"
 msgstr "Algumas instâncias falharam a %s"
@@ -8558,11 +8577,11 @@ msgstr ""
 "Fonte do pool de armazenamento (dispositivo de bloco, grupo de volume, "
 "conjunto de dados, caminho, ... como aplicável):"
 
-#: cmd/incus/image.go:984
+#: cmd/incus/image.go:1008
 msgid "Source:"
 msgstr "Fonte:"
 
-#: cmd/incus/storage_volume.go:3987
+#: cmd/incus/storage_volume.go:3986
 msgid "Specific address to listen on"
 msgstr "Endereço específico onde escutar"
 
@@ -8570,7 +8589,7 @@ msgstr "Endereço específico onde escutar"
 msgid "Start instances"
 msgstr "Inicia instâncias"
 
-#: cmd/incus/info.go:684
+#: cmd/incus/info.go:683
 #, c-format
 msgid "Started: %s"
 msgstr "Iniciado: %s"
@@ -8584,7 +8603,7 @@ msgstr "A iniciar %s"
 msgid "Starting recovery..."
 msgstr "A iniciar recuperação..."
 
-#: cmd/incus/info.go:766
+#: cmd/incus/info.go:765
 msgid "State"
 msgstr "Estado"
 
@@ -8593,11 +8612,11 @@ msgstr "Estado"
 msgid "State: %s"
 msgstr "Estado: %s"
 
-#: cmd/incus/info.go:843
+#: cmd/incus/info.go:842
 msgid "Stateful"
 msgstr "Stateful"
 
-#: cmd/incus/info.go:647
+#: cmd/incus/info.go:646
 #, c-format
 msgid "Status: %s"
 msgstr "Estatuto: %s"
@@ -8658,26 +8677,26 @@ msgstr "O pool de armazenamento %q já está na lista de recuperação"
 msgid "Storage pool %q of type %q"
 msgstr "Pool de armazenamento %q do tipo %q"
 
-#: cmd/incus/storage.go:191
+#: cmd/incus/storage.go:192
 #, c-format
 msgid "Storage pool %s created"
 msgstr "Pool de armazenamento %s criado"
 
-#: cmd/incus/storage.go:242
+#: cmd/incus/storage.go:243
 #, c-format
 msgid "Storage pool %s deleted"
 msgstr "Pool de armazenamento %s apagado"
 
-#: cmd/incus/storage.go:189
+#: cmd/incus/storage.go:190
 #, c-format
 msgid "Storage pool %s pending on member %s"
 msgstr "Pool de armazenamento %s pendente de membro %s"
 
-#: cmd/incus/storage.go:117
+#: cmd/incus/storage.go:118
 msgid "Storage pool description"
 msgstr "Descrição de pool de armazenamento"
 
-#: cmd/incus/copy.go:65 cmd/incus/create.go:67 cmd/incus/import.go:39
+#: cmd/incus/copy.go:65 cmd/incus/create.go:68 cmd/incus/import.go:39
 #: cmd/incus/move.go:66
 msgid "Storage pool name"
 msgstr "Nome de pool de armazenamento"
@@ -8717,29 +8736,29 @@ msgstr "Armazena o estado da instância"
 msgid "Successfully updated cluster certificates"
 msgstr "Certificados de agrupamento atualizados com sucesso"
 
-#: cmd/incus/info.go:220
+#: cmd/incus/info.go:219
 #, c-format
 msgid "Supported modes: %s"
 msgstr "Modos suportados: %s"
 
-#: cmd/incus/info.go:224
+#: cmd/incus/info.go:223
 #, c-format
 msgid "Supported ports: %s"
 msgstr "Portos suportados: %s"
 
-#: cmd/incus/info.go:739
+#: cmd/incus/info.go:738
 msgid "Swap (current)"
 msgstr "Swap (atual)"
 
-#: cmd/incus/info.go:743
+#: cmd/incus/info.go:742
 msgid "Swap (peak)"
 msgstr "Swap (pico)"
 
-#: cmd/incus/project.go:937 cmd/incus/project.go:938
+#: cmd/incus/project.go:936 cmd/incus/project.go:937
 msgid "Switch the current project"
 msgstr "Altera o projeto atual"
 
-#: cmd/incus/remote.go:1268 cmd/incus/remote.go:1269
+#: cmd/incus/remote.go:1264 cmd/incus/remote.go:1265
 msgid "Switch the default remote"
 msgstr "Altera o remoto predefinido"
 
@@ -8748,7 +8767,7 @@ msgid "Symlink target path can only be used for type \"symlink\""
 msgstr ""
 "O caminho do alvo do link simbólico só pode ser usado para o tipo \"symlink\""
 
-#: cmd/incus/info.go:403
+#: cmd/incus/info.go:402
 msgid "System:"
 msgstr "Sistema:"
 
@@ -8764,16 +8783,16 @@ msgstr "ALVO"
 msgid "TOKEN"
 msgstr "TESTEMUNHO"
 
-#: cmd/incus/config_trust.go:414 cmd/incus/image.go:1082
+#: cmd/incus/config_trust.go:414 cmd/incus/image.go:1106
 #: cmd/incus/image_alias.go:248 cmd/incus/list.go:490 cmd/incus/network.go:1072
 #: cmd/incus/network.go:1268 cmd/incus/network_allocations.go:82
-#: cmd/incus/network_integration.go:428 cmd/incus/network_peer.go:141
+#: cmd/incus/network_integration.go:429 cmd/incus/network_peer.go:141
 #: cmd/incus/operation.go:165 cmd/incus/storage_volume.go:1567
 #: cmd/incus/warning.go:216
 msgid "TYPE"
 msgstr "TIPO"
 
-#: cmd/incus/info.go:841 cmd/incus/info.go:892 cmd/incus/storage_volume.go:1405
+#: cmd/incus/info.go:840 cmd/incus/info.go:891 cmd/incus/storage_volume.go:1405
 msgid "Taken at"
 msgstr "Tomado em"
 
@@ -8781,8 +8800,8 @@ msgstr "Tomado em"
 msgid "Target isn't a cluster"
 msgstr "Alvo não é um agrupamento"
 
-#: cmd/incus/export.go:77 cmd/incus/storage_bucket.go:1329
-#: cmd/incus/storage_volume.go:3704
+#: cmd/incus/export.go:74 cmd/incus/storage_bucket.go:1329
+#: cmd/incus/storage_volume.go:3703
 #, c-format
 msgid "Target path %q already exists"
 msgstr "Caminho alvo %q já existe"
@@ -8910,7 +8929,7 @@ msgid ""
 msgstr ""
 "A instância está atualmente em execução. Use --force para a parar e reiniciar"
 
-#: cmd/incus/create.go:427
+#: cmd/incus/create.go:428
 msgid "The instance you are starting doesn't have any network attached to it."
 msgstr ""
 "A instância que você está a iniciar não tem nenhuma rede anexada a ela."
@@ -8920,7 +8939,7 @@ msgid "The is no config key to set on an instance snapshot."
 msgstr ""
 "Não há nenhuma chave de configuração a definir a um instantâneo de instância."
 
-#: cmd/incus/cluster_group.go:856
+#: cmd/incus/cluster_group.go:857
 #, c-format
 msgid "The key %q does not exist on cluster group %q"
 msgstr "A chave %q não existe no grupo de agrupamento %q"
@@ -8950,7 +8969,7 @@ msgstr "A taxa de atualização mínima é de 10s"
 msgid "The profile device doesn't exist"
 msgstr "O dispositivo de perfil não existe"
 
-#: cmd/incus/cluster_group.go:847
+#: cmd/incus/cluster_group.go:848
 #, c-format
 msgid "The property %q does not exist on the cluster group %q: %v"
 msgstr "A propriedade %q não existe no grupo de agrupamento %q: %v"
@@ -8970,7 +8989,7 @@ msgstr "A propriedade %q não existe na instância %q: %v"
 msgid "The property %q does not exist on the instance snapshot %s: %v"
 msgstr "A propriedade %q não existe no instantâneo da instância %s: %v"
 
-#: cmd/incus/network_load_balancer.go:432
+#: cmd/incus/network_load_balancer.go:433
 #, c-format
 msgid "The property %q does not exist on the load balancer %q: %v"
 msgstr "A propriedade %q não existe no balanceador de carga %q: %v"
@@ -8990,7 +9009,7 @@ msgstr "A propriedade %q não existe no ACL de rede %q: %v"
 msgid "The property %q does not exist on the network forward %q: %v"
 msgstr "A propriedade %q não existe no encaminhamento de rede %q: %v"
 
-#: cmd/incus/network_integration.go:362
+#: cmd/incus/network_integration.go:363
 #, c-format
 msgid "The property %q does not exist on the network integration %q: %v"
 msgstr "A propriedade %q não existe na integração de rede %q: %v"
@@ -9005,7 +9024,7 @@ msgstr "A propriedade %q não existe no peer de rede %q: %v"
 msgid "The property %q does not exist on the network zone %q: %v"
 msgstr "A propriedade %q não existe na zona de rede %q: %v"
 
-#: cmd/incus/network_zone.go:992
+#: cmd/incus/network_zone.go:993
 #, c-format
 msgid "The property %q does not exist on the network zone record %q: %v"
 msgstr "A propriedade %q não existe no registro da zona de rede %q: %v"
@@ -9025,7 +9044,7 @@ msgstr "A propriedade %q não existe no projeto %q: %v"
 msgid "The property %q does not exist on the storage bucket %q: %v"
 msgstr "A propriedade %q não existe no bucket de armazenamento %q: %v"
 
-#: cmd/incus/storage.go:436
+#: cmd/incus/storage.go:437
 #, c-format
 msgid "The property %q does not exist on the storage pool %q: %v"
 msgstr "A propriedade %q não existe na pool de armazenamento %q: %v"
@@ -9090,7 +9109,7 @@ msgstr ""
 msgid "The server doesn't have a web UI installed"
 msgstr "O servidor não tem uma Interface de Utilizador web instalada"
 
-#: cmd/incus/info.go:394
+#: cmd/incus/info.go:393
 msgid "The server doesn't implement the newer v2 resources API"
 msgstr "O servidor não implementa a nova API de recursos v2"
 
@@ -9146,7 +9165,7 @@ msgstr ""
 msgid "This command isn't supported on Windows"
 msgstr "Este comando não é suportado no Windows"
 
-#: cmd/incus/usage/parse.go:115
+#: cmd/incus/usage/parse.go:111
 msgid ""
 "This command was called with --explain; its arguments are valid, but no "
 "further processing is done"
@@ -9166,23 +9185,23 @@ msgstr "Este servidor já está agrupado"
 msgid "This server is not available on the network"
 msgstr "Este servidor não está disponível na rede"
 
-#: cmd/incus/info.go:332
+#: cmd/incus/info.go:331
 msgid "Threads:"
 msgstr "Threads:"
 
-#: cmd/incus/action.go:167
+#: cmd/incus/action.go:166
 msgid "Time to wait for the instance to shutdown cleanly"
 msgstr "Tempo a esperar para a instância desligar de maneira limpa"
 
-#: cmd/incus/image.go:946
+#: cmd/incus/image.go:970
 msgid "Timestamps:"
 msgstr "Marcas temporais:"
 
-#: cmd/incus/create.go:429
+#: cmd/incus/create.go:430
 msgid "To attach a network to an instance, use: incus network attach"
 msgstr "Para anexar uma rede a uma instância, use: incus network attach"
 
-#: cmd/incus/create.go:428
+#: cmd/incus/create.go:429
 msgid "To create a new network, use: incus network create"
 msgstr "Para criar uma nova rede, use: incus network create"
 
@@ -9200,8 +9219,8 @@ msgstr ""
 "Ou para uma máquina virtual: incus launch images:%s --vm"
 
 #: cmd/incus/config.go:290 cmd/incus/config.go:475 cmd/incus/config.go:639
-#: cmd/incus/config.go:724 cmd/incus/copy.go:129 cmd/incus/info.go:386
-#: cmd/incus/network.go:897 cmd/incus/storage.go:494
+#: cmd/incus/config.go:724 cmd/incus/copy.go:129 cmd/incus/info.go:385
+#: cmd/incus/network.go:897 cmd/incus/storage.go:495
 msgid "To use --target, the destination remote must be a cluster"
 msgstr "Para usar --target, o remoto alvo tem de ser um agrupamento"
 
@@ -9210,13 +9229,13 @@ msgstr "Para usar --target, o remoto alvo tem de ser um agrupamento"
 msgid "Total: %s"
 msgstr "Total: %s"
 
-#: cmd/incus/info.go:519 cmd/incus/info.go:530 cmd/incus/info.go:535
-#: cmd/incus/info.go:541
+#: cmd/incus/info.go:518 cmd/incus/info.go:529 cmd/incus/info.go:534
+#: cmd/incus/info.go:540
 #, c-format
 msgid "Total: %v"
 msgstr "Total: %v"
 
-#: cmd/incus/info.go:232
+#: cmd/incus/info.go:231
 #, c-format
 msgid "Transceiver type: %s"
 msgstr "Tipo de transceptor: %s"
@@ -9225,7 +9244,7 @@ msgstr "Tipo de transceptor: %s"
 msgid "Transfer mode, one of pull (default), push or relay"
 msgstr "Modo de transferência, um de pull (predefinido), push ou relay"
 
-#: cmd/incus/image.go:177
+#: cmd/incus/image.go:179
 msgid "Transfer mode. One of pull (default), push or relay"
 msgstr "Modo de transferência. Um de pull (predefinido), push ou relay"
 
@@ -9241,7 +9260,7 @@ msgstr "Modo de transferência. Um de pull, push ou relay"
 msgid "Transfer mode. One of pull, push or relay."
 msgstr "Modo de transferência. Um de pull, push ou relay."
 
-#: cmd/incus/image.go:744
+#: cmd/incus/image.go:768
 #, c-format
 msgid "Transferring image: %s"
 msgstr "A transferir imagem: %s"
@@ -9255,17 +9274,17 @@ msgstr "A transferir instância: %s"
 msgid "Transmit policy"
 msgstr "Política de transmissão"
 
-#: cmd/incus/remote.go:615
+#: cmd/incus/remote.go:611
 #, c-format
 msgid "Trust token for %s: "
 msgstr "Testemunho de confiança para %s: "
 
-#: cmd/incus/action.go:306 cmd/incus/launch.go:138
+#: cmd/incus/action.go:305 cmd/incus/launch.go:138
 #, c-format
 msgid "Try `incus info --show-log %s%s` for more info"
 msgstr "Tente `incus info --show-log %s%s` para mais informação"
 
-#: cmd/incus/info.go:765
+#: cmd/incus/info.go:764
 msgid "Type"
 msgstr "Tipo"
 
@@ -9285,42 +9304,42 @@ msgstr ""
 msgid "Type of peer (local or remote)"
 msgstr "Tipo de peer (local ou remoto)"
 
-#: cmd/incus/image.go:944 cmd/incus/info.go:288 cmd/incus/info.go:433
-#: cmd/incus/info.go:444 cmd/incus/info.go:662 cmd/incus/network.go:917
+#: cmd/incus/image.go:968 cmd/incus/info.go:287 cmd/incus/info.go:432
+#: cmd/incus/info.go:443 cmd/incus/info.go:661 cmd/incus/network.go:917
 #: cmd/incus/storage_volume.go:1303
 #, c-format
 msgid "Type: %s"
 msgstr "Tipo: %s"
 
-#: cmd/incus/project.go:1049
+#: cmd/incus/project.go:1048
 msgid "UNLIMITED"
 msgstr "SEM LIMITE"
 
-#: cmd/incus/image.go:1083
+#: cmd/incus/image.go:1107
 msgid "UPLOAD DATE"
 msgstr "DATA DE ENVIO"
 
-#: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:989
-#: cmd/incus/usage/usage.go:819
+#: cmd/incus/cluster.go:196 cmd/incus/remote.go:120 cmd/incus/remote.go:985
+#: cmd/incus/usage/usage.go:859
 msgid "URL"
 msgstr "URL"
 
-#: cmd/incus/project.go:1079 cmd/incus/storage_volume.go:1572
+#: cmd/incus/project.go:1078 cmd/incus/storage_volume.go:1572
 msgid "USAGE"
 msgstr "UTILIZAÇÃO"
 
-#: cmd/incus/info.go:581
+#: cmd/incus/info.go:580
 msgid "USB device:"
 msgstr "Dispositivo USB:"
 
-#: cmd/incus/info.go:584
+#: cmd/incus/info.go:583
 msgid "USB devices:"
 msgstr "Dispositivos USB:"
 
 #: cmd/incus/network.go:1077 cmd/incus/network_acl.go:164
 #: cmd/incus/network_address_set.go:157 cmd/incus/network_allocations.go:80
-#: cmd/incus/network_integration.go:429 cmd/incus/network_zone.go:146
-#: cmd/incus/profile.go:726 cmd/incus/project.go:550 cmd/incus/storage.go:688
+#: cmd/incus/network_integration.go:430 cmd/incus/network_zone.go:146
+#: cmd/incus/profile.go:726 cmd/incus/project.go:549 cmd/incus/storage.go:688
 #: cmd/incus/storage_volume.go:1571
 msgid "USED BY"
 msgstr "USADO POR"
@@ -9329,12 +9348,12 @@ msgstr "USADO POR"
 msgid "UUID"
 msgstr "UUID"
 
-#: cmd/incus/info.go:147 cmd/incus/info.go:405
+#: cmd/incus/info.go:146 cmd/incus/info.go:404
 #, c-format
 msgid "UUID: %v"
 msgstr "UUID: %v"
 
-#: cmd/incus/cluster.go:1740 cmd/incus/cluster.go:1933
+#: cmd/incus/cluster.go:1740 cmd/incus/cluster.go:1935
 msgid "Unable to connect to any of the cluster members specified in join token"
 msgstr ""
 "Incapaz de se ligar a qualquer um dos membros do agrupamento especificados "
@@ -9360,14 +9379,14 @@ msgid "Unknown channel type for client %q: %s"
 msgstr "Tipo de canal desconhecido para cliente %q: %s"
 
 #: cmd/incus/cluster.go:217 cmd/incus/cluster.go:1159
-#: cmd/incus/cluster_group.go:478 cmd/incus/config_trust.go:435
-#: cmd/incus/config_trust.go:616 cmd/incus/image.go:1098
+#: cmd/incus/cluster_group.go:479 cmd/incus/config_trust.go:435
+#: cmd/incus/config_trust.go:616 cmd/incus/image.go:1122
 #: cmd/incus/image_alias.go:264 cmd/incus/list.go:546 cmd/incus/network.go:1097
 #: cmd/incus/network.go:1286 cmd/incus/network_allocations.go:98
-#: cmd/incus/network_forward.go:163 cmd/incus/network_integration.go:443
+#: cmd/incus/network_forward.go:163 cmd/incus/network_integration.go:444
 #: cmd/incus/network_load_balancer.go:169 cmd/incus/network_peer.go:156
 #: cmd/incus/network_zone.go:164 cmd/incus/operation.go:187
-#: cmd/incus/profile.go:747 cmd/incus/project.go:565 cmd/incus/remote.go:1008
+#: cmd/incus/profile.go:747 cmd/incus/project.go:564 cmd/incus/remote.go:1004
 #: cmd/incus/snapshot.go:382 cmd/incus/storage.go:704
 #: cmd/incus/storage_bucket.go:504 cmd/incus/storage_bucket.go:888
 #: cmd/incus/storage_volume.go:1603 cmd/incus/storage_volume.go:3393
@@ -9381,17 +9400,17 @@ msgstr "Caractere curto de coluna desconhecido '%c' in '%s'"
 msgid "Unknown console type %q"
 msgstr "Tipo de consola desconhecido %q"
 
-#: cmd/incus/utils_sftp.go:238
+#: cmd/incus/utils_sftp.go:257
 #, c-format
 msgid "Unknown file type '%s'"
 msgstr "Tipo de ficheiro desconhecido '%s'"
 
-#: cmd/incus/usage/usage.go:336
+#: cmd/incus/usage/usage.go:376
 #, c-format
 msgid "Unknown flag --%s"
 msgstr "Bandeira desconhecida -- %s"
 
-#: cmd/incus/network_acl.go:891 cmd/incus/network_acl.go:1010
+#: cmd/incus/network_acl.go:892 cmd/incus/network_acl.go:1011
 #, c-format
 msgid "Unknown key: %s"
 msgstr "Chave desconhecida: %s"
@@ -9401,7 +9420,7 @@ msgstr "Chave desconhecida: %s"
 msgid "Unknown output type %q"
 msgstr "Tipo de saída desconhecido %q"
 
-#: cmd/incus/cluster_group.go:955
+#: cmd/incus/cluster_group.go:956
 msgid "Unset a cluster group's configuration keys"
 msgstr ""
 "Retira definições das chaves de configuração de um grupo de agrupamento"
@@ -9419,7 +9438,7 @@ msgstr "Retira definições de todos os perfis na instância alvo"
 msgid "Unset device configuration keys"
 msgstr "Retira definições de chaves de configuração"
 
-#: cmd/incus/image.go:1627 cmd/incus/image.go:1628
+#: cmd/incus/image.go:1651 cmd/incus/image.go:1652
 msgid "Unset image properties"
 msgstr "Retira propriedades da imagem"
 
@@ -9427,11 +9446,11 @@ msgstr "Retira propriedades da imagem"
 msgid "Unset instance or server configuration keys"
 msgstr "Retira definições das chaves de configuração de instância ou servidor"
 
-#: cmd/incus/network_acl.go:529 cmd/incus/network_acl.go:530
+#: cmd/incus/network_acl.go:530 cmd/incus/network_acl.go:531
 msgid "Unset network ACL configuration keys"
 msgstr "Retira definições das chaves de configuração de ACL de rede"
 
-#: cmd/incus/network_address_set.go:400 cmd/incus/network_address_set.go:401
+#: cmd/incus/network_address_set.go:401 cmd/incus/network_address_set.go:402
 msgid "Unset network address set configuration keys"
 msgstr ""
 "Retira definições das chaves de configuração de conjuntos de endereços de "
@@ -9449,16 +9468,16 @@ msgstr "Retira definições de chaves de configuração de encaminhamento de red
 msgid "Unset network forward keys"
 msgstr "Retira definições de chaves de encaminhamento e rede"
 
-#: cmd/incus/network_integration.go:637 cmd/incus/network_integration.go:638
+#: cmd/incus/network_integration.go:638 cmd/incus/network_integration.go:639
 msgid "Unset network integration configuration keys"
 msgstr "Retira definições de chaves de configuração de integração de rede"
 
-#: cmd/incus/network_load_balancer.go:558
+#: cmd/incus/network_load_balancer.go:559
 msgid "Unset network load balancer configuration keys"
 msgstr ""
 "Retira definições de chaves de configuração de balanceador de carga de rede"
 
-#: cmd/incus/network_load_balancer.go:559
+#: cmd/incus/network_load_balancer.go:560
 msgid "Unset network load balancer keys"
 msgstr "Retira definições de chaves de balanceador de carga de rede"
 
@@ -9470,11 +9489,11 @@ msgstr "Retira definições de chaves de configuração de peer de rede"
 msgid "Unset network peer keys"
 msgstr "Retira definições de chaves de peer de rede"
 
-#: cmd/incus/network_zone.go:543 cmd/incus/network_zone.go:544
+#: cmd/incus/network_zone.go:544 cmd/incus/network_zone.go:545
 msgid "Unset network zone configuration keys"
 msgstr "Retira definições de chaves de configuração de zona de rede"
 
-#: cmd/incus/network_zone.go:1200 cmd/incus/network_zone.go:1201
+#: cmd/incus/network_zone.go:1202 cmd/incus/network_zone.go:1203
 msgid "Unset network zone record configuration keys"
 msgstr "Retira definições de chaves de configuração de registo de zona de rede"
 
@@ -9482,7 +9501,7 @@ msgstr "Retira definições de chaves de configuração de registo de zona de re
 msgid "Unset profile configuration keys"
 msgstr "Retira definições de chaves de configuração de perfis"
 
-#: cmd/incus/project.go:843 cmd/incus/project.go:844
+#: cmd/incus/project.go:842 cmd/incus/project.go:843
 msgid "Unset project configuration keys"
 msgstr "Retira definições de chaves de configuração de projeto"
 
@@ -9512,7 +9531,7 @@ msgstr ""
 "Valores suportados para tipo são \"custom\", \"container\" e \"virtual-"
 "machine\"."
 
-#: cmd/incus/cluster_group.go:958
+#: cmd/incus/cluster_group.go:959
 msgid "Unset the key as a cluster group property"
 msgstr "Retira definições da chave como propriedade de grupo de agrupamento"
 
@@ -9520,11 +9539,11 @@ msgstr "Retira definições da chave como propriedade de grupo de agrupamento"
 msgid "Unset the key as a cluster property"
 msgstr "Retira definições da chave como propriedade de agrupamento"
 
-#: cmd/incus/network_acl.go:533
+#: cmd/incus/network_acl.go:534
 msgid "Unset the key as a network ACL property"
 msgstr "Retira definições da chave como propriedade de ACL de rede"
 
-#: cmd/incus/network_address_set.go:404
+#: cmd/incus/network_address_set.go:405
 msgid "Unset the key as a network address set property"
 msgstr ""
 "Retira definições da chave como propriedade de conjunto de endereços de rede"
@@ -9533,11 +9552,11 @@ msgstr ""
 msgid "Unset the key as a network forward property"
 msgstr "Retira definições da chave como propriedade de encaminhamento de rede"
 
-#: cmd/incus/network_integration.go:642
+#: cmd/incus/network_integration.go:643
 msgid "Unset the key as a network integration property"
 msgstr "Retira definições da chave como propriedade de integração de rede"
 
-#: cmd/incus/network_load_balancer.go:562
+#: cmd/incus/network_load_balancer.go:563
 msgid "Unset the key as a network load balancer property"
 msgstr ""
 "Retira definições da chave como propriedade de balanceador de carga de rede"
@@ -9550,11 +9569,11 @@ msgstr "Retira definições da chave como propriedade de peer de rede"
 msgid "Unset the key as a network property"
 msgstr "Retira definições da chave como propriedade de rede"
 
-#: cmd/incus/network_zone.go:547
+#: cmd/incus/network_zone.go:548
 msgid "Unset the key as a network zone property"
 msgstr "Retira definições da chave como propriedade de zona de rede"
 
-#: cmd/incus/network_zone.go:1204
+#: cmd/incus/network_zone.go:1206
 msgid "Unset the key as a network zone record property"
 msgstr "Retira definições da chave como propriedade de registo de zona de rede"
 
@@ -9562,7 +9581,7 @@ msgstr "Retira definições da chave como propriedade de registo de zona de rede
 msgid "Unset the key as a profile property"
 msgstr "Retira definições da chave como propriedade de perfil"
 
-#: cmd/incus/project.go:847
+#: cmd/incus/project.go:846
 msgid "Unset the key as a project property"
 msgstr "Retira definições da chave como propriedade de projeto"
 
@@ -9582,7 +9601,7 @@ msgstr "Retira definições da chave como propriedade de volume de armazenamento
 msgid "Unset the key as an instance property"
 msgstr "Retira definições da chave como propriedade de instância"
 
-#: cmd/incus/info.go:913
+#: cmd/incus/info.go:912
 #, c-format
 msgid "Unsupported instance type: %s"
 msgstr "Tipo de instância não suportado: %s"
@@ -9612,7 +9631,7 @@ msgstr "Atualiza o perfil do alvo a partir da fonte se já existir"
 msgid "Updated interval to %v"
 msgstr "Intervalo atualizado para %v"
 
-#: cmd/incus/image.go:952
+#: cmd/incus/image.go:976
 #, c-format
 msgid "Uploaded: %s"
 msgstr "Enviado: %s"
@@ -9621,7 +9640,7 @@ msgstr "Enviado: %s"
 msgid "Upper devices"
 msgstr "Dispositivos de cima"
 
-#: cmd/incus/color/color.go:35
+#: cmd/incus/color/color.go:37
 msgid "Usage:"
 msgstr "Utilização:"
 
@@ -9638,14 +9657,14 @@ msgstr ""
 "Use \"{{.CaminhoDeComando}} [<comando>] --help\" para mais informação sobre "
 "um comando."
 
-#: cmd/incus/export.go:54
+#: cmd/incus/export.go:51
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool)"
 msgstr ""
 "Usa o formato optimizado do driver de armazenamento (só pode ser restaurado "
 "num pool semelhante)"
 
-#: cmd/incus/storage_volume.go:3648
+#: cmd/incus/storage_volume.go:3647
 msgid ""
 "Use storage driver optimized format (can only be restored on a similar pool, "
 "ignored for ISO storage volumes)"
@@ -9657,8 +9676,8 @@ msgstr ""
 msgid "Use with help or --help to view sub-commands"
 msgstr "Usa com ajuda ou --help para visualizar sub-comandos"
 
-#: cmd/incus/info.go:518 cmd/incus/info.go:529 cmd/incus/info.go:534
-#: cmd/incus/info.go:540
+#: cmd/incus/info.go:517 cmd/incus/info.go:528 cmd/incus/info.go:533
+#: cmd/incus/info.go:539
 #, c-format
 msgid "Used: %v"
 msgstr "Usado: %v"
@@ -9676,7 +9695,7 @@ msgstr "Configuração abortada pelo utilizador"
 msgid "User aborted delete operation"
 msgstr "Operação de apagar abortada pelo utilizador"
 
-#: cmd/incus/info.go:155 cmd/incus/info.go:264
+#: cmd/incus/info.go:154 cmd/incus/info.go:263
 #, c-format
 msgid "VFs: %d"
 msgstr "VFs: %d"
@@ -9693,38 +9712,38 @@ msgstr "Filtragem VLAN"
 msgid "VLAN:"
 msgstr "VLAN:"
 
-#: cmd/incus/info.go:349 cmd/incus/info.go:362 cmd/incus/info.go:376
+#: cmd/incus/info.go:348 cmd/incus/info.go:361 cmd/incus/info.go:375
 #, c-format
 msgid "Vendor ID: %v"
 msgstr "ID do fornecedor: %v"
 
-#: cmd/incus/info.go:440 cmd/incus/info.go:460 cmd/incus/info.go:480
+#: cmd/incus/info.go:439 cmd/incus/info.go:459 cmd/incus/info.go:479
 #, c-format
 msgid "Vendor: %s"
 msgstr "Fornecedor: %s"
 
-#: cmd/incus/info.go:314 cmd/incus/info.go:348 cmd/incus/info.go:361
-#: cmd/incus/info.go:375 cmd/incus/info.go:409
+#: cmd/incus/info.go:313 cmd/incus/info.go:347 cmd/incus/info.go:360
+#: cmd/incus/info.go:374 cmd/incus/info.go:408
 #, c-format
 msgid "Vendor: %v"
 msgstr "Fornecedor: %v"
 
-#: cmd/incus/info.go:108 cmd/incus/info.go:194
+#: cmd/incus/info.go:107 cmd/incus/info.go:193
 #, c-format
 msgid "Vendor: %v (%v)"
 msgstr "Fornecedor: %v (%v)"
 
-#: cmd/incus/info.go:253
+#: cmd/incus/info.go:252
 #, c-format
 msgid "Verb: %s (%s)"
 msgstr "Verb: %s (%s)"
 
-#: cmd/incus/info.go:448 cmd/incus/info.go:472 cmd/incus/info.go:484
+#: cmd/incus/info.go:447 cmd/incus/info.go:471 cmd/incus/info.go:483
 #, c-format
 msgid "Version: %s"
 msgstr "Versão: %s"
 
-#: cmd/incus/info.go:421
+#: cmd/incus/info.go:420
 #, c-format
 msgid "Version: %v"
 msgstr "Versão: %v"
@@ -9742,7 +9761,7 @@ msgstr "Descrição do volume"
 msgid "Volume snapshot name is: %s"
 msgstr "Nome de instantâneo de volume é: %s"
 
-#: cmd/incus/info.go:294
+#: cmd/incus/info.go:293
 #, c-format
 msgid "WWN: %s"
 msgstr "WWN: %s"
@@ -9797,6 +9816,11 @@ msgstr ""
 #: cmd/incus/query.go:46
 msgid "Wait for the operation to complete"
 msgstr "Aguarde que a operação complete"
+
+#: cmd/incus/color/color.go:35
+#, fuzzy
+msgid "Warning:"
+msgstr "Mostra aviso"
 
 #: cmd/incus/admin_init_interactive.go:541
 msgid ""
@@ -9853,13 +9877,13 @@ msgstr "Como deve ser chamada a nova ponte?"
 msgid "Where should this storage pool store its data?"
 msgstr "Onde deve este pool de armazenamento guardar os seus dados?"
 
-#: cmd/incus/export.go:52
+#: cmd/incus/export.go:50
 msgid "Whether or not to only backup the instance (without dependent volumes)"
 msgstr ""
 "Se é ou não para apenas fazer salvaguarda da instância (sem os volumes "
 "dependentes)"
 
-#: cmd/incus/export.go:50
+#: cmd/incus/export.go:49
 msgid "Whether or not to only backup the instance (without snapshots)"
 msgstr ""
 "Se é ou não para apenas fazer salvaguarda da instância (sem os instantâneos)"
@@ -9955,9 +9979,9 @@ msgid "Would you like to use clustering?"
 msgstr "Deseja usar agrupamento?"
 
 #: cmd/incus/network.go:1117 cmd/incus/operation.go:217
-#: cmd/incus/project.go:582 cmd/incus/project.go:591 cmd/incus/project.go:600
-#: cmd/incus/project.go:609 cmd/incus/project.go:618 cmd/incus/project.go:627
-#: cmd/incus/remote.go:1054 cmd/incus/remote.go:1063 cmd/incus/remote.go:1072
+#: cmd/incus/project.go:581 cmd/incus/project.go:590 cmd/incus/project.go:599
+#: cmd/incus/project.go:608 cmd/incus/project.go:617 cmd/incus/project.go:626
+#: cmd/incus/remote.go:1050 cmd/incus/remote.go:1059 cmd/incus/remote.go:1068
 msgid "YES"
 msgstr "SIM"
 
@@ -9977,44 +10001,44 @@ msgstr "Você não pode passar -t ou -T ao mesmo tempo como --mode"
 msgid "You must specify a destination instance name"
 msgstr "Você tem de especificar um nome de instância de destino"
 
-#: cmd/incus/network_zone.go:381
+#: cmd/incus/network_zone.go:382
 msgid "Zone description"
 msgstr "Descrição da zona"
 
-#: cmd/incus/usage/usage.go:769
+#: cmd/incus/usage/usage.go:809
 msgid "address"
 msgstr "endereço"
 
-#: cmd/incus/usage/usage.go:770
+#: cmd/incus/usage/usage.go:810
 msgid "address set"
 msgstr "conjunto de endereço"
 
-#: cmd/incus/usage/usage.go:771
+#: cmd/incus/usage/usage.go:811
 msgid "alias"
 msgstr "nome alternativo"
 
-#: cmd/incus/info.go:655
+#: cmd/incus/info.go:654
 msgid "application"
 msgstr "aplicação"
 
-#: cmd/incus/usage/usage.go:772
+#: cmd/incus/usage/usage.go:812
 msgid "backend"
 msgstr "backend"
 
-#: cmd/incus/usage/usage.go:773
+#: cmd/incus/usage/usage.go:813
 msgid "backup file"
 msgstr "ficheiro de salvaguarda"
 
-#: cmd/incus/usage/usage.go:774
+#: cmd/incus/usage/usage.go:814
 msgid "bucket"
 msgstr "balde"
 
-#: cmd/incus/usage/parse.go:81
+#: cmd/incus/usage/parse.go:77
 #, c-format
 msgid "cannot parse this argument; unexpected %s"
 msgstr "não posso analisar este argumento; %s inesperado"
 
-#: cmd/incus/usage/parse.go:84
+#: cmd/incus/usage/parse.go:80
 #, c-format
 msgid "cannot parse this argument; unexpected %s in %s"
 msgstr "não posso analisar este argumento; %s em %s inesperado"
@@ -10027,7 +10051,7 @@ msgstr "cert.crt"
 msgid "cert.key"
 msgstr "cert.key"
 
-#: cmd/incus/usage/usage.go:775
+#: cmd/incus/usage/usage.go:815
 msgid "client"
 msgstr "cliente"
 
@@ -10039,7 +10063,7 @@ msgstr "agrupamento"
 msgid "command"
 msgstr "comando"
 
-#: cmd/incus/usage/usage.go:776
+#: cmd/incus/usage/usage.go:816
 msgid "command-line argument"
 msgstr "argumento de linha de comando"
 
@@ -10047,69 +10071,69 @@ msgstr "argumento de linha de comando"
 msgid "condition"
 msgstr "condição"
 
-#: cmd/incus/project.go:673 cmd/incus/remote.go:1023
+#: cmd/incus/project.go:672 cmd/incus/remote.go:1019
 msgid "current"
 msgstr "atual"
 
-#: cmd/incus/storage.go:520
+#: cmd/incus/storage.go:521
 msgid "description"
 msgstr "descrição"
 
-#: cmd/incus/usage/usage.go:777
+#: cmd/incus/usage/usage.go:817
 msgid "device"
 msgstr "dispositivo"
 
-#: cmd/incus/usage/usage.go:779
+#: cmd/incus/usage/usage.go:819
 msgid "directory"
 msgstr "diretório"
 
-#: cmd/incus/image.go:931
+#: cmd/incus/image.go:955
 msgid "disabled"
 msgstr "desativado"
 
-#: cmd/incus/storage.go:519 cmd/incus/usage/usage.go:780
+#: cmd/incus/storage.go:520 cmd/incus/usage/usage.go:820
 msgid "driver"
 msgstr "driver"
 
-#: cmd/incus/image.go:933
+#: cmd/incus/image.go:957
 msgid "enabled"
 msgstr "ativado"
 
-#: cmd/incus/info.go:659
+#: cmd/incus/info.go:658
 msgid "ephemeral"
 msgstr "efémero"
 
-#: cmd/incus/action.go:447
+#: cmd/incus/action.go:446
 #, c-format
 msgid "error: %v"
 msgstr "erro: %v"
 
-#: cmd/incus/usage/parse.go:99
+#: cmd/incus/usage/parse.go:95
 #, c-format
 msgid "expected %s"
 msgstr "esperado %s"
 
-#: cmd/incus/usage/usage.go:782
+#: cmd/incus/usage/usage.go:822
 msgid "expiry"
 msgstr "prazo de validade"
 
-#: cmd/incus/usage/usage.go:783
+#: cmd/incus/usage/usage.go:823
 msgid "file"
 msgstr "ficheiro"
 
-#: cmd/incus/usage/usage.go:784
+#: cmd/incus/usage/usage.go:824
 msgid "filter"
 msgstr "filtro"
 
-#: cmd/incus/usage/usage.go:785
+#: cmd/incus/usage/usage.go:825
 msgid "fingerprint"
 msgstr "impressão digital"
 
-#: cmd/incus/usage/usage.go:786
+#: cmd/incus/usage/usage.go:826
 msgid "group"
 msgstr "grupo"
 
-#: cmd/incus/usage/usage.go:787
+#: cmd/incus/usage/usage.go:827
 msgid "image"
 msgstr "imagem"
 
@@ -10162,11 +10186,13 @@ msgstr ""
 #: cmd/incus/cluster_group.go:174
 msgid ""
 "incus cluster group create g1\n"
+"    Create a cluster group named g1\n"
 "\n"
 "incus cluster group create g1 < config.yaml\n"
-"\tCreate a cluster group with configuration from config.yaml"
+"    Create a cluster group named g1 with configuration from config.yaml"
 msgstr ""
 "incus cluster group create g1\n"
+"\tCria um grupo de agrupamento com nome g1\n"
 "\n"
 "incus cluster group create g1 < config.yaml\n"
 "\tCria um grupo de agrupamento com configuração de config.yaml"
@@ -10220,8 +10246,10 @@ msgstr ""
 "    Irá fazer o servidor escutar em IPv4 e IPv6 porto 8443."
 
 #: cmd/incus/config_template.go:72
+#, fuzzy
 msgid ""
 "incus config template create u1 t1\n"
+"    Create template t1 for instance u1\n"
 "\n"
 "incus config template create u1 t1 < config.tpl\n"
 "    Create template t1 for instance u1 from config.tpl"
@@ -10232,8 +10260,10 @@ msgstr ""
 "    Cria modelo t1 para instância u1 a partir de config.tpl"
 
 #: cmd/incus/create.go:51
+#, fuzzy
 msgid ""
 "incus create images:debian/12 u1\n"
+"    Create the instance u1\n"
 "\n"
 "incus create images:debian/12 u1 < config.yaml\n"
 "    Create the instance with configuration from config.yaml\n"
@@ -10367,7 +10397,7 @@ msgstr ""
 "   Para ler \"Hello world\" a partir da entrada standard e escrevê-lo em /"
 "root/test na instância \"foo\"."
 
-#: cmd/incus/image.go:369
+#: cmd/incus/image.go:393
 msgid ""
 "incus image edit <image>\n"
 "    Launch a text editor to edit the properties\n"
@@ -10404,8 +10434,10 @@ msgstr ""
 "    Para informação do servidor."
 
 #: cmd/incus/launch.go:27
+#, fuzzy
 msgid ""
 "incus launch images:debian/12 u1\n"
+"    Create and start a container named u1\n"
 "\n"
 "incus launch images:debian/12 u1 < config.yaml\n"
 "    Create and start a container with configuration from config.yaml\n"
@@ -10502,8 +10534,10 @@ msgstr ""
 "    Renomeia uma instância local."
 
 #: cmd/incus/network_acl.go:358
+#, fuzzy
 msgid ""
 "incus network acl create a1\n"
+"    Create network acl a1\n"
 "\n"
 "incus network acl create a1 < config.yaml\n"
 "    Create network acl with configuration from config.yaml"
@@ -10514,8 +10548,10 @@ msgstr ""
 "    Cria acl de rede com configuração de config.yaml"
 
 #: cmd/incus/network_address_set.go:233
+#, fuzzy
 msgid ""
 "incus network address-set create as1\n"
+"    Create network address set as1\n"
 "\n"
 "incus network address-set create as1 < config.yaml\n"
 "    Create network address set with configuration from config.yaml"
@@ -10558,8 +10594,10 @@ msgstr ""
 "    Cria um novo encaminhamento de rede para rede n1 a partir de config.yaml"
 
 #: cmd/incus/network_integration.go:90
+#, fuzzy
 msgid ""
 "incus network integration create o1 ovn\n"
+"   Create network integration o1 of type ovn\n"
 "\n"
 "incus network integration create o1 ovn < config.yaml\n"
 "    Create network integration o1 of type ovn with configuration from "
@@ -10570,7 +10608,7 @@ msgstr ""
 "incus network integration create o1 ovn < config.yaml\n"
 "    Cria integração de rede o1 do tipo ovn com configuração de config.yaml"
 
-#: cmd/incus/network_integration.go:224
+#: cmd/incus/network_integration.go:225
 msgid ""
 "incus network integration edit <network integration> < network-"
 "integration.yaml\n"
@@ -10585,12 +10623,14 @@ msgstr ""
 #: cmd/incus/network_load_balancer.go:314
 msgid ""
 "incus network load-balancer create n1 127.0.0.1\n"
+"    Create network load-balancer for network n1\n"
 "\n"
 "incus network load-balancer create n1 127.0.0.1 < config.yaml\n"
 "    Create network load-balancer for network n1 with configuration from "
 "config.yaml"
 msgstr ""
 "incus network load-balancer create n1 127.0.0.1\n"
+"\tCria balanceador de carga de rede para a rede n1\n"
 "\n"
 "incus network load-balancer create n1 127.0.0.1 < config.yaml\n"
 "    Cria balanceador de carga de rede para a rede n1 com configuração de "
@@ -10625,8 +10665,10 @@ msgstr ""
 "\tno ficheiro config.yaml"
 
 #: cmd/incus/network_zone.go:374
+#, fuzzy
 msgid ""
 "incus network zone create z1\n"
+"    Create network zone z1\n"
 "\n"
 "incus network zone create z1 < config.yaml\n"
 "    Create network zone z1 with configuration from config.yaml"
@@ -10636,9 +10678,11 @@ msgstr ""
 "incus network zone create z1 < config.yaml\n"
 "    Cria zona de rede z1 com configuração de config.yaml"
 
-#: cmd/incus/network_zone.go:1023
+#: cmd/incus/network_zone.go:1024
+#, fuzzy
 msgid ""
 "incus network zone record create z1 r1\n"
+"    Create record r1 for zone z1\n"
 "\n"
 "incus network zone record create z1 r1 < config.yaml\n"
 "    Create record r1 for zone z1 with configuration from config.yaml"
@@ -10665,7 +10709,7 @@ msgid ""
 "    Reset \"foo\" to only using the \"default\" profile.\n"
 "\n"
 "incus profile assign foo --no-profiles\n"
-"    Remove all profile from \"foo\""
+"    Remove all profile assigned to \"foo\""
 msgstr ""
 "incus profile assign foo default,bar\n"
 "    Define os perfis para \"foo\" para \"default\" e \"bar\".\n"
@@ -10674,7 +10718,7 @@ msgstr ""
 "    Redefine \"foo\" para apenas usar o perfil \"default\".\n"
 "\n"
 "incus profile assign foo --no-profiles\n"
-"    Remove todos os perfis de \"foo\""
+"    Remove todos os perfis atribuídos a \"foo\""
 
 #: cmd/incus/profile.go:345
 msgid ""
@@ -10858,11 +10902,13 @@ msgstr ""
 "\"default\"."
 
 #: cmd/incus/storage.go:110
+#, fuzzy
 msgid ""
 "incus storage create s1 dir\n"
+"    Create a storage pool s1\n"
 "\n"
 "incus storage create s1 dir < config.yaml\n"
-"    Create a storage pool using the content of config.yaml.\n"
+"    Create a storage pool s1 using the content of config.yaml\n"
 "\t"
 msgstr ""
 "incus storage create s1 dir\n"
@@ -10871,7 +10917,7 @@ msgstr ""
 "    Cria uma pool de armazenamento usando o conteúdo de config.yaml.\n"
 "\t"
 
-#: cmd/incus/storage.go:267
+#: cmd/incus/storage.go:268
 msgid ""
 "incus storage edit [<remote>:]<pool> < pool.yaml\n"
 "    Update a storage pool using the content of pool.yaml."
@@ -10978,7 +11024,7 @@ msgstr ""
 "    Retorna o período de validade de instantâneo para uma máquina virtual "
 "\"data\" na pool \"default\""
 
-#: cmd/incus/storage_volume.go:3853
+#: cmd/incus/storage_volume.go:3852
 msgid ""
 "incus storage volume import default backup0.tar.gz\n"
 "    Create a new custom volume using backup0.tar.gz as the source\n"
@@ -11094,47 +11140,47 @@ msgstr ""
 "incus wait v1 agent\n"
 "\tEspera por instância VM v1 que tenha um agente funcional."
 
-#: cmd/incus/storage.go:517
+#: cmd/incus/storage.go:518
 msgid "info"
 msgstr "informação"
 
-#: cmd/incus/usage/usage.go:788
+#: cmd/incus/usage/usage.go:828
 msgid "instance"
 msgstr "instância"
 
-#: cmd/incus/usage/usage.go:789
+#: cmd/incus/usage/usage.go:829
 msgid "interface"
 msgstr "Interface"
 
-#: cmd/incus/usage/usage.go:792
+#: cmd/incus/usage/usage.go:832
 msgid "key"
 msgstr "chave"
 
-#: cmd/incus/usage/usage.go:790
+#: cmd/incus/usage/usage.go:830
 msgid "listen address"
 msgstr "endereço de escuta"
 
-#: cmd/incus/usage/usage.go:791
+#: cmd/incus/usage/usage.go:831
 msgid "listen port"
 msgstr "porto de escuta"
 
-#: cmd/incus/usage/usage.go:794
+#: cmd/incus/usage/usage.go:834
 msgid "member"
 msgstr "membro"
 
-#: cmd/incus/remote.go:507
+#: cmd/incus/remote.go:503
 msgid "n"
 msgstr "n"
 
-#: cmd/incus/storage.go:518
+#: cmd/incus/storage.go:519
 msgid "name"
 msgstr "nome"
 
-#: cmd/incus/usage/usage.go:795
+#: cmd/incus/usage/usage.go:835
 msgid "network"
 msgstr "rede"
 
-#: cmd/incus/usage/usage.go:796
+#: cmd/incus/usage/usage.go:836
 msgid "network integration"
 msgstr "integração de rede"
 
@@ -11142,51 +11188,55 @@ msgstr "integração de rede"
 msgid "network or integration"
 msgstr "rede ou integração"
 
-#: cmd/incus/usage/usage.go:854
+#: cmd/incus/usage/usage.go:894
 #, c-format
 msgid "new %s name"
 msgstr "novo %s nome"
 
-#: cmd/incus/config_trust.go:478 cmd/incus/image.go:921 cmd/incus/image.go:926
-#: cmd/incus/image.go:1140
+#: cmd/incus/config_trust.go:478 cmd/incus/image.go:945 cmd/incus/image.go:950
+#: cmd/incus/image.go:1164
 msgid "no"
 msgstr "não"
 
-#: cmd/incus/usage/parse.go:54
+#: cmd/incus/usage/parse.go:50
 #, c-format
 msgid "not enough arguments; expected a value for %s"
 msgstr "argumentos insuficientes; esperado um valor para %s"
 
-#: cmd/incus/remote.go:499
+#: cmd/incus/remote.go:495
 msgid "ok (y/n/[fingerprint])?"
 msgstr "ok (s/n/[impressão digital])?"
 
-#: cmd/incus/usage/parse.go:39
+#: cmd/incus/usage/parse.go:35
 #, c-format
 msgid "one of %s or %s"
 msgstr "um de %s ou %s"
 
-#: cmd/incus/usage/usage.go:797
+#: cmd/incus/usage/usage.go:837
 msgid "operation"
 msgstr "operação"
 
-#: cmd/incus/usage/usage.go:798
+#: cmd/incus/usage/usage.go:838
 msgid "path"
 msgstr "caminho"
 
-#: cmd/incus/usage/usage.go:799
+#: cmd/incus/usage/usage.go:839
 msgid "peer"
 msgstr "peer"
+
+#: cmd/incus/usage/legacysupport.go:8
+msgid "please switch to the “<key>=<value>” syntax"
+msgstr ""
 
 #: cmd/incus/config.go:55
 msgid "please use `incus profile`"
 msgstr "por favor use `incus profile`"
 
-#: cmd/incus/usage/usage.go:800
+#: cmd/incus/usage/usage.go:840
 msgid "pool"
 msgstr "pool"
 
-#: cmd/incus/usage/usage.go:801
+#: cmd/incus/usage/usage.go:841
 msgid "port"
 msgstr "porto"
 
@@ -11194,47 +11244,47 @@ msgstr "porto"
 msgid "preseed.yaml"
 msgstr "preseed.yaml"
 
-#: cmd/incus/usage/usage.go:802
+#: cmd/incus/usage/usage.go:842
 msgid "profile"
 msgstr "perfil"
 
-#: cmd/incus/usage/usage.go:803
+#: cmd/incus/usage/usage.go:843
 msgid "project"
 msgstr "projeto"
 
-#: cmd/incus/usage/usage.go:804
+#: cmd/incus/usage/usage.go:844
 msgid "protocol"
 msgstr "protocolo"
 
-#: cmd/incus/usage/usage.go:805
+#: cmd/incus/usage/usage.go:845
 msgid "query"
 msgstr "consulta"
 
-#: cmd/incus/usage/usage.go:806
+#: cmd/incus/usage/usage.go:846
 msgid "record"
 msgstr "registo"
 
-#: cmd/incus/usage/usage.go:807
+#: cmd/incus/usage/usage.go:847
 msgid "remote"
 msgstr "remoto"
 
-#: cmd/incus/usage/usage.go:811
+#: cmd/incus/usage/usage.go:851
 msgid "role"
 msgstr "função"
 
-#: cmd/incus/image.go:660
+#: cmd/incus/image.go:684
 msgid "rootfs tarball"
 msgstr "tarball de rootfs"
 
-#: cmd/incus/usage/usage.go:812
+#: cmd/incus/usage/usage.go:852
 msgid "snapshot"
 msgstr "instantâneo"
 
-#: cmd/incus/remote_unix.go:36
+#: cmd/incus/remote_unix.go:35
 msgid "socket file"
 msgstr "ficheiro socket"
 
-#: cmd/incus/storage.go:522
+#: cmd/incus/storage.go:523
 msgid "space used"
 msgstr "espaço usado"
 
@@ -11251,51 +11301,51 @@ msgstr "sshfs a montar %q em %q"
 msgid "stdin can only be used once, with no other source arguments"
 msgstr "stdin só pode ser usado uma vez, sem nenhuns outros argumentos fonte"
 
-#: cmd/incus/usage/usage.go:814
+#: cmd/incus/usage/usage.go:854
 msgid "symlink target path"
 msgstr "caminho alvo do link simbólico"
 
-#: cmd/incus/usage/usage.go:815
+#: cmd/incus/usage/usage.go:855
 msgid "tarball"
 msgstr "tarball"
 
-#: cmd/incus/usage/usage.go:860
+#: cmd/incus/usage/usage.go:900
 #, c-format
 msgid "target %s"
 msgstr "alvo %s"
 
-#: cmd/incus/usage/usage.go:816
+#: cmd/incus/usage/usage.go:856
 msgid "template"
 msgstr "modelo"
 
-#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:817
+#: cmd/incus/remote.go:120 cmd/incus/usage/usage.go:857
 msgid "token"
 msgstr "testemunho"
 
-#: cmd/incus/usage/parse.go:71
+#: cmd/incus/usage/parse.go:67
 #, c-format
 msgid "too many arguments; unexpected %s"
 msgstr "demasiados argumentos; %s inesperado"
 
-#: cmd/incus/storage.go:521
+#: cmd/incus/storage.go:522
 msgid "total space"
 msgstr "espaço total"
 
-#: cmd/incus/usage/usage.go:813 cmd/incus/usage/usage.go:818
+#: cmd/incus/usage/usage.go:853 cmd/incus/usage/usage.go:858
 msgid "type"
 msgstr "tipo"
 
-#: cmd/incus/usage/parse.go:95
+#: cmd/incus/usage/parse.go:91
 #, c-format
 msgid "unexpected %s"
 msgstr "%s inesperado"
 
-#: cmd/incus/usage/parse.go:102
+#: cmd/incus/usage/parse.go:98
 #, c-format
 msgid "unexpected %s; expected %s"
 msgstr "%s inesperado; esperado %s"
 
-#: cmd/incus/usage/parse.go:51
+#: cmd/incus/usage/parse.go:47
 msgid "unexpected end of argument; did you forget a suffix?"
 msgstr "fim de argumento inesperado; você esqueceu um sufixo?"
 
@@ -11303,40 +11353,43 @@ msgstr "fim de argumento inesperado; você esqueceu um sufixo?"
 msgid "unreachable"
 msgstr "inacessível"
 
-#: cmd/incus/storage.go:516
+#: cmd/incus/storage.go:517
 msgid "used by"
 msgstr "usado por"
 
-#: cmd/incus/usage/usage.go:820
+#: cmd/incus/usage/usage.go:860
 msgid "value"
 msgstr "valor"
 
-#: cmd/incus/usage/usage.go:821
+#: cmd/incus/usage/usage.go:861
 msgid "volume"
 msgstr "volume"
 
-#: cmd/incus/usage/usage.go:822
+#: cmd/incus/usage/usage.go:862
 msgid "warning UUID"
 msgstr "UUID de aviso"
 
-#: cmd/incus/remote.go:509
+#: cmd/incus/remote.go:505
 msgid "y"
 msgstr "s"
 
 #: cmd/incus/cluster.go:724 cmd/incus/config_trust.go:475
-#: cmd/incus/delete.go:56 cmd/incus/image.go:923 cmd/incus/image.go:928
-#: cmd/incus/image.go:1137 cmd/incus/project.go:225 cmd/incus/snapshot.go:279
+#: cmd/incus/delete.go:56 cmd/incus/image.go:947 cmd/incus/image.go:952
+#: cmd/incus/image.go:1161 cmd/incus/project.go:225 cmd/incus/snapshot.go:279
 msgid "yes"
 msgstr "sim"
 
-#: cmd/incus/usage/usage.go:823
+#: cmd/incus/usage/usage.go:863
 msgid "zone"
 msgstr "zona"
 
-#: cmd/incus/usage/parse.go:25
+#: cmd/incus/usage/utils.go:52
 #, c-format
 msgid "“%s”"
 msgstr "“%s”"
+
+#~ msgid "Action (defaults to GET)"
+#~ msgstr "Acção (predefine para GET)"
 
 #~ msgid "Can't override UID/GID in recursive mode without -p"
 #~ msgstr "Não pode sobrepor UID/GID em modo recursivo sem -p"

@@ -1,9 +1,8 @@
 package storage
 
 import (
-	"archive/zip"
-	"bytes"
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -11,6 +10,7 @@ import (
 	"io"
 	"io/fs"
 	"maps"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -23,45 +23,43 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/minio/minio-go/v7"
 	"go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
 
-	incus "github.com/lxc/incus/v6/client"
-	internalInstance "github.com/lxc/incus/v6/internal/instance"
-	"github.com/lxc/incus/v6/internal/instancewriter"
-	internalIO "github.com/lxc/incus/v6/internal/io"
-	"github.com/lxc/incus/v6/internal/linux"
-	"github.com/lxc/incus/v6/internal/migration"
-	"github.com/lxc/incus/v6/internal/rsync"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	backupConfig "github.com/lxc/incus/v6/internal/server/backup/config"
-	"github.com/lxc/incus/v6/internal/server/cluster/request"
-	"github.com/lxc/incus/v6/internal/server/db"
-	"github.com/lxc/incus/v6/internal/server/db/cluster"
-	deviceConfig "github.com/lxc/incus/v6/internal/server/device/config"
-	"github.com/lxc/incus/v6/internal/server/instance"
-	"github.com/lxc/incus/v6/internal/server/instance/instancetype"
-	"github.com/lxc/incus/v6/internal/server/lifecycle"
-	"github.com/lxc/incus/v6/internal/server/locking"
-	localMigration "github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/internal/server/project"
-	"github.com/lxc/incus/v6/internal/server/response"
-	"github.com/lxc/incus/v6/internal/server/state"
-	"github.com/lxc/incus/v6/internal/server/storage/drivers"
-	"github.com/lxc/incus/v6/internal/server/storage/memorypipe"
-	"github.com/lxc/incus/v6/internal/server/storage/s3"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
-	localUtil "github.com/lxc/incus/v6/internal/server/util"
-	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/archive"
-	"github.com/lxc/incus/v6/shared/ioprogress"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
+	incus "github.com/lxc/incus/v7/client"
+	internalInstance "github.com/lxc/incus/v7/internal/instance"
+	"github.com/lxc/incus/v7/internal/instancewriter"
+	internalIO "github.com/lxc/incus/v7/internal/io"
+	"github.com/lxc/incus/v7/internal/linux"
+	"github.com/lxc/incus/v7/internal/migration"
+	"github.com/lxc/incus/v7/internal/rsync"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	backupConfig "github.com/lxc/incus/v7/internal/server/backup/config"
+	"github.com/lxc/incus/v7/internal/server/cluster/request"
+	"github.com/lxc/incus/v7/internal/server/db"
+	"github.com/lxc/incus/v7/internal/server/db/cluster"
+	deviceConfig "github.com/lxc/incus/v7/internal/server/device/config"
+	"github.com/lxc/incus/v7/internal/server/instance"
+	"github.com/lxc/incus/v7/internal/server/instance/instancetype"
+	"github.com/lxc/incus/v7/internal/server/lifecycle"
+	"github.com/lxc/incus/v7/internal/server/locking"
+	localMigration "github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/internal/server/project"
+	"github.com/lxc/incus/v7/internal/server/response"
+	"github.com/lxc/incus/v7/internal/server/state"
+	"github.com/lxc/incus/v7/internal/server/storage/drivers"
+	"github.com/lxc/incus/v7/internal/server/storage/memorypipe"
+	"github.com/lxc/incus/v7/internal/server/storage/s3"
+	localUtil "github.com/lxc/incus/v7/internal/server/util"
+	internalUtil "github.com/lxc/incus/v7/internal/util"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/archive"
+	"github.com/lxc/incus/v7/shared/ioprogress"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 var (
@@ -897,12 +895,12 @@ func (b *backend) CreateInstanceFromBackup(srcBackup backup.Info, srcData io.Rea
 
 			// Check if snapshot volume config is available for restore and matches snapshot name.
 			if srcBackup.Config != nil {
-				if len(srcBackup.Config.Snapshots) >= i-1 && srcBackup.Config.Snapshots[i] != nil && srcBackup.Config.Snapshots[i].Name == backupFileSnap {
+				if len(srcBackup.Config.Snapshots) > i && srcBackup.Config.Snapshots[i] != nil && srcBackup.Config.Snapshots[i].Name == backupFileSnap {
 					// Use instance snapshot's creation date if snap info available.
 					volumeSnapCreationDate = srcBackup.Config.Snapshots[i].CreatedAt
 				}
 
-				if len(srcBackup.Config.VolumeSnapshots) >= i-1 && srcBackup.Config.VolumeSnapshots[i] != nil && srcBackup.Config.VolumeSnapshots[i].Name == backupFileSnap {
+				if len(srcBackup.Config.VolumeSnapshots) > i && srcBackup.Config.VolumeSnapshots[i] != nil && srcBackup.Config.VolumeSnapshots[i].Name == backupFileSnap {
 					// If the backup restore interface provides volume snapshot config use it,
 					// otherwise use default volume config for the storage pool.
 					volumeSnapDescription = srcBackup.Config.VolumeSnapshots[i].Description
@@ -1160,12 +1158,12 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 		newDevices := inst.LocalDevices()
 		err = src.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
 			// Load the pool for the disk.
-			diskPool, err := LoadByName(b.state, dev.Config["pool"])
+			diskPool, err := LoadByName(b.state, newDevices[dev.Name]["pool"])
 			if err != nil {
 				return fmt.Errorf("Failed loading storage pool: %w", err)
 			}
 
-			err = diskPool.CreateCustomVolumeFromCopy(inst.Project().Name, src.Project().Name, newDevices[dev.Name]["source"], "", nil, diskPool.Name(), dev.Config["source"], snapshots, op)
+			err = diskPool.CreateCustomVolumeFromCopy(inst.Project().Name, src.Project().Name, newDevices[dev.Name]["source"], "", nil, dev.Config["pool"], dev.Config["source"], snapshots, op)
 			if err != nil {
 				return err
 			}
@@ -1206,21 +1204,26 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 			}
 		}
 
-		dependentVolumesOffer, err := GenerateDependentVolumesOffer(b.state, srcConfig, inst.Project().Name, snapshots)
+		newDevices := inst.LocalDevices().CloneNative()
+		dependentVolumesOffer, err := GenerateDependentVolumesOffer(b.state, srcConfig, inst.Project().Name, snapshots, newDevices, false)
 		if err != nil {
 			err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 			return err
 		}
 
-		volumesWithTypes, err := DependentVolumesMatchMigrationType(b.state, dependentVolumesOffer, snapshots)
+		volumesWithTypes, err := DependentVolumesMatchMigrationType(b.state, dependentVolumesOffer, snapshots, newDevices, false)
 		if err != nil {
 			err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 			return err
 		}
 
-		dependentVolumes := []localMigration.DependentVolumeArgs{}
+		srcDependentVolumes := []localMigration.DependentVolumeArgs{}
+		dstDependentVolumes := []localMigration.DependentVolumeArgs{}
 		for _, volWithType := range volumesWithTypes {
-			dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+			srcDependentVolumes = append(srcDependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], nil))
+
+			vol := localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], newDevices[*volWithType.Volume.DeviceName])
+			dstDependentVolumes = append(dstDependentVolumes, vol)
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -1245,7 +1248,7 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 				VolumeOnly:         !snapshots,
 				Info:               &localMigration.Info{Config: srcConfig},
 				StorageMove:        true,
-				DependentVolumes:   dependentVolumes,
+				DependentVolumes:   srcDependentVolumes,
 			}, op)
 		})
 
@@ -1259,7 +1262,7 @@ func (b *backend) CreateInstanceFromCopy(inst instance.Instance, src instance.In
 				TrackProgress:      false,         // Do not use a progress tracker on receiver.
 				VolumeOnly:         !snapshots,
 				StoragePool:        srcPool.Name(),
-				DependentVolumes:   dependentVolumes,
+				DependentVolumes:   dstDependentVolumes,
 			}, op)
 		})
 
@@ -2114,12 +2117,12 @@ func (b *backend) CreateInstanceFromMigration(inst instance.Instance, conn io.Re
 
 			// If the source snapshot config is available, use that.
 			if srcInfo != nil && srcInfo.Config != nil {
-				if len(srcInfo.Config.Snapshots) >= i-1 && srcInfo.Config.Snapshots[i] != nil && srcInfo.Config.Snapshots[i].Name == snapName {
+				if len(srcInfo.Config.Snapshots) > i && srcInfo.Config.Snapshots[i] != nil && srcInfo.Config.Snapshots[i].Name == snapName {
 					// Use instance snapshot's creation date if snap info available.
 					snapCreationDate = srcInfo.Config.Snapshots[i].CreatedAt
 				}
 
-				if len(srcInfo.Config.VolumeSnapshots) >= i-1 && srcInfo.Config.VolumeSnapshots[i] != nil && srcInfo.Config.VolumeSnapshots[i].Name == snapName {
+				if len(srcInfo.Config.VolumeSnapshots) > i && srcInfo.Config.VolumeSnapshots[i] != nil && srcInfo.Config.VolumeSnapshots[i].Name == snapName {
 					// Check if snapshot volume config is available then use it.
 					snapDescription = srcInfo.Config.VolumeSnapshots[i].Description
 					snapConfig = srcInfo.Config.VolumeSnapshots[i].Config
@@ -3513,6 +3516,93 @@ func (b *backend) DeleteInstanceSnapshot(inst instance.Instance, op *operations.
 	return nil
 }
 
+// CanRestoreInstanceSnapshot checks whether an instance snapshot can be restored.
+func (b *backend) CanRestoreInstanceSnapshot(inst instance.Instance, src instance.Instance) error {
+	l := b.logger.AddContext(logger.Ctx{"project": inst.Project().Name, "instance": inst.Name(), "src": src.Name()})
+	l.Debug("CanRestoreInstanceSnapshot started")
+	defer l.Debug("CanRestoreInstanceSnapshot finished")
+
+	reverter := revert.New()
+	defer reverter.Fail()
+
+	if inst.Type() != src.Type() {
+		return errors.New("Instance types must match")
+	}
+
+	if inst.IsSnapshot() {
+		return errors.New("Instance must not be snapshot")
+	}
+
+	if !src.IsSnapshot() {
+		return errors.New("Source instance must be a snapshot")
+	}
+
+	snaps, err := inst.Snapshots()
+	if err != nil {
+		return err
+	}
+
+	if len(snaps) > 0 && snaps[len(snaps)-1].Name() != src.Name() && inst.HasDependentDisk() {
+		return fmt.Errorf("Snapshot %q cannot be restored due to subsequent snapshot(s).", src.Name())
+	}
+
+	// Check we can convert the instance to the volume type needed.
+	volType, err := InstanceTypeToVolumeType(inst.Type())
+	if err != nil {
+		return err
+	}
+
+	contentType := InstanceContentType(inst)
+
+	// Load storage volume from database.
+	dbVol, err := VolumeDBGet(b, inst.Project().Name, inst.Name(), volType)
+	if err != nil {
+		return err
+	}
+
+	// Generate the effective root device volume for instance.
+	volStorageName := project.Instance(inst.Project().Name, inst.Name())
+	vol := b.GetVolume(volType, contentType, volStorageName, dbVol.Config)
+
+	_, snapshotName, isSnap := api.GetParentAndSnapshotName(src.Name())
+	if !isSnap {
+		return errors.New("Volume name must be a snapshot")
+	}
+
+	srcDBVol, err := VolumeDBGet(b, src.Project().Name, src.Name(), volType)
+	if err != nil {
+		return err
+	}
+
+	if dbVol.Config["block.type"] == drivers.BlockVolumeTypeQcow2 {
+		snapVol := b.GetVolume(volType, contentType, project.Instance(inst.Project().Name, src.Name()), srcDBVol.Config)
+		err = b.qcow2CanRestoreSnapshot(vol, snapVol, inst.Project().Name)
+		if err != nil {
+			var snapErr drivers.ErrDeleteSnapshots
+			if errors.As(err, &snapErr) {
+				return nil
+			}
+
+			return err
+		}
+
+		return nil
+	}
+
+	err = b.driver.CanRestoreVolume(vol, snapshotName)
+	if err != nil {
+		var snapErr drivers.ErrDeleteSnapshots
+		if errors.As(err, &snapErr) {
+			return nil
+		}
+
+		return err
+	}
+
+	reverter.Success()
+	return nil
+}
+
 // RestoreInstanceSnapshot restores an instance snapshot.
 func (b *backend) RestoreInstanceSnapshot(inst instance.Instance, src instance.Instance, op *operations.Operation) error {
 	l := b.logger.AddContext(logger.Ctx{"project": inst.Project().Name, "instance": inst.Name(), "src": src.Name()})
@@ -4202,10 +4292,6 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 		return errors.New("Storage pool does not support buckets")
 	}
 
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
-
 	// Validate config and create database entry for new storage bucket.
 	reverter := revert.New()
 	defer reverter.Fail()
@@ -4224,7 +4310,7 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 	// Create the bucket on the storage device.
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
+		// Handle common implementation for local storage drivers.
 		err := b.driver.CreateVolume(bucketVol, nil, op)
 		if err != nil {
 			return err
@@ -4232,33 +4318,11 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 		reverter.Add(func() { _ = b.driver.DeleteVolume(bucketVol, op) })
 
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// Initialise the on-disk layout for the in-process S3 handler.
+		err = b.initLocalBucketLayout(projectName, bucket.Name, op)
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed initialising bucket on storage: %w", err)
 		}
-
-		s3Client, err := minioProc.S3Client()
-		if err != nil {
-			return err
-		}
-
-		bucketExists, err := s3Client.BucketExists(ctx, bucket.Name)
-		if err != nil {
-			return fmt.Errorf("Failed checking if bucket exists: %w", err)
-		}
-
-		if bucketExists {
-			return api.StatusErrorf(http.StatusConflict, "A bucket for that name already exists")
-		}
-
-		// Create new bucket.
-		err = s3Client.MakeBucket(ctx, bucket.Name, minio.MakeBucketOptions{})
-		if err != nil {
-			return fmt.Errorf("Failed creating bucket: %w", err)
-		}
-
-		reverter.Add(func() { _ = s3Client.RemoveBucket(ctx, bucket.Name) })
 	} else {
 		// Handle per-driver implementation for remote storage drivers.
 		err = b.driver.CreateBucket(bucketVol, op)
@@ -4269,6 +4333,61 @@ func (b *backend) CreateBucket(projectName string, bucket api.StorageBucketsPost
 
 	reverter.Success()
 	return nil
+}
+
+func generateLocalBucketKey(accessKey, secretKey string) (*drivers.S3Credentials, error) {
+	const accessKeyAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const secretKeyAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+	randomString := func(alphabet string, n int) (string, error) {
+		out := make([]byte, n)
+		maxChar := big.NewInt(int64(len(alphabet)))
+
+		for i := range out {
+			idx, err := rand.Int(rand.Reader, maxChar)
+			if err != nil {
+				return "", err
+			}
+
+			out[i] = alphabet[idx.Int64()]
+		}
+
+		return string(out), nil
+	}
+
+	if accessKey == "" {
+		key, err := randomString(accessKeyAlphabet, 20)
+		if err != nil {
+			return nil, fmt.Errorf("Failed generating access key: %w", err)
+		}
+
+		accessKey = key
+	}
+
+	if secretKey == "" {
+		key, err := randomString(secretKeyAlphabet, 40)
+		if err != nil {
+			return nil, fmt.Errorf("Failed generating secret key: %w", err)
+		}
+
+		secretKey = key
+	}
+
+	return &drivers.S3Credentials{AccessKey: accessKey, SecretKey: secretKey}, nil
+}
+
+// initLocalBucketLayout mounts the bucket volume and ensures the data/
+// directory exists so that the in-process S3 handler can serve writes
+// against it.
+func (b *backend) initLocalBucketLayout(projectName, bucketName string, op *operations.Operation) error {
+	mountPath, unmount, err := b.MountLocalBucket(projectName, bucketName, op)
+	if err != nil {
+		return err
+	}
+
+	defer func() { _ = unmount() }()
+
+	return os.MkdirAll(filepath.Join(mountPath, "data"), 0o700)
 }
 
 // UpdateBucket updates an object bucket.
@@ -4337,19 +4456,6 @@ func (b *backend) UpdateBucket(projectName string, bucketName string, bucket api
 	changedConfig, userOnly := b.detectChangedConfig(curBucket.Config, bucket.Config)
 	if len(changedConfig) > 0 && !userOnly {
 		if memberSpecific {
-			// Stop MinIO process if running so volume can be resized if needed.
-			minioProc, err := miniod.Get(curBucketVol.Name())
-			if err != nil {
-				return err
-			}
-
-			if minioProc != nil {
-				err = minioProc.Stop(context.Background())
-				if err != nil {
-					return fmt.Errorf("Failed stopping bucket: %w", err)
-				}
-			}
-
 			err = b.driver.UpdateVolume(curBucketVol, changedConfig)
 			if err != nil {
 				return err
@@ -4404,21 +4510,7 @@ func (b *backend) DeleteBucket(projectName string, bucketName string, op *operat
 	bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, bucket.Config)
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Stop MinIO process if running.
-		minioProc, err := miniod.Get(bucketVolName)
-		if err != nil {
-			return err
-		}
-
-		if minioProc != nil {
-			err = minioProc.Stop(context.Background())
-			if err != nil {
-				return fmt.Errorf("Failed stopping bucket: %w", err)
-			}
-		}
-
+		// Handle common implementation for local storage drivers.
 		vol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, nil)
 		err = b.driver.DeleteVolume(vol, op)
 		if err != nil {
@@ -4482,132 +4574,13 @@ func (b *backend) ImportBucket(projectName string, poolVol *backupConfig.Config,
 
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
-	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Extract existing bucket keys from MinIO.
-		keys, err := b.recoverMinIOKeys(projectName, bucket.Name, op)
-		if err != nil {
-			return nil, err
-		}
-
-		// Insert keys into the database.
-		for _, key := range keys {
-			var keyID int64
-
-			err := b.state.DB.Cluster.Transaction(b.state.ShutdownCtx, func(ctx context.Context, tx *db.ClusterTx) error {
-				keyID, err = tx.CreateStoragePoolBucketKey(ctx, bucketID, key)
-
-				return err
-			})
-			if err != nil {
-				return nil, err
-			}
-
-			reverter.Add(func() {
-				_ = b.state.DB.Cluster.Transaction(b.state.ShutdownCtx, func(ctx context.Context, tx *db.ClusterTx) error {
-					return tx.DeleteStoragePoolBucketKey(ctx, bucketID, keyID)
-				})
-			})
-		}
-	} else {
+	if !memberSpecific {
 		return nil, errors.New("Importing buckets from a remote storage is not supported")
 	}
 
 	cleanup := reverter.Clone().Fail
 	reverter.Success()
 	return cleanup, nil
-}
-
-// recoverMinIOKeys retrieves existing bucket keys from MinIO for each service account associated with the given bucket.
-func (b *backend) recoverMinIOKeys(projectName string, bucketName string, op *operations.Operation) ([]api.StorageBucketKeysPost, error) {
-	// Start minio process.
-	minioProc, err := b.ActivateBucket(projectName, bucketName, op)
-	if err != nil {
-		return nil, err
-	}
-
-	// Initialize minio client object.
-	adminClient, err := minioProc.AdminClient()
-	if err != nil {
-		return nil, err
-	}
-
-	ctx, ctxCancel := context.WithTimeout(b.state.ShutdownCtx, time.Duration(time.Second*30))
-	defer ctxCancel()
-
-	// Export IAM data (response is ZIP file).
-	iamBytes, err := adminClient.ExportIAM(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	iamZipReader, err := zip.NewReader(bytes.NewReader(iamBytes), int64(len(iamBytes)))
-	if err != nil {
-		return nil, err
-	}
-
-	// We are interested only in a json file that contains service accounts.
-	// Find that file and extract service accounts.
-	svcAccounts := map[string]miniod.AddServiceAccountResp{}
-	for _, file := range iamZipReader.File {
-		if file.Name != "iam-assets/svcaccts.json" {
-			continue
-		}
-
-		f, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-
-		defer f.Close()
-
-		fContent, err := io.ReadAll(f)
-		if err != nil {
-			return nil, err
-		}
-
-		err = json.Unmarshal(fContent, &svcAccounts)
-		if err != nil {
-			return nil, err
-		}
-
-		break
-	}
-
-	var recoveredKeys []api.StorageBucketKeysPost
-
-	// Extract bucket keys for each service account.
-	for _, creds := range svcAccounts {
-		svcAccountInfo, err := adminClient.InfoServiceAccount(ctx, creds.AccessKey)
-		if err != nil {
-			return nil, err
-		}
-
-		jsonBytes, err := json.Marshal(svcAccountInfo.Policy)
-		if err != nil {
-			return nil, err
-		}
-
-		bucketRole, err := s3.BucketPolicyRole(bucketName, string(jsonBytes))
-		if err != nil {
-			return nil, err
-		}
-
-		key := api.StorageBucketKeysPost{
-			Name: creds.AccessKey,
-			StorageBucketKeyPut: api.StorageBucketKeyPut{
-				Description: "Recovered bucket key",
-				Role:        bucketRole,
-				AccessKey:   creds.AccessKey,
-				SecretKey:   creds.SecretKey,
-			},
-		}
-
-		recoveredKeys = append(recoveredKeys, key)
-	}
-
-	return recoveredKeys, nil
 }
 
 // CreateBucketKey creates an object bucket key.
@@ -4624,10 +4597,6 @@ func (b *backend) CreateBucketKey(projectName string, bucketName string, key api
 	if !b.Driver().Info().Buckets {
 		return nil, errors.New("Storage pool does not support buckets")
 	}
-
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
 
 	reverter := revert.New()
 	defer reverter.Fail()
@@ -4660,34 +4629,11 @@ func (b *backend) CreateBucketKey(projectName string, bucketName string, key api
 	var newCreds *drivers.S3Credentials
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// For local buckets the credentials are stored solely in the
+		// Incus database; generate any missing fields here.
+		newCreds, err = generateLocalBucketKey(key.AccessKey, key.SecretKey)
 		if err != nil {
 			return nil, err
-		}
-
-		bucketPolicy, err := s3.BucketPolicy(bucket.Name, key.Role)
-		if err != nil {
-			return nil, err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return nil, err
-		}
-
-		adminCreds, err := adminClient.AddServiceAccount(ctx, minioProc.AdminUser(), key.AccessKey, key.SecretKey, bucketPolicy)
-		if err != nil {
-			return nil, err
-		}
-
-		reverter.Add(func() { _ = adminClient.DeleteServiceAccount(ctx, adminCreds.AccessKey) })
-
-		newCreds = &drivers.S3Credentials{
-			AccessKey: adminCreds.AccessKey,
-			SecretKey: adminCreds.SecretKey,
 		}
 	} else {
 		// Handle per-driver implementation for remote storage drivers.
@@ -4738,10 +4684,6 @@ func (b *backend) UpdateBucketKey(projectName string, bucketName string, keyName
 	if !b.Driver().Info().Buckets {
 		return errors.New("Storage pool does not support buckets")
 	}
-
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
 
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
@@ -4798,43 +4740,11 @@ func (b *backend) UpdateBucketKey(projectName string, bucketName string, keyName
 	}
 
 	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
+		// For local buckets the key fields are stored only in the DB;
+		// generate any missing values here.
+		newCreds, err := generateLocalBucketKey(creds.AccessKey, creds.SecretKey)
 		if err != nil {
 			return err
-		}
-
-		bucketPolicy, err := s3.BucketPolicy(bucket.Name, key.Role)
-		if err != nil {
-			return err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return err
-		}
-
-		// Delete service account if exists (this allows changing the access key).
-		_ = adminClient.DeleteServiceAccount(ctx, curBucketKey.AccessKey)
-
-		newCreds, err := adminClient.AddServiceAccount(ctx, minioProc.AdminUser(), creds.AccessKey, creds.SecretKey, bucketPolicy)
-		if err != nil {
-			return err
-		}
-
-		if creds.SecretKey != "" && newCreds.AccessKey != creds.SecretKey {
-			// There seems to be a bug in MinIO where if the AccessKey isn't specified for a new
-			// service account but a secret key is, *both* the AccessKey and the SecreyKey are randomly
-			// generated, even though it should only have been the AccessKey.
-			// So detect this and update the SecretKey back to what it should have been.
-			err := adminClient.UpdateServiceAccount(ctx, newCreds.AccessKey, creds.SecretKey, bucketPolicy)
-			if err != nil {
-				return err
-			}
-
-			newCreds.SecretKey = creds.SecretKey
 		}
 
 		key.AccessKey = newCreds.AccessKey
@@ -4876,10 +4786,6 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 		return errors.New("Storage pool does not support buckets")
 	}
 
-	// Must be defined before revert so that its not cancelled by time reverter.Fail runs.
-	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Duration(time.Second*30))
-	defer ctxCancel()
-
 	memberSpecific := !b.Driver().Info().Remote // Member specific if storage pool isn't remote.
 
 	var bucket *db.StorageBucket
@@ -4901,25 +4807,7 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 		return err
 	}
 
-	if memberSpecific {
-		// Handle common MinIO implementation for local storage drivers.
-
-		// Start minio process.
-		minioProc, err := b.ActivateBucket(projectName, bucket.Name, op)
-		if err != nil {
-			return err
-		}
-
-		adminClient, err := minioProc.AdminClient()
-		if err != nil {
-			return err
-		}
-
-		err = adminClient.DeleteServiceAccount(ctx, bucketKey.AccessKey)
-		if err != nil {
-			return err
-		}
-	} else {
+	if !memberSpecific {
 		// Handle per-driver implementation for remote storage drivers.
 		bucketVolName := project.StorageVolume(projectName, bucket.Name)
 		bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, bucket.Config)
@@ -4941,20 +4829,35 @@ func (b *backend) DeleteBucketKey(projectName string, bucketName string, keyName
 	return nil
 }
 
-// ActivateBucket mounts the local bucket volume and returns the MinIO S3 process for it.
-func (b *backend) ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error) {
+// MountLocalBucket mounts the local bucket volume and returns its mount path
+// along with an unmount function that the caller must invoke when finished.
+func (b *backend) MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error) {
 	if !b.Driver().Info().Buckets {
-		return nil, errors.New("Storage pool does not support buckets")
+		return "", nil, errors.New("Storage pool does not support buckets")
 	}
 
 	if b.Driver().Info().Remote {
-		return nil, errors.New("Remote buckets cannot be activated")
+		return "", nil, errors.New("Remote buckets cannot be mounted locally")
 	}
 
 	bucketVolName := project.StorageVolume(projectName, bucketName)
 	bucketVol := b.GetVolume(drivers.VolumeTypeBucket, drivers.ContentTypeFS, bucketVolName, nil)
 
-	return miniod.EnsureRunning(b.state, bucketVol)
+	err := b.driver.MountVolume(bucketVol, op)
+	if err != nil {
+		return "", nil, err
+	}
+
+	unmount := func() error {
+		_, err := b.driver.UnmountVolume(bucketVol, false, op)
+		if err != nil && !errors.Is(err, drivers.ErrInUse) {
+			return err
+		}
+
+		return nil
+	}
+
+	return bucketVol.MountPath(), unmount, nil
 }
 
 // GetBucketURL returns S3 URL for bucket.
@@ -7806,6 +7709,10 @@ func (b *backend) CreateCustomVolumeFromBackup(srcBackup backup.Info, srcData io
 
 	// Create database entries for new storage volume snapshots.
 	for _, s := range srcBackup.Config.VolumeSnapshots {
+		if s == nil {
+			return errors.New("Bad snapshot definition found in index")
+		}
+
 		snapshot := s // Local var for revert.
 		snapName := snapshot.Name
 
@@ -7938,6 +7845,10 @@ func (b *backend) CreateBucketFromBackup(srcBackup backup.Info, srcData io.ReadS
 		return errors.New("Storage pool does not support buckets")
 	}
 
+	if srcBackup.Config == nil || srcBackup.Config.Bucket == nil {
+		return errors.New("Valid bucket config not found in index")
+	}
+
 	reverter := revert.New()
 	defer reverter.Fail()
 
@@ -7956,6 +7867,10 @@ func (b *backend) CreateBucketFromBackup(srcBackup backup.Info, srcData io.ReadS
 
 	// Upload all keys from the backup.
 	for _, bucketKey := range srcBackup.Config.BucketKeys {
+		if bucketKey == nil {
+			return errors.New("Bad bucket key found in index")
+		}
+
 		bucketKeyRequest := api.StorageBucketKeysPost{
 			Name:                bucketKey.Name,
 			StorageBucketKeyPut: bucketKey.StorageBucketKeyPut,
@@ -8196,11 +8111,10 @@ func (b *backend) qcow2CreateSnapshot(vol drivers.Volume, snapVol drivers.Volume
 	return nil
 }
 
-// qcow2RestoreSnapshot restores the QCOW2 volume snapshot.
-func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string, op *operations.Operation) error {
-	// Return if this is not a qcow2 image.
+// qcow2CanRestoreSnapshot checks if a qcow2 snapshot can be restored.
+func (b *backend) qcow2CanRestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string) error {
 	if vol.Config()["block.type"] != drivers.BlockVolumeTypeQcow2 {
-		return nil
+		return fmt.Errorf("Not a QCOW2 volume type")
 	}
 
 	snapVolDevPath, err := b.driver.GetQcow2BackingFilePath(snapVol)
@@ -8260,6 +8174,38 @@ func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volum
 			// Setup custom error to tell the backend what to delete.
 			err := drivers.ErrDeleteSnapshots{}
 			err.Snapshots = snapshots
+			return err
+		}
+
+		return nil
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// qcow2RestoreSnapshot restores the QCOW2 volume snapshot.
+func (b *backend) qcow2RestoreSnapshot(vol drivers.Volume, snapVol drivers.Volume, projectName string, op *operations.Operation) error {
+	// Return if this is not a qcow2 image.
+	if vol.Config()["block.type"] != drivers.BlockVolumeTypeQcow2 {
+		return nil
+	}
+
+	err := b.qcow2CanRestoreSnapshot(vol, snapVol, projectName)
+	if err != nil {
+		return err
+	}
+
+	snapVolDevPath, err := b.driver.GetQcow2BackingFilePath(snapVol)
+	if err != nil {
+		return err
+	}
+
+	err = vol.MountWithSnapshotsTask(func(_ string, _ map[string]string, op *operations.Operation) error {
+		parentDiskPath, err := b.driver.GetVolumeDiskPath(vol)
+		if err != nil {
 			return err
 		}
 
@@ -9409,6 +9355,10 @@ func (b *backend) createDependentVolumesFromBackup(srcBackup backup.Info, srcDat
 	}
 
 	for _, disk := range srcBackup.Config.DependentVolumes {
+		if disk == nil {
+			return errors.New("Bad dependent volume definition found in index")
+		}
+
 		optimizedStorage := srcBackup.OptimizedStorage
 		optimizedHeader := srcBackup.OptimizedHeader
 
@@ -9465,9 +9415,7 @@ func (b *backend) migrateDependentVolumes(inst instance.Instance, conn io.ReadWr
 			return fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMove) {
-			continue
-		}
+		b.logger.Debug("migrateDependentVolumes", logger.Ctx{"name": dependentVol.Name, "pool": dependentVol.Pool, "deviceName": dependentVol.DeviceName, "type": dependentVol.MigrationType})
 
 		diskConfig, err := diskPool.GenerateCustomVolumeBackupConfig(inst.Project().Name, dependentVol.Name, !args.VolumeOnly, op)
 		if err != nil {
@@ -9520,33 +9468,16 @@ func (b *backend) createDependentVolumesFromMigration(inst instance.Instance, co
 
 	reverter.Add(func() { cleanup() })
 
-	devicesMap := DevicesMapFromBackupConfig(info.Config)
-
 	for idx, dependentVol := range args.DependentVolumes {
 		diskPool, err := LoadByName(b.state, dependentVol.Pool)
 		if err != nil {
 			return nil, fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		if !ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
-			continue
-		}
-
 		b.logger.Debug("createDependentVolumesFromMigration", logger.Ctx{"name": dependentVol.Name, "type": dependentVol.MigrationType, "size": dependentVol.VolumeSize})
-		devices := inst.ExpandedDevices().Clone()
-		deviceName := DeviceByPoolAndVolume(devicesMap, dependentVol.Pool, dependentVol.Name)
-		if deviceName == "" {
-			return nil, fmt.Errorf("%s/%s does not exists in source device", dependentVol.Pool, dependentVol.Name)
-		}
-
-		dev, ok := devices[deviceName]
-		if !ok {
-			return nil, fmt.Errorf("Device %s not found for instance %s", deviceName, inst.Name())
-		}
-
 		volumeArgs := localMigration.VolumeTargetArgs{
 			IndexHeaderVersion: localMigration.IndexHeaderVersion,
-			Name:               dev["source"],
+			Name:               dependentVol.Name,
 			MigrationType:      dependentVol.MigrationType,
 			TrackProgress:      true,
 			ContentType:        dependentVol.ContentType,

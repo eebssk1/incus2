@@ -21,9 +21,9 @@ import (
 	"github.com/kballard/go-shellquote"
 	"go.yaml.in/yaml/v4"
 
-	"github.com/lxc/incus/v6/shared/osarch"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
+	"github.com/lxc/incus/v7/shared/osarch"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 // And returns a function that runs one or more validators, all must pass without error.

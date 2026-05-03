@@ -6,19 +6,18 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/lxc/incus/v6/internal/instancewriter"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	backupConfig "github.com/lxc/incus/v6/internal/server/backup/config"
-	"github.com/lxc/incus/v6/internal/server/cluster/request"
-	"github.com/lxc/incus/v6/internal/server/instance"
-	"github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/internal/server/state"
-	"github.com/lxc/incus/v6/internal/server/storage/drivers"
-	"github.com/lxc/incus/v6/internal/server/storage/s3/miniod"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
+	"github.com/lxc/incus/v7/internal/instancewriter"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	backupConfig "github.com/lxc/incus/v7/internal/server/backup/config"
+	"github.com/lxc/incus/v7/internal/server/cluster/request"
+	"github.com/lxc/incus/v7/internal/server/instance"
+	"github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/internal/server/state"
+	"github.com/lxc/incus/v7/internal/server/storage/drivers"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
 )
 
 type mockBackend struct {
@@ -213,6 +212,11 @@ func (b *mockBackend) DeleteInstanceSnapshot(inst instance.Instance, op *operati
 	return nil
 }
 
+// CanRestoreInstanceSnapshot checks if an instance snapshot can be restored.
+func (b *mockBackend) CanRestoreInstanceSnapshot(inst instance.Instance, src instance.Instance) error {
+	return nil
+}
+
 func (b *mockBackend) RestoreInstanceSnapshot(inst instance.Instance, src instance.Instance, op *operations.Operation) error {
 	return nil
 }
@@ -269,8 +273,10 @@ func (b *mockBackend) DeleteBucketKey(projectName string, bucketName string, key
 	return nil
 }
 
-func (b *mockBackend) ActivateBucket(projectName string, bucketName string, op *operations.Operation) (*miniod.Process, error) {
-	return nil, nil
+// MountLocalBucket mounts the local bucket volume and returns its mount path
+// along with an unmount function that the caller must invoke when finished.
+func (b *mockBackend) MountLocalBucket(projectName string, bucketName string, op *operations.Operation) (string, func() error, error) {
+	return "", func() error { return nil }, nil
 }
 
 func (b *mockBackend) GetBucketURL(bucketName string) *url.URL {

@@ -14,11 +14,11 @@ import (
 	ovsModel "github.com/ovn-kubernetes/libovsdb/model"
 	"github.com/ovn-kubernetes/libovsdb/ovsdb"
 
-	"github.com/lxc/incus/v6/internal/iprange"
-	ovnNB "github.com/lxc/incus/v6/internal/server/network/ovn/schema/ovn-nb"
-	ovnSB "github.com/lxc/incus/v6/internal/server/network/ovn/schema/ovn-sb"
-	localUtil "github.com/lxc/incus/v6/internal/server/util"
-	"github.com/lxc/incus/v6/shared/util"
+	"github.com/lxc/incus/v7/internal/iprange"
+	ovnNB "github.com/lxc/incus/v7/internal/server/network/ovn/schema/ovn-nb"
+	ovnSB "github.com/lxc/incus/v7/internal/server/network/ovn/schema/ovn-sb"
+	localUtil "github.com/lxc/incus/v7/internal/server/util"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 // OVNRouter OVN router name.

@@ -14,33 +14,34 @@ import (
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gorilla/websocket"
 
-	internalInstance "github.com/lxc/incus/v6/internal/instance"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	"github.com/lxc/incus/v6/internal/server/cluster"
-	"github.com/lxc/incus/v6/internal/server/db"
-	dbCluster "github.com/lxc/incus/v6/internal/server/db/cluster"
-	"github.com/lxc/incus/v6/internal/server/db/operationtype"
-	deviceConfig "github.com/lxc/incus/v6/internal/server/device/config"
-	"github.com/lxc/incus/v6/internal/server/instance"
-	"github.com/lxc/incus/v6/internal/server/instance/instancetype"
-	"github.com/lxc/incus/v6/internal/server/instance/operationlock"
-	"github.com/lxc/incus/v6/internal/server/lifecycle"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/internal/server/project"
-	"github.com/lxc/incus/v6/internal/server/request"
-	"github.com/lxc/incus/v6/internal/server/response"
-	"github.com/lxc/incus/v6/internal/server/scriptlet"
-	"github.com/lxc/incus/v6/internal/server/state"
-	storagePools "github.com/lxc/incus/v6/internal/server/storage"
-	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
-	"github.com/lxc/incus/v6/shared/api"
-	apiScriptlet "github.com/lxc/incus/v6/shared/api/scriptlet"
-	"github.com/lxc/incus/v6/shared/archive"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/osarch"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/util"
+	internalInstance "github.com/lxc/incus/v7/internal/instance"
+	internalIO "github.com/lxc/incus/v7/internal/io"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	"github.com/lxc/incus/v7/internal/server/cluster"
+	"github.com/lxc/incus/v7/internal/server/db"
+	dbCluster "github.com/lxc/incus/v7/internal/server/db/cluster"
+	"github.com/lxc/incus/v7/internal/server/db/operationtype"
+	deviceConfig "github.com/lxc/incus/v7/internal/server/device/config"
+	"github.com/lxc/incus/v7/internal/server/instance"
+	"github.com/lxc/incus/v7/internal/server/instance/instancetype"
+	"github.com/lxc/incus/v7/internal/server/instance/operationlock"
+	"github.com/lxc/incus/v7/internal/server/lifecycle"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/internal/server/project"
+	"github.com/lxc/incus/v7/internal/server/request"
+	"github.com/lxc/incus/v7/internal/server/response"
+	"github.com/lxc/incus/v7/internal/server/scriptlet"
+	"github.com/lxc/incus/v7/internal/server/state"
+	storagePools "github.com/lxc/incus/v7/internal/server/storage"
+	internalUtil "github.com/lxc/incus/v7/internal/util"
+	"github.com/lxc/incus/v7/internal/version"
+	"github.com/lxc/incus/v7/shared/api"
+	apiScriptlet "github.com/lxc/incus/v7/shared/api/scriptlet"
+	"github.com/lxc/incus/v7/shared/archive"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/osarch"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 func ensureDownloadedImageFitWithinBudget(ctx context.Context, s *state.State, r *http.Request, op *operations.Operation, p api.Project, imgAlias string, source api.InstanceSource, imgType string) (*api.Image, error) {
@@ -353,6 +354,33 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 		}
 	}
 
+	// Override existing devices with values provided in the request.
+	devs := inst.LocalDevices().CloneNative()
+	if req.Devices != nil {
+		err = inst.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+			reqDevice, ok := req.Devices[dev.Name]
+			if !ok {
+				return nil
+			}
+
+			for k, v := range reqDevice {
+				devs[dev.Name][k] = v
+			}
+
+			return nil
+		})
+		if err != nil {
+			return response.InternalError(err)
+		}
+	}
+
+	// Update devices for the target instance without saving changes to the database,
+	// as the same instance is still being used by the source.
+	err = inst.UpdateDevices(deviceConfig.NewDevices(devs))
+	if err != nil {
+		return response.InternalError(fmt.Errorf("Failed to update instance %q: %w", inst.Name(), err))
+	}
+
 	migrationArgs := migrationSinkArgs{
 		URL:                   req.Source.Operation,
 		Dialer:                dialer,
@@ -399,7 +427,7 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 
 		instOp.Done(nil) // Complete operation that was created earlier, to release lock.
 
-		if migrationArgs.StoragePool != "" {
+		if migrationArgs.StoragePool != "" || req.Devices != nil {
 			// Update root device for the instance if needed.
 			updateNeeded := false
 
@@ -429,6 +457,25 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 				if devs[rootDevKey]["pool"] != storagePool {
 					devs[rootDevKey]["pool"] = storagePool
 					updateNeeded = true
+				}
+			}
+
+			if req.Devices != nil {
+				err = inst.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
+					updateNeeded = true
+					reqDevice, ok := req.Devices[dev.Name]
+					if !ok {
+						return nil
+					}
+
+					for k, v := range reqDevice {
+						devs[dev.Name][k] = v
+					}
+
+					return nil
+				})
+				if err != nil {
+					return err
 				}
 			}
 
@@ -504,6 +551,10 @@ func validateDependentVolumes(source instance.Instance, req *api.InstancesPost) 
 		oldDevice, exists := sourceDevices[key]
 		if !exists {
 			return fmt.Errorf("Missing device %s on source", key)
+		}
+
+		if newDevice["pool"] != "" && oldDevice["pool"] != newDevice["pool"] {
+			continue
 		}
 
 		// Check if the source was overridden.
@@ -730,8 +781,23 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 	defer func() { _ = os.Remove(backupFile.Name()) }()
 	reverter.Add(func() { _ = backupFile.Close() })
 
+	// Get disk budget for the project if any.
+	var budget int64
+
+	err = s.DB.Cluster.Transaction(r.Context(), func(ctx context.Context, tx *db.ClusterTx) error {
+		budget, err = project.GetSpaceBudget(tx, projectName)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return response.InternalError(err)
+	}
+
 	// Stream uploaded backup data into temporary file.
-	_, err = util.SafeCopy(backupFile, data)
+	_, err = util.SafeCopy(internalIO.NewQuotaWriter(backupFile, budget), data)
 	if err != nil {
 		return response.InternalError(err)
 	}
@@ -785,7 +851,7 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 	}
 
 	// Detect broken legacy backups.
-	if bInfo.Config == nil {
+	if bInfo.Config == nil || bInfo.Config.Container == nil {
 		return response.BadRequest(errors.New("Backup file is missing required information"))
 	}
 
@@ -1578,6 +1644,7 @@ func clusterCopyContainerInternal(ctx context.Context, s *state.State, r *http.R
 			Migration:    true,
 			Live:         req.Source.Live,
 			InstanceOnly: instanceOnly,
+			Devices:      req.Devices,
 		}
 
 		op, err := client.MigrateInstance(req.Source.Source, pullReq)

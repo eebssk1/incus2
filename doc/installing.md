@@ -346,7 +346,7 @@ Also you can find the package you need with the binary name from [Alpine Linux p
 
 Install the main dependencies:
 
-    apk add acl attr ca-certificates cgmanager dbus dnsmasq lxc libintl iproute2 iptables netcat-openbsd rsync squashfs-tools shadow-uidmap tar xz
+    apk add acl attr ca-certificates cgmanager dbus dnsmasq lxc libintl iproute2 nftables netcat-openbsd rsync squashfs-tools shadow-uidmap tar xz
 
 Install the extra dependencies for running virtual machines:
 
@@ -366,7 +366,7 @@ Also, due to a [`gettext` issue](https://github.com/gosexy/gettext/issues/1), yo
 Install the build and required runtime dependencies with:
 
     sudo apt update
-    sudo apt install acl attr autoconf automake dnsmasq-base git golang-go libacl1-dev libcap-dev liblxc1 lxc-dev libsqlite3-dev libtool libudev-dev liblz4-dev libuv1-dev make pkg-config rsync squashfs-tools tar tcl xz-utils ebtables
+    sudo apt install acl attr autoconf automake dnsmasq-base git golang-go libacl1-dev libcap-dev liblxc1 lxc-dev libsqlite3-dev libtool libudev-dev liblz4-dev libuv1-dev make pkg-config rsync squashfs-tools tar tcl xz-utils nftables
 
 ****NOTE:**** The version of `golang-go` in your version of Debian or Ubuntu may not be sufficient to build Incus (see {ref}`requirements-go`).
 In such cases, you may need to install a newer Go version [from upstream](https://go.dev/doc/install).
@@ -398,7 +398,7 @@ You can get the development resources required to build Incus on your OpenSUSE T
 
 In addition, for normal operation, you'll also likely need:
 
-    sudo zypper install dnsmasq squashfs xz rsync tar attr acl qemu qemu-img qemu-spice qemu-hw-display-virtio-gpu-pci iptables ebtables nftables
+    sudo zypper install dnsmasq squashfs xz rsync tar attr acl qemu qemu-img qemu-spice qemu-hw-display-virtio-gpu-pci nftables
 
 For using NVIDIA GPUs inside containers, you will need the NVIDIA container tools and LXC hooks:
 

@@ -14,18 +14,18 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/sys/unix"
 
-	"github.com/lxc/incus/v6/internal/instancewriter"
-	"github.com/lxc/incus/v6/internal/linux"
-	"github.com/lxc/incus/v6/internal/migration"
-	"github.com/lxc/incus/v6/internal/server/backup"
-	localMigration "github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/shared/api"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
-	"github.com/lxc/incus/v6/shared/validate"
+	"github.com/lxc/incus/v7/internal/instancewriter"
+	"github.com/lxc/incus/v7/internal/linux"
+	"github.com/lxc/incus/v7/internal/migration"
+	"github.com/lxc/incus/v7/internal/server/backup"
+	localMigration "github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
+	"github.com/lxc/incus/v7/shared/validate"
 )
 
 // CreateVolume creates an empty volume and can optionally fill it by executing the supplied
@@ -1082,21 +1082,6 @@ func (d *truenas) SetVolumeQuota(vol Volume, size string, allowUnsafeResize bool
 				return err
 			}
 		} else if sizeBytes > oldVolSizeBytes {
-
-			// Grow FileSystem
-
-			if !tnHasIscsiRefresh {
-				if inUse {
-					return fmt.Errorf("Growing an online TrueNAS filesystem requires iSCSI Refresh support. Please update the TrueNAS tool: %w", ErrInUse)
-				}
-
-				// Deactivate if necessary, so we can re-activate after changing the zvol size, since we can't use refresh
-				_, err = d.deactivateVolume(vol)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Grow block device first, ignoring any shrink errors, which could happen because we've already ignored a shrink error when shrinking.
 			err = d.setVolsize(dataset, sizeBytes, false)
 			if err != nil {
@@ -1119,7 +1104,7 @@ func (d *truenas) SetVolumeQuota(vol Volume, size string, allowUnsafeResize bool
 				return err
 			}
 
-			if tnHasIscsiRefresh && actualSize < sizeBytes {
+			if actualSize < sizeBytes {
 				// refresh until it does actually grow
 				for range 20 {
 					// rescan iscsi devices to pickup any size change
@@ -1953,12 +1938,8 @@ func (d *truenas) VolumeSnapshots(vol Volume, op *operations.Operation) ([]strin
 	return snapshots, nil
 }
 
-// RestoreVolume restores a volume from a snapshot.
-func (d *truenas) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
-	return d.restoreVolume(vol, snapshotName, false, op)
-}
-
-func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration bool, op *operations.Operation) error {
+// CanRestoreVolume checks whether a volume snapshot can be restored.
+func (d *truenas) CanRestoreVolume(vol Volume, snapshotName string) error {
 	// Get the list of snapshots.
 	dataset := d.dataset(vol, false)
 	entries, err := d.getDatasets(dataset, "snapshot")
@@ -2001,6 +1982,22 @@ func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration boo
 		// Setup custom error to tell the backend what to delete.
 		err := ErrDeleteSnapshots{}
 		err.Snapshots = snapshots
+		return err
+	}
+
+	return nil
+}
+
+// RestoreVolume restores a volume from a snapshot.
+func (d *truenas) RestoreVolume(vol Volume, snapshotName string, op *operations.Operation) error {
+	return d.restoreVolume(vol, snapshotName, false, op)
+}
+
+func (d *truenas) restoreVolume(vol Volume, snapshotName string, isMigration bool, op *operations.Operation) error {
+	dataset := d.dataset(vol, false)
+
+	err := d.CanRestoreVolume(vol, snapshotName)
+	if err != nil {
 		return err
 	}
 

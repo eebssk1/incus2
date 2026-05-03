@@ -41,54 +41,54 @@ import (
 	"golang.org/x/sys/unix"
 	"google.golang.org/protobuf/proto"
 
-	incus "github.com/lxc/incus/v6/client"
-	internalInstance "github.com/lxc/incus/v6/internal/instance"
-	"github.com/lxc/incus/v6/internal/instancewriter"
-	"github.com/lxc/incus/v6/internal/jmap"
-	"github.com/lxc/incus/v6/internal/linux"
-	"github.com/lxc/incus/v6/internal/migration"
-	"github.com/lxc/incus/v6/internal/ports"
-	"github.com/lxc/incus/v6/internal/server/apparmor"
-	"github.com/lxc/incus/v6/internal/server/cgroup"
-	"github.com/lxc/incus/v6/internal/server/db"
-	dbCluster "github.com/lxc/incus/v6/internal/server/db/cluster"
-	"github.com/lxc/incus/v6/internal/server/device"
-	deviceConfig "github.com/lxc/incus/v6/internal/server/device/config"
-	"github.com/lxc/incus/v6/internal/server/device/nictype"
-	"github.com/lxc/incus/v6/internal/server/instance"
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/cfg"
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/edk2"
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/qemudefault"
-	"github.com/lxc/incus/v6/internal/server/instance/drivers/qmp"
-	"github.com/lxc/incus/v6/internal/server/instance/instancetype"
-	"github.com/lxc/incus/v6/internal/server/instance/operationlock"
-	"github.com/lxc/incus/v6/internal/server/lifecycle"
-	"github.com/lxc/incus/v6/internal/server/metrics"
-	localMigration "github.com/lxc/incus/v6/internal/server/migration"
-	"github.com/lxc/incus/v6/internal/server/network"
-	"github.com/lxc/incus/v6/internal/server/operations"
-	"github.com/lxc/incus/v6/internal/server/project"
-	"github.com/lxc/incus/v6/internal/server/response"
-	"github.com/lxc/incus/v6/internal/server/scriptlet"
-	scriptletLoad "github.com/lxc/incus/v6/internal/server/scriptlet/load"
-	"github.com/lxc/incus/v6/internal/server/state"
-	storagePools "github.com/lxc/incus/v6/internal/server/storage"
-	storageDrivers "github.com/lxc/incus/v6/internal/server/storage/drivers"
-	localUtil "github.com/lxc/incus/v6/internal/server/util"
-	localvsock "github.com/lxc/incus/v6/internal/server/vsock"
-	internalUtil "github.com/lxc/incus/v6/internal/util"
-	"github.com/lxc/incus/v6/internal/version"
-	"github.com/lxc/incus/v6/shared/api"
-	agentAPI "github.com/lxc/incus/v6/shared/api/agent"
-	"github.com/lxc/incus/v6/shared/ioprogress"
-	"github.com/lxc/incus/v6/shared/logger"
-	"github.com/lxc/incus/v6/shared/osarch"
-	"github.com/lxc/incus/v6/shared/resources"
-	"github.com/lxc/incus/v6/shared/revert"
-	"github.com/lxc/incus/v6/shared/subprocess"
-	localtls "github.com/lxc/incus/v6/shared/tls"
-	"github.com/lxc/incus/v6/shared/units"
-	"github.com/lxc/incus/v6/shared/util"
+	incus "github.com/lxc/incus/v7/client"
+	internalInstance "github.com/lxc/incus/v7/internal/instance"
+	"github.com/lxc/incus/v7/internal/instancewriter"
+	"github.com/lxc/incus/v7/internal/jmap"
+	"github.com/lxc/incus/v7/internal/linux"
+	"github.com/lxc/incus/v7/internal/migration"
+	"github.com/lxc/incus/v7/internal/ports"
+	"github.com/lxc/incus/v7/internal/server/apparmor"
+	"github.com/lxc/incus/v7/internal/server/cgroup"
+	"github.com/lxc/incus/v7/internal/server/db"
+	dbCluster "github.com/lxc/incus/v7/internal/server/db/cluster"
+	"github.com/lxc/incus/v7/internal/server/device"
+	deviceConfig "github.com/lxc/incus/v7/internal/server/device/config"
+	"github.com/lxc/incus/v7/internal/server/device/nictype"
+	"github.com/lxc/incus/v7/internal/server/instance"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/cfg"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/edk2"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/qemudefault"
+	"github.com/lxc/incus/v7/internal/server/instance/drivers/qmp"
+	"github.com/lxc/incus/v7/internal/server/instance/instancetype"
+	"github.com/lxc/incus/v7/internal/server/instance/operationlock"
+	"github.com/lxc/incus/v7/internal/server/lifecycle"
+	"github.com/lxc/incus/v7/internal/server/metrics"
+	localMigration "github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/server/network"
+	"github.com/lxc/incus/v7/internal/server/operations"
+	"github.com/lxc/incus/v7/internal/server/project"
+	"github.com/lxc/incus/v7/internal/server/response"
+	"github.com/lxc/incus/v7/internal/server/scriptlet"
+	scriptletLoad "github.com/lxc/incus/v7/internal/server/scriptlet/load"
+	"github.com/lxc/incus/v7/internal/server/state"
+	storagePools "github.com/lxc/incus/v7/internal/server/storage"
+	storageDrivers "github.com/lxc/incus/v7/internal/server/storage/drivers"
+	localUtil "github.com/lxc/incus/v7/internal/server/util"
+	localvsock "github.com/lxc/incus/v7/internal/server/vsock"
+	internalUtil "github.com/lxc/incus/v7/internal/util"
+	"github.com/lxc/incus/v7/internal/version"
+	"github.com/lxc/incus/v7/shared/api"
+	agentAPI "github.com/lxc/incus/v7/shared/api/agent"
+	"github.com/lxc/incus/v7/shared/ioprogress"
+	"github.com/lxc/incus/v7/shared/logger"
+	"github.com/lxc/incus/v7/shared/osarch"
+	"github.com/lxc/incus/v7/shared/resources"
+	"github.com/lxc/incus/v7/shared/revert"
+	"github.com/lxc/incus/v7/shared/subprocess"
+	localtls "github.com/lxc/incus/v7/shared/tls"
+	"github.com/lxc/incus/v7/shared/units"
+	"github.com/lxc/incus/v7/shared/util"
 )
 
 // incus-agent files
@@ -354,6 +354,7 @@ type qemu struct {
 
 	// Indicate whether the root disk will be live-migrated.
 	migrationRootDisk bool
+	disksToMigrate    []localMigration.DependentVolumeArgs
 
 	// Indicates whether this is an inner-cluster or cross-cluster move.
 	migrationClusterMove bool
@@ -522,8 +523,10 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 		case qmp.EventVMReset:
 			monitor, err := d.qmpConnect()
 			if err == nil {
-				if !monitor.IsInitialized() {
-					// If the VM isn't fully initialized yet, we want system_reset to be treated internally within QEMU.
+				if monitor.HandleReset() {
+					// This RESET corresponds to a deliberate system_reset we triggered
+					// (e.g. the boot-config rebuild during startup), so let QEMU handle
+					// it internally rather than tearing the VM down.
 					break
 				}
 
@@ -537,19 +540,28 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 
 			fallthrough
 		case qmp.EventVMShutdown:
+			var reason string
+
 			target := "stop"
 			entry, ok := data["reason"]
-			if ok && entry == "guest-reset" {
+			if ok {
+				entryStr, ok := entry.(string)
+				if ok {
+					reason = entryStr
+				}
+			}
+
+			if reason == "guest-reset" {
 				target = "reboot"
 			}
 
-			if entry == qmp.EventVMShutdownReasonDisconnect {
+			if reason == qmp.EventVMShutdownReasonDisconnect {
 				d.logger.Warn("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			} else {
 				d.logger.Debug("Instance stopped", logger.Ctx{"target": target, "reason": data["reason"]})
 			}
 
-			err = d.onStop(target)
+			err = d.onStop(target, reason)
 			if err != nil {
 				d.logger.Error("Failed to cleanly stop instance", logger.Ctx{"err": err})
 				return
@@ -708,9 +720,9 @@ func (d *qemu) pidWait(timeout time.Duration) bool {
 }
 
 // onStop is run when the instance stops.
-func (d *qemu) onStop(target string) error {
-	d.logger.Debug("onStop hook started", logger.Ctx{"target": target})
-	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target})
+func (d *qemu) onStop(target string, reason string) error {
+	d.logger.Debug("onStop hook started", logger.Ctx{"target": target, "reason": reason})
+	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target, "reason": reason})
 
 	// Create/pick up operation.
 	op, err := d.onStopOperationSetup(target)
@@ -775,8 +787,10 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Determine if instance should be auto-restarted.
+	cleanShutdown := reason == qmp.EventVMShutdownReasonGuestShutdown || reason == qmp.EventVMShutdownReasonQuit
+
 	var autoRestart bool
-	if target != "reboot" && op.GetInstanceInitiated() && d.shouldAutoRestart() {
+	if target != "reboot" && !cleanShutdown && d.shouldAutoRestart() {
 		autoRestart = true
 
 		// Mark current shutdown as complete.
@@ -792,7 +806,7 @@ func (d *qemu) onStop(target string) error {
 	}
 
 	// Log and emit lifecycle if not user triggered.
-	if target != "reboot" && !autoRestart && op.Action() != operationlock.ActionMigrate {
+	if target != "reboot" && !autoRestart && op.Action() != operationlock.ActionMigrate && op.Action() != operationlock.ActionRestart {
 		if op.GetInstanceInitiated() {
 			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceShutdown.Event(d, nil))
 		} else {
@@ -1071,20 +1085,11 @@ func (d *qemu) restoreState(monitor *qmp.Monitor) error {
 
 				devicesMap := storagePools.DevicesMapFromBackupConfig(config)
 
-				for _, vol := range config.DependentVolumes {
-					diskPool, err := storagePools.LoadByName(d.state, vol.Pool.Name)
-					if err != nil {
-						d.logger.Error("Failed loading storage pool", logger.Ctx{"err": err})
-					}
-
-					if !storagePools.ShouldMigrateDependentVolume(diskPool, d.migrationClusterMove) {
-						continue
-					}
-
-					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Volume.Name, "pool": vol.Pool.Name})
-					deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool.Name, vol.Volume.Name)
+				for _, vol := range d.disksToMigrate {
+					d.logger.Debug("Receiving dependent volume", logger.Ctx{"name": vol.Name, "pool": vol.Pool})
+					deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
 					if deviceName == "" {
-						d.logger.Error("Failed to find requested device", logger.Ctx{"pool": vol.Pool.Name, "volName": vol.Volume.Name})
+						d.logger.Error("Failed to find requested device", logger.Ctx{"pool": vol.Pool, "volName": vol.Name})
 						return
 					}
 
@@ -4253,18 +4258,8 @@ func (d *qemu) writeQemuConfigFile(configPath string) error {
 
 // getCPUOpts retrieves configuration options for virtualized CPUs and memory.
 func (d *qemu) getCPUOpts(cpuInfo *qemuCPUTopology, memSizeBytes int64) (*qemuCPUOpts, error) {
-	// Figure out what memory object layout we're going to use.
-	// Before v6.0 or if version unknown, we use the "repeated" format, otherwise we use "indexed" format.
-	qemuMemObjectFormat := "repeated"
-	qemuVer6, _ := version.NewDottedVersion("6.0")
-	qemuVer, _ := d.version()
-	if qemuVer != nil && qemuVer.Compare(qemuVer6) >= 0 {
-		qemuMemObjectFormat = "indexed"
-	}
-
 	cpuOpts := qemuCPUOpts{
-		architecture:        d.architectureName,
-		qemuMemObjectFormat: qemuMemObjectFormat,
+		architecture: d.architectureName,
 	}
 
 	hostNodes := []uint64{}
@@ -4595,13 +4590,10 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 	media := "disk"
 	isRBDImage := strings.HasPrefix(driveConf.DevPath, device.RBDFormatPrefix)
 
-	// Check supported features.
-	// Use io_uring over native for added performance (if supported by QEMU and kernel is recent enough).
-	// We've seen issues starting VMs when running with io_ring AIO mode on kernels before 5.13.
+	// Use io_uring over native for added performance when supported by QEMU.
 	info := DriverStatuses()[instancetype.VM].Info
-	minVer, _ := version.NewDottedVersion("5.13.0")
 	_, ioUring := info.Features["io_uring"]
-	if slices.Contains(driveConf.Opts, device.DiskIOUring) && ioUring && d.state.OS.KernelVersion.Compare(minVer) >= 0 {
+	if slices.Contains(driveConf.Opts, device.DiskIOUring) && ioUring {
 		aioMode = "io_uring"
 	}
 
@@ -5655,7 +5647,8 @@ func (d *qemu) Stop(stateful bool) error {
 		}
 
 		// Wait for QEMU process to exit and perform device cleanup.
-		err = d.onStop("stop")
+		// Treat as host-qmp-quit so autoRestart isn't triggered for a user-requested force stop.
+		err = d.onStop("stop", qmp.EventVMShutdownReasonQuit)
 		if err != nil {
 			op.Done(err)
 			return err
@@ -5845,6 +5838,19 @@ func (d *qemu) Restore(source instance.Instance, stateful bool, diskOnly bool) e
 
 	var ctxMap logger.Ctx
 
+	// Load the storage driver.
+	pool, err := storagePools.LoadByInstance(d.state, d)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
+	err = pool.CanRestoreInstanceSnapshot(d, source)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
 	// Stop the instance.
 	wasRunning := false
 	if d.IsRunning() {
@@ -5902,13 +5908,6 @@ func (d *qemu) Restore(source instance.Instance, stateful bool, diskOnly bool) e
 	}
 
 	d.logger.Info("Restoring instance", ctxMap)
-
-	// Load the storage driver.
-	pool, err := storagePools.LoadByInstance(d.state, d)
-	if err != nil {
-		op.Done(err)
-		return err
-	}
 
 	// Restore the rootfs.
 	err = pool.RestoreInstanceSnapshot(d, source, nil)
@@ -6424,6 +6423,10 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 		for devName, newDev := range addDevices {
 			for k, newVal := range newDev {
 				if !strings.HasPrefix(k, "initial.") {
+					continue
+				}
+
+				if newDev["pool"] != "" && newDev["path"] != "/" && strings.Contains(newDev["source"], "/") {
 					continue
 				}
 
@@ -7599,7 +7602,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots)
+	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.ClusterMoveSourceName != "")
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 		op.Done(err)
@@ -7668,7 +7671,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true)
 	if err != nil {
 		err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 		op.Done(err)
@@ -7677,7 +7680,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], nil))
 	}
 
 	volSourceArgs := &localMigration.VolumeSourceArgs{
@@ -8080,24 +8083,9 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 	// If we are performing an intra-cluster member move on a Ceph storage pool without storage change
 	// then we can treat this as shared storage and avoid needing to sync the root disk.
 	sameSharedStorage := clusterMoveSourceName != "" && pool.Driver().Info().Remote && storagePool == ""
-	disksToMigrate := false
-
-	for _, vol := range volSourceArgs.DependentVolumes {
-		diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-		if err != nil {
-			return fmt.Errorf("Failed loading storage pool: %w", err)
-		}
-
-		if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-			continue
-		}
-
-		disksToMigrate = true
-		break
-	}
+	disksToMigrate := len(volSourceArgs.DependentVolumes) > 0
 
 	dependentVolumeMove := clusterMoveSourceName != "" && disksToMigrate
-	devicesMap := storagePools.DevicesMapFromBackupConfig(volSourceArgs.Info.Config)
 
 	reverter := revert.New()
 
@@ -8143,21 +8131,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
-			diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-			if err != nil {
-				return fmt.Errorf("Failed loading storage pool: %w", err)
-			}
-
-			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-				continue
-			}
-
-			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
-			if deviceName == "" {
-				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
-			}
-
-			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.DeviceName))
 
 			d.logger.Debug("Create snapshot for dependent volume", logger.Ctx{"name": vol.Name, "size": vol.VolumeSize, "diskName": diskName})
 
@@ -8329,21 +8303,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
-			diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-			if err != nil {
-				return fmt.Errorf("Failed loading storage pool: %w", err)
-			}
-
-			if !storagePools.ShouldMigrateDependentVolume(diskPool, clusterMoveSourceName != "") {
-				continue
-			}
-
-			deviceName := storagePools.DeviceByPoolAndVolume(devicesMap, vol.Pool, vol.Name)
-			if deviceName == "" {
-				return fmt.Errorf("%s/%s does not exists in source device", vol.Pool, vol.Name)
-			}
-
-			diskName := d.blockNodeName(linux.PathNameEncode(deviceName))
+			diskName := d.blockNodeName(linux.PathNameEncode(vol.DeviceName))
 
 			_, err = d.sendMigrationSnapshot(diskName, filesystemConn, true)
 			if err != nil {
@@ -8473,7 +8433,8 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	respHeader.Snapshots = offerHeader.Snapshots
 	respHeader.Refresh = &args.Refresh
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots)
+	localDevices := d.localDevices.CloneNative()
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false)
 	if err != nil {
 		return fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 	}
@@ -8481,7 +8442,8 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	dependentVolumes := []localMigration.DependentVolumeArgs{}
 	for _, volWithType := range volumesWithTypes {
 		respHeader.DependentVolumes = append(respHeader.DependentVolumes, volWithType.Volume)
-		dependentVolumes = append(dependentVolumes, localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0]))
+		vol := localMigration.ProtobufToDependentVolume(volWithType.Volume, volWithType.VolumeTypes[0], localDevices[*volWithType.Volume.DeviceName])
+		dependentVolumes = append(dependentVolumes, vol)
 	}
 
 	if args.Refresh {
@@ -8813,22 +8775,11 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 					api.SecretNameState: stateConn,
 				}
 
-				disksToMigrate := false
 				for _, vol := range dependentVolumes {
-					diskPool, err := storagePools.LoadByName(d.state, vol.Pool)
-					if err != nil {
-						return fmt.Errorf("Failed loading storage pool: %w", err)
-					}
-
-					if !storagePools.ShouldMigrateDependentVolume(diskPool, args.ClusterMoveSourceName != "") {
-						continue
-					}
-
-					disksToMigrate = true
-					break
+					d.disksToMigrate = append(d.disksToMigrate, vol)
 				}
 
-				dependentVolumeMove := args.ClusterMoveSourceName != "" && disksToMigrate
+				dependentVolumeMove := args.ClusterMoveSourceName != "" && len(d.disksToMigrate) > 0
 
 				// Populate the filesystem connection handle if doing non-shared storage migration.
 				sameSharedStorage := args.ClusterMoveSourceName != "" && poolInfo.Remote && args.StoragePool == ""
@@ -9065,7 +9016,12 @@ func (d *qemu) Console(protocol string) (*os.File, chan error, error) {
 		_ = d.consoleSwapSocketWithRB()
 	}()
 
-	d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	// Only emit a lifecycle event for the text console here. SPICE clients open one socket per channel
+	// (display, cursor, inputs, ...) and would otherwise produce a flurry of instance-console events
+	// for a single user session; the VGA emit is handled once per session by the console request handler.
+	if protocol == instance.ConsoleTypeConsole {
+		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceConsole.Event(d, logger.Ctx{"type": protocol}))
+	}
 
 	return file, chDisconnect, nil
 }
