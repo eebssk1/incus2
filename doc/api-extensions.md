@@ -3152,3 +3152,74 @@ For example, `/1.0?target=foo#storage.logs_volume` refers to the
 This extends the `limits.cpu` configuration key for virtual machines to
 allow specifying an explicit CPU topology of the form
 `sockets=2,cores=4,threads=2`.
+
+## `instance_nbd`
+
+This adds a new `GET /1.0/instances/{name}/nbd` endpoint which acts
+similarly to the equivalent storage volume endpoint but allows concurrent
+access to all disks attached to the VM.
+
+## `network_bridge_bgp_instances`
+
+This adds the `bgp.ipv4.instances` and `bgp.ipv6.instances` configuration
+keys to managed bridge networks.
+
+When enabled, Incus advertises a `/32` (IPv4) or `/128` (IPv6) route over
+BGP for each running instance connected to the network, withdrawing it
+again when the instance stops.
+
+## `core_https_allowed_websocket_origin`
+
+This adds a new `core.https_allowed_websocket_origin` server
+configuration key. It can be set to a comma-separate list of allowed
+origins or to the `*` wildcard.
+
+## `storage_btrfs_compression`
+
+This adds a new `btrfs.compression` storage volume configuration key for
+the `btrfs` driver. It maps to the Btrfs `compression` property and takes
+the same values (for example `zstd`, `lzo`, `zlib` or `none`).
+
+## `oci_network_config`
+
+This allows for static network configuration of OCI application containers.
+
+The NIC `ipv4.address` and `ipv6.address` keys can now be set to a CIDR
+value to statically configure the address inside the container and the new
+`ipv4.gateway` and `ipv6.gateway` keys can be used to set the default
+gateway. Setting either address to `none` prevents any configuration for
+that address family and stops the built-in DHCP client from running on it.
+
+For DNS, the `oci.dns.nameservers`, `oci.dns.domain` and `oci.dns.search`
+instance configuration keys can be used to set the initial content of the
+container's `resolv.conf`, which is then extended with any value received
+over DHCP.
+
+All of those keys are only valid for OCI containers.
+
+## `infiniband_sriov_guid`
+
+This adds two new configuration keys, `node_guid` and `port_guid`, to
+`infiniband` devices using the `sriov` `nictype`.
+
+When set, the matching GUID of the allocated virtual function is changed
+to the provided value when the instance starts and restored to its
+original value when the instance stops.
+
+## `instance_selinux`
+
+This adds per-instance SELinux integration for containers and virtual
+machines, with automatic MCS level allocation for isolation between
+instances on the same host.
+
+The following instance configuration keys are added:
+
+* `security.selinux.domain`: Override the SELinux process domain.
+* `security.selinux.type`: Override the SELinux file type used for the
+  instance storage.
+* `security.selinux.level`: Override the SELinux MCS level.
+* `security.selinux.label_rootfs`: Control rootfs labeling behavior
+  (`auto`, `always` or `never`).
+
+The computed context is persisted in the `volatile.selinux.context` key so
+that MCS ranges stay stable across restarts.

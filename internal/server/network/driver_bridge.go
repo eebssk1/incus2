@@ -178,6 +178,7 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//
 		// ---
 		//  type: string
+		//  scope: local
 		//  condition: BGP server
 		//  default: local address
 		//  shortdesc: Override the next-hop for advertised prefixes
@@ -187,10 +188,29 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//
 		// ---
 		//  type: string
+		//  scope: local
 		//  condition: BGP server
 		//  default: local address
 		//  shortdesc: Override the next-hop for advertised prefixes
 		"bgp.ipv6.nexthop": validate.Optional(validate.IsNetworkAddressV6),
+
+		// gendoc:generate(entity=network_bridge, group=common, key=bgp.ipv4.instances)
+		//
+		// ---
+		//  type: bool
+		//  condition: BGP server
+		//  default: `false`
+		//  shortdesc: Whether to advertise a /32 route for the IPv4 address of each running instance
+		"bgp.ipv4.instances": validate.Optional(validate.IsBool),
+
+		// gendoc:generate(entity=network_bridge, group=common, key=bgp.ipv6.instances)
+		//
+		// ---
+		//  type: bool
+		//  condition: BGP server
+		//  default: `false`
+		//  shortdesc: Whether to advertise a /128 route for the IPv6 address of each running instance
+		"bgp.ipv6.instances": validate.Optional(validate.IsBool),
 
 		// gendoc:generate(entity=network_bridge, group=common, key=bridge.driver)
 		//
@@ -285,7 +305,7 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//  type: string
 		//  condition: IPv4 address
 		//  default: `before`
-		//  shortdesc: Whether to add the required NAT rules before or after any pre-existing rules
+		//  shortdesc: Whether to add the required NAT rules before or after any pre-existing rules (no effect with the `nftables` firewall driver)
 		"ipv4.nat.order": validate.Optional(validate.IsOneOf("before", "after")),
 
 		// gendoc:generate(entity=network_bridge, group=common, key=ipv4.nat.address)
@@ -414,7 +434,7 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//  type: string
 		//  condition: IPv6 address
 		//  default: `before`
-		//  shortdesc: Whether to add the required NAT rules before or after any pre-existing rules
+		//  shortdesc: Whether to add the required NAT rules before or after any pre-existing rules (no effect with the `nftables` firewall driver)
 		"ipv6.nat.order": validate.Optional(validate.IsOneOf("before", "after")),
 
 		// gendoc:generate(entity=network_bridge, group=common, key=ipv6.nat.address)
@@ -772,12 +792,12 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 			}
 
 			ipv6 := config["ipv6.address"]
-			if ipv6 != "" && ipv6 != "none" && mtu < 1280 {
+			if !util.IsNoneOrEmpty(ipv6) && mtu < 1280 {
 				return errors.New("The minimum MTU for an IPv6 network is 1280")
 			}
 
 			ipv4 := config["ipv4.address"]
-			if ipv4 != "" && ipv4 != "none" && mtu < 68 {
+			if !util.IsNoneOrEmpty(ipv4) && mtu < 68 {
 				return errors.New("The minimum MTU for an IPv4 network is 68")
 			}
 		}
@@ -2880,7 +2900,8 @@ func (n *bridge) ForwardCreate(forward api.NetworkForwardsPost, clientType reque
 	}
 
 	// Check if hairpin mode needs to be enabled on active NIC bridge ports.
-	if n.config["bridge.driver"] != "openvswitch" {
+	// IncusOS doesn't load br_netfilter as it breaks routed proxy traffic, so skip the hairpin handling there.
+	if n.config["bridge.driver"] != "openvswitch" && n.state.OS.IncusOS == nil {
 		brNetfilterEnabled := false
 		for _, ipVersion := range []uint{4, 6} {
 			if BridgeNetfilterEnabled(ipVersion) == nil {
@@ -3280,7 +3301,8 @@ func (n *bridge) forwardSetupFirewall() error {
 		fwForwards = append(fwForwards, n.forwardConvertToFirewallForwards(listenAddressNet.IP, net.ParseIP(forward.Config["target_address"]), portMaps)...)
 	}
 
-	if len(forwards) > 0 {
+	// IncusOS doesn't load br_netfilter as it breaks routed proxy traffic, so skip the warning there.
+	if len(forwards) > 0 && n.state.OS.IncusOS == nil {
 		// Check if br_netfilter is enabled to, and warn if not.
 		brNetfilterWarning := false
 		for ipVersion := range ipVersions {

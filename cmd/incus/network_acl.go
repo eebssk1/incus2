@@ -214,7 +214,7 @@ func (c *cmdNetworkACLShow) run(cmd *cobra.Command, args []string) error {
 
 	sort.Strings(netACL.UsedBy)
 
-	data, err := yaml.Dump(&netACL, yaml.V2)
+	data, err := yaml.Dump(&netACL, yaml.WithV2Defaults())
 	if err != nil {
 		return err
 	}
@@ -451,7 +451,8 @@ func (c *cmdNetworkACLSet) command() *cobra.Command {
 		`Set network ACL configuration keys
 
 For backward compatibility, a single configuration key may still be set with:
-    incus network set [<remote>:]<ACL> <key> <value>`))
+    incus network set [<remote>:]<ACL> <key> <value>`,
+	))
 
 	cli.AddBoolFlag(cmd.Flags(), &c.flagIsProperty, "property|p", i18n.G("Set the key as a network ACL property"))
 	cmd.RunE = c.run
@@ -609,7 +610,8 @@ func (c *cmdNetworkACLEdit) helpTemplate() string {
 ### config:
 ###  user.foo: bah
 ###
-### Note that only the ingress and egress rules, description and configuration keys can be changed.`)
+### Note that only the ingress and egress rules, description and configuration keys can be changed.`,
+	)
 }
 
 func (c *cmdNetworkACLEdit) run(cmd *cobra.Command, args []string) error {
@@ -645,7 +647,7 @@ func (c *cmdNetworkACLEdit) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	data, err := yaml.Dump(&netACL, yaml.V2)
+	data, err := yaml.Dump(&netACL, yaml.WithV2Defaults())
 	if err != nil {
 		return err
 	}
@@ -864,7 +866,7 @@ func networkACLRuleJSONStructFieldMap() map[string]int {
 		}
 
 		// Split the json tag into its name and options (e.g. json:"action,omitempty").
-		tagParts := strings.SplitN(string(field.Tag.Get(("json"))), ",", 2)
+		tagParts := strings.SplitN(string(field.Tag.Get("json")), ",", 2)
 		fieldName := tagParts[0]
 
 		if fieldName == "" {
