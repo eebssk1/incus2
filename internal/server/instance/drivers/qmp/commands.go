@@ -336,6 +336,10 @@ func (m *Monitor) SendFile(name string, file *os.File) error {
 	// Query the status.
 	_, err = m.qmp.runWithFile(reqJSON, file, id)
 	if err != nil {
+		if errors.Is(err, ErrMonitorTimeout) {
+			return err
+		}
+
 		// Confirm the daemon didn't die.
 		errPing := m.ping()
 		if errPing != nil {
@@ -392,6 +396,10 @@ func (m *Monitor) SendFileWithFDSet(name string, file *os.File, readonly bool) (
 
 	ret, err := m.qmp.runWithFile(reqJSON, file, id)
 	if err != nil {
+		if errors.Is(err, ErrMonitorTimeout) {
+			return nil, err
+		}
+
 		// Confirm the daemon didn't die.
 		errPing := m.ping()
 		if errPing != nil {
@@ -1882,12 +1890,39 @@ func (m *Monitor) DumpGuestMemory(path string, format string) error {
 
 	args.Protocol = "fd:" + path
 	args.Format = format
+	args.Detach = true
 
 	var queryResp struct {
 		Return struct{} `json:"return"`
 	}
 
-	return m.Run("dump-guest-memory", args, &queryResp)
+	err := m.Run("dump-guest-memory", args, &queryResp)
+	if err != nil {
+		return err
+	}
+
+	// Wait for completion.
+	for {
+		var resp struct {
+			Return struct {
+				Status string `json:"status"`
+			} `json:"return"`
+		}
+
+		err := m.Run("query-dump", nil, &resp)
+		if err != nil {
+			return err
+		}
+
+		switch resp.Return.Status {
+		case "completed":
+			return nil
+		case "failed":
+			return errors.New("Guest memory dump failed")
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // SetNICLink sets the link status of the given device.
