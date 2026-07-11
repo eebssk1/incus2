@@ -576,7 +576,7 @@
 						"ipv4.gateway": {
 							"longdesc": "",
 							"managed": "no",
-							"shortdesc": "IPv4 default gateway to statically configure inside an OCI container",
+							"shortdesc": "IPv4 default gateway to statically configure inside an OCI container (`none` to prevent a default gateway from being applied)",
 							"type": "string"
 						}
 					},
@@ -608,7 +608,7 @@
 						"ipv6.gateway": {
 							"longdesc": "",
 							"managed": "no",
-							"shortdesc": "IPv6 default gateway to statically configure inside an OCI container",
+							"shortdesc": "IPv6 default gateway to statically configure inside an OCI container (`none` to prevent a default gateway from being applied)",
 							"type": "string"
 						}
 					},
@@ -1103,7 +1103,7 @@
 						"ipv4.gateway": {
 							"longdesc": "",
 							"managed": "no",
-							"shortdesc": "IPv4 default gateway to statically configure inside an OCI container",
+							"shortdesc": "IPv4 default gateway to statically configure inside an OCI container (`none` to prevent a default gateway from being applied)",
 							"type": "string"
 						}
 					},
@@ -1143,7 +1143,7 @@
 						"ipv6.gateway": {
 							"longdesc": "",
 							"managed": "no",
-							"shortdesc": "IPv6 default gateway to statically configure inside an OCI container",
+							"shortdesc": "IPv6 default gateway to statically configure inside an OCI container (`none` to prevent a default gateway from being applied)",
 							"type": "string"
 						}
 					},
@@ -2830,7 +2830,7 @@
 							"condition": "container",
 							"defaultdesc": "`true`",
 							"liveupdate": "yes",
-							"longdesc": "When set to `true` or `false`, it controls whether the container is likely to get some of\nits memory swapped by the kernel. Alternatively, it can be set to a bytes value which will\nthen allow the container to make use of additional memory through swap.",
+							"longdesc": "When set to `true` or `false`, it controls whether the container is likely to get some of\nits memory swapped by the kernel. Alternatively, it can be set to a bytes value which will\nthen allow the container to make use of additional memory through swap.\n\nSupport for this is limited on cgroup2 systems due to lack of swap priority control.",
 							"shortdesc": "Control swap usage by the instance",
 							"type": "string"
 						}
@@ -2840,7 +2840,7 @@
 							"condition": "container",
 							"defaultdesc": "`10` (maximum)",
 							"liveupdate": "yes",
-							"longdesc": "Specify an integer between 0 and 10.\nThe higher the value, the less likely the instance is to be swapped to disk.",
+							"longdesc": "Specify an integer between 0 and 10.\nThe higher the value, the less likely the instance is to be swapped to disk.\n\nThis currently doesn't have any effect on cgroup2 systems.",
 							"shortdesc": "Prevents the instance from being swapped to disk",
 							"type": "integer"
 						}
@@ -2984,11 +2984,10 @@
 					},
 					{
 						"security.nesting": {
-							"condition": "container",
-							"defaultdesc": "`false`",
-							"liveupdate": "yes",
-							"longdesc": "",
-							"shortdesc": "Whether to support running Incus (nested) inside the instance",
+							"defaultdesc": "`false` (containers), `true` (VMs)",
+							"liveupdate": "yes (containers only)",
+							"longdesc": "For containers, this controls whether Incus (nested) can be run inside of the instance.\nFor virtual machines, setting this to `false` disables nested virtualization (turns off the `svm` and `vmx` CPU flags).",
+							"shortdesc": "Whether to allow nesting inside of the instance",
 							"type": "bool"
 						}
 					},
@@ -3774,6 +3773,15 @@
 							"longdesc": "",
 							"shortdesc": "Peer session hold time (in seconds; optional)",
 							"type": "integer"
+						}
+					},
+					{
+						"bgp.peers.NAME.interface": {
+							"condition": "BGP server",
+							"defaultdesc": "-",
+							"longdesc": "",
+							"shortdesc": "Interface name for BGP unnumbered peering (alternative to the peer address)",
+							"type": "string"
 						}
 					},
 					{
@@ -4857,6 +4865,15 @@
 						}
 					},
 					{
+						"bgp.peers.NAME.interface": {
+							"condition": "BGP server",
+							"defaultdesc": "-",
+							"longdesc": "",
+							"shortdesc": "Interface name for BGP unnumbered peering (alternative to the peer address)",
+							"type": "string"
+						}
+					},
+					{
 						"bgp.peers.NAME.password": {
 							"condition": "BGP server",
 							"defaultdesc": "- (no password)",
@@ -5479,6 +5496,14 @@
 							"shortdesc": "Whether to prevent using low-level VM options",
 							"type": "string"
 						}
+					},
+					{
+						"restricted.virtual-machines.nesting": {
+							"defaultdesc": "`allow`",
+							"longdesc": "Possible values are `allow` or `block`.\nWhen set to `block`, {config:option}`instance-security:security.nesting` must be set to `false` on all virtual machines, turning off nested virtualization.",
+							"shortdesc": "Whether to prevent using nested virtualization",
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -5623,6 +5648,42 @@
 							"longdesc": "DNS resolvers to use for performing (recursive) `CNAME` resolving and apex domain determination during DNS-01 challenge.",
 							"scope": "global",
 							"shortdesc": "Comma-separated list of DNS resolvers (used by DNS-01)",
+							"type": "string"
+						}
+					}
+				]
+			},
+			"authorization": {
+				"keys": [
+					{
+						"authorization.openfga.api.token": {
+							"longdesc": "",
+							"scope": "global",
+							"shortdesc": "API token of the OpenFGA server",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.openfga.api.url": {
+							"longdesc": "",
+							"scope": "global",
+							"shortdesc": "URL of the OpenFGA server",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.openfga.store.id": {
+							"longdesc": "",
+							"scope": "global",
+							"shortdesc": "ID of the OpenFGA permission store",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.scriptlet": {
+							"longdesc": "When using scriptlet-based authorization, this option stores the scriptlet.",
+							"scope": "global",
+							"shortdesc": "Authorization scriptlet",
 							"type": "string"
 						}
 					}
@@ -6157,14 +6218,6 @@
 			"miscellaneous": {
 				"keys": [
 					{
-						"authorization.scriptlet": {
-							"longdesc": "When using scriptlet-based authorization, this option stores the scriptlet.",
-							"scope": "global",
-							"shortdesc": "Authorization scriptlet",
-							"type": "string"
-						}
-					},
-					{
 						"backups.compression_algorithm": {
 							"defaultdesc": "`gzip`",
 							"longdesc": "Possible values are `bzip2`, `gzip`, `lz4`, `lzma`, `xz`, `zstd` or `none`.",
@@ -6387,34 +6440,6 @@
 							"longdesc": "",
 							"scope": "global",
 							"shortdesc": "Comma separated list of OpenID Connect scopes",
-							"type": "string"
-						}
-					}
-				]
-			},
-			"openfga": {
-				"keys": [
-					{
-						"openfga.api.token": {
-							"longdesc": "",
-							"scope": "global",
-							"shortdesc": "API token of the OpenFGA server",
-							"type": "string"
-						}
-					},
-					{
-						"openfga.api.url": {
-							"longdesc": "",
-							"scope": "global",
-							"shortdesc": "URL of the OpenFGA server",
-							"type": "string"
-						}
-					},
-					{
-						"openfga.store.id": {
-							"longdesc": "",
-							"scope": "global",
-							"shortdesc": "ID of the OpenFGA permission store",
 							"type": "string"
 						}
 					}

@@ -266,11 +266,42 @@ func (qmp *qemuMachineProtocol) listen(r io.Reader, events chan<- qmpEvent, repl
 }
 
 // defaultCommandTimeout is how long we wait for a QMP reply before giving up.
-const defaultCommandTimeout = 100 * time.Millisecond
+const defaultCommandTimeout = 500 * time.Millisecond
+
+// blockCommandTimeout is used for block commands that do blocking storage I/O.
+const blockCommandTimeout = 5 * time.Second
+
+// heavyCommandTimeout is used for commands that require I/O flush or VFIO operations.
+const heavyCommandTimeout = 30 * time.Second
 
 // commandTimeouts overrides defaultCommandTimeout for synchronous slow commands.
 var commandTimeouts = map[string]time.Duration{
-	"screendump": 10 * time.Second,
+	"block-commit":              blockCommandTimeout,
+	"block-dirty-bitmap-remove": blockCommandTimeout,
+	"block-export-add":          blockCommandTimeout,
+	"block-job-cancel":          blockCommandTimeout,
+	"block-job-complete":        blockCommandTimeout,
+	"block_resize":              blockCommandTimeout,
+	"block_set_io_throttle":     blockCommandTimeout,
+	"blockdev-add":              blockCommandTimeout,
+	"blockdev-del":              blockCommandTimeout,
+	"blockdev-mirror":           blockCommandTimeout,
+	"blockdev-snapshot":         blockCommandTimeout,
+	"change-backing-file":       blockCommandTimeout,
+	"query-block-jobs":          blockCommandTimeout,
+	"nbd-server-start":          blockCommandTimeout,
+	"nbd-server-stop":           blockCommandTimeout,
+	"transaction":               blockCommandTimeout,
+	"cont":                      heavyCommandTimeout,
+	"device_add":                heavyCommandTimeout,
+	"device_del":                heavyCommandTimeout,
+	"netdev_add":                heavyCommandTimeout,
+	"netdev_del":                heavyCommandTimeout,
+	"object-add":                heavyCommandTimeout,
+	"stop":                      heavyCommandTimeout,
+	"system_reset":              heavyCommandTimeout,
+	"query-migrate":             5 * time.Second,
+	"screendump":                10 * time.Second,
 }
 
 // commandName extracts the command name from a marshalled QMP request.

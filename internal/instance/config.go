@@ -310,6 +310,16 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	//  shortdesc: Whether `/dev/incus` is present in the instance
 	"security.guestapi": validate.Optional(validate.IsBool),
 
+	// gendoc:generate(entity=instance, group=security, key=security.nesting)
+	// For containers, this controls whether Incus (nested) can be run inside of the instance.
+	// For virtual machines, setting this to `false` disables nested virtualization (turns off the `svm` and `vmx` CPU flags).
+	// ---
+	//  type: bool
+	//  defaultdesc: `false` (containers), `true` (VMs)
+	//  liveupdate: yes (containers only)
+	//  shortdesc: Whether to allow nesting inside of the instance
+	"security.nesting": validate.Optional(validate.IsBool),
+
 	// gendoc:generate(entity=instance, group=security, key=security.protection.delete)
 	//
 	// ---
@@ -655,6 +665,8 @@ var InstanceConfigKeysContainer = map[string]func(value string) error{
 	// When set to `true` or `false`, it controls whether the container is likely to get some of
 	// its memory swapped by the kernel. Alternatively, it can be set to a bytes value which will
 	// then allow the container to make use of additional memory through swap.
+	//
+	// Support for this is limited on cgroup2 systems due to lack of swap priority control.
 	// ---
 	//  type: string
 	//  defaultdesc: `true`
@@ -666,6 +678,8 @@ var InstanceConfigKeysContainer = map[string]func(value string) error{
 	// gendoc:generate(entity=instance, group=resource-limits, key=limits.memory.swap.priority)
 	// Specify an integer between 0 and 10.
 	// The higher the value, the less likely the instance is to be swapped to disk.
+	//
+	// This currently doesn't have any effect on cgroup2 systems.
 	// ---
 	//  type: integer
 	//  defaultdesc: `10` (maximum)
@@ -934,16 +948,6 @@ var InstanceConfigKeysContainer = map[string]func(value string) error{
 	//  condition: unprivileged container
 	//  shortdesc: The size of the idmap to use
 	"security.idmap.size": validate.Optional(validate.IsUint32),
-
-	// gendoc:generate(entity=instance, group=security, key=security.nesting)
-	//
-	// ---
-	//  type: bool
-	//  defaultdesc: `false`
-	//  liveupdate: yes
-	//  condition: container
-	//  shortdesc: Whether to support running Incus (nested) inside the instance
-	"security.nesting": validate.Optional(validate.IsBool),
 
 	// gendoc:generate(entity=instance, group=security, key=security.privileged)
 	//

@@ -3223,3 +3223,36 @@ The following instance configuration keys are added:
 
 The computed context is persisted in the `volatile.selinux.context` key so
 that MCS ranges stay stable across restarts.
+
+## `network_bgp_peer_interface`
+
+This adds a new `bgp.peers.NAME.interface` configuration key to `bridge`
+and `physical` networks as an alternative to `bgp.peers.NAME.address`.
+
+When set, the BGP session is established over the given interface using
+BGP unnumbered (the peer's IPv6 link-local address is discovered
+automatically and IPv4 routes are exchanged using extended next-hop).
+
+## `projects_restricted_virtual_machines_nesting`
+
+This adds a new `restricted.virtual-machines.nesting` project configuration key.
+
+When set to `block`, all virtual machines in the project must have
+`security.nesting` set to `false`, turning off nested virtualization.
+
+## `authorization_config`
+
+This moves the authorization configuration keys under a general
+`authorization.*` namespace.
+
+The following server configuration keys replace the former `openfga.*` keys:
+
+* `authorization.openfga.api.url`: URL of the OpenFGA server
+* `authorization.openfga.api.token`: API token of the OpenFGA server
+* `authorization.openfga.store.id`: ID of the OpenFGA permission store
+
+Existing `openfga.*` values are automatically migrated to the new keys on
+upgrade.
+
+## `network_allocations_network`
+Adds the `network` field to the network allocations API response.

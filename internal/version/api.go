@@ -550,6 +550,10 @@ var APIExtensions = []string{
 	"oci_network_config",
 	"infiniband_sriov_guid",
 	"instance_selinux",
+	"network_bgp_peer_interface",
+	"projects_restricted_virtual_machines_nesting",
+	"authorization_config",
+	"network_allocations_network",
 }
 
 // APIExtensionsCount returns the number of available API extensions.
