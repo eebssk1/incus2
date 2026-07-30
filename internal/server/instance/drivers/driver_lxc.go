@@ -164,6 +164,32 @@ func lxcSetConfigItem(c *liblxc.Container, key string, value string) error {
 	return nil
 }
 
+// lxcEncodeCmd encodes a command for lxc.init.cmd/lxc.execute.cmd, whose
+// parser only supports whole-word quoting with no escape sequences.
+func lxcEncodeCmd(args []string) (string, error) {
+	words := make([]string, 0, len(args))
+	for _, arg := range args {
+		if arg != "" && !strings.ContainsAny(arg, " \t\n\v\f\r") && !strings.HasPrefix(arg, "'") && !strings.HasPrefix(arg, "\"") {
+			words = append(words, arg)
+			continue
+		}
+
+		if !strings.Contains(arg, "\"") {
+			words = append(words, "\""+arg+"\"")
+			continue
+		}
+
+		if !strings.Contains(arg, "'") {
+			words = append(words, "'"+arg+"'")
+			continue
+		}
+
+		return "", fmt.Errorf("Unable to encode command argument: %q", arg)
+	}
+
+	return strings.Join(words, " "), nil
+}
+
 func lxcStatusCode(lxcState liblxc.State) api.StatusCode {
 	return map[int]api.StatusCode{
 		1: api.Stopped,
@@ -2489,12 +2515,11 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 			}
 		}
 
-		// Compute the entrypoint string.
-		initCmd := shellquote.Join(entrypoint...)
-
-		// As we feed this to execve and not to a real shell, un-escape some sequences.
-		initCmd = strings.ReplaceAll(initCmd, "\\(", "(")
-		initCmd = strings.ReplaceAll(initCmd, "\\)", ")")
+		// Compute the entrypoint string using LXC's own quoting rules.
+		initCmd, err := lxcEncodeCmd(entrypoint)
+		if err != nil {
+			return "", nil, err
+		}
 
 		if len(entrypoint) > 0 && slices.Contains([]string{"/init", "/sbin/init", "/s6-init", "/usr/bin/init"}, entrypoint[0]) {
 			// For regular init systems, call them directly as PID1.
@@ -3522,6 +3547,46 @@ func (d *lxc) Rebuild(img *api.Image, op *operations.Operation) error {
 	return d.rebuildCommon(d, img, op)
 }
 
+// stopDHCPClient kills the forknet dhcp process if any and waits for it to
+// exit so the container's cgroup can be fully cleaned up.
+func (d *lxc) stopDHCPClient() {
+	pidPath := filepath.Join(d.Path(), "network", "dhcp.pid")
+
+	dhcpPIDStr, err := os.ReadFile(pidPath)
+	if err != nil {
+		return
+	}
+
+	dhcpPID, err := strconv.Atoi(strings.TrimSpace(string(dhcpPIDStr)))
+	if err != nil {
+		return
+	}
+
+	pidFd, err := linux.PidFdOpen(dhcpPID, 0)
+	if err != nil {
+		return
+	}
+
+	defer func() { _ = pidFd.Close() }()
+
+	// Guard against PID reuse.
+	cmdline, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", dhcpPID))
+	if err != nil || (!strings.HasPrefix(string(cmdline), "[incus dhcp]") && !strings.Contains(string(cmdline), "forknet\x00dhcp")) {
+		return
+	}
+
+	err = linux.PidfdSendSignal(int(pidFd.Fd()), int(unix.SIGTERM), 0)
+	if err != nil {
+		return
+	}
+
+	// Wait for the process to exit.
+	fds := []unix.PollFd{{Fd: int32(pidFd.Fd()), Events: unix.POLLIN}}
+	_, _ = unix.Poll(fds, 5000)
+
+	_ = os.Remove(pidPath)
+}
+
 // onStopNS is triggered by LXC's stop hook once a container is shutdown but before the container's
 // namespaces have been closed. The netns path of the stopped container is provided.
 func (d *lxc) onStopNS(args map[string]string) error {
@@ -3539,6 +3604,9 @@ func (d *lxc) onStopNS(args map[string]string) error {
 	if err != nil {
 		return err
 	}
+
+	// Stop the DHCP client if any.
+	d.stopDHCPClient()
 
 	// Clean up devices.
 	d.cleanupDevices(false, netns)
@@ -3597,16 +3665,8 @@ func (d *lxc) onStop(args map[string]string) error {
 		// Clean up devices.
 		d.cleanupDevices(false, "")
 
-		// Stop DHCP client if any.
-		if util.PathExists(filepath.Join(d.Path(), "network", "dhcp.pid")) {
-			dhcpPIDStr, err := os.ReadFile(filepath.Join(d.Path(), "network", "dhcp.pid"))
-			if err == nil {
-				dhcpPID, err := strconv.Atoi(strings.TrimSpace(string(dhcpPIDStr)))
-				if err == nil {
-					_ = unix.Kill(dhcpPID, unix.SIGTERM)
-				}
-			}
-		}
+		// Stop the DHCP client if it's somehow still around.
+		d.stopDHCPClient()
 
 		// Remove directory ownership (to avoid issue if uidmap is reused)
 		err := os.Chown(d.Path(), 0, 0)
@@ -3761,6 +3821,21 @@ func (d *lxc) cleanupDevices(instanceRunning bool, stopHookNetnsPath string) {
 				d.logger.Error("Failed to stop device", logger.Ctx{"device": dev.Name(), "err": err})
 			}
 		}
+	}
+}
+
+// cleanupFailedMigrationRestore removes devices prepared by startCommon when CRIU restore fails before the stop hooks can run.
+func (d *lxc) cleanupFailedMigrationRestore() {
+	d.cleanupDevices(false, "")
+
+	err := d.removeUnixDevices()
+	if err != nil {
+		d.logger.Error("Failed to remove Unix devices after migration restore failure", logger.Ctx{"err": err})
+	}
+
+	err = d.removeDiskDevices()
+	if err != nil {
+		d.logger.Error("Failed to remove disk devices after migration restore failure", logger.Ctx{"err": err})
 	}
 }
 
@@ -7125,6 +7200,7 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			// here since we know that "final" is the folder for CRIU's final dump.
 			err = d.migrate(&criuMigrationArgs)
 			if err != nil {
+				d.cleanupFailedMigrationRestore()
 				return err
 			}
 
@@ -7292,7 +7368,7 @@ func (d *lxc) migrate(args *instance.CriuMigrationArgs) error {
 		_, migrateErr = subprocess.RunCommand(
 			d.state.OS.ExecPath,
 			"forkmigrate",
-			d.name,
+			project.Instance(d.Project().Name, d.Name()),
 			d.state.OS.LxcPath,
 			configPath,
 			finalStateDir,
@@ -7901,6 +7977,58 @@ func (d *lxc) FileSFTP() (*sftp.Client, error) {
 	}()
 
 	return client, nil
+}
+
+// PortForwardConn connects to the given address and TCP port from within the instance's network namespace.
+func (d *lxc) PortForwardConn(address string, port int) (net.Conn, error) {
+	if !d.IsRunning() {
+		return nil, errors.New("Instance is not running")
+	}
+
+	// Create a socket pair to pass the connection around.
+	fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_STREAM|unix.SOCK_CLOEXEC, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	parentFile := os.NewFile(uintptr(fds[0]), "forknet-parent")
+	defer func() { _ = parentFile.Close() }()
+
+	childFile := os.NewFile(uintptr(fds[1]), "forknet-child")
+	defer func() { _ = childFile.Close() }()
+
+	// Spawn forknet to establish the connection from within the network namespace.
+	var stderr bytes.Buffer
+
+	forknet := exec.Cmd{
+		Path:       d.state.OS.ExecPath,
+		Args:       []string{d.state.OS.ExecPath, "forknet", "connect", "--", fmt.Sprintf("/proc/%d/ns/net", d.InitPID()), address, strconv.Itoa(port)},
+		ExtraFiles: []*os.File{childFile},
+		Stderr:     &stderr,
+	}
+
+	err = forknet.Run()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to run forknet connect: %w: %s", err, strings.TrimSpace(stderr.String()))
+	}
+
+	// Close our copy of the child end so the receive below can't block forever.
+	_ = childFile.Close()
+
+	// Retrieve the connection from forknet.
+	file, err := netutils.AbstractUnixReceiveFd(int(parentFile.Fd()), netutils.UnixFdsAcceptExact)
+	if err != nil {
+		return nil, fmt.Errorf("Failed getting the connection: %w", err)
+	}
+
+	defer func() { _ = file.Close() }()
+
+	conn, err := net.FileConn(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }
 
 // stopForkFile attempts to send SIGTERM (if force is true) or SIGINT to forkfile then waits for it to exit.

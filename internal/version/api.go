@@ -554,6 +554,13 @@ var APIExtensions = []string{
 	"projects_restricted_virtual_machines_nesting",
 	"authorization_config",
 	"network_allocations_network",
+	"gpu_native_context",
+	"instance_port_forward",
+	"unix_block_limits",
+	"authorization_client_routing",
+	"instance_nvram",
+	"disk_io_limits_combined",
+	"resources_cpu_cluster",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

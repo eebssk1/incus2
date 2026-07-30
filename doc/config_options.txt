@@ -139,21 +139,21 @@ For file systems (shared directories or custom volumes), this is one of:
 
 ```{config:option} limits.max devices-disk
 :required: "no"
-:shortdesc: "I/O limit in byte/s or IOPS for both read and write (same as setting both `limits.read` and `limits.write`)"
+:shortdesc: "I/O limit in byte/s and/or IOPS for both read and write (same as setting both `limits.read` and `limits.write`)"
 :type: "string"
 
 ```
 
 ```{config:option} limits.read devices-disk
 :required: "no"
-:shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) or in IOPS (must be suffixed with `iops`) - see also {ref}`storage-configure-IO`"
+:shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`"
 :type: "string"
 
 ```
 
 ```{config:option} limits.write devices-disk
 :required: "no"
-:shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) or in IOPS (must be suffixed with `iops`) - see also {ref}`storage-configure-IO`"
+:shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`"
 :type: "string"
 
 ```
@@ -333,6 +333,44 @@ With VMs, this option supports mounting file system disk devices and paths withi
 ```
 
 <!-- config group devices-gpu_mig end -->
+<!-- config group devices-gpu_native_context start -->
+```{config:option} blob.size devices-gpu_native_context
+:default: "2GiB"
+:required: "no"
+:shortdesc: "Size of the host-visible blob memory window for the `virtio-gpu` device"
+:type: "string"
+
+```
+
+```{config:option} id devices-gpu_native_context
+:required: "no"
+:shortdesc: "The DRM card ID of the GPU device"
+:type: "string"
+
+```
+
+```{config:option} pci devices-gpu_native_context
+:required: "no"
+:shortdesc: "The PCI address of the GPU device"
+:type: "string"
+
+```
+
+```{config:option} productid devices-gpu_native_context
+:required: "no"
+:shortdesc: "The product ID of the GPU device"
+:type: "string"
+
+```
+
+```{config:option} vendorid devices-gpu_native_context
+:required: "no"
+:shortdesc: "The vendor ID of the GPU device"
+:type: "string"
+
+```
+
+<!-- config group devices-gpu_native_context end -->
 <!-- config group devices-gpu_physical start -->
 ```{config:option} gid devices-gpu_physical
 :default: "0"
@@ -1762,6 +1800,18 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 :default: "0"
 :shortdesc: "GID of the device owner in the instance"
 :type: "int"
+
+```
+
+```{config:option} limits.read devices-unix-char-block
+:shortdesc: "I/O limit in byte/s and/or IOPS (comma separated) for read operations"
+:type: "string"
+
+```
+
+```{config:option} limits.write devices-unix-char-block
+:shortdesc: "I/O limit in byte/s and/or IOPS (comma separated) for write operations"
+:type: "string"
 
 ```
 
@@ -5046,6 +5096,46 @@ DNS resolvers to use for performing (recursive) `CNAME` resolving and apex domai
 
 <!-- config group server-acme end -->
 <!-- config group server-authorization start -->
+```{config:option} authorization.client.default server-authorization
+:scope: "global"
+:shortdesc: "Authorization driver for clients without a more specific class route"
+:type: "string"
+Routes clients that do not match a more specific class to an authorization driver.
+Possible values are `allow`, `deny`, `openfga` and `scriptlet`.
+```
+
+```{config:option} authorization.client.oidc server-authorization
+:scope: "global"
+:shortdesc: "Authorization driver for OIDC-authenticated clients"
+:type: "string"
+Routes OIDC-authenticated clients to an authorization driver.
+Possible values are `allow`, `deny`, `openfga` and `scriptlet`.
+```
+
+```{config:option} authorization.client.tls server-authorization
+:scope: "global"
+:shortdesc: "Authorization driver for unrestricted TLS clients"
+:type: "string"
+Routes clients using an unrestricted client certificate to an authorization driver.
+Possible values are `allow`, `deny`, `openfga` and `scriptlet`.
+```
+
+```{config:option} authorization.client.tls-restricted server-authorization
+:scope: "global"
+:shortdesc: "Authorization driver for restricted TLS clients"
+:type: "string"
+Routes clients using a restricted (project-scoped) client certificate to an authorization driver.
+Possible values are `allow`, `deny`, `tls`, `openfga` and `scriptlet`.
+```
+
+```{config:option} authorization.client.unix server-authorization
+:scope: "global"
+:shortdesc: "Authorization driver for local (`unix` socket) clients"
+:type: "string"
+Routes local clients connecting over the `unix` socket to an authorization driver.
+Possible values are `allow`, `deny`, `openfga` and `scriptlet`.
+```
+
 ```{config:option} authorization.openfga.api.token server-authorization
 :scope: "global"
 :shortdesc: "API token of the OpenFGA server"
@@ -5065,6 +5155,15 @@ DNS resolvers to use for performing (recursive) `CNAME` resolving and apex domai
 :shortdesc: "ID of the OpenFGA permission store"
 :type: "string"
 
+```
+
+```{config:option} authorization.openfga.tls.identifier server-authorization
+:defaultdesc: "`name`"
+:scope: "global"
+:shortdesc: "Certificate attribute used as the OpenFGA user for TLS clients"
+:type: "string"
+When a TLS client is authorized by OpenFGA, this selects the certificate
+attribute used as the OpenFGA user: `fingerprint` or `name`.
 ```
 
 ```{config:option} authorization.scriptlet server-authorization

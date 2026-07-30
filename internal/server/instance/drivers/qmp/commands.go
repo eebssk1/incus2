@@ -1507,21 +1507,39 @@ func (m *Monitor) BlockNodeSize(nodeName string) (int64, error) {
 	return 0, fmt.Errorf("Block node %q not found", nodeName)
 }
 
-// blockJobWaitReady waits until the specified jobID is ready, errored or missing.
-// Returns nil if the job is ready, otherwise an error.
-func (m *Monitor) blockJobWaitReady(jobID string, exitOnNotFound bool) error {
+// blockJobDismiss dismisses a concluded block job.
+func (m *Monitor) blockJobDismiss(jobID string) error {
+	var args struct {
+		ID string `json:"id"`
+	}
+
+	args.ID = jobID
+
+	err := m.Run("job-dismiss", args, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// blockJobWait waits until the specified jobID is ready (when waitReady is true), reached
+// its final state or is missing. Concluded jobs are dismissed and their error, if any, is
+// returned. The returned boolean is true when the job concluded rather than turned ready.
+func (m *Monitor) blockJobWait(jobID string, waitReady bool, exitOnNotFound bool) (bool, error) {
 	for {
 		var resp struct {
 			Return []struct {
 				Device string `json:"device"`
 				Ready  bool   `json:"ready"`
 				Error  string `json:"error"`
+				Status string `json:"status"`
 			} `json:"return"`
 		}
 
 		err := m.Run("query-block-jobs", nil, &resp)
 		if err != nil {
-			return err
+			return false, err
 		}
 
 		found := false
@@ -1530,21 +1548,34 @@ func (m *Monitor) blockJobWaitReady(jobID string, exitOnNotFound bool) error {
 				continue
 			}
 
-			if job.Error != "" {
-				return fmt.Errorf("Failed block job: %s", job.Error)
+			if job.Status == "concluded" {
+				err := m.blockJobDismiss(jobID)
+				if err != nil {
+					logger.Warn("Failed dismissing block job", logger.Ctx{"jobID": jobID, "err": err})
+				}
+
+				if job.Error != "" {
+					return true, fmt.Errorf("Failed block job: %s", job.Error)
+				}
+
+				return true, nil
 			}
 
-			if job.Ready {
-				return nil
+			if job.Error != "" {
+				return true, fmt.Errorf("Failed block job: %s", job.Error)
+			}
+
+			if waitReady && job.Ready {
+				return false, nil
 			}
 
 			found = true
 		}
 
 		if !found && !exitOnNotFound {
-			return errors.New("Specified block job not found")
+			return true, errors.New("Specified block job not found")
 		} else if !found && exitOnNotFound {
-			return nil
+			return true, nil
 		}
 
 		time.Sleep(1 * time.Second)
@@ -1554,16 +1585,21 @@ func (m *Monitor) blockJobWaitReady(jobID string, exitOnNotFound bool) error {
 // BlockCommit merges a snapshot device back into its parent device.
 func (m *Monitor) BlockCommit(deviceNodeName string, top string, base string) error {
 	var args struct {
-		Device string `json:"device"`
-		JobID  string `json:"job-id"`
-		Top    string `json:"top-node,omitempty"`
-		Base   string `json:"base-node,omitempty"`
+		Device      string `json:"device"`
+		JobID       string `json:"job-id"`
+		Top         string `json:"top-node,omitempty"`
+		Base        string `json:"base-node,omitempty"`
+		AutoDismiss bool   `json:"auto-dismiss"`
 	}
 
 	args.Device = deviceNodeName
 	args.JobID = args.Device
 	args.Top = top
 	args.Base = base
+
+	// Keep failed jobs around so their actual error can be retrieved,
+	// blockJobWait takes care of dismissing them.
+	args.AutoDismiss = false
 
 	err := m.Run("block-commit", args, nil)
 	if err != nil {
@@ -1573,12 +1609,12 @@ func (m *Monitor) BlockCommit(deviceNodeName string, top string, base string) er
 	// From QEMU doc: If top has no overlays on top of it, or if it is in use by a writer,
 	// the job will not be completed by itself.
 	hasTop := top != deviceNodeName && top != ""
-	err = m.blockJobWaitReady(args.JobID, hasTop)
+	concluded, err := m.blockJobWait(args.JobID, !hasTop, hasTop)
 	if err != nil {
 		return err
 	}
 
-	if !hasTop {
+	if !concluded {
 		err = m.BlockJobComplete(args.JobID)
 		if err != nil {
 			return err
@@ -1615,7 +1651,7 @@ func (m *Monitor) BlockDevMirror(deviceNodeName string, targetNodeName string) e
 		return err
 	}
 
-	err = m.blockJobWaitReady(args.JobID, false)
+	_, err = m.blockJobWait(args.JobID, true, false)
 	if err != nil {
 		return err
 	}
@@ -1639,7 +1675,7 @@ func (m *Monitor) BlockJobCancel(deviceNodeName string) error {
 	return nil
 }
 
-// BlockJobComplete completes a block job that is in reader state.
+// BlockJobComplete completes a block job that is in ready state.
 func (m *Monitor) BlockJobComplete(deviceNodeName string) error {
 	var args struct {
 		Device string `json:"device"`
@@ -1647,26 +1683,18 @@ func (m *Monitor) BlockJobComplete(deviceNodeName string) error {
 
 	args.Device = deviceNodeName
 
-	ch, err := m.CreateEventChannel(args.Device)
+	err := m.Run("block-job-complete", args, nil)
 	if err != nil {
 		return err
 	}
 
-	err = m.Run("block-job-complete", args, nil)
+	// Wait for the job to reach its final state and report its result.
+	_, err = m.blockJobWait(args.Device, false, true)
 	if err != nil {
 		return err
 	}
 
-	event := <-ch
-
-	switch event.Name {
-	case EventBlockJobCompleted:
-		return nil
-	case EventBlockJobError:
-		return fmt.Errorf("Error during block-job-complete")
-	default:
-		return fmt.Errorf("Not supported event: %q", event.Name)
-	}
+	return nil
 }
 
 // UpdateBlockSize updates the size of a disk.

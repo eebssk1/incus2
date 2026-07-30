@@ -138,6 +138,8 @@ type InstanceServer interface {
 
 	GetInstanceNBDConn(instanceName string, args InstanceNBDArgs) (net.Conn, error)
 
+	GetInstancePortForwardConn(instanceName string, forward api.InstancePortForwardPost) (net.Conn, error)
+
 	GetInstanceSnapshotNames(instanceName string) (names []string, err error)
 	GetInstanceSnapshots(instanceName string) (snapshots []api.InstanceSnapshot, err error)
 	GetInstanceSnapshot(instanceName string, name string) (snapshot *api.InstanceSnapshot, ETag string, err error)
@@ -176,6 +178,11 @@ type InstanceServer interface {
 	DeleteInstanceTemplateFile(name string, templateName string) (err error)
 
 	GetInstanceDebugMemory(name string, format string) (rc io.ReadCloser, err error)
+	GetInstanceNVRAM(name string) (vars map[string]map[string]*api.InstanceNVRAMVariable, err error)
+	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*api.InstanceNVRAMVariable, err error)
+	GetRawInstanceNVRAMGUIDVar(name string, guid string, varName string) (resp []byte, err error)
+	GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (resp *api.InstanceNVRAMVariable, err error)
+	DeleteInstanceNVRAMGUIDVar(name string, guid string, varName string) error
 
 	// Event handling functions
 	GetEvents() (listener *EventListener, err error)

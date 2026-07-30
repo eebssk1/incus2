@@ -1661,7 +1661,7 @@ func (r *ProtocolIncus) DeleteInstanceFile(instanceName string, filePath string)
 }
 
 // rawConn connects to the apiURL, upgrades to the requested protocol and returns it.
-func (r *ProtocolIncus) rawConn(apiURL *url.URL, protocol string) (net.Conn, error) {
+func (r *ProtocolIncus) rawConn(method string, apiURL *url.URL, protocol string, data any) (net.Conn, error) {
 	// Get the HTTP transport.
 	httpTransport, err := r.getUnderlyingHTTPTransport()
 	if err != nil {
@@ -1669,7 +1669,7 @@ func (r *ProtocolIncus) rawConn(apiURL *url.URL, protocol string) (net.Conn, err
 	}
 
 	req := &http.Request{
-		Method:     http.MethodGet,
+		Method:     method,
 		URL:        apiURL,
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
@@ -1680,6 +1680,18 @@ func (r *ProtocolIncus) rawConn(apiURL *url.URL, protocol string) (net.Conn, err
 
 	req.Header["Upgrade"] = []string{protocol}
 	req.Header["Connection"] = []string{"Upgrade"}
+
+	// Add the request body.
+	if data != nil {
+		body, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Body = io.NopCloser(bytes.NewReader(body))
+		req.ContentLength = int64(len(body))
+		req.Header.Set("Content-Type", "application/json")
+	}
 
 	r.addClientHeaders(req)
 
@@ -1753,7 +1765,21 @@ func (r *ProtocolIncus) GetInstanceNBDConn(instanceName string, args InstanceNBD
 
 	r.setURLQueryAttributes(&apiURL.URL)
 
-	return r.rawConn(&apiURL.URL, "nbd")
+	return r.rawConn(http.MethodGet, &apiURL.URL, "nbd", nil)
+}
+
+// GetInstancePortForwardConn returns a connection to the given address and TCP port inside of the instance.
+func (r *ProtocolIncus) GetInstancePortForwardConn(instanceName string, forward api.InstancePortForwardPost) (net.Conn, error) {
+	if !r.HasExtension("instance_port_forward") {
+		return nil, errors.New(`The server is missing the required "instance_port_forward" API extension`)
+	}
+
+	apiURL := api.NewURL()
+	apiURL.URL = r.httpBaseURL // Preload the URL with the client base URL.
+	apiURL.Path("1.0", "instances", instanceName, "port-forward")
+	r.setURLQueryAttributes(&apiURL.URL)
+
+	return r.rawConn(http.MethodPost, &apiURL.URL, "tcp", forward)
 }
 
 // GetInstanceFileSFTPConn returns a connection to the instance's SFTP endpoint.
@@ -1763,7 +1789,7 @@ func (r *ProtocolIncus) GetInstanceFileSFTPConn(instanceName string) (net.Conn, 
 	apiURL.Path("1.0", "instances", instanceName, "sftp")
 	r.setURLQueryAttributes(&apiURL.URL)
 
-	return r.rawConn(&apiURL.URL, "sftp")
+	return r.rawConn(http.MethodGet, &apiURL.URL, "sftp", nil)
 }
 
 // GetInstanceFileSFTP returns an SFTP connection to the instance.
@@ -3250,6 +3276,141 @@ func (r *ProtocolIncus) CreateInstanceBitmap(name string, bitmap api.StorageVolu
 
 	// Send the request
 	_, _, err = r.query("POST", fmt.Sprintf("%s/%s/bitmaps", path, url.PathEscape(name)), bitmap, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProtocolIncus) getInstanceNVRAM(name string, guid string, varName string, accept string) (*http.Response, error) {
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeVM)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare the HTTP request
+	requestURL := fmt.Sprintf("%s/1.0%s/%s/nvram/%s/%s", r.httpBaseURL.String(), path, url.PathEscape(name), url.PathEscape(guid), url.PathEscape(varName))
+
+	requestURL, err = r.setQueryAttributes(requestURL)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Accept", accept)
+
+	// Send the request
+	resp, err := r.DoHTTP(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check the return value for a cleaner error
+	if resp.StatusCode != http.StatusOK {
+		_, _, err := incusParseResponse(resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return resp, nil
+}
+
+// GetInstanceNVRAM gets OVMF variables from an instance.
+func (r *ProtocolIncus) GetInstanceNVRAM(name string) (map[string]map[string]*api.InstanceNVRAMVariable, error) {
+	if !r.HasExtension("instance_nvram") {
+		return nil, errors.New(`The server is missing the required "instance_nvram" API extension`)
+	}
+
+	vars := map[string]map[string]*api.InstanceNVRAMVariable{}
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeVM)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the raw value.
+	_, err = r.queryStruct("GET", fmt.Sprintf("%s/%s/nvram?recursion=2", path, url.PathEscape(name)), nil, "", &vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, err
+}
+
+// GetInstanceNVRAMGUID gets namespaced OVMF variables from an instance.
+func (r *ProtocolIncus) GetInstanceNVRAMGUID(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error) {
+	if !r.HasExtension("instance_nvram") {
+		return nil, errors.New(`The server is missing the required "instance_nvram" API extension`)
+	}
+
+	vars := map[string]*api.InstanceNVRAMVariable{}
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeVM)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the raw value.
+	_, err = r.queryStruct("GET", fmt.Sprintf("%s/%s/nvram/%s?recursion=1", path, url.PathEscape(name), url.PathEscape(guid)), nil, "", &vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, err
+}
+
+// GetRawInstanceNVRAMGUIDVar gets raw OVMF variables from an instance.
+func (r *ProtocolIncus) GetRawInstanceNVRAMGUIDVar(name string, guid string, varName string) ([]byte, error) {
+	if !r.HasExtension("instance_nvram") {
+		return nil, errors.New(`The server is missing the required "instance_nvram" API extension`)
+	}
+
+	resp, err := r.getInstanceNVRAM(name, guid, varName, "application/octet-stream")
+	if err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
+// GetInstanceNVRAMGUIDVar gets interpreted OVMF variables from an instance.
+func (r *ProtocolIncus) GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (*api.InstanceNVRAMVariable, error) {
+	if !r.HasExtension("instance_nvram") {
+		return nil, errors.New(`The server is missing the required "instance_nvram" API extension`)
+	}
+
+	var v *api.InstanceNVRAMVariable
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeVM)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the raw value.
+	_, err = r.queryStruct("GET", fmt.Sprintf("%s/%s/nvram/%s/%s?recursion=1", path, url.PathEscape(name), url.PathEscape(guid), url.PathEscape(varName)), nil, "", &v)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, err
+}
+
+// DeleteInstanceNVRAMGUIDVar sets interpreted OVMF variables on an instance.
+func (r *ProtocolIncus) DeleteInstanceNVRAMGUIDVar(name string, guid string, varName string) error {
+	if !r.HasExtension("instance_nvram") {
+		return errors.New(`The server is missing the required "instance_nvram" API extension`)
+	}
+
+	path, _, err := r.instanceTypeToPath(api.InstanceTypeVM)
+	if err != nil {
+		return err
+	}
+
+	// Send the request
+	_, _, err = r.query("DELETE", fmt.Sprintf("%s/%s/nvram/%s/%s", path, url.PathEscape(name), url.PathEscape(guid), url.PathEscape(varName)), nil, "")
 	if err != nil {
 		return err
 	}

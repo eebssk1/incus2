@@ -125,7 +125,7 @@
 						"limits.max": {
 							"longdesc": "",
 							"required": "no",
-							"shortdesc": "I/O limit in byte/s or IOPS for both read and write (same as setting both `limits.read` and `limits.write`)",
+							"shortdesc": "I/O limit in byte/s and/or IOPS for both read and write (same as setting both `limits.read` and `limits.write`)",
 							"type": "string"
 						}
 					},
@@ -133,7 +133,7 @@
 						"limits.read": {
 							"longdesc": "",
 							"required": "no",
-							"shortdesc": "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) or in IOPS (must be suffixed with `iops`) - see also {ref}`storage-configure-IO`",
+							"shortdesc": "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`",
 							"type": "string"
 						}
 					},
@@ -141,7 +141,7 @@
 						"limits.write": {
 							"longdesc": "",
 							"required": "no",
-							"shortdesc": "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) or in IOPS (must be suffixed with `iops`) - see also {ref}`storage-configure-IO`",
+							"shortdesc": "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`",
 							"type": "string"
 						}
 					},
@@ -315,6 +315,51 @@
 							"longdesc": "",
 							"required": "no",
 							"shortdesc": "Existing MIG device UUID (MIG- prefix can be omitted)",
+							"type": "string"
+						}
+					},
+					{
+						"pci": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The PCI address of the GPU device",
+							"type": "string"
+						}
+					},
+					{
+						"productid": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The product ID of the GPU device",
+							"type": "string"
+						}
+					},
+					{
+						"vendorid": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The vendor ID of the GPU device",
+							"type": "string"
+						}
+					}
+				]
+			},
+			"gpu_native_context": {
+				"keys": [
+					{
+						"blob.size": {
+							"default": "2GiB",
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Size of the host-visible blob memory window for the `virtio-gpu` device",
+							"type": "string"
+						}
+					},
+					{
+						"id": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "The DRM card ID of the GPU device",
 							"type": "string"
 						}
 					},
@@ -1994,6 +2039,20 @@
 							"longdesc": "",
 							"shortdesc": "GID of the device owner in the instance",
 							"type": "int"
+						}
+					},
+					{
+						"limits.read": {
+							"longdesc": "",
+							"shortdesc": "I/O limit in byte/s and/or IOPS (comma separated) for read operations",
+							"type": "string"
+						}
+					},
+					{
+						"limits.write": {
+							"longdesc": "",
+							"shortdesc": "I/O limit in byte/s and/or IOPS (comma separated) for write operations",
+							"type": "string"
 						}
 					},
 					{
@@ -5656,6 +5715,46 @@
 			"authorization": {
 				"keys": [
 					{
+						"authorization.client.default": {
+							"longdesc": "Routes clients that do not match a more specific class to an authorization driver.\nPossible values are `allow`, `deny`, `openfga` and `scriptlet`.",
+							"scope": "global",
+							"shortdesc": "Authorization driver for clients without a more specific class route",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.client.oidc": {
+							"longdesc": "Routes OIDC-authenticated clients to an authorization driver.\nPossible values are `allow`, `deny`, `openfga` and `scriptlet`.",
+							"scope": "global",
+							"shortdesc": "Authorization driver for OIDC-authenticated clients",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.client.tls": {
+							"longdesc": "Routes clients using an unrestricted client certificate to an authorization driver.\nPossible values are `allow`, `deny`, `openfga` and `scriptlet`.",
+							"scope": "global",
+							"shortdesc": "Authorization driver for unrestricted TLS clients",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.client.tls-restricted": {
+							"longdesc": "Routes clients using a restricted (project-scoped) client certificate to an authorization driver.\nPossible values are `allow`, `deny`, `tls`, `openfga` and `scriptlet`.",
+							"scope": "global",
+							"shortdesc": "Authorization driver for restricted TLS clients",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.client.unix": {
+							"longdesc": "Routes local clients connecting over the `unix` socket to an authorization driver.\nPossible values are `allow`, `deny`, `openfga` and `scriptlet`.",
+							"scope": "global",
+							"shortdesc": "Authorization driver for local (`unix` socket) clients",
+							"type": "string"
+						}
+					},
+					{
 						"authorization.openfga.api.token": {
 							"longdesc": "",
 							"scope": "global",
@@ -5676,6 +5775,15 @@
 							"longdesc": "",
 							"scope": "global",
 							"shortdesc": "ID of the OpenFGA permission store",
+							"type": "string"
+						}
+					},
+					{
+						"authorization.openfga.tls.identifier": {
+							"defaultdesc": "`name`",
+							"longdesc": "When a TLS client is authorized by OpenFGA, this selects the certificate\nattribute used as the OpenFGA user: `fingerprint` or `name`.",
+							"scope": "global",
+							"shortdesc": "Certificate attribute used as the OpenFGA user for TLS clients",
 							"type": "string"
 						}
 					},
