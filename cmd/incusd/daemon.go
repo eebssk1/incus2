@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -324,9 +326,15 @@ func allowPermission(objectType auth.ObjectType, entitlement auth.Entitlement, m
 		}
 
 		// Expansion function to deal with project inheritance.
+		var expandProjectErr error
 		expandProject := func(projectName string) string {
 			// Object types that aren't part of projects.
 			if slices.Contains([]auth.ObjectType{auth.ObjectTypeUser, auth.ObjectTypeServer, auth.ObjectTypeCertificate, auth.ObjectTypeStoragePool, auth.ObjectTypeNetworkIntegration}, objectType) {
+				return projectName
+			}
+
+			// Object types that are always addressed in the requested project.
+			if slices.Contains([]auth.ObjectType{auth.ObjectTypeProject, auth.ObjectTypeInstance}, objectType) {
 				return projectName
 			}
 
@@ -350,24 +358,26 @@ func allowPermission(objectType auth.ObjectType, entitlement auth.Entitlement, m
 			}
 
 			if objectType == auth.ObjectTypeProfile {
-				projectName = project.ProfileProjectFromRecord(p)
+				return project.ProfileProjectFromRecord(p)
 			} else if objectType == auth.ObjectTypeStorageBucket {
-				projectName = project.StorageBucketProjectFromRecord(p)
+				return project.StorageBucketProjectFromRecord(p)
 			} else if objectType == auth.ObjectTypeStorageVolume {
 				dbVolType, err := storagePools.VolumeTypeNameToDBType(muxVars[1])
 				if err != nil {
 					return projectName
 				}
 
-				projectName = project.StorageVolumeProjectFromRecord(p, dbVolType)
+				return project.StorageVolumeProjectFromRecord(p, dbVolType)
 			} else if objectType == auth.ObjectTypeNetworkZone {
-				projectName = project.NetworkZoneProjectFromRecord(p)
+				return project.NetworkZoneProjectFromRecord(p)
 			} else if slices.Contains([]auth.ObjectType{auth.ObjectTypeImage, auth.ObjectTypeImageAlias}, objectType) {
-				projectName = project.ImageProjectFromRecord(p)
-			} else if slices.Contains([]auth.ObjectType{auth.ObjectTypeNetwork, auth.ObjectTypeNetworkACL}, objectType) {
-				projectName = project.NetworkProjectFromRecord(p)
+				return project.ImageProjectFromRecord(p)
+			} else if slices.Contains([]auth.ObjectType{auth.ObjectTypeNetwork, auth.ObjectTypeNetworkACL, auth.ObjectTypeNetworkAddressSet}, objectType) {
+				return project.NetworkProjectFromRecord(p)
 			}
 
+			// Fail closed rather than defaulting to the requested project, which could bypass confinement.
+			expandProjectErr = fmt.Errorf("No project expansion defined for object type %q", objectType)
 			return projectName
 		}
 
@@ -446,6 +456,10 @@ func allowPermission(objectType auth.ObjectType, entitlement auth.Entitlement, m
 		objectName, err := auth.ObjectFromRequest(r, objectType, expandProject, expandFingerprint, expandVolumeLocation, expandBucketLocation, muxVars...)
 		if err != nil {
 			return response.InternalError(fmt.Errorf("Failed to create authentication object: %w", err))
+		}
+
+		if expandProjectErr != nil {
+			return response.InternalError(fmt.Errorf("Failed to expand project for authorization: %w", expandProjectErr))
 		}
 
 		s := d.State()
@@ -1677,6 +1691,12 @@ func (d *Daemon) init() error {
 }
 
 func (d *Daemon) startClusterTasks() {
+	// Get an updated cluster certificate if needed.
+	err := d.clusterSyncCertificate()
+	if err != nil {
+		logger.Warn("Failed to sync cluster certificate", logger.Ctx{"err": err})
+	}
+
 	// Add initial event listeners from global database members.
 	// Run asynchronously so that connecting to remote members doesn't delay starting up other cluster tasks.
 	go cluster.EventsUpdateListeners(d.State(), nil, d.events.Inject)
@@ -2689,4 +2709,67 @@ func (d *Daemon) getLinstor() (*linstor.Client, error) {
 	}
 
 	return d.linstor, nil
+}
+
+// clusterSyncCertificate retrieves the cluster certificate from the leader and applies it
+// locally if it's a newer certificate for our existing private key. This catches up members
+// which were offline during a cluster certificate renewal.
+func (d *Daemon) clusterSyncCertificate() error {
+	// Skip if we're the leader.
+	leaderAddress, err := d.gateway.LeaderAddress()
+	if err != nil {
+		return err
+	}
+
+	if leaderAddress == d.localConfig.ClusterAddress() {
+		return nil
+	}
+
+	// Retrieve the leader's certificate.
+	leaderCert, err := localtls.GetRemoteCertificate(fmt.Sprintf("https://%s", leaderAddress), version.UserAgent)
+	if err != nil {
+		return fmt.Errorf("Failed to retrieve cluster certificate from leader: %w", err)
+	}
+
+	leaderCertPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: leaderCert.Raw})
+
+	// Skip if the leader certificate doesn't match our private key (full cluster renewal).
+	networkCert := d.endpoints.NetworkCert()
+
+	_, err = tls.X509KeyPair(leaderCertPEM, networkCert.PrivateKey())
+	if err != nil {
+		return nil
+	}
+
+	// Skip if the leader certificate isn't newer than ours.
+	localCert, err := networkCert.PublicKeyX509()
+	if err != nil {
+		return err
+	}
+
+	if !leaderCert.NotBefore.After(localCert.NotBefore) {
+		return nil
+	}
+
+	// Write the new certificate to disk.
+	err = internalUtil.WriteCert(d.os.VarDir, "cluster", leaderCertPEM, networkCert.PrivateKey(), nil)
+	if err != nil {
+		return err
+	}
+
+	// Apply the new certificate.
+	newCert, err := internalUtil.LoadClusterCert(d.os.VarDir)
+	if err != nil {
+		return err
+	}
+
+	d.endpoints.NetworkUpdateCert(newCert)
+	d.gateway.NetworkUpdateCert(newCert)
+
+	// Resolve warning of this type.
+	_ = warnings.ResolveWarningsByLocalNodeAndType(d.db.Cluster, warningtype.UnableToUpdateClusterCertificate)
+
+	logger.Info("Updated cluster certificate from leader")
+
+	return nil
 }

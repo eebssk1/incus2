@@ -1,19 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
+	"io"
 	"maps"
 	"net/http"
 	"slices"
 	"sort"
 	"strconv"
+	"time"
 
 	internalInstance "github.com/lxc/incus/v7/internal/instance"
 	"github.com/lxc/incus/v7/internal/server/instance"
 	"github.com/lxc/incus/v7/internal/server/instance/instancetype"
 	"github.com/lxc/incus/v7/internal/server/request"
 	"github.com/lxc/incus/v7/internal/server/response"
+	localUtil "github.com/lxc/incus/v7/internal/server/util"
 	"github.com/lxc/incus/v7/internal/version"
 	"github.com/lxc/incus/v7/shared/api"
 	"github.com/lxc/incus/v7/shared/uefi"
@@ -116,6 +119,8 @@ func getNVRAMStore(d *Daemon, r *http.Request, projectName string, name string) 
 //      $ref: "#/responses/Forbidden"
 //    "404":
 //      $ref: "#/responses/NotFound"
+//    "409":
+//      $ref: "#/responses/Conflict"
 //    "500":
 //      $ref: "#/responses/InternalServerError"
 
@@ -181,6 +186,8 @@ func getNVRAMStore(d *Daemon, r *http.Request, projectName string, name string) 
 //      $ref: "#/responses/Forbidden"
 //    "404":
 //      $ref: "#/responses/NotFound"
+//    "409":
+//      $ref: "#/responses/Conflict"
 //    "500":
 //      $ref: "#/responses/InternalServerError"
 
@@ -239,6 +246,8 @@ func getNVRAMStore(d *Daemon, r *http.Request, projectName string, name string) 
 //	    $ref: "#/responses/Forbidden"
 //	  "404":
 //	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
 //	  "500":
 //	    $ref: "#/responses/InternalServerError"
 func instanceNVRAMGet(d *Daemon, r *http.Request) response.Response {
@@ -360,6 +369,8 @@ func instanceNVRAMGet(d *Daemon, r *http.Request) response.Response {
 //      $ref: "#/responses/Forbidden"
 //    "404":
 //      $ref: "#/responses/NotFound"
+//    "409":
+//      $ref: "#/responses/Conflict"
 //    "500":
 //      $ref: "#/responses/InternalServerError"
 
@@ -420,6 +431,8 @@ func instanceNVRAMGet(d *Daemon, r *http.Request) response.Response {
 //	    $ref: "#/responses/Forbidden"
 //	  "404":
 //	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
 //	  "500":
 //	    $ref: "#/responses/InternalServerError"
 func instanceNVRAMGUIDGet(d *Daemon, r *http.Request) response.Response {
@@ -537,6 +550,8 @@ func instanceNVRAMGUIDGet(d *Daemon, r *http.Request) response.Response {
 //	    $ref: "#/responses/Forbidden"
 //	  "404":
 //	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
 //	  "500":
 //	    $ref: "#/responses/InternalServerError"
 func instanceNVRAMGUIDVarGet(d *Daemon, r *http.Request) response.Response {
@@ -572,11 +587,22 @@ func instanceNVRAMGUIDVarGet(d *Daemon, r *http.Request) response.Response {
 	}
 
 	if r.Header.Get("Accept") == "application/octet-stream" {
-		return response.DevIncusResponse(http.StatusOK, string(v.Binary), "raw", false)
+		attributes := map[string]string{"X-Incus-attributes": strconv.FormatUint(uint64(uefi.DumpAttributes(v.Attributes)), 10)}
+		if v.Timestamp != nil {
+			attributes["X-Incus-timestamp"] = strconv.FormatInt(v.Timestamp.Unix(), 10)
+		}
+
+		return response.DevIncusResponseHeaders(http.StatusOK, string(v.Binary), "raw", false, attributes)
+	}
+
+	etag := []any{
+		v.Binary,
+		v.Attributes,
+		v.Timestamp,
 	}
 
 	_ = uefi.Dissect(v, guid, varName)
-	return response.SyncResponse(true, v)
+	return response.SyncResponseETag(true, v, etag)
 }
 
 // swagger:operation DELETE /1.0/instances/{name}/nvram/{guid}/{var} instances instance_nvram_guid_var_delete
@@ -619,6 +645,8 @@ func instanceNVRAMGUIDVarGet(d *Daemon, r *http.Request) response.Response {
 //	    $ref: "#/responses/Forbidden"
 //	  "404":
 //	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
 //	  "500":
 //	    $ref: "#/responses/InternalServerError"
 func instanceNVRAMGUIDVarDelete(d *Daemon, r *http.Request) response.Response {
@@ -644,7 +672,7 @@ func instanceNVRAMGUIDVarDelete(d *Daemon, r *http.Request) response.Response {
 	}
 
 	if inst.IsRunning() {
-		return response.BadRequest(fmt.Errorf("UEFI variables cannot be deleted on running VMs"))
+		return response.BadRequest(errors.New("UEFI variables cannot be deleted on running VMs"))
 	}
 
 	vars, ok := store.Vars[guid]
@@ -660,8 +688,185 @@ func instanceNVRAMGUIDVarDelete(d *Daemon, r *http.Request) response.Response {
 	delete(store.Vars[guid], varName)
 	err = inst.SetNVRAM(store)
 	if err != nil {
-		response.SmartError(err)
+		return response.SmartError(err)
 	}
 
 	return response.EmptySyncResponse
+}
+
+// swagger:operation PUT /1.0/instances/{name}/nvram/{guid}/{var} instances instance_nvram_guid_var_put
+//
+//	Update the NVRAM variable
+//
+//	If the `Content-Type` header is set to `application/octet-stream`, this sets the raw binary
+//	value of the variable.
+//
+//	Only supported for VMs.
+//
+//	---
+//	consumes:
+//	  - application/json
+//	  - application/octet-stream
+//	produces:
+//	  - application/json
+//	parameters:
+//	  - in: path
+//	    name: name
+//	    description: Instance name
+//	    type: string
+//	    required: true
+//	  - in: path
+//	    name: guid
+//	    description: Variable GUID
+//	    type: string
+//	    required: true
+//	    example: 8be4df61-93ca-11d2-aa0d-00e098032b8c
+//	  - in: path
+//	    name: var
+//	    description: Variable name
+//	    type: string
+//	    example: BootOrder
+//	  - in: query
+//	    name: project
+//	    description: Project name
+//	    type: string
+//	    example: default
+//	  - in: header
+//	    name: X-Incus-attributes
+//	    description: Raw UEFI variable attributes to set
+//	    schema:
+//	      type: integer
+//	  - in: header
+//	    name: X-Incus-timestamp
+//	    description: Raw UEFI variable UNIX timestamp (in seconds) to set
+//	    schema:
+//	      type: integer
+//	responses:
+//	  "200":
+//	    $ref: "#/responses/EmptySyncResponse"
+//	  "201":
+//	    $ref: "#/responses/EmptySyncResponse"
+//	  "400":
+//	    $ref: "#/responses/BadRequest"
+//	  "403":
+//	    $ref: "#/responses/Forbidden"
+//	  "404":
+//	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
+//	  "412":
+//	    $ref: "#/responses/PreconditionFailed"
+//	  "500":
+//	    $ref: "#/responses/InternalServerError"
+func instanceNVRAMGUIDVarPut(d *Daemon, r *http.Request) response.Response {
+	projectName := request.ProjectParam(r)
+	name, err := pathVar(r, "name")
+	if err != nil {
+		return response.SmartError(err)
+	}
+
+	guid, err := pathVar(r, "guid")
+	if err != nil {
+		return response.SmartError(err)
+	}
+
+	varName, err := pathVar(r, "var")
+	if err != nil {
+		return response.SmartError(err)
+	}
+
+	store, inst, resp := getNVRAMStore(d, r, projectName, name)
+	if resp != nil {
+		return resp
+	}
+
+	if inst.IsRunning() {
+		return response.BadRequest(errors.New("UEFI variables cannot be modified on running VMs"))
+	}
+
+	_, ok := store.Vars[guid]
+	if !ok {
+		store.Vars[guid] = map[string]*api.InstanceNVRAMVariable{}
+	}
+
+	oldV, updated := store.Vars[guid][varName]
+	if updated {
+		// Validate ETag
+		etag := []any{
+			oldV.Binary,
+			oldV.Attributes,
+			oldV.Timestamp,
+		}
+
+		err = localUtil.EtagCheck(r, etag)
+		if err != nil {
+			return response.PreconditionFailed(err)
+		}
+	}
+
+	var v api.InstanceNVRAMVariable
+	if r.Header.Get("Content-Type") == "application/octet-stream" {
+		v.Attributes = []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS", "RUNTIME_ACCESS"}
+		rawAttributesStr := r.Header.Get("X-Incus-attributes")
+		if rawAttributesStr != "" {
+			rawAttributes, err := strconv.ParseUint(rawAttributesStr, 0, 32)
+			if err != nil {
+				return response.BadRequest(errors.New("X-Incus-attributes header must be an integer"))
+			}
+
+			v.Attributes = uefi.ParseAttributes(uint32(rawAttributes))
+		}
+
+		rawTimestampStr := r.Header.Get("X-Incus-timestamp")
+		if rawTimestampStr != "" {
+			if !slices.Contains(v.Attributes, "TIME_BASED_AUTHENTICATED_WRITE_ACCESS") {
+				return response.BadRequest(errors.New("X-Incus-timestamp header can only be set on variables with TIME_BASED_AUTHENTICATED_WRITE_ACCESS"))
+			}
+
+			rawTimestamp, err := strconv.ParseInt(rawTimestampStr, 10, 64)
+			if err != nil {
+				return response.BadRequest(errors.New("X-Incus-timestamp header must be an integer"))
+			}
+
+			timestamp := time.Unix(rawTimestamp, 0).UTC()
+			v.Timestamp = &timestamp
+		}
+
+		v.Binary, err = io.ReadAll(r.Body)
+		if err != nil {
+			return response.SmartError(err)
+		}
+	} else {
+		// This leaves the dissected data unmarshalled for deferred processing.
+		var raw struct {
+			Data       json.RawMessage `json:"data"`
+			Attributes []string        `json:"attributes"`
+			Timestamp  *time.Time      `json:"timestamp"`
+		}
+
+		err := json.NewDecoder(r.Body).Decode(&raw)
+		if err != nil {
+			return response.SmartError(err)
+		}
+
+		v.Data = raw.Data
+		v.Attributes = raw.Attributes
+		v.Timestamp = raw.Timestamp
+		err = uefi.Format(&v, guid, varName)
+		if err != nil {
+			return response.SmartError(err)
+		}
+	}
+
+	store.Vars[guid][varName] = &v
+	err = inst.SetNVRAM(store)
+	if err != nil {
+		return response.SmartError(err)
+	}
+
+	if updated {
+		return response.EmptySyncResponse
+	}
+
+	return response.SyncResponseLocation(true, nil, r.URL.String())
 }

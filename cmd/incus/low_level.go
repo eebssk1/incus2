@@ -2,9 +2,15 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -18,6 +24,7 @@ import (
 	"github.com/lxc/incus/v7/internal/i18n"
 	"github.com/lxc/incus/v7/shared/api"
 	cli "github.com/lxc/incus/v7/shared/cmd"
+	"github.com/lxc/incus/v7/shared/termios"
 	"github.com/lxc/incus/v7/shared/uefi"
 	"github.com/lxc/incus/v7/shared/util"
 )
@@ -33,6 +40,9 @@ func (c *cmdLowLevel) command() *cobra.Command {
 	cmd.Short = i18n.G("Low-level commands")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Low-level commands for instances`))
 
+	lowLevelBitmapsCmd := cmdLowLevelBitmaps{global: c.global}
+	cmd.AddCommand(lowLevelBitmapsCmd.command())
+
 	lowLevelAttachCmd := cmdLowLevelMemory{global: c.global, lowLevel: c}
 	cmd.AddCommand(lowLevelAttachCmd.command())
 
@@ -42,7 +52,142 @@ func (c *cmdLowLevel) command() *cobra.Command {
 	lowLevelNVRAMCmd := cmdLowLevelNVRAM{global: c.global}
 	cmd.AddCommand(lowLevelNVRAMCmd.command())
 
+	lowLevelRepairCmd := cmdLowLevelRepair{global: c.global}
+	cmd.AddCommand(lowLevelRepairCmd.command())
+
 	return cmd
+}
+
+type cmdLowLevelBitmaps struct {
+	global *cmdGlobal
+}
+
+func (c *cmdLowLevelBitmaps) command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("bitmaps")
+	cmd.Short = i18n.G("Manage dirty bitmaps on virtual machines")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Manage dirty bitmaps on virtual machines`))
+
+	// Create.
+	lowLevelBitmapsCreateCmd := cmdLowLevelBitmapsCreate{global: c.global}
+	cmd.AddCommand(lowLevelBitmapsCreateCmd.command())
+
+	// Workaround for subcommand usage errors. See: https://github.com/spf13/cobra/issues/706.
+	cmd.Args = cobra.NoArgs
+	cmd.Run = func(cmd *cobra.Command, _ []string) { _ = cmd.Usage() }
+	return cmd
+}
+
+// Create.
+type cmdLowLevelBitmapsCreate struct {
+	global *cmdGlobal
+
+	flagGranularity int
+	flagPersistent  bool
+	flagDisabled    bool
+}
+
+var cmdLowLevelBitmapsCreateUsage = u.Usage{u.Instance.Remote(), u.NewName(u.Placeholder(i18n.G("bitmap")))}
+
+func (c *cmdLowLevelBitmapsCreate) command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("create", cmdLowLevelBitmapsCreateUsage...)
+	cmd.Short = i18n.G("Create a dirty bitmap on a virtual machine")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
+		`Create a dirty bitmap on all the disks of a running virtual machine`,
+	))
+
+	cmd.RunE = c.run
+	cli.AddIntFlag(cmd.Flags(), &c.flagGranularity, "granularity", i18n.G("Granularity of the dirty bitmap in bytes"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagPersistent, "persistent", i18n.G("Store the bitmap on disk"))
+	cli.AddBoolFlag(cmd.Flags(), &c.flagDisabled, "disabled", i18n.G("Create the bitmap in the disabled state"))
+
+	// completion for instance.
+	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return c.global.cmpInstances(toComplete)
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return cmd
+}
+
+func (c *cmdLowLevelBitmapsCreate) run(cmd *cobra.Command, args []string) error {
+	parsed, err := c.global.Parse(cmdLowLevelBitmapsCreateUsage, cmd, args)
+	if err != nil {
+		return err
+	}
+
+	d := parsed[0].RemoteServer
+	instanceName := parsed[0].RemoteObject.String
+
+	bitmap := api.StorageVolumeBitmapsPost{
+		Name:        parsed[1].String,
+		Granularity: c.flagGranularity,
+		Persistent:  c.flagPersistent,
+		Disabled:    c.flagDisabled,
+	}
+
+	err = d.CreateInstanceBitmap(instanceName, bitmap)
+	if err != nil {
+		return fmt.Errorf(i18n.G("Failed to create bitmap: %w"), err)
+	}
+
+	return nil
+}
+
+type cmdLowLevelRepair struct {
+	global *cmdGlobal
+}
+
+var cmdLowLevelRepairUsage = u.Usage{u.Instance.Remote(), u.Placeholder(i18n.G("action"))}
+
+func (c *cmdLowLevelRepair) command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("repair", cmdLowLevelRepairUsage...)
+	cmd.Short = i18n.G("Run a repair action on an instance")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(
+		`Run a low-level repair action on an instance.
+
+Supported actions:
+  rebuild-config-volume    Rebuild the config volume of a stopped QCOW2 backed virtual machine
+  rebuild-nvram            Rebuild the virtual machine's UEFI NVRAM`,
+	))
+
+	cmd.RunE = c.run
+
+	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return c.global.cmpInstances(toComplete)
+		}
+
+		if len(args) == 1 {
+			return []string{"rebuild-config-volume"}, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return cmd
+}
+
+func (c *cmdLowLevelRepair) run(cmd *cobra.Command, args []string) error {
+	parsed, err := c.global.Parse(cmdLowLevelRepairUsage, cmd, args)
+	if err != nil {
+		return err
+	}
+
+	d := parsed[0].RemoteServer
+	instanceName := parsed[0].RemoteObject.String
+
+	err = d.RepairInstance(instanceName, api.InstanceDebugRepairPost{Action: parsed[1].String})
+	if err != nil {
+		return fmt.Errorf(i18n.G("Failed to repair instance: %w"), err)
+	}
+
+	return nil
 }
 
 type cmdLowLevelMemory struct {
@@ -246,6 +391,10 @@ func (c *cmdLowLevelNVRAM) command() *cobra.Command {
 	cmd.Short = i18n.G("Manage NVRAM on virtual machines")
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Manage NVRAM on virtual machines`))
 
+	// Edit.
+	lowLevelNVRAMEditCmd := cmdLowLevelNVRAMEdit{global: c.global}
+	cmd.AddCommand(lowLevelNVRAMEditCmd.command())
+
 	// Get.
 	lowLevelNVRAMGetCmd := cmdLowLevelNVRAMGet{global: c.global}
 	cmd.AddCommand(lowLevelNVRAMGetCmd.command())
@@ -253,6 +402,10 @@ func (c *cmdLowLevelNVRAM) command() *cobra.Command {
 	// List.
 	lowLevelNVRAMListCmd := cmdLowLevelNVRAMList{global: c.global}
 	cmd.AddCommand(lowLevelNVRAMListCmd.command())
+
+	// Set.
+	lowLevelNVRAMSetCmd := cmdLowLevelNVRAMSet{global: c.global}
+	cmd.AddCommand(lowLevelNVRAMSetCmd.command())
 
 	// Unset.
 	lowLevelNVRAMUnsetCmd := cmdLowLevelNVRAMUnset{global: c.global}
@@ -304,11 +457,136 @@ func nvramGuessVar(name string) (string, string, error) {
 	return uefi.EfiGlobalVariableGuid, name, nil
 }
 
+// Edit.
+type cmdLowLevelNVRAMEdit struct {
+	global *cmdGlobal
+}
+
+var cmdLowLevelNVRAMEditUsage = u.Usage{u.Instance.Remote(), u.Variable}
+
+func (c *cmdLowLevelNVRAMEdit) command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("edit", cmdLowLevelNVRAMEditUsage...)
+	cmd.Short = i18n.G("Edit instance UEFI variables")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Edit instance UEFI variables`))
+
+	cmd.RunE = c.run
+
+	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return c.global.cmpInstances(toComplete)
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return cmd
+}
+
+// helpTemplate returns a sample YAML configuration and guidelines for editing UEFI variables.
+func (c *cmdLowLevelNVRAMEdit) helpTemplate() string {
+	return i18n.G(
+		`### This is a YAML representation of the UEFI variable.
+### Any line starting with a '# will be ignored.`,
+	)
+}
+
+func (c *cmdLowLevelNVRAMEdit) run(cmd *cobra.Command, args []string) error {
+	parsed, err := c.global.Parse(cmdLowLevelNVRAMEditUsage, cmd, args)
+	if err != nil {
+		return err
+	}
+
+	d := parsed[0].RemoteServer
+	instanceName := parsed[0].RemoteObject.String
+	guid, varName, err := nvramGuessVar(parsed[1].String)
+	if err != nil {
+		return err
+	}
+
+	// If stdin isn't a terminal, read text from it
+	if !termios.IsTerminal(getStdinFd()) {
+		loader, err := yaml.NewLoader(os.Stdin)
+		if err != nil {
+			return err
+		}
+
+		newData := api.InstanceNVRAMVariablePut{}
+		err = loader.Load(&newData)
+		if err != nil && !errors.Is(err, io.EOF) {
+			return err
+		}
+
+		err = d.UpdateInstanceNVRAMGUIDVar(instanceName, guid, varName, newData, "")
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Extract the current value
+	v, etag, err := d.GetInstanceNVRAMGUIDVar(instanceName, guid, varName)
+	if err != nil {
+		return err
+	}
+
+	// If the variable couldn't be dissected, then there's really nothing to edit.
+	if v.Data == nil {
+		return fmt.Errorf(i18n.G("Incus does not know how to dissect %s:%s"), guid, varName)
+	}
+
+	// Empty binary representation so it isn't shown in edit screen (relies on omitempty tag).
+	v.Binary = nil
+
+	data, err := yaml.Dump(&v, yaml.WithV2Defaults())
+	if err != nil {
+		return err
+	}
+
+	// Spawn the editor
+	content, err := cli.TextEditor("", []byte(c.helpTemplate()+"\n\n"+string(data)))
+	if err != nil {
+		return err
+	}
+
+	for {
+		// Parse the text received from the editor
+		newData := api.InstanceNVRAMVariablePut{}
+		err = yaml.Load(content, &newData)
+		if err == nil {
+			err = d.UpdateInstanceNVRAMGUIDVar(instanceName, guid, varName, newData, etag)
+		}
+
+		// Respawn the editor
+		if err != nil {
+			fmt.Fprintf(os.Stderr, i18n.G("Failed to set UEFI variable %s:%s: %s")+"\n", guid, varName, err)
+			fmt.Println(i18n.G("Press enter to open the editor again or ctrl+c to abort change"))
+
+			_, err := os.Stdin.Read(make([]byte, 1))
+			if err != nil {
+				return err
+			}
+
+			content, err = cli.TextEditor("", content)
+			if err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		break
+	}
+
+	return nil
+}
+
 // Get.
 type cmdLowLevelNVRAMGet struct {
 	global *cmdGlobal
 
-	flagRaw bool
+	flagFormat string
 }
 
 var cmdLowLevelNVRAMGetUsage = u.Usage{u.Instance.Remote(), u.Variable}
@@ -320,7 +598,7 @@ func (c *cmdLowLevelNVRAMGet) command() *cobra.Command {
 	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Get values for UEFI variables`))
 
 	cmd.RunE = c.run
-	cli.AddBoolFlag(cmd.Flags(), &c.flagRaw, "raw", i18n.G("Get the raw binary variable value"))
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "yaml", "", i18n.G("Format (base64|binary|efivarfs|hex|json|yaml)"))
 
 	// completion for instance.
 	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -348,27 +626,50 @@ func (c *cmdLowLevelNVRAMGet) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if c.flagRaw {
-		resp, err := d.GetRawInstanceNVRAMGUIDVar(instanceName, guid, varName)
+	if slices.Contains([]string{"base64", "binary", "efivarfs", "hex"}, c.flagFormat) {
+		data, attributes, err := d.GetRawInstanceNVRAMGUIDVar(instanceName, guid, varName)
 		if err != nil {
 			return fmt.Errorf(i18n.G("Failed to get instance UEFI variable: %w"), err)
 		}
 
-		fmt.Print(string(resp))
+		switch c.flagFormat {
+		case "base64":
+			fmt.Print(base64.StdEncoding.EncodeToString(data))
+		case "binary":
+			fmt.Print(string(data))
+		case "efivarfs":
+			attrs := make([]byte, 4)
+			binary.LittleEndian.PutUint32(attrs, attributes)
+			fmt.Print(string(append(attrs, data...)))
+		case "hex":
+			fmt.Print(hex.EncodeToString(data))
+		}
+
 		return nil
 	}
 
-	v, err := d.GetInstanceNVRAMGUIDVar(instanceName, guid, varName)
+	if !slices.Contains([]string{"json", "yaml"}, c.flagFormat) {
+		return fmt.Errorf(i18n.G("Invalid format: %s"), c.flagFormat)
+	}
+
+	v, _, err := d.GetInstanceNVRAMGUIDVar(instanceName, guid, varName)
 	if err != nil {
 		return fmt.Errorf(i18n.G("Failed to get instance UEFI variable: %w"), err)
 	}
 
-	data, err := yaml.Dump(v, yaml.WithV2Defaults())
+	var data []byte
+	switch c.flagFormat {
+	case "json":
+		data, err = json.Marshal(v)
+	case "yaml":
+		data, err = yaml.Dump(v, yaml.WithV2Defaults())
+	}
+
 	if err != nil {
 		return err
 	}
 
-	print(string(data))
+	fmt.Print(string(data))
 	return nil
 }
 
@@ -537,6 +838,132 @@ func (c *cmdLowLevelNVRAMList) run(cmd *cobra.Command, args []string) error {
 	}
 
 	return cli.RenderTable(os.Stdout, c.flagFormat, header, data, uefiVars)
+}
+
+// Set.
+type cmdLowLevelNVRAMSet struct {
+	global *cmdGlobal
+
+	flagAttributes uint32
+	flagFormat     string
+	flagTimestamp  int64
+}
+
+var cmdLowLevelNVRAMSetUsage = u.Usage{u.Instance.Remote(), u.MakeKV(u.Variable, u.Value)}
+
+func (c *cmdLowLevelNVRAMSet) command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = cli.U("set", cmdLowLevelNVRAMSetUsage...)
+	cmd.Short = i18n.G("Set values for UEFI variables")
+	cmd.Long = cli.FormatSection(color.DescriptionPrefix, i18n.G(`Set values for UEFI variables.`))
+
+	cmd.RunE = c.run
+	cli.AddUint32Flag(cmd.Flags(), &c.flagAttributes, "attributes", i18n.G("Set the variable attributes (requires `--format=base64|binary|hex`)"), 7)
+	cli.AddStringFlag(cmd.Flags(), &c.flagFormat, "format|f", "yaml", "", i18n.G("Format (base64|binary|efivarfs|hex|json|yaml)"))
+	cli.AddInt64Flag(cmd.Flags(), &c.flagTimestamp, "timestamp", i18n.G("Set the variable timestamp (requires `--format=base64|binary|efivarfs|hex`)"))
+
+	// completion for instance.
+	cmd.ValidArgsFunction = func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return c.global.cmpInstances(toComplete)
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return cmd
+}
+
+func (c *cmdLowLevelNVRAMSet) run(cmd *cobra.Command, args []string) error {
+	// We deliberately only accept a single definition at a time because we don’t want to give users
+	// the impression that they are hitting any kind of optimized path. Setting 100 variables leads to
+	// 100 full NVRAM rewrites.
+	parsed, err := c.global.Parse(cmdLowLevelNVRAMSetUsage, cmd, args)
+	if err != nil {
+		return err
+	}
+
+	d := parsed[0].RemoteServer
+	instanceName := parsed[0].RemoteObject.String
+	keys, err := kvToMap(u.AsSingleton(parsed[1]))
+	if err != nil {
+		return err
+	}
+
+	var errs []error
+
+	for k, v := range keys {
+		guid, varName, err := nvramGuessVar(k)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+
+		if slices.Contains([]string{"base64", "binary", "efivarfs", "hex"}, c.flagFormat) {
+			attributes := c.flagAttributes
+			var data []byte
+			switch c.flagFormat {
+			case "base64":
+				data, err = base64.StdEncoding.DecodeString(v)
+				if err != nil {
+					return err
+				}
+
+			case "binary":
+				data = []byte(v)
+			case "efivarfs":
+				if cmd.Flags().Changed("attributes") {
+					return fmt.Errorf(i18n.G("--attributes cannot be used with --format=%s"), "efivarfs")
+				}
+
+				if len(v) < 4 {
+					return errors.New(i18n.G("Unexpected input size"))
+				}
+
+				b := []byte(v)
+				attributes = binary.LittleEndian.Uint32(b[:4])
+				data = b[4:]
+			case "hex":
+				data, err = hex.DecodeString(v)
+				if err != nil {
+					return err
+				}
+			}
+
+			err = d.UpdateRawInstanceNVRAMGUIDVar(instanceName, guid, varName, data, attributes, c.flagTimestamp)
+		} else {
+			if cmd.Flags().Changed("attributes") {
+				return fmt.Errorf(i18n.G("--attributes cannot be used with --format=%s"), c.flagFormat)
+			}
+
+			if cmd.Flags().Changed("timestamp") {
+				return fmt.Errorf(i18n.G("--timestamp cannot be used with --format=%s"), c.flagFormat)
+			}
+
+			data := api.InstanceNVRAMVariablePut{}
+			switch c.flagFormat {
+			case "json":
+				err = json.Unmarshal([]byte(v), &data)
+			case "yaml":
+				err = yaml.Load([]byte(v), &data)
+			default:
+				return fmt.Errorf(i18n.G("Invalid format: %s"), c.flagFormat)
+			}
+
+			if err != nil {
+				errs = append(errs, fmt.Errorf(i18n.G("Failed to parse variable %s:%s: %w"), guid, varName, err))
+				continue
+			}
+
+			err = d.UpdateInstanceNVRAMGUIDVar(instanceName, guid, varName, data, "")
+		}
+
+		if err != nil {
+			errs = append(errs, fmt.Errorf(i18n.G("Failed to set UEFI variable %s:%s: %w"), guid, varName, err))
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 // Unset.

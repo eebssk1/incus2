@@ -3320,6 +3320,9 @@ This adds new endpoints to manage virtual machines’ UEFI variables:
 * `GET /1.0/instances/{name}/nvram/{guid}`, to get UEFI variables under the given GUID
 * `GET /1.0/instances/{name}/nvram/{guid}/{var}`, to get specific UEFI variables
 * `DELETE /1.0/instances/{name}/nvram/{guid}/{var}`, to delete specific UEFI variables
+* `PUT /1.0/instances/{name}/nvram/{guid}/{var}`, to set/update specific UEFI variables
+
+It also adds `rebuild-nvram` as an instance debug action.
 
 ## `disk_io_limits_combined`
 
@@ -3332,3 +3335,11 @@ a comma separated list of values (for example, `limits.read=30MiB,1000iops`).
 Adds a `cluster` field to CPU core entries in the resources API, telling
 apart cores with identical identifiers on systems where core identifiers
 are only unique within a CPU cluster (ARM big.LITTLE).
+
+## `acme_eab`
+
+Adds support for ACME External Account Binding (EAB) through two new
+server configuration keys:
+
+* `acme.eab.kid`
+* `acme.eab.hmac`

@@ -561,7 +561,9 @@ func validateDependentVolumes(source instance.Instance, req *api.InstancesPost) 
 		}
 
 		// Check if the source was overridden.
-		if oldDevice["source"] == newDevice["source"] {
+		oldVolName, _ := internalInstance.SplitVolumeSource(oldDevice["source"])
+		newVolName, _ := internalInstance.SplitVolumeSource(newDevice["source"])
+		if oldVolName == newVolName {
 			return fmt.Errorf("Device source name should be different during copy for dependent disk: %s", key)
 		}
 	}
@@ -705,6 +707,15 @@ func createFromCopy(ctx context.Context, s *state.State, r *http.Request, projec
 		}
 
 		req.Devices[key] = value
+	}
+
+	// Re-check project restrictions against the fully merged config, as the source
+	// instance's config and devices (including restricted keys) are only merged in above.
+	err = s.DB.Cluster.Transaction(ctx, func(ctx context.Context, tx *db.ClusterTx) error {
+		return project.AllowInstanceCreation(tx, targetProject, *req)
+	})
+	if err != nil {
+		return response.SmartError(err)
 	}
 
 	if req.Stateful {
@@ -884,6 +895,19 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 	// Override instance name.
 	if instanceName != "" {
 		bInfo.Name = instanceName
+	}
+
+	// Validate the instance and snapshot names to avoid path traversal when used as path segments.
+	err = instance.ValidName(bInfo.Name, false)
+	if err != nil {
+		return response.BadRequest(err)
+	}
+
+	for _, snapName := range bInfo.Snapshots {
+		err = instance.ValidName(bInfo.Name+internalInstance.SnapshotDelimiter+snapName, true)
+		if err != nil {
+			return response.BadRequest(err)
+		}
 	}
 
 	// Override config.
@@ -1147,6 +1171,10 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 //	    $ref: "#/responses/BadRequest"
 //	  "403":
 //	    $ref: "#/responses/Forbidden"
+//	  "404":
+//	    $ref: "#/responses/NotFound"
+//	  "409":
+//	    $ref: "#/responses/Conflict"
 //	  "500":
 //	    $ref: "#/responses/InternalServerError"
 func instancesPost(d *Daemon, r *http.Request) response.Response {
@@ -1183,8 +1211,10 @@ func instancesPost(d *Daemon, r *http.Request) response.Response {
 		req.Config = map[string]string{}
 	}
 
+	var instanceTypeDisk int64
+
 	if req.InstanceType != "" {
-		conf, err := instanceParseType(req.InstanceType)
+		conf, disk, err := instanceParseType(req.InstanceType)
 		if err != nil {
 			return response.BadRequest(err)
 		}
@@ -1194,6 +1224,8 @@ func instancesPost(d *Daemon, r *http.Request) response.Response {
 				req.Config[k] = v
 			}
 		}
+
+		instanceTypeDisk = disk
 	}
 
 	// Special handling for instance refresh.
@@ -1347,12 +1379,12 @@ func instancesPost(d *Daemon, r *http.Request) response.Response {
 				return err
 			}
 
-			dbProfileConfigs, err := dbCluster.GetAllProfileConfigs(ctx, tx.Tx())
+			dbProfileConfigs, err := dbCluster.GetReferencedProfileConfigs(ctx, tx.Tx(), dbProfiles)
 			if err != nil {
 				return err
 			}
 
-			dbProfileDevices, err := dbCluster.GetAllProfileDevices(ctx, tx.Tx())
+			dbProfileDevices, err := dbCluster.GetReferencedProfileDevices(ctx, tx.Tx(), dbProfiles)
 			if err != nil {
 				return err
 			}
@@ -1374,6 +1406,32 @@ func instancesPost(d *Daemon, r *http.Request) response.Response {
 				}
 
 				profiles = append(profiles, *apiProfile)
+			}
+		}
+
+		// Apply the instance type's disk size to the root disk device.
+		if instanceTypeDisk > 0 {
+			size := fmt.Sprintf("%dB", instanceTypeDisk)
+
+			_, rootDev, rootErr := internalInstance.GetRootDiskDevice(req.Devices)
+			if rootErr == nil {
+				if rootDev["size"] == "" {
+					rootDev["size"] = size
+				}
+			} else {
+				// Take over the root disk device from the profiles.
+				for i := len(profiles) - 1; i >= 0; i-- {
+					devName, dev, rootErr := internalInstance.GetRootDiskDevice(profiles[i].Devices)
+					if rootErr != nil {
+						continue
+					}
+
+					newDev := map[string]string{}
+					maps.Copy(newDev, dev)
+					newDev["size"] = size
+					req.Devices[devName] = newDev
+					break
+				}
 			}
 		}
 
