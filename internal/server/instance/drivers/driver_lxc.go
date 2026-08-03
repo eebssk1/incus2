@@ -1895,14 +1895,54 @@ func (d *lxc) handleIdmappedStorage() (idmap.StorageType, *idmap.Set, error) {
 		return idmap.StorageTypeNone, nil, fmt.Errorf("Set ID map: %w", err)
 	}
 
+	shiftMethod := d.expandedConfig["security.shift.method"]
+	if shiftMethod == "" {
+		shiftMethod = "idmapped"
+	}
+
+	// When switching from chown back to idmapped, unshift the rootfs
+	// and clear the on-disk idmap so idmapped mounts can be used.
+	if d.localConfig["volatile.last_state.shift.method"] == "chown" && shiftMethod != "chown" && diskIdmap != nil {
+		d.logger.Info("Shift method changed from chown to idmapped, unshifting rootfs")
+		d.updateProgress("Remapping container filesystem (unshift)")
+
+		storageType, err := d.getStorageType()
+		if err != nil {
+			return idmap.StorageTypeNone, nil, fmt.Errorf("Storage type: %w", err)
+		}
+
+		switch storageType {
+		case "zfs":
+			err = diskIdmap.UnshiftPath(d.RootfsPath(), storageDrivers.ShiftZFSSkipper)
+		case "btrfs":
+			err = storageDrivers.UnshiftBtrfsRootfs(d.RootfsPath(), diskIdmap)
+		default:
+			err = diskIdmap.UnshiftPath(d.RootfsPath(), nil)
+		}
+		if err != nil {
+			return idmap.StorageTypeNone, nil, err
+		}
+
+		err = d.VolatileSet(map[string]string{"volatile.last_state.idmap": "[]"})
+		if err != nil {
+			return idmap.StorageTypeNone, nil, fmt.Errorf("Clear volatile.last_state.idmap: %w", err)
+		}
+
+		d.updateProgress("")
+		diskIdmap = nil
+	}
+
 	// Identical on-disk idmaps so no changes required.
 	if nextIdmap.Equals(diskIdmap) {
 		return idmap.StorageTypeNone, nextIdmap, nil
 	}
 
 	// There's no on-disk idmap applied and the container can use idmapped
-	// storage.
+	// storage, unless the instance is configured to force physical chown.
 	idmapType := d.IdmappedStorage(d.RootfsPath(), "none")
+	if shiftMethod == "chown" {
+		idmapType = idmap.StorageTypeNone
+	}
 	if diskIdmap == nil && idmapType != idmap.StorageTypeNone {
 		return idmapType, nextIdmap, nil
 	}
@@ -1964,7 +2004,11 @@ func (d *lxc) handleIdmappedStorage() (idmap.StorageType, *idmap.Set, error) {
 		jsonDiskIdmap = idmapJSON
 	}
 
-	err = d.VolatileSet(map[string]string{"volatile.last_state.idmap": jsonDiskIdmap})
+	volatileSet := map[string]string{"volatile.last_state.idmap": jsonDiskIdmap}
+	if shiftMethod == "chown" {
+		volatileSet["volatile.last_state.shift.method"] = shiftMethod
+	}
+	err = d.VolatileSet(volatileSet)
 	if err != nil {
 		return idmap.StorageTypeNone, nextIdmap, fmt.Errorf("Set volatile.last_state.idmap config key on container %q (id %d): %w", d.name, d.id, err)
 	}
@@ -3007,6 +3051,15 @@ func (d *lxc) Start(stateful bool) error {
 
 	// If stateful, restore now.
 	if stateful && d.stateful {
+		recordedMethod := d.localConfig["volatile.last_state.shift.method"]
+		currentMethod := d.expandedConfig["security.shift.method"]
+		if currentMethod == "" {
+			currentMethod = "idmapped"
+		}
+		if recordedMethod != "" && currentMethod != recordedMethod {
+			d.logger.Warn("security.shift.method changed; will not take effect until a clean (non-stateful) start", logger.Ctx{"configured": currentMethod, "active": recordedMethod})
+		}
+
 		d.logger.Info("Restoring stateful checkpoint")
 
 		criuMigrationArgs := instance.CriuMigrationArgs{

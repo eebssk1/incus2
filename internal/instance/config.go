@@ -987,6 +987,23 @@ var InstanceConfigKeysContainer = map[string]func(value string) error{
 	//  shortdesc: Whether to protect the file system from being UID/GID shifted
 	"security.protection.shift": validate.Optional(validate.IsBool),
 
+	// gendoc:generate(entity=instance, group=security, key=security.shift.method)
+	// Set this option to control how the instance's file system UID/GID shifting is
+	// performed.
+	// `idmapped` (default) uses kernel VFS idmapped mounts, `chown` physically rewrites
+	// on-disk UIDs/GIDs.
+	// When `chown` is selected, the instance's rootfs is physically chowned to the
+	// shifted UID/GID range on startup rather than using a virtual idmapped mount.
+	// This is needed for CRIU stateful checkpoint/restore, as CRIU does not support
+	// idmapped mounts.
+	// ---
+	//  type: string
+	//  defaultdesc: `idmapped`
+	//  liveupdate: no
+	//  condition: container
+	//  shortdesc: Method for UID/GID filesystem shifting
+	"security.shift.method": validate.Optional(validate.IsOneOf("idmapped", "chown")),
+
 	// gendoc:generate(entity=instance, group=security, key=security.syscalls.allow)
 	// A `\n`-separated list of syscalls to allow.
 	// This list must be mutually exclusive with `security.syscalls.deny*`.
