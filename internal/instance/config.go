@@ -566,6 +566,12 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	//  type: string
 	//  shortdesc: Full SELinux context
 	"volatile.selinux.context": validate.Optional(validate.IsAny),
+
+	// Latest Idmap mode record
+	// ---
+	// type: string
+	// shortdesc: idmap mode
+	"volatile.last_state.shift.method": validate.Optional(validate.IsOneOf("idmapped", "chown")),
 }
 
 // InstanceConfigKeysContainer is a map of config key to validator. (keys applying to containers only).
