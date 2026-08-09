@@ -60,9 +60,7 @@ type ProtocolIncus struct {
 
 // Disconnect gets rid of any background goroutines.
 func (r *ProtocolIncus) Disconnect() {
-	if r.ctxConnected.Err() != nil {
-		r.ctxConnectedCancel()
-	}
+	r.ctxConnectedCancel()
 }
 
 // GetConnectionInfo returns the basic connection information used to interact with the server.
@@ -523,9 +521,26 @@ func (r *ProtocolIncus) websocket(path string) (*websocket.Conn, error) {
 
 // WithContext returns a client that will add context.Context.
 func (r *ProtocolIncus) WithContext(ctx context.Context) InstanceServer {
-	rr := r
-	rr.ctx = ctx
-	return rr
+	return &ProtocolIncus{
+		ctx:                  ctx,
+		ctxConnected:         r.ctxConnected,
+		ctxConnectedCancel:   r.ctxConnectedCancel,
+		server:               r.server,
+		http:                 r.http,
+		httpCertificate:      r.httpCertificate,
+		httpBaseURL:          r.httpBaseURL,
+		httpProtocol:         r.httpProtocol,
+		httpUserAgent:        r.httpUserAgent,
+		httpUnixPath:         r.httpUnixPath,
+		requireAuthenticated: r.requireAuthenticated,
+		clusterTarget:        r.clusterTarget,
+		project:              r.project,
+		eventConns:           make(map[string]*websocket.Conn),
+		eventListeners:       make(map[string][]*EventListener),
+		skipEvents:           r.skipEvents,
+		oidcClient:           r.oidcClient,
+		tempPath:             r.tempPath,
+	}
 }
 
 // getUnderlyingHTTPTransport returns the *http.Transport used by the http client. If the http
