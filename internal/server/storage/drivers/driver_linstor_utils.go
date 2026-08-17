@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	linstorapi "github.com/LINBIT/golinstor"
 	linstorClient "github.com/LINBIT/golinstor/client"
 	"github.com/LINBIT/golinstor/clonestatus"
 	"github.com/google/uuid"
@@ -370,13 +371,12 @@ func (d *linstor) deleteResourceGroup() error {
 	return nil
 }
 
-// getResourceDefinition returns the Linstor resource definition for a given volume.
-func (d *linstor) getResourceDefinition(vol Volume, fetchVolumeDefinitions bool) (linstorClient.ResourceDefinitionWithVolumeDefinition, error) {
+// getVolumeResourceDefinitions returns all Linstor resource definitions matching a given volume.
+func (d *linstor) getVolumeResourceDefinitions(vol Volume, fetchVolumeDefinitions bool) ([]linstorClient.ResourceDefinitionWithVolumeDefinition, error) {
 	l := logger.AddContext(logger.Ctx{"vol": vol.name, "volType": vol.volType, "contentType": vol.contentType})
-	l.Debug("Getting resource definition for volume")
 	linstor, err := d.state.Linstor()
 	if err != nil {
-		return linstorClient.ResourceDefinitionWithVolumeDefinition{}, err
+		return nil, err
 	}
 
 	// Query resource definitions that match the desired volume by its name.
@@ -388,7 +388,7 @@ func (d *linstor) getResourceDefinition(vol Volume, fetchVolumeDefinitions bool)
 		WithVolumeDefinitions: fetchVolumeDefinitions,
 	})
 	if err != nil {
-		return linstorClient.ResourceDefinitionWithVolumeDefinition{}, err
+		return nil, err
 	}
 
 	l.Debug("Queried resource definitions", logger.Ctx{"query": LinstorAuxName + "=" + d.config[LinstorVolumePrefixConfigKey] + vol.name, "result": resourceDefinitions})
@@ -399,6 +399,19 @@ func (d *linstor) getResourceDefinition(vol Volume, fetchVolumeDefinitions bool)
 		if rd.ResourceGroupName == d.config[LinstorResourceGroupNameConfigKey] {
 			filteredResourceDefinitions = append(filteredResourceDefinitions, rd)
 		}
+	}
+
+	return filteredResourceDefinitions, nil
+}
+
+// getResourceDefinition returns the Linstor resource definition for a given volume.
+func (d *linstor) getResourceDefinition(vol Volume, fetchVolumeDefinitions bool) (linstorClient.ResourceDefinitionWithVolumeDefinition, error) {
+	l := logger.AddContext(logger.Ctx{"vol": vol.name, "volType": vol.volType, "contentType": vol.contentType})
+	l.Debug("Getting resource definition for volume")
+
+	filteredResourceDefinitions, err := d.getVolumeResourceDefinitions(vol, fetchVolumeDefinitions)
+	if err != nil {
+		return linstorClient.ResourceDefinitionWithVolumeDefinition{}, err
 	}
 
 	if len(filteredResourceDefinitions) == 0 {
@@ -827,6 +840,11 @@ func (d *linstor) createResourceDefinitionFromSnapshot(snapVol Volume, vol Volum
 
 	rev.Add(func() { _ = linstor.Client.ResourceDefinitions.Delete(context.TODO(), resourceDefinitionName) })
 
+	err = d.setResourceDefinitionExactSize(resourceDefinitionName)
+	if err != nil {
+		return err
+	}
+
 	err = linstor.Client.Resources.RestoreVolumeDefinitionSnapshot(context.TODO(), parentResourceDefinition.Name, linstorSnapshotName, linstorClient.SnapshotRestore{
 		ToResource: resourceDefinitionName,
 	})
@@ -851,28 +869,47 @@ func (d *linstor) createResourceDefinitionFromSnapshot(snapVol Volume, vol Volum
 	return nil
 }
 
-// deleteResourceDefinitionFromSnapshot deletes the resource definition created from a snapshot.
-func (d *linstor) deleteResourceDefinitionFromSnapshot(vol Volume) error {
-	l := d.logger.AddContext(logger.Ctx{"vol": vol.Name()})
-	l.Debug("Deleting resource definition for snapshot")
-
+// deleteResourceDefinition deletes a resource definition, retrying on transient errors.
+func (d *linstor) deleteResourceDefinition(resourceDefinitionName string) error {
 	linstor, err := d.state.Linstor()
 	if err != nil {
 		return err
 	}
 
-	resourceDefinition, err := d.getResourceDefinition(vol, false)
-	if err != nil {
-		if errors.Is(err, errResourceDefinitionNotFound) {
-			return nil
+	// DRBD demotes the resource asynchronously after the last close and the backing
+	// device can also be briefly held open (udev), so retry transient failures.
+	for range 20 {
+		err = linstor.Client.ResourceDefinitions.Delete(context.TODO(), resourceDefinitionName)
+		if err == nil {
+			break
 		}
 
+		if !linstorClient.IsApiCallError(err, linstorapi.FailInUse) && !linstorClient.IsApiCallError(err, linstorapi.FailUnknownError) {
+			break
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return err
+}
+
+// deleteResourceDefinitionFromSnapshot deletes the resource definition created from a snapshot.
+func (d *linstor) deleteResourceDefinitionFromSnapshot(vol Volume) error {
+	l := d.logger.AddContext(logger.Ctx{"vol": vol.Name()})
+	l.Debug("Deleting resource definition for snapshot")
+
+	// Delete every matching resource definition, as an interrupted past deletion can leave more than one behind.
+	resourceDefinitions, err := d.getVolumeResourceDefinitions(vol, false)
+	if err != nil {
 		return err
 	}
 
-	err = linstor.Client.ResourceDefinitions.Delete(context.TODO(), resourceDefinition.Name)
-	if err != nil {
-		return err
+	for _, resourceDefinition := range resourceDefinitions {
+		err = d.deleteResourceDefinition(resourceDefinition.Name)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.logger.Debug("Resource definition for snapshot deleted")
@@ -897,6 +934,15 @@ func (d *linstor) resizeVolume(vol Volume, sizeBytes int64) error {
 	// For VM volumes, the associated filesystem volume is a second volume on the same LINSTOR resource.
 	if vol.volType == VolumeTypeVM && vol.contentType == ContentTypeFS {
 		volumeIndex = 1
+	}
+
+	// LINSTOR cannot resize volume definitions with an exact size, so clear the
+	// property (it cannot be re-enabled while resources are deployed).
+	err = linstor.Client.ResourceDefinitions.Modify(context.TODO(), resourceDefinition.Name, linstorClient.GenericPropsModify{
+		DeleteProps: []string{"DrbdOptions/ExactSize"},
+	})
+	if err != nil {
+		return fmt.Errorf("Unable to remove the exact size property: %w", err)
 	}
 
 	// Resize the volume definition.
@@ -1007,6 +1053,25 @@ func (d *linstor) getResourceDefinitions() ([]linstorClient.ResourceDefinitionWi
 	}
 
 	return resourceDefinitions, nil
+}
+
+// setResourceDefinitionExactSize enables the DRBD exact size on a resource definition.
+// This can only be done before any resource is deployed and is inherited when cloning.
+func (d *linstor) setResourceDefinitionExactSize(resourceDefinitionName string) error {
+	linstor, err := d.state.Linstor()
+	if err != nil {
+		return err
+	}
+
+	// Expose exactly the requested size rather than what the backing storage rounded up to.
+	err = linstor.Client.ResourceDefinitions.Modify(context.TODO(), resourceDefinitionName, linstorClient.GenericPropsModify{
+		OverrideProps: map[string]string{"DrbdOptions/ExactSize": "true"},
+	})
+	if err != nil {
+		return fmt.Errorf("Could not set exact size on resource definition: %w", err)
+	}
+
+	return nil
 }
 
 // setResourceDefinitionProperties sets properties on the resource definition based on the volume config.

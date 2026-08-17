@@ -1,4 +1,10 @@
 network_ovn_supported() {
+    if [ -n "${INCUS_OFFLINE:-}" ]; then
+        echo "==> SKIP: External connectivity needed to pull test image"
+        export TEST_UNMET_REQUIREMENT="external connectivity needed to pull test image"
+        return 1
+    fi
+
     if ! command -v ovn-nbctl > /dev/null 2>&1 || ! command -v ovs-vsctl > /dev/null 2>&1; then
         echo "==> SKIP: OVN tools not available"
         export TEST_UNMET_REQUIREMENT="OVN tools not available"
@@ -34,7 +40,7 @@ test_network_ovn_basic() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     incus network create incusbr0 \
         ipv4.address=10.10.10.1/24 ipv4.nat=true \
@@ -580,7 +586,7 @@ test_network_ovn_forward() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     # Create incusbr0 bridge to act as uplink network.
     incus network create incusbr0 \
@@ -810,7 +816,7 @@ test_network_ovn_load_balancer() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     # Create incusbr0 bridge to act as uplink network.
     incus network create incusbr0 \
@@ -1037,7 +1043,7 @@ test_network_ovn_peering() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     # Create two projects to test cross-project peering.
     incus project create prj-ovn1 \
@@ -1360,7 +1366,7 @@ test_network_ovn_dhcp_reservation() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     incus network create incusbr0 \
         ipv4.address=10.10.10.1/24 ipv4.nat=true \
@@ -1445,7 +1451,7 @@ test_network_ovn_nested_vlan() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     incus network create incusbr0 \
         ipv4.address=10.10.10.1/24 ipv4.nat=true \
@@ -1536,7 +1542,7 @@ test_network_ovn_acl() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     # Create uplink network with a special DNS record incusbr0.test pointing to the bridge addresses.
     incus network create incusbr0 \
@@ -1913,7 +1919,7 @@ test_network_ovn_l3only() {
     fi
 
     poolName=$(incus profile device get default root pool)
-    instanceImage="images:debian/12"
+    instanceImage="images:debian/13"
 
     incus network create incusbr0 \
         ipv4.address=10.10.10.1/24 ipv4.nat=true \

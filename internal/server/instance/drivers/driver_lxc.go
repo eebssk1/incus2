@@ -6068,6 +6068,13 @@ func getCRIULogErrors(imagesDir string, method string) (string, error) {
 
 // Check if CRIU supports pre-dumping and number of pre-dump iterations.
 func (d *lxc) migrationSendCheckForPreDumpSupport() (bool, int) {
+	config := d.ExpandedConfig()
+
+	// Incremental memory migration is opt-in, matching the documented default and avoiding an unnecessary CRIU probe.
+	if !util.IsTrue(config["migration.incremental.memory"]) {
+		return false, 0
+	}
+
 	// Check if this architecture/kernel/criu combination supports pre-copy dirty memory tracking feature.
 	_, err := subprocess.RunCommand("criu", "check", "--feature", "mem_dirty_track")
 	if err != nil {
@@ -6076,23 +6083,12 @@ func (d *lxc) migrationSendCheckForPreDumpSupport() (bool, int) {
 		return false, 0
 	}
 
-	// CRIU says it can actually do pre-dump. Let's set it to true
-	// unless the user wants something else.
-	usePreDumps := true
-
-	// What does the configuration say about pre-copy
-	tmp := d.ExpandedConfig()["migration.incremental.memory"]
-
-	if tmp != "" {
-		usePreDumps = util.IsTrue(tmp)
-	}
-
 	var maxIterations int
 
 	// migration.incremental.memory.iterations is the value after which the
 	// container will be definitely migrated, even if the remaining number
 	// of memory pages is below the defined threshold.
-	tmp = d.ExpandedConfig()["migration.incremental.memory.iterations"]
+	tmp := config["migration.incremental.memory.iterations"]
 	if tmp != "" {
 		maxIterations, _ = strconv.Atoi(tmp)
 	} else {
@@ -6110,7 +6106,7 @@ func (d *lxc) migrationSendCheckForPreDumpSupport() (bool, int) {
 
 	logger.Debugf("Using maximal %d iterations for pre-dumping", maxIterations)
 
-	return usePreDumps, maxIterations
+	return true, maxIterations
 }
 
 func (d *lxc) migrationSendWriteActionScript(directory string, operation string, secret string, execPath string) error {
@@ -6499,6 +6495,12 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 					return err
 				}
 
+				err = actionScriptOp.Start()
+				if err != nil {
+					_ = os.RemoveAll(checkpointDir)
+					return err
+				}
+
 				err = d.migrationSendWriteActionScript(checkpointDir, actionScriptOp.URL(), actionScriptOpSecret, d.state.OS.ExecPath)
 				if err != nil {
 					_ = os.RemoveAll(checkpointDir)
@@ -6543,12 +6545,6 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 					}
 				} else {
 					d.logger.Debug("The other side does not support pre-copy")
-				}
-
-				err = actionScriptOp.Start()
-				if err != nil {
-					_ = os.RemoveAll(checkpointDir)
-					return err
 				}
 
 				go func() {
@@ -7266,6 +7262,22 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 			d.logger.Debug("Done receiving final dump rsync")
 
+			// CRIU writes most images as the outer daemon's root user, but some namespace-owned
+			// images retain the source container's shifted IDs. Normalize only those shifted
+			// owners before migrate() applies the target container's idmap to the tree.
+			if len(srcIdmap.Entries) > 0 {
+				err = srcIdmap.UnshiftPath(imagesDir, func(_ string, _ string, _ os.FileInfo, newUID int64, newGID int64) error {
+					if newUID < 0 && newGID < 0 {
+						return errors.New("CRIU state owner is not source-idmapped")
+					}
+
+					return nil
+				})
+				if err != nil {
+					return fmt.Errorf("Failed normalizing CRIU state ownership: %w", err)
+				}
+			}
+
 			// Wait until filesystem transfer is done before starting final state sync and restore.
 			<-fsTransferDone
 
@@ -7767,7 +7779,7 @@ func (d *lxc) templateApplyNow(trigger instance.TemplateTrigger) error {
 					return err
 				}
 			}
-			defer logger.WarnOnError(w.Close, "Failed to close file")
+			defer logger.WarnOnErrorExcept(w.Close, []error{os.ErrClosed}, "Failed to close file")
 
 			// Read the template
 			tplString, err := os.ReadFile(filepath.Join(d.TemplatesPath(), tpl.Template))
