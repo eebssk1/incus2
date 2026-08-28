@@ -98,6 +98,14 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 		return nil
 	}
 
+	assertNVRAM := func(name string) error {
+		if nvram == nil {
+			return fmt.Errorf("%s requires a firmware with an NVRAM", name)
+		}
+
+		return nil
+	}
+
 	runQMPFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		err := assertQEMUStarted(b.Name())
 		if err != nil {
@@ -371,8 +379,13 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	}
 
 	getNVRAMVarFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		err := assertNVRAM(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		var guid, varName string
-		err := starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
+		err = starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
 		if err != nil {
 			return nil, err
 		}
@@ -397,8 +410,13 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	}
 
 	hasNVRAMVarFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		err := assertNVRAM(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		var guid, varName string
-		err := starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
+		err = starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
 		if err != nil {
 			return nil, err
 		}
@@ -413,6 +431,11 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 
 	setNVRAMVarFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		err := assertConfigStage(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
+		err = assertNVRAM(b.Name())
 		if err != nil {
 			return nil, err
 		}
@@ -461,6 +484,11 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 			return nil, err
 		}
 
+		err = assertNVRAM(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		var guid, varName string
 		err = starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
 		if err != nil {
@@ -481,8 +509,13 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	}
 
 	getRawNVRAMVarFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		err := assertNVRAM(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		var guid, varName string
-		err := starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
+		err = starlark.UnpackArgs(b.Name(), args, kwargs, "guid", &guid, "name", &varName)
 		if err != nil {
 			return nil, err
 		}
@@ -502,6 +535,11 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 
 	setRawNVRAMVarFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		err := assertConfigStage(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
+		err = assertNVRAM(b.Name())
 		if err != nil {
 			return nil, err
 		}
@@ -541,8 +579,13 @@ func QEMURun(l logger.Logger, instance *api.Instance, cmdArgs *[]string, conf *[
 	}
 
 	listNVRAMVarsFunc := func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		err := assertNVRAM(b.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		var guid string
-		err := starlark.UnpackArgs(b.Name(), args, kwargs, "guid??", &guid)
+		err = starlark.UnpackArgs(b.Name(), args, kwargs, "guid??", &guid)
 		if err != nil {
 			return nil, err
 		}
