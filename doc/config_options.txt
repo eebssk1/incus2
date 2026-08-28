@@ -144,6 +144,21 @@ For file systems (shared directories or custom volumes), this is one of:
 
 ```
 
+```{config:option} limits.max.burst devices-disk
+:required: "no"
+:shortdesc: "I/O limit in byte/s and/or IOPS that both reads and writes may burst up to (same as setting both `limits.read.burst` and `limits.write.burst`)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.burst.length devices-disk
+:default: "`1s`"
+:required: "no"
+:shortdesc: "How long the burst limits may be sustained for (same as setting both `limits.read.burst.length` and `limits.write.burst.length`)"
+:type: "string"
+
+```
+
 ```{config:option} limits.read devices-disk
 :required: "no"
 :shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`"
@@ -151,9 +166,39 @@ For file systems (shared directories or custom volumes), this is one of:
 
 ```
 
+```{config:option} limits.read.burst devices-disk
+:required: "no"
+:shortdesc: "I/O limit in byte/s and/or IOPS that reads may burst up to for `limits.read.burst.length` (only for virtual machines) - see also {ref}`storage-configure-IO`"
+:type: "string"
+
+```
+
+```{config:option} limits.read.burst.length devices-disk
+:default: "`1s`"
+:required: "no"
+:shortdesc: "How long `limits.read.burst` may be sustained for before falling back to the sustained limit"
+:type: "string"
+
+```
+
 ```{config:option} limits.write devices-disk
 :required: "no"
 :shortdesc: "I/O limit in byte/s (various suffixes supported, see {ref}`instances-limit-units`) and/or in IOPS (must be suffixed with `iops`), comma separated when specifying both - see also {ref}`storage-configure-IO`"
+:type: "string"
+
+```
+
+```{config:option} limits.write.burst devices-disk
+:required: "no"
+:shortdesc: "I/O limit in byte/s and/or IOPS that writes may burst up to for `limits.write.burst.length` (only for virtual machines) - see also {ref}`storage-configure-IO`"
+:type: "string"
+
+```
+
+```{config:option} limits.write.burst.length devices-disk
+:default: "`1s`"
+:required: "no"
+:shortdesc: "How long `limits.write.burst` may be sustained for before falling back to the sustained limit"
 :type: "string"
 
 ```
@@ -562,7 +607,7 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```{config:option} ipv4.address devices-nic_bridged
 :managed: "no"
-:shortdesc: "An IPv4 address to assign to the instance through DHCP (can be `none` to restrict all IPv4 traffic when `security.ipv4_filtering` is set, or a CIDR value to statically configure the address inside an OCI container)"
+:shortdesc: "An IPv4 address to assign to the instance through DHCP (can be `none` to disable DHCPv4 inside an OCI container and restrict all IPv4 traffic when `security.ipv4_filtering` is set, or a CIDR value to statically configure the address inside an OCI container)"
 :type: "string"
 
 ```
@@ -590,7 +635,7 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```{config:option} ipv6.address devices-nic_bridged
 :managed: "no"
-:shortdesc: "An IPv6 address to assign to the instance through DHCP (can be `none` to restrict all IPv6 traffic when `security.ipv6_filtering` is set, or a CIDR value to statically configure the address inside an OCI container)"
+:shortdesc: "An IPv6 address to assign to the instance through DHCP (can be `none` to disable DHCPv6 and SLAAC inside an OCI container and restrict all IPv6 traffic when `security.ipv6_filtering` is set, or a CIDR value to statically configure the address inside an OCI container)"
 :type: "string"
 
 ```
@@ -623,6 +668,20 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} limits.egress.bucket devices-nic_bridged
+:managed: "no"
+:shortdesc: "Amount of data in bit that outgoing traffic may send in excess of `limits.egress`, requires `limits.egress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.egress.burst devices-nic_bridged
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that outgoing traffic may burst up to, requires `limits.egress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.ingress devices-nic_bridged
 :managed: "no"
 :shortdesc: "I/O limit in bit/s for incoming traffic (various suffixes supported, see {ref}`instances-limit-units`)"
@@ -630,9 +689,37 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} limits.ingress.bucket devices-nic_bridged
+:managed: "no"
+:shortdesc: "Amount of data in bit that incoming traffic may send in excess of `limits.ingress`, requires `limits.ingress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.ingress.burst devices-nic_bridged
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that incoming traffic may burst up to, requires `limits.ingress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.max devices-nic_bridged
 :managed: "no"
 :shortdesc: "I/O limit in bit/s for both incoming and outgoing traffic (same as setting both limits.ingress and limits.egress)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.bucket devices-nic_bridged
+:managed: "no"
+:shortdesc: "Amount of data in bit that traffic may send in excess of the sustained limit (same as setting both `limits.ingress.bucket` and `limits.egress.bucket`)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.burst devices-nic_bridged
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that both incoming and outgoing traffic may burst up to (same as setting both `limits.ingress.burst` and `limits.egress.burst`)"
 :type: "string"
 
 ```
@@ -670,6 +757,21 @@ With VMs, this option supports mounting file system disk devices and paths withi
 ```{config:option} parent devices-nic_bridged
 :managed: "yes"
 :shortdesc: "The name of the parent host device (required if specifying the `nictype` directly)"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline devices-nic_bridged
+:managed: "no"
+:shortdesc: "The queuing discipline to set on the NIC, applied to the rate limit's class when a limit is set"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline.attach devices-nic_bridged
+:default: "`queue`"
+:managed: "no"
+:shortdesc: "Only for VMs: Whether to attach the queuing discipline to each transmit queue (`queue`) or to the interface root (`root`)"
 :type: "string"
 
 ```
@@ -1089,6 +1191,13 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} limits.egress.bucket devices-nic_ovn
+:managed: "no"
+:shortdesc: "Amount of data in bit that outgoing traffic may send in excess of `limits.egress` (mutually exclusive with `limits.max.bucket`)"
+:type: "string"
+
+```
+
 ```{config:option} limits.ingress devices-nic_ovn
 :managed: "no"
 :shortdesc: "I/O limit in bit/s for incoming traffic (various suffixes supported, see {ref}`instances-limit-units`)"
@@ -1096,9 +1205,23 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} limits.ingress.bucket devices-nic_ovn
+:managed: "no"
+:shortdesc: "Amount of data in bit that incoming traffic may send in excess of `limits.ingress` (mutually exclusive with `limits.max.bucket`)"
+:type: "string"
+
+```
+
 ```{config:option} limits.max devices-nic_ovn
 :managed: "no"
 :shortdesc: "I/O limit in bit/s for both incoming and outgoing traffic. (same as setting both limits.ingress and limits.egress / mutually exclusive with limits.ingress and limits.egress)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.bucket devices-nic_ovn
+:managed: "no"
+:shortdesc: "Amount of data in bit that traffic may send in excess of the sustained limit (same as setting both `limits.ingress.bucket` and `limits.egress.bucket` / mutually exclusive with them)"
 :type: "string"
 
 ```
@@ -1258,14 +1381,56 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} limits.egress.bucket devices-nic_p2p
+:managed: "no"
+:shortdesc: "Amount of data in bit that outgoing traffic may send in excess of `limits.egress`, requires `limits.egress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.egress.burst devices-nic_p2p
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that outgoing traffic may burst up to, requires `limits.egress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.ingress devices-nic_p2p
 :shortdesc: "I/O limit in bit/s for incoming traffic (various suffixes supported, see {ref}`instances-limit-units`)"
 :type: "string"
 
 ```
 
+```{config:option} limits.ingress.bucket devices-nic_p2p
+:managed: "no"
+:shortdesc: "Amount of data in bit that incoming traffic may send in excess of `limits.ingress`, requires `limits.ingress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.ingress.burst devices-nic_p2p
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that incoming traffic may burst up to, requires `limits.ingress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.max devices-nic_p2p
 :shortdesc: "I/O limit in bit/s for both incoming and outgoing traffic (same as setting both limits.ingress and limits.egress)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.bucket devices-nic_p2p
+:managed: "no"
+:shortdesc: "Amount of data in bit that traffic may send in excess of the sustained limit (same as setting both `limits.ingress.bucket` and `limits.egress.bucket`)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.burst devices-nic_p2p
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that both incoming and outgoing traffic may burst up to (same as setting both `limits.ingress.burst` and `limits.egress.burst`)"
 :type: "string"
 
 ```
@@ -1286,6 +1451,19 @@ With VMs, this option supports mounting file system disk devices and paths withi
 ```{config:option} name devices-nic_p2p
 :default: "kernel assigned"
 :shortdesc: "The name of the interface inside the instance"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline devices-nic_p2p
+:shortdesc: "The queuing discipline to set on the NIC, applied to the rate limit's class when a limit is set"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline.attach devices-nic_p2p
+:default: "`queue`"
+:shortdesc: "Only for VMs: Whether to attach the queuing discipline to each transmit queue (`queue`) or to the interface root (`root`)"
 :type: "string"
 
 ```
@@ -1524,14 +1702,56 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 
 ```
 
+```{config:option} limits.egress.bucket devices-nic_routed
+:managed: "no"
+:shortdesc: "Amount of data in bit that outgoing traffic may send in excess of `limits.egress`, requires `limits.egress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.egress.burst devices-nic_routed
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that outgoing traffic may burst up to, requires `limits.egress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.ingress devices-nic_routed
 :shortdesc: "I/O limit in bit/s for incoming traffic (various suffixes supported, see {ref}`instances-limit-units`)"
 :type: "string"
 
 ```
 
+```{config:option} limits.ingress.bucket devices-nic_routed
+:managed: "no"
+:shortdesc: "Amount of data in bit that incoming traffic may send in excess of `limits.ingress`, requires `limits.ingress.burst`"
+:type: "string"
+
+```
+
+```{config:option} limits.ingress.burst devices-nic_routed
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that incoming traffic may burst up to, requires `limits.ingress.bucket`"
+:type: "string"
+
+```
+
 ```{config:option} limits.max devices-nic_routed
 :shortdesc: "I/O limit in bit/s for both incoming and outgoing traffic (same as setting both limits.ingress and limits.egress)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.bucket devices-nic_routed
+:managed: "no"
+:shortdesc: "Amount of data in bit that traffic may send in excess of the sustained limit (same as setting both `limits.ingress.bucket` and `limits.egress.bucket`)"
+:type: "string"
+
+```
+
+```{config:option} limits.max.burst devices-nic_routed
+:managed: "no"
+:shortdesc: "I/O limit in bit/s that both incoming and outgoing traffic may burst up to (same as setting both `limits.ingress.burst` and `limits.egress.burst`)"
 :type: "string"
 
 ```
@@ -1558,6 +1778,19 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 
 ```{config:option} parent devices-nic_routed
 :shortdesc: "The name of the parent host device to join the instance to"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline devices-nic_routed
+:shortdesc: "The queuing discipline to set on the NIC, applied to the rate limit's class when a limit is set"
+:type: "string"
+
+```
+
+```{config:option} queue.discipline.attach devices-nic_routed
+:default: "`queue`"
+:shortdesc: "Only for VMs: Whether to attach the queuing discipline to each transmit queue (`queue`) or to the interface root (`root`)"
 :type: "string"
 
 ```
@@ -2360,6 +2593,22 @@ Override the UID of the process run in an OCI container.
 
 <!-- config group instance-oci end -->
 <!-- config group instance-raw start -->
+```{config:option} initial.nvram-binary.<GUID>.<name> instance-raw
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Base64-encoded NVRAM variable value to set when generating the NVRAM, optionally prefixed by its attributes"
+:type: "blob"
+Base64-encoded variable value to set when generating the NVRAM, optionally prefixed by `<attributes>:`, with `<attributes>` an integer.
+```
+
+```{config:option} initial.nvram.<GUID>.<name> instance-raw
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Dissected NVRAM variable value to set when generating the NVRAM"
+:type: "blob"
+
+```
+
 ```{config:option} raw.apparmor instance-raw
 :liveupdate: "yes"
 :shortdesc: "AppArmor profile entries"
@@ -2628,6 +2877,54 @@ If left empty, no limit is set.
 
 <!-- config group instance-resource-limits end -->
 <!-- config group instance-security start -->
+```{config:option} initial.secureboot.db instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial authorized signature database entries to enroll when generating the NVRAM (PEM certificate and signature bundle)"
+:type: "string"
+This option accepts signatures armored with `SIGNATURE` in addition to certificates.
+```
+
+```{config:option} initial.secureboot.dbt instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial authorized timestamp signature database certificates to enroll when generating the NVRAM (PEM certificate bundle)"
+:type: "string"
+
+```
+
+```{config:option} initial.secureboot.dbx instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial forbidden signature database entries to enroll when generating the NVRAM (PEM certificate and signature bundle)"
+:type: "string"
+This option accepts signatures armored with `SIGNATURE` in addition to certificates.
+```
+
+```{config:option} initial.secureboot.kek instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial key exchange keys to enroll when generating the NVRAM (PEM certificate bundle)"
+:type: "string"
+
+```
+
+```{config:option} initial.secureboot.mok instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial machine owner key entries to enroll when generating the NVRAM (PEM certificate and signature bundle)"
+:type: "string"
+This option accepts signatures armored with `SIGNATURE` in addition to certificates.
+```
+
+```{config:option} initial.secureboot.pk instance-security
+:condition: "virtual machine"
+:liveupdate: "yes"
+:shortdesc: "Initial platform key to enroll when generating the NVRAM (PEM certificate)"
+:type: "string"
+
+```
+
 ```{config:option} security.agent.metrics instance-security
 :condition: "virtual machine"
 :defaultdesc: "`true`"
@@ -3799,6 +4096,14 @@ User keys can be used in search.
 
 ```
 
+```{config:option} ipv6.ra network_bridge-common
+:condition: "IPv6 address"
+:default: "`true`"
+:shortdesc: "Whether to send IPv6 router advertisements"
+:type: "bool"
+
+```
+
 ```{config:option} ipv6.routes network_bridge-common
 :condition: "IPv6 address"
 :default: "-"
@@ -3961,21 +4266,21 @@ User keys can be used in search.
 <!-- config group network_integration-ovn start -->
 ```{config:option} ovn.ca_cert network_integration-ovn
 :scope: "global"
-:shortdesc: "OVN SSL certificate authority for the inter-connection database"
+:shortdesc: "OVN SSL certificate authorities for the inter-connection database (PEM bundle)"
 :type: "string"
 
 ```
 
 ```{config:option} ovn.client_cert network_integration-ovn
 :scope: "global"
-:shortdesc: "OVN SSL client certificate"
+:shortdesc: "OVN SSL client certificate (PEM bundle)"
 :type: "string"
 
 ```
 
 ```{config:option} ovn.client_key network_integration-ovn
 :scope: "global"
-:shortdesc: "OVN SSL client key"
+:shortdesc: "OVN SSL client key (PEM private key)"
 :type: "string"
 
 ```
@@ -4282,6 +4587,14 @@ User keys can be used in search.
 :condition: "IPv6 address"
 :shortdesc: "The source address used for outbound traffic from the network (requires uplink `ovn.ingress_mode=routed`)"
 :type: "string"
+
+```
+
+```{config:option} ipv6.ra network_ovn-common
+:condition: "IPv6 address"
+:default: "`true`"
+:shortdesc: "Whether to send IPv6 router advertisements"
+:type: "bool"
 
 ```
 
@@ -4935,6 +5248,10 @@ If this option is not set, all image servers are accessible.
 Specify a comma-delimited list of network names that are allowed for use in this project.
 If this option is not set, all networks are accessible.
 
+In restricted projects with {config:option}`project-features:features.networks` enabled,
+the listed networks from the default project are shared into the project and their names
+can't be used for the project's own networks.
+
 Note that this setting depends on the {config:option}`project-restricted:restricted.devices.nic` setting.
 ```
 
@@ -5555,7 +5872,7 @@ Specify the protocol, name or IP and port. For example `tcp://syslog01.int.examp
 
 ```{config:option} logging.NAME.target.ca_cert server-logging
 :scope: "global"
-:shortdesc: "CA certificate for the server"
+:shortdesc: "CA certificates for the server (PEM bundle)"
 :type: "string"
 
 ```
@@ -5623,7 +5940,7 @@ The events can be any combination of `lifecycle`, `logging`, and `network-acl`.
 <!-- config group server-loki start -->
 ```{config:option} loki.api.ca_cert server-loki
 :scope: "global"
-:shortdesc: "CA certificate for the Loki server"
+:shortdesc: "CA certificates for the Loki server (PEM bundle)"
 :type: "string"
 
 ```
@@ -5728,7 +6045,7 @@ See {ref}`clustering-instance-placement-scriptlet` for more information.
 
 ```{config:option} instances.tpm.platform_cert server-miscellaneous
 :scope: "global"
-:shortdesc: "Platform CA certificate used to provision TPM Endorsement Keys"
+:shortdesc: "Platform CA certificate used to provision TPM Endorsement Keys (PEM bundle)"
 :type: "string"
 PEM encoded platform CA certificate used to sign the Endorsement
 Key and platform certificate of newly created TPM devices.
@@ -5737,7 +6054,7 @@ Must be set together with `instances.tpm.platform_key`.
 
 ```{config:option} instances.tpm.platform_key server-miscellaneous
 :scope: "global"
-:shortdesc: "Private key for the TPM platform CA certificate"
+:shortdesc: "Private key for the TPM platform CA certificate (PEM private key)"
 :type: "string"
 PEM encoded private key matching `instances.tpm.platform_cert`.
 Used to sign the Endorsement Key and platform certificate of newly
@@ -5747,7 +6064,7 @@ created TPM devices.
 ```{config:option} network.ovn.ca_cert server-miscellaneous
 :defaultdesc: "Content of `/etc/ovn/ovn-central.crt` if present"
 :scope: "global"
-:shortdesc: "OVN SSL certificate authority"
+:shortdesc: "OVN SSL certificate authorities (PEM bundle)"
 :type: "string"
 
 ```
@@ -5755,7 +6072,7 @@ created TPM devices.
 ```{config:option} network.ovn.client_cert server-miscellaneous
 :defaultdesc: "Content of `/etc/ovn/cert_host` if present"
 :scope: "global"
-:shortdesc: "OVN SSL client certificate"
+:shortdesc: "OVN SSL client certificate (PEM bundle)"
 :type: "string"
 
 ```
@@ -5763,7 +6080,7 @@ created TPM devices.
 ```{config:option} network.ovn.client_key server-miscellaneous
 :defaultdesc: "Content of `/etc/ovn/key_host` if present"
 :scope: "global"
-:shortdesc: "OVN SSL client key"
+:shortdesc: "OVN SSL client key (PEM private key)"
 :type: "string"
 
 ```
@@ -5808,21 +6125,21 @@ Specify the volume using the syntax `POOL/VOLUME`.
 
 ```{config:option} storage.linstor.ca_cert server-miscellaneous
 :scope: "global"
-:shortdesc: "LINSTOR SSL certificate authority"
+:shortdesc: "LINSTOR SSL certificate authorities (PEM bundle)"
 :type: "string"
 
 ```
 
 ```{config:option} storage.linstor.client_cert server-miscellaneous
 :scope: "global"
-:shortdesc: "LINSTOR SSL client certificate"
+:shortdesc: "LINSTOR SSL client certificate (PEM bundle)"
 :type: "string"
 
 ```
 
 ```{config:option} storage.linstor.client_key server-miscellaneous
 :scope: "global"
-:shortdesc: "LINSTOR SSL client key"
+:shortdesc: "LINSTOR SSL client key (PEM private key)"
 :type: "string"
 
 ```
@@ -6020,6 +6337,14 @@ Note that the claim must be contained in the access token.
 
 ```
 
+```{config:option} ceph.rbd.backend storage_ceph-common
+:default: "`krbd`"
+:scope: "global"
+:shortdesc: "Whether to use the RBD kernel driver (`krbd`) or `librbd` through `qemu-nbd` (`librbd`)"
+:type: "string"
+
+```
+
 ```{config:option} ceph.rbd.clone_copy storage_ceph-common
 :default: "`true`"
 :scope: "global"
@@ -6176,10 +6501,10 @@ Note that the claim must be contained in the access token.
 
 ```
 
-```{config:option} cephobject.radosgw.endpoint_cert_file storage_cephobject-common
+```{config:option} cephobject.radosgw.endpoint_cert storage_cephobject-common
 :default: "-"
 :scope: "global"
-:shortdesc: "Path to the file containing the TLS client certificate to use for endpoint communication"
+:shortdesc: "TLS certificate (PEM bundle) to trust for endpoint communication"
 :type: "string"
 
 ```

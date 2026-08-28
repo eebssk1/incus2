@@ -480,6 +480,27 @@ func createFromMigration(ctx context.Context, s *state.State, r *http.Request, p
 				if err != nil {
 					return err
 				}
+
+				// On a cluster move onto a differently named instance, as done by near-live
+				// migration, dependent volumes on shared storage aren't transferred, they're taken
+				// over from the source once its last transfer has landed. That's when their devices
+				// appear in the request. A same-name move needs none of this as the devices already
+				// belong to the very record being received into.
+				if clusterMoveSourceName != "" && clusterMoveSourceName != req.Name {
+					for devName, devConfig := range req.Devices {
+						if devConfig["type"] != "disk" || util.IsFalseOrEmpty(devConfig["dependent"]) || devConfig["path"] == "/" || devConfig["pool"] == "" {
+							continue
+						}
+
+						_, ok := devs[devName]
+						if ok {
+							continue
+						}
+
+						devs[devName] = devConfig
+						updateNeeded = true
+					}
+				}
 			}
 
 			if updateNeeded {
@@ -783,6 +804,10 @@ func createFromCopy(ctx context.Context, s *state.State, r *http.Request, projec
 }
 
 func createFromBackup(s *state.State, r *http.Request, projectName string, data io.Reader, pool string, instanceName string, config string, device string) response.Response {
+	if s.ServerClustered && s.DB.Cluster.LocalNodeIsEvacuated() {
+		return response.Forbidden(errors.New("Cluster member is evacuated"))
+	}
+
 	reverter := revert.New()
 	defer reverter.Fail()
 
@@ -913,8 +938,8 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 	// Override config.
 	configMap := map[string]string{}
 	if config != "" {
-		configOverride := strings.Split(config, " ")
-		for _, entry := range configOverride {
+		configOverride := strings.SplitSeq(config, " ")
+		for entry := range configOverride {
 			key, value, found := strings.Cut(entry, "=")
 			if !found {
 				return response.BadRequest(fmt.Errorf("Failed to parse config <key>=<value>: %q", entry))
@@ -927,8 +952,8 @@ func createFromBackup(s *state.State, r *http.Request, projectName string, data 
 	// Override device.
 	deviceMap := map[string]map[string]string{}
 	if device != "" {
-		deviceOverride := strings.Split(device, " ")
-		for _, entry := range deviceOverride {
+		deviceOverride := strings.SplitSeq(device, " ")
+		for entry := range deviceOverride {
 			if !strings.Contains(entry, "=") || !strings.Contains(entry, ",") {
 				return response.BadRequest(fmt.Errorf("Failed to parse device <device>,<key>=<value>: %q", entry))
 			}
@@ -1416,8 +1441,8 @@ func instancesPost(d *Daemon, r *http.Request) response.Response {
 				}
 			} else {
 				// Take over the root disk device from the profiles.
-				for i := len(profiles) - 1; i >= 0; i-- {
-					devName, dev, rootErr := internalInstance.GetRootDiskDevice(profiles[i].Devices)
+				for _, profile := range slices.Backward(profiles) {
+					devName, dev, rootErr := internalInstance.GetRootDiskDevice(profile.Devices)
 					if rootErr != nil {
 						continue
 					}

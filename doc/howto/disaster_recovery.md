@@ -18,6 +18,9 @@ The tool must be run interactively and cannot be used in automated scripts.
 When you run the tool, it scans all storage pools that still exist in the database, looking for missing volumes that can be recovered.
 You can also specify the details of any unknown storage pools (those that exist on disk but do not exist in the database), and the tool attempts to scan those too.
 
+On a clustered server, only shared storage pools (for example, `ceph` or `lvmcluster`) can be specified as unknown storage pools.
+It is up to you to ensure that the same shared storage is available to all cluster members.
+
 After mounting the specified storage pools (if not already mounted), the tool scans them for unknown volumes that look like they are associated with Incus.
 Incus maintains a `backup.yaml` file in each instance's storage volume, which contains all necessary information to recover a given instance (including instance configuration, attached devices, storage volume, and pool configuration).
 This data can be used to rebuild the instance, storage volume, and storage pool database records.
@@ -69,22 +72,22 @@ The following unknown volumes have been found:
 Would you like those to be recovered? (yes/no) [default=no]: yes
 Starting recovery...
 :input: incus list
-+------+---------+------+------+-----------+-----------+
-| NAME |  STATE  | IPV4 | IPV6 |   TYPE    | SNAPSHOTS |
-+------+---------+------+------+-----------+-----------+
-| u1   | STOPPED |      |      | CONTAINER | 0         |
-+------+---------+------+------+-----------+-----------+
-| u2   | STOPPED |      |      | CONTAINER | 0         |
-+------+---------+------+------+-----------+-----------+
+┌──────┬─────────┬──────┬──────┬───────────┬───────────┐
+│ NAME │  STATE  │ IPV4 │ IPV6 │   TYPE    │ SNAPSHOTS │
+├──────┼─────────┼──────┼──────┼───────────┼───────────┤
+│ u1   │ STOPPED │      │      │ CONTAINER │ 0         │
+├──────┼─────────┼──────┼──────┼───────────┼───────────┤
+│ u2   │ STOPPED │      │      │ CONTAINER │ 0         │
+└──────┴─────────┴──────┴──────┴───────────┴───────────┘
 :input: incus profile device add default eth0 nic network=incusbr0 name=eth0
 Device eth0 added to default
 :input: incus start u1
 :input: incus list
-+------+---------+-------------------+----------------------------------------------+-----------+-----------+
-| NAME |  STATE  |       IPV4        |                    IPV6                      |   TYPE    | SNAPSHOTS |
-+------+---------+-------------------+----------------------------------------------+-----------+-----------+
-| u1   | RUNNING | 192.0.2.49 (eth0) | 2001:db8:8b6:abfe:1266:6aff:fe82:918e (eth0) | CONTAINER | 0         |
-+------+---------+-------------------+----------------------------------------------+-----------+-----------+
-| u2   | STOPPED |                   |                                              | CONTAINER | 0         |
-+------+---------+-------------------+----------------------------------------------+-----------+-----------+
+┌──────┬─────────┬───────────────────┬──────────────────────────────────────────────┬───────────┬───────────┐
+│ NAME │  STATE  │       IPV4        │                     IPV6                     │   TYPE    │ SNAPSHOTS │
+├──────┼─────────┼───────────────────┼──────────────────────────────────────────────┼───────────┼───────────┤
+│ u1   │ RUNNING │ 192.0.2.49 (eth0) │ 2001:db8:8b6:abfe:1266:6aff:fe82:918e (eth0) │ CONTAINER │ 0         │
+├──────┼─────────┼───────────────────┼──────────────────────────────────────────────┼───────────┼───────────┤
+│ u2   │ STOPPED │                   │                                              │ CONTAINER │ 0         │
+└──────┴─────────┴───────────────────┴──────────────────────────────────────────────┴───────────┴───────────┘
 ```

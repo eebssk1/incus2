@@ -10,6 +10,7 @@ import (
 	"embed"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -40,7 +41,6 @@ import (
 	"go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sys/unix"
-	"google.golang.org/protobuf/proto"
 
 	incus "github.com/lxc/incus/v7/client"
 	internalInstance "github.com/lxc/incus/v7/internal/instance"
@@ -1023,13 +1023,14 @@ func (d *qemu) restoreStateHandle(ctx context.Context, monitor *qmp.Monitor, f *
 
 	err = monitor.MigrateIncoming(ctx, "migration")
 	if err != nil {
-		if errors.Is(err, qmp.ErrMonitorDisconnect) && util.PathExists(d.LogFilePath()) {
-			qemuError, err := os.ReadFile(d.LogFilePath())
-			if err != nil {
-				return err
+		if errors.Is(err, qmp.ErrMonitorDisconnect) {
+			// Crash output goes to stderr (early log), -D only captures QEMU's internal logging.
+			qemuError, readErr := os.ReadFile(d.EarlyLogFilePath())
+			if readErr != nil || len(strings.TrimSpace(string(qemuError))) == 0 {
+				qemuError, _ = os.ReadFile(d.LogFilePath())
 			}
 
-			return fmt.Errorf("QEMU crashed on VM restore: %s", string(qemuError))
+			return fmt.Errorf("QEMU crashed on VM restore: %s", strings.TrimSpace(string(qemuError)))
 		}
 
 		return err
@@ -1405,10 +1406,21 @@ func (d *qemu) runStartupScriptlet(monitor *qmp.Monitor, stage string) error {
 			return errors.New("Unexpected instance type")
 		}
 
-		err := scriptlet.QEMURun(logger.Log, instanceData, &d.cmdArgs, &d.conf, monitor, stage)
+		nvram, err := d.getNVRAM()
 		if err != nil {
-			err = fmt.Errorf("Failed running QEMU scriptlet at %s stage: %w", stage, err)
-			return err
+			return fmt.Errorf("Failed reading the NVRAM at %s stage: %w", stage, err)
+		}
+
+		err = scriptlet.QEMURun(logger.Log, instanceData, &d.cmdArgs, &d.conf, monitor, nvram, stage)
+		if err != nil {
+			return fmt.Errorf("Failed running QEMU scriptlet at %s stage: %w", stage, err)
+		}
+
+		if stage == "config" {
+			err = d.setNVRAM(nvram)
+			if err != nil {
+				return fmt.Errorf("Failed writing the NVRAM at %s stage: %w", stage, err)
+			}
 		}
 	}
 
@@ -1589,11 +1601,15 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 		volatileSet["volatile.uuid.generation"] = vmGenUUID
 	}
 
-	// Generate the config drive.
-	err = d.generateConfigShare(volatileSet)
-	if err != nil {
-		op.Done(err)
-		return err
+	// Generate the config drive. Skip this when starting as a live migration target as the
+	// running guest relies on the current content and the source may still hold its own
+	// mount of a shared config volume.
+	if d.migrationReceiveStateful == nil {
+		err = d.generateConfigShare(volatileSet)
+		if err != nil {
+			op.Done(err)
+			return err
+		}
 	}
 
 	// Create all needed paths.
@@ -2613,6 +2629,14 @@ func (d *qemu) setupNvram() error {
 		return err
 	}
 
+	// Get the configured NVRAM defaults.
+	nvramDefaults := map[string]string{}
+	for k, v := range d.expandedConfig {
+		if strings.HasPrefix(k, "initial.nvram.") || strings.HasPrefix(k, "initial.nvram-binary.") || strings.HasPrefix(k, "initial.secureboot.") {
+			nvramDefaults[k] = v
+		}
+	}
+
 	// Unified firmware images (e.g. AMD SEV) carry their own variable store and need no NVRAM.
 	needsNvram := false
 	for _, firmware := range firmwares {
@@ -2623,6 +2647,10 @@ func (d *qemu) setupNvram() error {
 	}
 
 	if !needsNvram {
+		if len(nvramDefaults) > 0 {
+			return errors.New("The selected firmware doesn’t include a NVRAM but NVRAM modifications are required")
+		}
+
 		return nil
 	}
 
@@ -2658,18 +2686,132 @@ func (d *qemu) setupNvram() error {
 
 	nvramPath := d.nvramPath()
 
-	// Handle the case where the firmware vars filename matches our internal one.
-	if efiVarsName == filepath.Base(nvramPath) {
-		return nil
+	if efiVarsName != filepath.Base(nvramPath) {
+		// Generate a symlink.
+		// This is so qemu.nvram can always be assumed to be the EDK2 vars file.
+		// The real file name is then used to determine what firmware must be selected.
+		_ = os.Remove(nvramPath)
+		err = os.Symlink(efiVarsName, nvramPath)
+		if err != nil {
+			return err
+		}
 	}
 
-	// Generate a symlink.
-	// This is so qemu.nvram can always be assumed to be the EDK2 vars file.
-	// The real file name is then used to determine what firmware must be selected.
-	_ = os.Remove(nvramPath)
-	err = os.Symlink(efiVarsName, nvramPath)
-	if err != nil {
-		return err
+	// Initialize the configured NVRAM defaults.
+	if len(nvramDefaults) > 0 {
+		nvram, err := d.getNVRAM()
+		if err != nil {
+			return err
+		}
+
+		for k, raw := range nvramDefaults {
+			var v api.InstanceNVRAMVariable
+			parts := strings.SplitN(k, ".", 4)
+			var guid, varName string
+			if strings.HasPrefix(k, "initial.nvram.") {
+				if len(parts) != 4 {
+					return fmt.Errorf("Unknown key %q", k)
+				}
+
+				guid = parts[2]
+				varName = parts[3]
+				var vPut api.InstanceNVRAMVariablePut
+				err = json.Unmarshal([]byte(raw), &vPut)
+				if err != nil {
+					return err
+				}
+
+				v.InstanceNVRAMVariablePut = vPut
+			} else if strings.HasPrefix(k, "initial.nvram-binary.") {
+				if len(parts) != 4 {
+					return fmt.Errorf("Unknown key %q", k)
+				}
+
+				guid = parts[2]
+				varName = parts[3]
+				varParts := strings.SplitN(raw, ":", 2)
+				if len(varParts) == 1 {
+					v.Attributes = []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS", "RUNTIME_ACCESS"}
+				} else {
+					attributes, err := strconv.ParseUint(varParts[0], 0, 32)
+					if err != nil {
+						return fmt.Errorf("Invalid attribute value for %q: %q", k, varParts[0])
+					}
+
+					v.Attributes = uefi.ParseAttributes(uint32(attributes))
+				}
+
+				value := varParts[len(varParts)-1]
+				v.Binary, err = base64.RawStdEncoding.DecodeString(strings.TrimRight(value, "="))
+				if err != nil {
+					return fmt.Errorf("Invalid base64 value for %q: %q", k, value)
+				}
+			} else if strings.HasPrefix(k, "initial.secureboot.") {
+				guid, varName = util.ESLGUIDVar(parts[2])
+				var esl uefi.ESL
+				if varName == "MokList" {
+					v.Attributes = []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS"}
+				} else {
+					now := time.Now().UTC()
+					v.Attributes = []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS", "RUNTIME_ACCESS", "TIME_BASED_AUTHENTICATED_WRITE_ACCESS"}
+					v.Timestamp = &now
+				}
+
+				rest := []byte(raw)
+				ok := false
+				var block *pem.Block
+				for {
+					block, rest = pem.Decode(rest)
+					if block == nil {
+						break
+					}
+
+					switch block.Type {
+					case "CERTIFICATE":
+						cert, err := x509.ParseCertificate(block.Bytes)
+						if err != nil {
+							return fmt.Errorf("Invalid PEM certificate in %q: %w", k, err)
+						}
+
+						esl = append(esl, uefi.ESLNode{Entries: []uefi.ESLEntry{{Owner: uefi.IncusVendorGuid, Data: cert.Raw}}, Type: "x509"})
+					case "SIGNATURE":
+						eslNode := uefi.ESLNode{Entries: []uefi.ESLEntry{{Owner: uefi.IncusVendorGuid, Data: block.Bytes}}}
+						switch len(block.Bytes) {
+						case 32:
+							eslNode.Type = "sha256"
+						case 48:
+							eslNode.Type = "sha384"
+						case 64:
+							eslNode.Type = "sha512"
+						default:
+							return fmt.Errorf("Unexpected signature length %d in %q", len(block.Bytes), k)
+						}
+
+						esl = append(esl, eslNode)
+					default:
+						return fmt.Errorf("Unknown armor %s in %q", block.Type, k)
+					}
+
+					ok = true
+				}
+
+				if !ok {
+					return fmt.Errorf("Invalid PEM data in %q", k)
+				}
+
+				v.Data = esl
+			}
+
+			err = nvram.Set(guid, varName, v)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = d.setNVRAM(nvram)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -5059,6 +5201,24 @@ func (d *qemu) addDriveDirConfigVirtiofs(qemuDev map[string]any, agentMounts *[]
 	return monHook, nil
 }
 
+// qemuBlockThrottle converts device I/O limits into their QMP equivalent.
+func qemuBlockThrottle(limits *deviceConfig.DiskLimits) qmp.BlockThrottle {
+	return qmp.BlockThrottle{
+		BytesRead:  int(limits.ReadBytes),
+		BytesWrite: int(limits.WriteBytes),
+		IOPsRead:   int(limits.ReadIOps),
+		IOPsWrite:  int(limits.WriteIOps),
+
+		BytesReadBurst:  int(limits.ReadBytesBurst),
+		IOPsReadBurst:   int(limits.ReadIOpsBurst),
+		ReadBurstLength: int(limits.ReadBurstLength),
+
+		BytesWriteBurst:  int(limits.WriteBytesBurst),
+		IOPsWriteBurst:   int(limits.WriteIOpsBurst),
+		WriteBurstLength: int(limits.WriteBurstLength),
+	}
+}
+
 // addDriveConfig adds the qemu config required for adding a supplementary drive.
 func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int, driveConf deviceConfig.MountEntryItem) (monitorHook, error) {
 	aioMode := "native" // Use native kernel async IO and O_DIRECT by default.
@@ -5452,7 +5612,7 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 		}
 
 		if driveConf.Limits != nil {
-			err = m.SetBlockThrottle(qemuDev["id"].(string), int(driveConf.Limits.ReadBytes), int(driveConf.Limits.WriteBytes), int(driveConf.Limits.ReadIOps), int(driveConf.Limits.WriteIOps))
+			err = m.SetBlockThrottle(qemuDev["id"].(string), qemuBlockThrottle(driveConf.Limits))
 			if err != nil {
 				return fmt.Errorf("Failed applying limits for disk device %q: %w", driveConf.DevName, err)
 			}
@@ -7037,6 +7197,8 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 			"cloud-init.",
 			"environment.",
 			"image.",
+			"initial.nvram.",
+			"initial.secureboot.",
 			"snapshots.",
 			"user.",
 			"volatile.",
@@ -7714,7 +7876,7 @@ func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 	} else if pool != nil {
 		if d.IsSnapshot() {
 			// Remove snapshot volume and database record.
-			err = pool.DeleteInstanceSnapshot(d, nil)
+			err = pool.DeleteInstanceSnapshot(d, cleanupDependencies, nil)
 			if err != nil {
 				return err
 			}
@@ -8141,7 +8303,9 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.ClusterMoveSourceName != "")
+	// On a cluster move the dependent volumes on shared storage are taken over by the target
+	// rather than transferred, so they're kept out of the offer.
+	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.SkipDependentVolumes, clusterMove)
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 		op.Done(err)
@@ -8180,6 +8344,18 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 	// fulfil the "live" part of the request, albeit with longer pause of the instance during the process.
 	if args.Live {
 		offerHeader.Criu = migration.CRIUType_VM_QEMU.Enum()
+	}
+
+	// When moving between cluster members on shared storage, the target will mount the
+	// config volume while we still have it mounted. Sync it first so the target doesn't
+	// find a dirty journal.
+	if args.Live && remoteClusterMove && !storageMove {
+		err = linux.SyncFS(d.Path())
+		if err != nil {
+			err := fmt.Errorf("Failed syncing config volume: %w", err)
+			op.Done(err)
+			return err
+		}
 	}
 
 	// Send offer to target.
@@ -8265,6 +8441,9 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 
 	g, ctx := errgroup.WithContext(context.Background())
 
+	// Tracks whether a live cluster move completed the state hand-over to the target.
+	committed := false
+
 	// Start control connection monitor.
 	g.Go(func() error {
 		d.logger.Debug("Migrate send control monitor started")
@@ -8327,7 +8506,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 				defer instanceRefClear(d)
 			}
 
-			err = d.migrateSendLive(ctx, pool, args.ClusterMoveSourceName, args.StoragePool, blockSize, filesystemConn, stateConn, volSourceArgs)
+			err = d.migrateSendLive(ctx, pool, args.ClusterMoveSourceName, args.StoragePool, blockSize, filesystemConn, stateConn, volSourceArgs, &committed)
 			if err != nil {
 				return err
 			}
@@ -8353,8 +8532,13 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 	{
 		err := g.Wait()
 		if err != nil {
-			op.Done(err)
-			return err
+			if !committed {
+				op.Done(err)
+				return err
+			}
+
+			// Post hand-over errors can't undo the migration, rely on the target's own result instead.
+			d.logger.Warn("Ignoring migration error received after hand-over", logger.Ctx{"err": err})
 		}
 
 		op.Done(nil)
@@ -8670,7 +8854,7 @@ func (d *qemu) sendMigrationSnapshot(diskName string, filesystemConn io.ReadWrit
 }
 
 // migrateSendLive performs live migration send process.
-func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clusterMoveSourceName string, storagePool string, rootDiskSize int64, filesystemConn io.ReadWriteCloser, stateConn io.ReadWriteCloser, volSourceArgs *localMigration.VolumeSourceArgs) error {
+func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clusterMoveSourceName string, storagePool string, rootDiskSize int64, filesystemConn io.ReadWriteCloser, stateConn io.ReadWriteCloser, volSourceArgs *localMigration.VolumeSourceArgs, committed *bool) error {
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return err
@@ -8692,6 +8876,7 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 	dependentVolumeMove := clusterMoveSourceName != "" && disksToMigrate
 
 	reverter := revert.New()
+	defer reverter.Fail()
 
 	// Non-shared storage snapshot setup.
 	if !sameSharedStorage || dependentVolumeMove {
@@ -8705,6 +8890,10 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 			// migration and blockdev-mirror. This requires that the migration be continued after it
 			// has reached the "pre-switchover" status.
 			"pause-before-switchover": true,
+
+			// Emit MIGRATION events on status changes so we notice pre-switchover
+			// immediately rather than on the next poll.
+			"events": true,
 		}
 
 		err = monitor.MigrateSetCapabilities(capabilities)
@@ -8750,6 +8939,15 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		capabilities := map[string]bool{
 			// Automatically throttle down the guest to speed up convergence of RAM migration.
 			"auto-converge": true,
+
+			// Pause the migration before the device state serialization so the source can
+			// flush its pending config volume writes to disk before the target reads or
+			// overwrites them through its own mount of the shared volume.
+			"pause-before-switchover": true,
+
+			// Emit MIGRATION events on status changes so we notice pre-switchover
+			// immediately rather than on the next poll.
+			"events": true,
 		}
 
 		err = monitor.MigrateSetCapabilities(capabilities)
@@ -8847,6 +9045,12 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		return fmt.Errorf("Failed starting state transfer to target: %w", err)
 	}
 
+	// On failure, cancel the migration and resume the guest.
+	reverter.Add(func() {
+		_ = monitor.MigrateCancel()
+		_ = monitor.Start()
+	})
+
 	// Start monitoring the migration progress.
 	chMonitor := make(chan bool, 1)
 
@@ -8886,16 +9090,16 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		}()
 	}
 
+	// Wait until state transfer has reached pre-switchover state (the guest OS will remain paused).
+	err = monitor.MigrateWait(ctx, "pre-switchover")
+	if err != nil {
+		return fmt.Errorf("Failed waiting for state transfer to reach pre-switchover stage: %w", err)
+	}
+
+	d.logger.Debug("Stateful migration checkpoint reached pre-switchover phase")
+
 	// Non-shared storage snapshot transfer finalization.
 	if !sameSharedStorage || dependentVolumeMove {
-		// Wait until state transfer has reached pre-switchover state (the guest OS will remain paused).
-		err = monitor.MigrateWait(ctx, "pre-switchover")
-		if err != nil {
-			return fmt.Errorf("Failed waiting for state transfer to reach pre-switchover stage: %w", err)
-		}
-
-		d.logger.Debug("Stateful migration checkpoint reached pre-switchover phase")
-
 		if finalizeRootTransfer != nil {
 			err = finalizeRootTransfer()
 			if err != nil {
@@ -8911,15 +9115,25 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				return fmt.Errorf("Failed transferring snapshot disk: %w", err)
 			}
 		}
-
-		// Finalise the migration state transfer (the guest OS will remain paused).
-		err = monitor.MigrateContinue("pre-switchover")
-		if err != nil {
-			return fmt.Errorf("Failed continuing state transfer: %w", err)
-		}
-
-		d.logger.Debug("Stateful migration checkpoint send continuing")
 	}
+
+	// With the guest paused, flush any pending config volume writes (TPM state, UEFI
+	// variables) so they reach the shared volume before the target writes to it during
+	// the switchover.
+	if sameSharedStorage {
+		err = linux.SyncFS(d.Path())
+		if err != nil {
+			return fmt.Errorf("Failed syncing config volume: %w", err)
+		}
+	}
+
+	// Finalize the migration state transfer (the guest OS will remain paused).
+	err = monitor.MigrateContinue("pre-switchover")
+	if err != nil {
+		return fmt.Errorf("Failed continuing state transfer: %w", err)
+	}
+
+	d.logger.Debug("Stateful migration checkpoint send continuing")
 
 	// Wait until the migration state transfer has completed (the guest OS will remain paused).
 	err = monitor.MigrateWait(ctx, "completed")
@@ -8931,12 +9145,24 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 
 	d.logger.Debug("Stateful migration checkpoint send finished")
 
+	// The state hand-over is complete, past this point the migration can no longer be reverted.
+	if clusterMoveSourceName != "" {
+		*committed = true
+	}
+
+	reverter.Success()
+
 	if clusterMoveSourceName != "" {
 		// If doing an intra-cluster member move then we will be deleting the instance on the source,
 		// so lets just stop it after migration is completed.
 		err = d.Stop(false)
 		if err != nil {
-			return fmt.Errorf("Failed stopping instance: %w", err)
+			d.logger.Warn("Failed stopping instance after hand-over, forcing stop", logger.Ctx{"err": err})
+
+			err = d.forceStop()
+			if err != nil {
+				return fmt.Errorf("Failed stopping instance: %w", err)
+			}
 		}
 	} else {
 		// Resume guest.
@@ -8947,8 +9173,6 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 
 		d.logger.Debug("Resumed instance")
 	}
-
-	reverter.Success()
 
 	return nil
 }
@@ -9356,7 +9580,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 				for k := range snapshots {
 					// Delete the snapshots in reverse order.
 					k = snapshotCount - 1 - k
-					_ = pool.DeleteInstanceSnapshot(snapshots[k], nil)
+					_ = pool.DeleteInstanceSnapshot(snapshots[k], true, nil)
 				}
 
 				_ = pool.DeleteInstance(d, nil)
@@ -9417,11 +9641,11 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 			// Send failure response to source.
 			msg := migration.MigrationControl{
-				Success: proto.Bool(err == nil),
+				Success: new(err == nil),
 			}
 
 			if err != nil {
-				msg.Message = proto.String(err.Error())
+				msg.Message = new(err.Error())
 			}
 
 			d.logger.Debug("Sending migration failure response to source", logger.Ctx{"err": err})
@@ -9435,7 +9659,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 		// Send success response to source to control as nothing has gone wrong so far.
 		msg := migration.MigrationControl{
-			Success: proto.Bool(true),
+			Success: new(true),
 		}
 
 		d.logger.Debug("Sending migration success response to source", logger.Ctx{"success": msg.GetSuccess()})
@@ -10213,7 +10437,7 @@ func (d *qemu) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 
 		if mount.Limits != nil {
 			// Apply the limits.
-			err = m.SetBlockThrottle(devID, int(mount.Limits.ReadBytes), int(mount.Limits.WriteBytes), int(mount.Limits.ReadIOps), int(mount.Limits.WriteIOps))
+			err = m.SetBlockThrottle(devID, qemuBlockThrottle(mount.Limits))
 			if err != nil {
 				return fmt.Errorf("Failed applying limits for disk device %q: %w", mount.DevName, err)
 			}
@@ -11528,6 +11752,11 @@ func (d *qemu) CanLiveMigrate() bool {
 	return true
 }
 
+// IsLiveMigration returns whether the instance is starting as the target of a live migration.
+func (d *qemu) IsLiveMigration() bool {
+	return d.migrationReceiveStateful != nil
+}
+
 // GuestOS returns the guest OS. In this driver, we consider anything unknown to be Linux.
 func (d *qemu) GuestOS() osinfo.OSType {
 	osType, _ := osinfo.DetermineOS(strings.ToLower(d.expandedConfig["image.os"]))
@@ -12440,6 +12669,17 @@ func buildDataFileInfo(nodeName string, m *qmp.Monitor, driveConf deviceConfig.M
 	return dataDev, nil
 }
 
+// getNVRAM gets the NVRAM assuming the config volume is mounted and the NVRAM already has been
+// initialized.
+func (d *qemu) getNVRAM() (*uefi.Store, error) {
+	nvRAM, err := os.ReadFile(d.nvramPath())
+	if err != nil {
+		return nil, fmt.Errorf("Failed opening NVRAM file: %w", err)
+	}
+
+	return uefi.ParseNVRAM(nvRAM)
+}
+
 // GetNVRAM gets the NVRAM.
 func (d *qemu) GetNVRAM() (*uefi.Store, error) {
 	if !d.IsRunning() {
@@ -12461,16 +12701,35 @@ func (d *qemu) GetNVRAM() (*uefi.Store, error) {
 		}
 	}
 
-	nvRAM, err := os.ReadFile(d.nvramPath())
-	if err != nil {
-		return nil, fmt.Errorf("Failed opening NVRAM file: %w", err)
+	return d.getNVRAM()
+}
+
+// setNVRAM sets the NVRAM assuming the config volume is mounted.
+func (d *qemu) setNVRAM(store *uefi.Store) error {
+	if !store.Modified() {
+		return nil
 	}
 
-	return uefi.ParseNVRAM(nvRAM)
+	f, err := os.Create(d.nvramPath())
+	if err != nil {
+		return fmt.Errorf("Failed opening NVRAM file: %w", err)
+	}
+
+	b, err := store.Bytes()
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(b)
+	return err
 }
 
 // SetNVRAM sets the NVRAM.
 func (d *qemu) SetNVRAM(store *uefi.Store) error {
+	if !store.Modified() {
+		return nil
+	}
+
 	// Mount the instance's config volume.
 	_, err := d.mount()
 	if err != nil {
@@ -12488,18 +12747,7 @@ func (d *qemu) SetNVRAM(store *uefi.Store) error {
 		}
 	}
 
-	f, err := os.Create(d.nvramPath())
-	if err != nil {
-		return fmt.Errorf("Failed opening NVRAM file: %w", err)
-	}
-
-	b, err := store.Bytes()
-	if err != nil {
-		return err
-	}
-
-	_, err = f.Write(b)
-	return err
+	return d.setNVRAM(store)
 }
 
 // ResetNVRAM resets the NVRAM.

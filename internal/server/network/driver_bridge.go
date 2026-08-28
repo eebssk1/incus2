@@ -482,6 +482,15 @@ func (n *bridge) Validate(config map[string]string, clientType request.ClientTyp
 		//  shortdesc: Comma-separated list of IPv6 ranges to use for DHCP (FIRST-LAST format)
 		"ipv6.dhcp.ranges": validate.Optional(validate.IsListOf(validate.IsNetworkRangeV6)),
 
+		// gendoc:generate(entity=network_bridge, group=common, key=ipv6.ra)
+		//
+		// ---
+		//  type: bool
+		//  condition: IPv6 address
+		//  default: `true`
+		//  shortdesc: Whether to send IPv6 router advertisements
+		"ipv6.ra": validate.Optional(validate.IsBool),
+
 		// gendoc:generate(entity=network_bridge, group=common, key=ipv6.routes)
 		//
 		// ---
@@ -927,7 +936,7 @@ func (n *bridge) Delete(clientType request.ClientType) error {
 
 	// Clean up extended external interfaces.
 	if n.config["bridge.external_interfaces"] != "" {
-		for _, entry := range strings.Split(n.config["bridge.external_interfaces"], ",") {
+		for entry := range strings.SplitSeq(n.config["bridge.external_interfaces"], ",") {
 			entry = strings.TrimSpace(entry)
 			entryParts := strings.Split(entry, "/")
 
@@ -1238,7 +1247,7 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 
 	// Add any listed existing external interface.
 	if n.config["bridge.external_interfaces"] != "" {
-		for _, entry := range strings.Split(n.config["bridge.external_interfaces"], ",") {
+		for entry := range strings.SplitSeq(n.config["bridge.external_interfaces"], ",") {
 			entry = strings.TrimSpace(entry)
 
 			// Test for extended configuration of external interface.
@@ -1499,7 +1508,7 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 			}
 
 			if n.config["ipv4.dhcp.ranges"] != "" {
-				for _, dhcpRange := range strings.Split(n.config["ipv4.dhcp.ranges"], ",") {
+				for dhcpRange := range strings.SplitSeq(n.config["ipv4.dhcp.ranges"], ",") {
 					dhcpRange = strings.TrimSpace(dhcpRange)
 					dnsmasqCmd = append(dnsmasqCmd, []string{"--dhcp-range", fmt.Sprintf("%s,%s", strings.ReplaceAll(dhcpRange, "-", ","), expiry)}...)
 				}
@@ -1545,7 +1554,7 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 
 		// Add additional routes.
 		if n.config["ipv4.routes"] != "" {
-			for _, route := range strings.Split(n.config["ipv4.routes"], ",") {
+			for route := range strings.SplitSeq(n.config["ipv4.routes"], ",") {
 				route, err := ip.ParseIPNet(strings.TrimSpace(route))
 				if err != nil {
 					return err
@@ -1644,7 +1653,11 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 		}
 
 		// Update the dnsmasq config.
-		dnsmasqCmd = append(dnsmasqCmd, []string{fmt.Sprintf("--listen-address=%s", ipAddress.String()), "--enable-ra"}...)
+		dnsmasqCmd = append(dnsmasqCmd, fmt.Sprintf("--listen-address=%s", ipAddress.String()))
+		if util.IsTrueOrEmpty(n.config["ipv6.ra"]) {
+			dnsmasqCmd = append(dnsmasqCmd, "--enable-ra")
+		}
+
 		if n.DHCPv6Subnet() != nil {
 			if n.hasIPv6Firewall() {
 				fwOpts.FeaturesV6.ICMPDHCPDNSAccess = true
@@ -1662,17 +1675,17 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 
 			if util.IsTrue(n.config["ipv6.dhcp.stateful"]) {
 				if n.config["ipv6.dhcp.ranges"] != "" {
-					for _, dhcpRange := range strings.Split(n.config["ipv6.dhcp.ranges"], ",") {
+					for dhcpRange := range strings.SplitSeq(n.config["ipv6.dhcp.ranges"], ",") {
 						dhcpRange = strings.TrimSpace(dhcpRange)
 						dnsmasqCmd = append(dnsmasqCmd, []string{"--dhcp-range", fmt.Sprintf("%s,%d,%s", strings.ReplaceAll(dhcpRange, "-", ","), subnetSize, expiry)}...)
 					}
 				} else {
 					dnsmasqCmd = append(dnsmasqCmd, []string{"--dhcp-range", fmt.Sprintf("%s,%s,%d,%s", dhcpalloc.GetIP(subnet, 2), dhcpalloc.GetIP(subnet, -1), subnetSize, expiry)}...)
 				}
-			} else {
+			} else if util.IsTrueOrEmpty(n.config["ipv6.ra"]) {
 				dnsmasqCmd = append(dnsmasqCmd, []string{"--dhcp-range", fmt.Sprintf("::,constructor:%s,ra-stateless,ra-names", n.name)}...)
 			}
-		} else {
+		} else if util.IsTrueOrEmpty(n.config["ipv6.ra"]) {
 			dnsmasqCmd = append(dnsmasqCmd, []string{"--dhcp-range", fmt.Sprintf("::,constructor:%s,ra-only", n.name)}...)
 		}
 
@@ -1771,7 +1784,7 @@ func (n *bridge) setup(oldConfig map[string]string) error {
 
 		// Add additional routes.
 		if n.config["ipv6.routes"] != "" {
-			for _, route := range strings.Split(n.config["ipv6.routes"], ",") {
+			for route := range strings.SplitSeq(n.config["ipv6.routes"], ",") {
 				route, err := ip.ParseIPNet(route)
 				if err != nil {
 					return err
@@ -2261,12 +2274,12 @@ func (n *bridge) Update(newNetwork api.NetworkPut, targetNode string, clientType
 		// Detach any external interfaces should no longer be attached.
 		if slices.Contains(changedKeys, "bridge.external_interfaces") && n.isRunning() {
 			devices := []string{}
-			for _, dev := range strings.Split(newNetwork.Config["bridge.external_interfaces"], ",") {
+			for dev := range strings.SplitSeq(newNetwork.Config["bridge.external_interfaces"], ",") {
 				dev = strings.TrimSpace(dev)
 				devices = append(devices, dev)
 			}
 
-			for _, dev := range strings.Split(oldNetwork.Config["bridge.external_interfaces"], ",") {
+			for dev := range strings.SplitSeq(oldNetwork.Config["bridge.external_interfaces"], ",") {
 				dev = strings.TrimSpace(dev)
 				if dev == "" {
 					continue
@@ -2586,10 +2599,6 @@ func (n *bridge) bridgedNICExternalRoutes(bridgeProjectNetworks map[string][]*ap
 			// Get the instance's effective network project name.
 			instNetworkProject := project.NetworkProjectFromRecord(&p)
 
-			if instNetworkProject != api.ProjectDefaultName {
-				return nil // Managed bridge networks can only exist in default project.
-			}
-
 			devices := db.ExpandInstanceDevices(inst.Devices, inst.Profiles)
 
 			// Iterate through each of the instance's devices, looking for bridged NICs that are linked to
@@ -2599,8 +2608,19 @@ func (n *bridge) bridgedNICExternalRoutes(bridgeProjectNetworks map[string][]*ap
 					continue
 				}
 
+				// Get the effective network project of the NIC (accounts for shared networks).
+				devNetworkProject := instNetworkProject
+				if devConfig["network"] != "" {
+					devNetworkProject = project.NetworkProjectForNameFromRecord(&p, devConfig["network"])
+				}
+
+				// Managed bridge networks can only exist in the default project.
+				if devNetworkProject != api.ProjectDefaultName {
+					continue
+				}
+
 				// Check whether the NIC device references one of the networks supplied.
-				if !NICUsesNetwork(devConfig, bridgeProjectNetworks[instNetworkProject]...) {
+				if !NICUsesNetwork(devConfig, bridgeProjectNetworks[devNetworkProject]...) {
 					continue
 				}
 
@@ -2616,7 +2636,7 @@ func (n *bridge) bridgedNICExternalRoutes(bridgeProjectNetworks map[string][]*ap
 
 						externalRoutes = append(externalRoutes, externalSubnetUsage{
 							subnet:          *ipNet,
-							networkProject:  instNetworkProject,
+							networkProject:  devNetworkProject,
 							networkName:     devConfig["network"],
 							instanceProject: inst.Project,
 							instanceName:    inst.Name,
@@ -2953,8 +2973,8 @@ func (n *bridge) ForwardCreate(forward api.NetworkForwardsPost, clientType reque
 
 				err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
 					return tx.InstanceList(ctx, func(inst db.InstanceArgs, p api.Project) error {
-						// Get the instance's effective network project name.
-						instNetworkProject := project.NetworkProjectFromRecord(&p)
+						// Get the effective network project name for this network name.
+						instNetworkProject := project.NetworkProjectForNameFromRecord(&p, n.Name())
 
 						if instNetworkProject != api.ProjectDefaultName {
 							return nil // Managed bridge networks can only exist in default project.
@@ -3469,7 +3489,7 @@ func (n *bridge) Leases(projectName string, clientType request.ClientType) ([]ap
 		return nil, err
 	}
 
-	for _, lease := range strings.Split(string(content), "\n") {
+	for lease := range strings.SplitSeq(string(content), "\n") {
 		fields := strings.Fields(lease)
 		if len(fields) >= 5 {
 			// Parse the MAC.
@@ -3589,7 +3609,7 @@ func (n *bridge) deleteChildren() error {
 
 	var externalInterfaces []string
 	if n.config["bridge.external_interfaces"] != "" {
-		for _, entry := range strings.Split(n.config["bridge.external_interfaces"], ",") {
+		for entry := range strings.SplitSeq(n.config["bridge.external_interfaces"], ",") {
 			entry = strings.Split(strings.TrimSpace(entry), "/")[0]
 			externalInterfaces = append(externalInterfaces, entry)
 		}
