@@ -2113,6 +2113,8 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 		if err != nil {
 			return "", nil, err
 		}
+
+		reverter.Add(d.numaReservationClear)
 	}
 
 	// Check if idmap needs changing.
@@ -3483,7 +3485,17 @@ func (d *lxc) Stop(stateful bool) error {
 	err = cc.Stop()
 	if err != nil {
 		// Only fail while the container is still running, it may have finished stopping on its own.
-		if d.IsRunning() {
+		if cc.Running() {
+			op.Done(err)
+			return err
+		}
+
+		// Give onStop some time to complete the operation, it may never run if the daemon is shutting down.
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		waitErr := op.Wait(ctx)
+		if waitErr != nil {
 			op.Done(err)
 			return err
 		}
@@ -3594,7 +3606,7 @@ func (d *lxc) Shutdown(timeout time.Duration) error {
 	// Request shutdown, but don't wait for container to stop. If call fails then cancel operation with error,
 	// otherwise expect the onStop() hook to cancel operation when done (when the container has stopped).
 	err = cc.Shutdown(0)
-	if err != nil {
+	if err != nil && cc.Running() {
 		op.Done(err)
 	}
 
@@ -3735,6 +3747,8 @@ func (d *lxc) onStop(args map[string]string) error {
 		// Don't return an error here as we still want to cleanup the instance even if DB not available.
 		d.logger.Error("Failed recording last power state", logger.Ctx{"err": err})
 	}
+
+	d.numaReservationClear()
 
 	go func(d *lxc, target string, op *operationlock.InstanceOperation) {
 		d.fromHook = false
