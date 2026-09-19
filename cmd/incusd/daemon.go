@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -139,6 +140,9 @@ type Daemon struct {
 	shutdownCancel context.CancelFunc // Cancels the shutdownCtx to indicate shutdown starting.
 	shutdownDoneCh chan error         // Receives the result of the d.Stop() function and tells the daemon to end.
 
+	shutdownForceCtx    context.Context    // Cancelled when the shutdown should stop waiting on operations and instances.
+	shutdownForceCancel context.CancelFunc // Cancels the shutdownForceCtx to force the shutdown.
+
 	// Device monitor for watching filesystem events
 	devmonitor fsmonitor.FSMonitor
 
@@ -193,6 +197,7 @@ func newDaemon(config *DaemonConfig, osInfo *sys.OS) *Daemon {
 	incusEvents := events.NewServer(daemon.Debug, daemon.Verbose, cluster.EventHubPush)
 	devIncusEvents := events.NewDevIncusServer(daemon.Debug, daemon.Verbose)
 	shutdownCtx, shutdownCancel := context.WithCancel(context.Background())
+	shutdownForceCtx, shutdownForceCancel := context.WithCancel(context.Background())
 
 	d := &Daemon{
 		clientCerts:    &certificate.Cache{},
@@ -206,7 +211,10 @@ func newDaemon(config *DaemonConfig, osInfo *sys.OS) *Daemon {
 		shutdownCtx:    shutdownCtx,
 		shutdownCancel: shutdownCancel,
 		shutdownDoneCh: make(chan error),
-		apiExtensions:  len(version.APIExtensions),
+
+		shutdownForceCtx:    shutdownForceCtx,
+		shutdownForceCancel: shutdownForceCancel,
+		apiExtensions:       len(version.APIExtensions),
 	}
 
 	d.serverCert = func() *localtls.CertInfo { return d.serverCertInt }
@@ -492,7 +500,7 @@ func allowPermission(objectType auth.ObjectType, entitlement auth.Entitlement, m
 
 // Convenience function around Authenticate.
 func (d *Daemon) checkTrustedClient(r *http.Request) error {
-	trusted, _, _, err := d.Authenticate(nil, r)
+	trusted, _, _, _, err := d.Authenticate(nil, r)
 	if !trusted || err != nil {
 		if err != nil {
 			return err
@@ -548,10 +556,10 @@ func (d *Daemon) getTrustedCertificates() (map[certificate.Type]map[string]x509.
 // This does not perform authorization, only validates authentication.
 // Returns whether trusted or not, the username (or certificate fingerprint) of the trusted client, and the type of
 // client that has been authenticated (cluster, unix, or tls).
-func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, string, string, error) {
+func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, string, string, map[string]any, error) {
 	trustedCerts, err := d.getTrustedCertificates()
 	if err != nil {
-		return false, "", "", err
+		return false, "", "", nil, err
 	}
 
 	// Allow internal cluster traffic by checking against the trusted certfificates.
@@ -559,7 +567,7 @@ func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, str
 		for _, i := range r.TLS.PeerCertificates {
 			trusted, fingerprint := localUtil.CheckTrustState(*i, trustedCerts[certificate.TypeServer], d.endpoints.NetworkCert(), false)
 			if trusted {
-				return true, fingerprint, "cluster", nil
+				return true, fingerprint, "cluster", nil, nil
 			}
 		}
 	}
@@ -569,38 +577,38 @@ func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, str
 		if w != nil {
 			cred, err := ucred.GetCredFromContext(r.Context())
 			if err != nil {
-				return false, "", "", err
+				return false, "", "", nil, err
 			}
 
 			u, err := user.LookupId(fmt.Sprintf("%d", cred.Uid))
 			if err != nil {
-				return true, fmt.Sprintf("uid=%d", cred.Uid), "unix", nil
+				return true, fmt.Sprintf("uid=%d", cred.Uid), "unix", nil, nil
 			}
 
-			return true, u.Username, "unix", nil
+			return true, u.Username, "unix", nil, nil
 		}
 
-		return true, "", "unix", nil
+		return true, "", "unix", nil, nil
 	}
 
 	// DevIncus unix socket credentials on main API.
 	if r.RemoteAddr == "@dev_incus" {
-		return false, "", "", errors.New("Main API query can't come from /dev/incus socket")
+		return false, "", "", nil, errors.New("Main API query can't come from /dev/incus socket")
 	}
 
 	// Cluster notification with wrong certificate.
 	if isClusterNotification(r) {
-		return false, "", "", errors.New("Cluster notification isn't using trusted server certificate")
+		return false, "", "", nil, errors.New("Cluster notification isn't using trusted server certificate")
 	}
 
 	// Cluster internal client with wrong certificate.
 	if isClusterInternal(r) {
-		return false, "", "", errors.New("Cluster internal client isn't using trusted server certificate")
+		return false, "", "", nil, errors.New("Cluster internal client isn't using trusted server certificate")
 	}
 
 	// Bad query, no TLS found.
 	if r.TLS == nil {
-		return false, "", "", errors.New("Bad/missing TLS on network query")
+		return false, "", "", nil, errors.New("Bad/missing TLS on network query")
 	}
 
 	// Load the certificates.
@@ -611,18 +619,18 @@ func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, str
 	if jwtOk {
 		trusted, username := localUtil.CheckTrustState(*cert, trustedCerts[certificate.TypeClient], d.endpoints.NetworkCert(), trustCACertificates)
 		if trusted {
-			return true, username, api.AuthenticationMethodTLS, nil
+			return true, username, api.AuthenticationMethodTLS, nil, nil
 		}
 	}
 
 	// Check for JWT token signed by an OpenID Connect provider.
 	if d.oidcVerifier != nil && d.oidcVerifier.IsRequest(r) {
-		userName, err := d.oidcVerifier.Auth(d.shutdownCtx, w, r)
+		userName, claims, err := d.oidcVerifier.Auth(d.shutdownCtx, w, r)
 		if err != nil {
-			return false, "", "", err
+			return false, "", "", nil, err
 		}
 
-		return true, userName, api.AuthenticationMethodOIDC, nil
+		return true, userName, api.AuthenticationMethodOIDC, claims, nil
 	}
 
 	// Validate metrics TLS certificates.
@@ -630,7 +638,7 @@ func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, str
 		for _, i := range r.TLS.PeerCertificates {
 			trusted, username := localUtil.CheckTrustState(*i, trustedCerts[certificate.TypeMetrics], d.endpoints.NetworkCert(), trustCACertificates)
 			if trusted {
-				return true, username, api.AuthenticationMethodTLS, nil
+				return true, username, api.AuthenticationMethodTLS, nil, nil
 			}
 		}
 	}
@@ -639,12 +647,12 @@ func (d *Daemon) Authenticate(w http.ResponseWriter, r *http.Request) (bool, str
 	for _, i := range r.TLS.PeerCertificates {
 		trusted, username := localUtil.CheckTrustState(*i, trustedCerts[certificate.TypeClient], d.endpoints.NetworkCert(), trustCACertificates)
 		if trusted {
-			return true, username, api.AuthenticationMethodTLS, nil
+			return true, username, api.AuthenticationMethodTLS, nil, nil
 		}
 	}
 
 	// Reject unauthorized.
-	return false, "", "", nil
+	return false, "", "", nil, nil
 }
 
 // State creates a new State instance linked to our internal db and os.
@@ -734,7 +742,7 @@ func (d *Daemon) createCmd(restAPI *http.ServeMux, apiVersion string, c APIEndpo
 		}
 
 		// Authentication
-		trusted, username, protocol, err := d.Authenticate(w, r)
+		trusted, username, protocol, claims, err := d.Authenticate(w, r)
 		if err != nil {
 			_, ok := errors.AsType[*oidc.AuthError](err)
 			if ok {
@@ -792,6 +800,10 @@ func (d *Daemon) createCmd(restAPI *http.ServeMux, apiVersion string, c APIEndpo
 			ctx := context.WithValue(r.Context(), request.CtxUsername, username)
 			ctx = context.WithValue(ctx, request.CtxProtocol, protocol)
 
+			if claims != nil {
+				ctx = context.WithValue(ctx, request.CtxClaims, claims)
+			}
+
 			// Flag requests made by the root user over the local unix socket.
 			if protocol == "unix" {
 				cred, err := ucred.GetCredFromContext(r.Context())
@@ -806,6 +818,17 @@ func (d *Daemon) createCmd(restAPI *http.ServeMux, apiVersion string, c APIEndpo
 				ctx = context.WithValue(ctx, request.CtxForwardedAddress, r.Header.Get(request.HeaderForwardedAddress))
 				ctx = context.WithValue(ctx, request.CtxForwardedUsername, r.Header.Get(request.HeaderForwardedUsername))
 				ctx = context.WithValue(ctx, request.CtxForwardedProtocol, r.Header.Get(request.HeaderForwardedProtocol))
+
+				forwardedClaims := r.Header.Get(request.HeaderForwardedClaims)
+				if forwardedClaims != "" {
+					forwarded := map[string]any{}
+					err := json.Unmarshal([]byte(forwardedClaims), &forwarded)
+					if err != nil {
+						logger.Warn("Ignoring invalid forwarded claims", logger.Ctx{"ip": r.RemoteAddr, "err": err})
+					} else {
+						ctx = context.WithValue(ctx, request.CtxForwardedClaims, forwarded)
+					}
+				}
 			}
 
 			r = r.WithContext(ctx)
@@ -842,12 +865,13 @@ func (d *Daemon) createCmd(restAPI *http.ServeMux, apiVersion string, c APIEndpo
 		// Return Unavailable Error (503) if daemon is shutting down.
 		// There are some exceptions:
 		// - internal calls, e.g. shutdown
+		// - OS calls, so the host can still be rebooted
 		// - events endpoint as this is accessed when running `shutdown`
 		// - /1.0 endpoint
 		// - /1.0/operations endpoints
 		// - GET queries
 		allowedDuringShutdown := func() bool {
-			if apiVersion == "internal" {
+			if slices.Contains([]string{"internal", "os"}, apiVersion) {
 				return true
 			}
 
@@ -1866,13 +1890,15 @@ func (d *Daemon) Stop(ctx context.Context, sig os.Signal) error {
 		select {
 		case <-time.After(time.Minute):
 			logger.Error("Timed out waiting for image and backup volume")
+		case <-ctx.Done():
+			logger.Warn("Forced shutdown, no longer waiting for image and backup volume")
 		case <-done:
 		}
 
 		// Full shutdown requested.
 		if sig == unix.SIGPWR {
 			if !evacuated {
-				instancesShutdown(instances)
+				instancesShutdown(ctx, instances, s.GlobalConfig.ShutdownTimeout())
 
 				logger.Info("Stopping networks")
 				networkShutdown(s)

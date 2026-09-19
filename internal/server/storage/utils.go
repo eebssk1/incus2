@@ -1341,6 +1341,11 @@ func GenerateDependentVolumesOffer(s *state.State, config *backupConfig.Config, 
 		return result, nil
 	}
 
+	storageProjectName, err := project.StorageVolumeProject(s.DB.Cluster, projectName, db.StoragePoolVolumeTypeCustom)
+	if err != nil {
+		return nil, err
+	}
+
 	devicesMap := DevicesMapFromBackupConfig(config)
 
 	for _, volConfig := range config.DependentVolumes {
@@ -1371,10 +1376,13 @@ func GenerateDependentVolumesOffer(s *state.State, config *backupConfig.Config, 
 			continue
 		}
 
-		volStorageName := project.StorageVolume(projectName, volName)
+		volStorageName := project.StorageVolume(storageProjectName, volName)
 		vol := pool.GetVolume(drivers.VolumeTypeCustom, drivers.ContentType(contentType), volStorageName, volConfig.Volume.Config)
 
-		poolMigrationTypes := pool.MigrationTypes(drivers.ContentType(contentType), false, snapshots, true, false)
+		// The volume changes pool when the device override points it elsewhere.
+		storageMove := devices[deviceName]["pool"] != "" && devices[deviceName]["pool"] != poolName
+
+		poolMigrationTypes := pool.MigrationTypes(drivers.ContentType(contentType), false, snapshots, clusterMove, storageMove)
 		if len(poolMigrationTypes) == 0 {
 			return nil, fmt.Errorf("No migration types available")
 		}
@@ -1429,15 +1437,17 @@ type DependentVolumeWithType struct {
 }
 
 // DependentVolumesMatchMigrationType returns the transport type matching the dependent volumes.
-func DependentVolumesMatchMigrationType(s *state.State, migrationDependentVolumes []*migration.DependentVolume, snapshots bool, overrides api.DevicesMap, source bool) ([]DependentVolumeWithType, error) {
+func DependentVolumesMatchMigrationType(s *state.State, migrationDependentVolumes []*migration.DependentVolume, snapshots bool, overrides api.DevicesMap, source bool, clusterMove bool) ([]DependentVolumeWithType, error) {
 	dependentVolumes := []DependentVolumeWithType{}
 	for _, vol := range migrationDependentVolumes {
 		contentType := drivers.ContentType(*vol.ContentType)
 		poolName := *vol.Pool
+		storageMove := false
 
 		if overrides != nil && overrides[*vol.DeviceName] != nil {
 			newPoolName, ok := overrides[*vol.DeviceName]["pool"]
 			if ok {
+				storageMove = newPoolName != poolName
 				poolName = newPoolName
 			}
 		}
@@ -1447,7 +1457,7 @@ func DependentVolumesMatchMigrationType(s *state.State, migrationDependentVolume
 			return nil, fmt.Errorf("Failed loading storage pool: %w", err)
 		}
 
-		poolMigrationTypes := pool.MigrationTypes(drivers.ContentType(contentType), false, snapshots, true, false)
+		poolMigrationTypes := pool.MigrationTypes(drivers.ContentType(contentType), false, snapshots, clusterMove, storageMove)
 		if len(poolMigrationTypes) == 0 {
 			return nil, errors.New("No migration types available")
 		}

@@ -301,35 +301,40 @@ func lxcCreate(s *state.State, args db.InstanceArgs, p api.Project, partialDevic
 		return nil, nil, errors.New("Storage pool does not support instance type")
 	}
 
-	// Setup the initial idmap config.
-	var idmapSet *idmap.Set
-	base := int64(0)
-	if !d.IsPrivileged() {
-		idmapSet, base, err = d.findIdmap()
-		if err != nil {
-			return nil, nil, err
+	// Setup the initial idmap config, keeping the allocation locked until it's persisted.
+	err = func() error {
+		idmapLock.Lock()
+		defer idmapLock.Unlock()
+
+		var idmapSet *idmap.Set
+		base := int64(0)
+		if !d.IsPrivileged() {
+			idmapSet, base, err = d.findIdmap()
+			if err != nil {
+				return err
+			}
 		}
-	}
 
-	idmapSetJSON, err := idmapSet.ToJSON()
-	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to encode ID map: %w", err)
-	}
+		idmapSetJSON, err := idmapSet.ToJSON()
+		if err != nil {
+			return fmt.Errorf("Failed to encode ID map: %w", err)
+		}
 
-	v := map[string]string{
-		"volatile.idmap.next": idmapSetJSON,
-		"volatile.idmap.base": fmt.Sprintf("%v", base),
-	}
+		v := map[string]string{
+			"volatile.idmap.next": idmapSetJSON,
+			"volatile.idmap.base": fmt.Sprintf("%v", base),
+		}
 
-	// Invalidate the idmap cache.
-	d.idmapset = nil
+		// Invalidate the idmap cache.
+		d.idmapset = nil
 
-	// Set last_state if not currently set.
-	if d.localConfig["volatile.last_state.idmap"] == "" {
-		v["volatile.last_state.idmap"] = "[]"
-	}
+		// Set last_state if not currently set.
+		if d.localConfig["volatile.last_state.idmap"] == "" {
+			v["volatile.last_state.idmap"] = "[]"
+		}
 
-	err = d.VolatileSet(v)
+		return d.VolatileSet(v)
+	}()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -477,6 +482,7 @@ type lxc struct {
 
 var idmapLock sync.Mutex
 
+// findIdmap selects the ID map for the instance, the caller must hold idmapLock until the base is persisted.
 func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 	if d.state.OS.IdmapSet == nil {
 		return nil, 0, errors.New("System doesn't have a functional idmap setup")
@@ -578,9 +584,6 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 		return set, offset, nil
 	}
 
-	idmapLock.Lock()
-	defer idmapLock.Unlock()
-
 	cts, err := instance.LoadNodeAll(d.state, instancetype.Container)
 	if err != nil {
 		return nil, 0, err
@@ -647,7 +650,7 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 		}
 
 		offset = mapentries.Entries[i-1].HostID + mapentries.Entries[i-1].MapRange
-		if offset+size < mapentries.Entries[i].HostID {
+		if offset+size <= mapentries.Entries[i].HostID {
 			set, err := mkIdmap(offset, size)
 			if err != nil && errors.Is(err, idmap.ErrHostIDIsSubID) {
 				return nil, 0, err
@@ -2126,23 +2129,33 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 
 		// Check if we need to change idmap.
 		if nextMap != nil && d.state.OS.IdmapSet != nil && !d.state.OS.IdmapSet.Includes(nextMap) {
-			// Update the idmap.
-			idmapSet, base, err := d.findIdmap()
-			if err != nil {
-				return "", nil, fmt.Errorf("Failed to get ID map: %w", err)
-			}
+			// Update the idmap, keeping the allocation locked until it's persisted.
+			err = func() error {
+				idmapLock.Lock()
+				defer idmapLock.Unlock()
 
-			idmapSetJSON, err := idmapSet.ToJSON()
-			if err != nil {
-				return "", nil, fmt.Errorf("Failed to encode ID map: %w", err)
-			}
+				idmapSet, base, err := d.findIdmap()
+				if err != nil {
+					return fmt.Errorf("Failed to get ID map: %w", err)
+				}
 
-			err = d.VolatileSet(map[string]string{
-				"volatile.idmap.next": idmapSetJSON,
-				"volatile.idmap.base": fmt.Sprintf("%v", base),
-			})
+				idmapSetJSON, err := idmapSet.ToJSON()
+				if err != nil {
+					return fmt.Errorf("Failed to encode ID map: %w", err)
+				}
+
+				err = d.VolatileSet(map[string]string{
+					"volatile.idmap.next": idmapSetJSON,
+					"volatile.idmap.base": fmt.Sprintf("%v", base),
+				})
+				if err != nil {
+					return fmt.Errorf("Failed to update volatile idmap: %w", err)
+				}
+
+				return nil
+			}()
 			if err != nil {
-				return "", nil, fmt.Errorf("Failed to update volatile idmap: %w", err)
+				return "", nil, err
 			}
 
 			// Invalidate the idmap cache.
@@ -4672,6 +4685,11 @@ func (d *lxc) delete(force bool, cleanupDependencies bool) error {
 			}
 
 			if cleanupDependencies {
+				storageProjectName, err := project.StorageVolumeProject(d.state.DB.Cluster, d.Project().Name, db.StoragePoolVolumeTypeCustom)
+				if err != nil {
+					return err
+				}
+
 				// Delete all dependent volumes associated with this instance.
 				err = d.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
 					// Load the pool for the disk.
@@ -4681,7 +4699,7 @@ func (d *lxc) delete(force bool, cleanupDependencies bool) error {
 					}
 
 					volName, _ := internalInstance.SplitVolumeSource(dev.Config["source"])
-					err = diskPool.DeleteCustomVolume(d.Project().Name, volName, nil)
+					err = diskPool.DeleteCustomVolume(storageProjectName, volName, nil)
 					if err != nil {
 						return err
 					}
@@ -5284,6 +5302,10 @@ func (d *lxc) Update(args db.InstanceArgs, userRequested bool) error {
 	}
 
 	if slices.Contains(changedConfig, "security.idmap.isolated") || slices.Contains(changedConfig, "security.idmap.base") || slices.Contains(changedConfig, "security.idmap.size") || slices.Contains(changedConfig, "raw.idmap") || slices.Contains(changedConfig, "security.privileged") {
+		// Keep the allocation locked until the config is written to the database below.
+		idmapLock.Lock()
+		defer idmapLock.Unlock()
+
 		var idmapSet *idmap.Set
 		base := int64(0)
 		if !d.IsPrivileged() {
@@ -6321,7 +6343,7 @@ func (d *lxc) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true, clusterMove)
 	if err != nil {
 		err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 		op.Done(err)
@@ -6913,7 +6935,7 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	respHeader.Criu = criuType
 
 	localDevices := d.LocalDevices().CloneNative()
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false, clusterMove)
 	if err != nil {
 		return fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 	}
@@ -7054,9 +7076,14 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	}()
 
 	// Start filesystem transfer routine and initialize a channel that is closed when the routine finishes.
+	// The error is recorded before closing as errgroup only cancels the context after the routine returns.
+	var fsTransferErr error
 	fsTransferDone := make(chan struct{})
-	g.Go(func() error {
-		defer close(fsTransferDone)
+	g.Go(func() (retErr error) {
+		defer func() {
+			fsTransferErr = retErr
+			close(fsTransferDone)
+		}()
 
 		d.logger.Debug("Migrate receive filesystem transfer started")
 		defer d.logger.Debug("Migrate receive filesystem transfer finished")
@@ -7224,13 +7251,17 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 
 	// Start live state transfer routine (if required) and initialize a channel that is closed when the
 	// routine finishes. It is never closed if the routine is not started.
+	var stateTransferErr error
 	stateTransferDone := make(chan struct{})
 	if args.Live {
-		g.Go(func() error {
+		g.Go(func() (retErr error) {
 			d.logger.Debug("Migrate receive state transfer started")
 			defer d.logger.Debug("Migrate receive state transfer finished")
 
-			defer close(stateTransferDone)
+			defer func() {
+				stateTransferErr = retErr
+				close(stateTransferDone)
+			}()
 
 			imagesDir, err := os.MkdirTemp("", "incus_restore_")
 			if err != nil {
@@ -7305,6 +7336,10 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			<-fsTransferDone
 
 			// But only proceed if no errors have occurred thus far.
+			if fsTransferErr != nil {
+				return fsTransferErr
+			}
+
 			err = ctx.Err()
 			if err != nil {
 				return err
@@ -7339,9 +7374,9 @@ func (d *lxc) MigrateReceive(args instance.MigrateReceiveArgs) error {
 			<-stateTransferDone
 		}
 
-		// If context is cancelled by this stage, then an error has occurred.
+		// If a transfer failed or the context is cancelled by this stage, then an error has occurred.
 		// Wait for all routines to finish and collect the first error that occurred.
-		if ctx.Err() != nil {
+		if fsTransferErr != nil || stateTransferErr != nil || ctx.Err() != nil {
 			err := g.Wait()
 
 			// Send failure response to source.
@@ -8976,6 +9011,8 @@ func (d *lxc) removeUnixDevices() error {
 		return err
 	}
 
+	var errs []error
+
 	// Go through all the unix devices
 	for _, f := range dents {
 		// Skip non-Unix devices
@@ -8983,15 +9020,21 @@ func (d *lxc) removeUnixDevices() error {
 			continue
 		}
 
-		// Remove the entry
+		// Unmount bind mounts left behind by a failed restore before removing their mountpoints.
 		devicePath := filepath.Join(d.DevicesPath(), f.Name())
-		err := os.Remove(devicePath)
-		if err != nil {
-			d.logger.Error("Failed removing unix device", logger.Ctx{"err": err, "path": devicePath})
+		err := unix.Unmount(devicePath, 0)
+		if err != nil && !errors.Is(err, unix.EINVAL) && !errors.Is(err, unix.ENOENT) {
+			errs = append(errs, fmt.Errorf("Failed unmounting unix device %q: %w", devicePath, err))
+			continue
+		}
+
+		err = os.Remove(devicePath)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			errs = append(errs, fmt.Errorf("Failed removing unix device %q: %w", devicePath, err))
 		}
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 // FillNetworkDevice takes a nic or infiniband device type and enriches it with automatically

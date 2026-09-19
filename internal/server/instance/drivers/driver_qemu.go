@@ -129,6 +129,9 @@ const qemuSparseUSBPorts = 8
 
 var errQemuAgentOffline = errors.New("VM agent isn't currently running")
 
+// qemuStopHooks tracks instances with a stop hook in progress.
+var qemuStopHooks sync.Map
+
 type monitorHook func(m *qmp.Monitor) error
 
 // qemuLoad creates a Qemu instance from the supplied InstanceArgs.
@@ -758,6 +761,16 @@ func (d *qemu) pidWait(timeout time.Duration) bool {
 func (d *qemu) onStop(target string, reason string) error {
 	d.logger.Debug("onStop hook started", logger.Ctx{"target": target, "reason": reason})
 	defer d.logger.Debug("onStop hook finished", logger.Ctx{"target": target, "reason": reason})
+
+	// Only run one stop hook at a time, a duplicate would race the cleanup and restart.
+	hookKey := project.Instance(d.Project().Name, d.Name())
+	_, running := qemuStopHooks.LoadOrStore(hookKey, struct{}{})
+	if running {
+		d.logger.Warn("Ignoring duplicate stop hook", logger.Ctx{"target": target, "reason": reason})
+		return nil
+	}
+
+	defer qemuStopHooks.Delete(hookKey)
 
 	// Create/pick up operation.
 	op, err := d.onStopOperationSetup(target)
@@ -1693,8 +1706,12 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 			return err
 		}
 
+		// Detect a symlink whose variables file is gone.
+		_, err = os.Stat(d.nvramPath())
+		dangling := fi != nil && errors.Is(err, fs.ErrNotExist)
+
 		// Generate new NVRAM if missing, or if requested by the user or if the NVRAM file is of an invalid format (needs to be a valid symlink).
-		if util.IsTrue(d.localConfig["volatile.apply_nvram"]) || fi == nil || fi.Mode()&os.ModeSymlink != os.ModeSymlink {
+		if util.IsTrue(d.localConfig["volatile.apply_nvram"]) || fi == nil || fi.Mode()&os.ModeSymlink != os.ModeSymlink || dangling {
 			err = d.setupNvram()
 			if err != nil {
 				op.Done(err)
@@ -6279,7 +6296,7 @@ func (d *qemu) addPCIDevConfig(conf *[]cfg.Section, bus *qemuBus, pciConfig []de
 
 // addGPUDevConfig adds the qemu config required for adding a GPU device.
 func (d *qemu) addGPUDevConfig(conf *[]cfg.Section, bus *qemuBus, gpuConfig []deviceConfig.RunConfigItem) error {
-	var devName, pciSlotName, vgpu, gpuType string
+	var devName, pciSlotName, vgpu, gpuType, clique string
 	for _, gpuItem := range gpuConfig {
 		switch gpuItem.Key {
 		case "devName":
@@ -6290,6 +6307,8 @@ func (d *qemu) addGPUDevConfig(conf *[]cfg.Section, bus *qemuBus, gpuConfig []de
 			vgpu = gpuItem.Value
 		case "gpuType":
 			gpuType = gpuItem.Value
+		case "clique":
+			clique = gpuItem.Value
 		}
 	}
 
@@ -6336,6 +6355,7 @@ func (d *qemu) addGPUDevConfig(conf *[]cfg.Section, bus *qemuBus, gpuConfig []de
 		pciSlotName: pciSlotName,
 		vga:         vgaMode,
 		vgpu:        vgpu,
+		clique:      clique,
 	}
 
 	// Add main GPU device in VGA mode to qemu config.
@@ -8154,6 +8174,11 @@ func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 			}
 
 			if cleanupDependencies {
+				storageProjectName, err := project.StorageVolumeProject(d.state.DB.Cluster, d.Project().Name, db.StoragePoolVolumeTypeCustom)
+				if err != nil {
+					return err
+				}
+
 				// Delete all dependent volumes associated with this instance.
 				err = d.ForEachDependentDiskType(func(dev deviceConfig.DeviceNamed) error {
 					// Load the pool for the disk.
@@ -8163,7 +8188,7 @@ func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 					}
 
 					volName, _ := internalInstance.SplitVolumeSource(dev.Config["source"])
-					err = diskPool.DeleteCustomVolume(d.Project().Name, volName, nil)
+					err = diskPool.DeleteCustomVolume(storageProjectName, volName, nil)
 					if err != nil {
 						return err
 					}
@@ -8570,6 +8595,17 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
+	// Filesystem volumes are shared over 9p, which QEMU can't live migrate.
+	if args.Live {
+		for _, vol := range dependentVolumesOffer {
+			if vol.GetContentType() != string(storageDrivers.ContentTypeBlock) {
+				err := fmt.Errorf("Live migration isn't supported for dependent disk %q with a filesystem volume", vol.GetDeviceName())
+				op.Done(err)
+				return err
+			}
+		}
+	}
+
 	offerHeader.DependentVolumes = dependentVolumesOffer
 
 	contentType := storagePools.InstanceContentType(d)
@@ -8672,7 +8708,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 		return err
 	}
 
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, respHeader.DependentVolumes, args.Snapshots, nil, true, clusterMove)
 	if err != nil {
 		err := fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 		op.Done(err)
@@ -8897,6 +8933,10 @@ func (d *qemu) prepareEphemeralSnapshot(monitor *qmp.Monitor, diskName string, d
 	blockDevs, err := d.fetchBlockDeviceChain(monitor, diskName)
 	if err != nil {
 		return "", "", nil, fmt.Errorf("Failed fetching block device chain: %w", err)
+	}
+
+	if len(blockDevs) == 0 {
+		return "", "", nil, fmt.Errorf("No block device found for disk %q", diskName)
 	}
 
 	blockDevName := blockDevs[len(blockDevs)-1]
@@ -9611,7 +9651,7 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	respHeader.Refresh = &args.Refresh
 
 	localDevices := d.localDevices.CloneNative()
-	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false)
+	volumesWithTypes, err := storagePools.DependentVolumesMatchMigrationType(d.state, offerHeader.DependentVolumes, args.Snapshots, localDevices, false, clusterMove)
 	if err != nil {
 		return fmt.Errorf("Failed to negotiate migration types for dependent volumes: %w", err)
 	}
@@ -9748,9 +9788,14 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 	}()
 
 	// Start filesystem transfer routine and initialize a channel that is closed when the routine finishes.
+	// The error is recorded before closing as errgroup only cancels the context after the routine returns.
+	var fsTransferErr error
 	fsTransferDone := make(chan struct{})
-	g.Go(func() error {
-		defer close(fsTransferDone)
+	g.Go(func() (retErr error) {
+		defer func() {
+			fsTransferErr = retErr
+			close(fsTransferDone)
+		}()
 
 		d.logger.Debug("Migrate receive transfer started")
 		defer d.logger.Debug("Migrate receive transfer finished")
@@ -9985,9 +10030,9 @@ func (d *qemu) MigrateReceive(args instance.MigrateReceiveArgs) error {
 		// Wait until the filesystem transfer routine has finished.
 		<-fsTransferDone
 
-		// If context is cancelled by this stage, then an error has occurred.
+		// If the transfer failed or the context is cancelled by this stage, then an error has occurred.
 		// Wait for all routines to finish and collect the first error that occurred.
-		if ctx.Err() != nil {
+		if fsTransferErr != nil || ctx.Err() != nil {
 			err := g.Wait()
 
 			// Send failure response to source.
@@ -10330,11 +10375,21 @@ func (d *qemu) Exec(req api.InstanceExecPost, stdin *os.File, stdout *os.File, s
 	}
 
 	args := incus.InstanceExecArgs{
-		Stdin:    stdin,
-		Stdout:   stdout,
-		Stderr:   stderr,
 		DataDone: dataDone,
 		Control:  controlHandler,
+	}
+
+	// Only set the streams when provided, a nil *os.File would otherwise be a non-nil interface.
+	if stdin != nil {
+		args.Stdin = stdin
+	}
+
+	if stdout != nil {
+		args.Stdout = stdout
+	}
+
+	if stderr != nil {
+		args.Stderr = stderr
 	}
 
 	// Always needed for VM exec, as even for non-websocket requests from the client we need to connect the

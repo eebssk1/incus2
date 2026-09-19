@@ -3456,3 +3456,22 @@ Adds a new `dns.include_hosts` configuration key to `bridge` networks,
 controlling whether the network's `dnsmasq` serves records from the host's
 `/etc/hosts` file. Setting it to `false` avoids exposing host-only entries
 to instances while keeping AppArmor confinement.
+
+## `gpu_physical_clique`
+
+Adds a new `nvidia.clique` configuration key to `gpu` devices of type `physical`
+when used with virtual machines. It sets the NVIDIA GPUDirect P2P clique ID
+(0 to 15) advertised to the guest driver, allowing peer-to-peer DMA between
+GPUs passed through to the same virtual machine when they share a clique ID.
+
+## `authorization_scriptlet_claims`
+
+This adds a `Claims` field to the `details` argument of the authorization
+scriptlet, holding the validated OIDC token claims of the client as a
+dictionary. This allows writing rules based on claims such as `groups`.
+
+## `instance_project_move_live`
+
+This allows a running instance to change project as part of a live migration
+to another cluster member. It also lets instances with `dependent` disks
+attached change project.
