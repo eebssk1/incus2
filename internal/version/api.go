@@ -578,6 +578,11 @@ var APIExtensions = []string{
 	"gpu_physical_clique",
 	"authorization_scriptlet_claims",
 	"instance_project_move_live",
+	"metrics_cluster_members",
+	"instance_security_tags",
+	"network_ovn_parent",
+	"disk_initial_copy",
+	"internal_debug_pprof",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

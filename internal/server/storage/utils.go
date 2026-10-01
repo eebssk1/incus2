@@ -295,11 +295,21 @@ func VolumeDBCreate(pool Pool, projectName string, volumeName string, volumeDesc
 		// Create the database entry for the storage volume.
 		if snapshot {
 			_, err = tx.CreateStorageVolumeSnapshot(ctx, projectName, volumeName, volumeDescription, volDBType, pool.ID(), vol.Config(), creationDate, expiryDate)
-		} else {
-			_, err = tx.CreateStoragePoolVolume(ctx, projectName, volumeName, volumeDescription, volDBType, pool.ID(), vol.Config(), volDBContentType, creationDate)
+			return err
 		}
 
-		return err
+		_, err = tx.CreateStoragePoolVolume(ctx, projectName, volumeName, volumeDescription, volDBType, pool.ID(), vol.Config(), volDBContentType, creationDate)
+		if err != nil {
+			return err
+		}
+
+		// Re-check project limits now that the volume is recorded, so concurrent creations
+		// can't all pass the earlier check.
+		if volumeType == drivers.VolumeTypeCustom {
+			return project.CheckLimits(tx, projectName)
+		}
+
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("Error inserting volume %q for project %q in pool %q of type %q into database: %w", volumeName, projectName, pool.Name(), volumeType, err)
@@ -544,6 +554,7 @@ func validateVolumeCommonRules(vol drivers.Volume) map[string]func(string) error
 	if vol.ContentType() == drivers.ContentTypeFS {
 		rules["volatile.idmap.last"] = validate.IsAny
 		rules["volatile.idmap.next"] = validate.IsAny
+		rules["volatile.initial.copied"] = validate.Optional(validate.IsBool)
 	}
 
 	// block.mount_options and block.filesystem settings are only relevant for drivers that are block backed

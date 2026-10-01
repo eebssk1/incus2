@@ -333,6 +333,15 @@ func qemuCreate(s *state.State, args db.InstanceArgs, p api.Project, partialDevi
 
 		reverter.Add(func() { _ = d.state.Authorizer.DeleteInstance(d.state.ShutdownCtx, d.project.Name, d.Name()) })
 
+		// Add the security tags to the authorizer.
+		tags := util.SplitNTrimSpace(d.expandedConfig["security.tags"], ",", -1, true)
+		if len(tags) > 0 {
+			err = d.state.Authorizer.SetInstanceSecurityTags(d.state.ShutdownCtx, d.project.Name, d.Name(), tags)
+			if err != nil {
+				logger.Error("Failed to add instance security tags to authorizer", logger.Ctx{"name": d.Name(), "project": d.project.Name, "error": err})
+			}
+		}
+
 		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceCreated.Event(d, map[string]any{
 			"type":         api.InstanceTypeVM,
 			"storage-pool": d.storagePool.Name(),
@@ -7735,6 +7744,14 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 		}
 	}
 
+	// Update the security tags in the authorizer.
+	if !d.isSnapshot && slices.Contains(changedConfig, "security.tags") {
+		err = d.state.Authorizer.SetInstanceSecurityTags(d.state.ShutdownCtx, d.project.Name, d.Name(), util.SplitNTrimSpace(d.expandedConfig["security.tags"], ",", -1, true))
+		if err != nil {
+			d.logger.Error("Failed to update instance security tags in authorizer", logger.Ctx{"err": err})
+		}
+	}
+
 	if userRequested {
 		if d.isSnapshot {
 			d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceSnapshotUpdated.Event(d, nil))
@@ -9240,6 +9257,22 @@ func (d *qemu) sendMigrationSnapshot(ctx context.Context, diskName string, files
 	return finalizeFunc, nil
 }
 
+// cancelMigrationSnapshot stops a snapshot transfer, leaving the snapshot attached so it can be merged.
+func (d *qemu) cancelMigrationSnapshot(monitor *qmp.Monitor, diskName string) {
+	// Cancel the mirror job first as its filter node blocks the merge.
+	err := monitor.BlockJobCancelWait(ephemeralSnapshotName(diskName))
+	if err != nil {
+		d.logger.Warn("Failed cancelling migration storage snapshot transfer", logger.Ctx{"diskName": diskName, "err": err})
+	}
+
+	time.Sleep(time.Second) // Wait for it to be released.
+
+	err = monitor.RemoveBlockDevice(migrationNBDTarget(diskName))
+	if err != nil {
+		d.logger.Warn("Failed removing NBD storage target device", logger.Ctx{"diskName": diskName, "err": err})
+	}
+}
+
 // migrateSendLive performs live migration send process.
 func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clusterMoveSourceName string, storagePool string, rootDiskSize int64, filesystemConn io.ReadWriteCloser, stateConn io.ReadWriteCloser, volSourceArgs *localMigration.VolumeSourceArgs, committed *bool) error {
 	monitor, err := d.qmpConnect()
@@ -9264,6 +9297,8 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 
 	reverter := revert.New()
 	defer reverter.Fail()
+
+	rootTransferDone := false
 
 	// Non-shared storage snapshot setup.
 	if !sameSharedStorage || dependentVolumeMove {
@@ -9304,7 +9339,12 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 				return fmt.Errorf("Failed creating migration snapshot: %w", err)
 			}
 
-			reverter.Add(cleanup)
+			// The snapshot is gone once its transfer has been finalized.
+			reverter.Add(func() {
+				if !rootTransferDone {
+					cleanup()
+				}
+			})
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
@@ -9410,6 +9450,13 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 		if err != nil {
 			return fmt.Errorf("Failed transferring snapshot disk: %w", err)
 		}
+
+		// Abort the transfer on failure so the snapshot can be merged back.
+		reverter.Add(func() {
+			if !rootTransferDone {
+				d.cancelMigrationSnapshot(monitor, rootDiskName)
+			}
+		})
 	}
 
 	d.logger.Debug("Stateful migration checkpoint send starting")
@@ -9496,6 +9543,8 @@ func (d *qemu) migrateSendLive(ctx context.Context, pool storagePools.Pool, clus
 			if err != nil {
 				return fmt.Errorf("Failed transferring root snapshot disk: %w", err)
 			}
+
+			rootTransferDone = true
 		}
 
 		for _, vol := range volSourceArgs.DependentVolumes {
@@ -10321,11 +10370,13 @@ func (d *qemu) Console(protocol string) (*os.File, chan error, error) {
 
 	_ = conn.Close()
 
-	// Handle disconnections.
-	go func() {
-		<-chDisconnect
-		_ = d.consoleSwapSocketWithRB()
-	}()
+	// Swap the text console back to the ring buffer on disconnection.
+	if protocol == instance.ConsoleTypeConsole {
+		go func() {
+			<-chDisconnect
+			_ = d.consoleSwapSocketWithRB()
+		}()
+	}
 
 	// Only emit a lifecycle event for the text console here. SPICE clients open one socket per channel
 	// (display, cursor, inputs, ...) and would otherwise produce a flurry of instance-console events

@@ -3475,3 +3475,37 @@ dictionary. This allows writing rules based on claims such as `groups`.
 This allows a running instance to change project as part of a live migration
 to another cluster member. It also lets instances with `dependent` disks
 attached change project.
+
+## `metrics_cluster_members`
+
+This adds cluster member metrics to the `/1.0/metrics` endpoint:
+
+* `incus_cluster_member` with the member's architecture and failure domain
+* `incus_cluster_member_status` with one sample per possible status
+* `incus_cluster_member_role` with one sample per role held
+* `incus_cluster_member_group` with one sample per group the member belongs to
+
+## `instance_security_tags`
+
+Adds a new `security.tags` configuration key to instances, holding a
+comma-separated list of tags. The tags are exposed to the authorization
+backend, with OpenFGA maintaining a `security_tag` object for each tag
+along with a `tag` relation to every instance carrying it.
+
+## `network_ovn_parent`
+
+Adds a new `parent` configuration key to `ovn` networks, referencing another
+`ovn` network in the same project.
+
+## `disk_initial_copy`
+
+This adds the `initial.copy` property to `disk` devices backed by a custom storage volume.
+
+When set to `true` on a container, the content already present at the device `path` inside
+the container is copied into the volume the first time the volume is used, if it's empty.
+
+## `internal_debug_pprof`
+
+This adds `/internal/debug/pprof/` to the API, serving the same `pprof`
+profiles as the `core.debug_address` listener but over the regular
+listeners, restricted to trusted clients with server administration rights.

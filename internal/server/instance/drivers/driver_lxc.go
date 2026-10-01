@@ -33,7 +33,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/kballard/go-shellquote"
 	liblxc "github.com/lxc/go-lxc"
-	ociSpecs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/sftp"
 	yaml "go.yaml.in/yaml/v4"
 	"golang.org/x/sync/errgroup"
@@ -372,6 +371,15 @@ func lxcCreate(s *state.State, args db.InstanceArgs, p api.Project, partialDevic
 
 		reverter.Add(func() { _ = d.state.Authorizer.DeleteInstance(d.state.ShutdownCtx, d.project.Name, d.Name()) })
 
+		// Add the security tags to the authorizer.
+		tags := util.SplitNTrimSpace(d.expandedConfig["security.tags"], ",", -1, true)
+		if len(tags) > 0 {
+			err = d.state.Authorizer.SetInstanceSecurityTags(d.state.ShutdownCtx, d.project.Name, d.Name(), tags)
+			if err != nil {
+				logger.Error("Failed to add instance security tags to authorizer", logger.Ctx{"instanceName": d.Name(), "projectName": d.project.Name, "error": err})
+			}
+		}
+
 		d.state.Events.SendLifecycle(d.project.Name, lifecycle.InstanceCreated.Event(d, map[string]any{
 			"type":         api.InstanceTypeContainer,
 			"storage-pool": d.storagePool.Name(),
@@ -491,7 +499,7 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 	idmapSize := func(size string) (int64, error) {
 		var idMapSize int64
 		if size == "" || size == "auto" {
-			if util.IsTrue(d.expandedConfig["security.idmap.isolated"]) {
+			if util.IsTrue(d.expandedConfig["security.idmap.isolated"]) || d.expandedConfig["security.idmap.base"] != "" {
 				idMapSize = 65536
 			} else {
 				if len(d.state.OS.IdmapSet.Entries) != 2 {
@@ -534,6 +542,26 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 	}
 
 	if !util.IsTrue(d.expandedConfig["security.idmap.isolated"]) {
+		// A fixed base selects a range that may be shared with other instances.
+		if d.expandedConfig["security.idmap.base"] != "" {
+			offset, err := strconv.ParseInt(d.expandedConfig["security.idmap.base"], 10, 64)
+			if err != nil {
+				return nil, 0, err
+			}
+
+			size, err := idmapSize(d.expandedConfig["security.idmap.size"])
+			if err != nil {
+				return nil, 0, err
+			}
+
+			set, err := mkIdmap(offset, size)
+			if err != nil && errors.Is(err, idmap.ErrHostIDIsSubID) {
+				return nil, 0, err
+			}
+
+			return set, offset, nil
+		}
+
 		// Create a new set based from the global one.
 		newIdmapset := idmap.Set{Entries: make([]idmap.Entry, len(d.state.OS.IdmapSet.Entries))}
 		copy(newIdmapset.Entries, d.state.OS.IdmapSet.Entries)
@@ -570,20 +598,6 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 		return nil, 0, err
 	}
 
-	if d.expandedConfig["security.idmap.base"] != "" {
-		offset, err := strconv.ParseInt(d.expandedConfig["security.idmap.base"], 10, 64)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		set, err := mkIdmap(offset, size)
-		if err != nil && errors.Is(err, idmap.ErrHostIDIsSubID) {
-			return nil, 0, err
-		}
-
-		return set, offset, nil
-	}
-
 	cts, err := instance.LoadNodeAll(d.state, instancetype.Container)
 	if err != nil {
 		return nil, 0, err
@@ -606,15 +620,20 @@ func (d *lxc) findIdmap() (*idmap.Set, int64, error) {
 			continue
 		}
 
-		if util.IsFalseOrEmpty(container.ExpandedConfig()["security.idmap.isolated"]) {
-			continue
+		// Fixed ranges of non-isolated containers are reserved too.
+		base := container.ExpandedConfig()["security.idmap.base"]
+		if base == "" {
+			if util.IsFalseOrEmpty(container.ExpandedConfig()["security.idmap.isolated"]) {
+				continue
+			}
+
+			base = container.ExpandedConfig()["volatile.idmap.base"]
+			if base == "" {
+				continue
+			}
 		}
 
-		if container.ExpandedConfig()["volatile.idmap.base"] == "" {
-			continue
-		}
-
-		cBase, err := strconv.ParseInt(container.ExpandedConfig()["volatile.idmap.base"], 10, 64)
+		cBase, err := strconv.ParseInt(base, 10, 64)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -2520,21 +2539,28 @@ func (d *lxc) startCommon() (string, []func() error, error) {
 	}
 
 	// Handle application containers.
-	if util.PathExists(filepath.Join(d.Path(), "config.json")) {
-		// Parse the OCI config.
-		data, err := os.ReadFile(filepath.Join(d.Path(), "config.json"))
+	config, err := instance.OCISpec(d.Path())
+	if err != nil {
+		return "", nil, err
+	}
+
+	if config != nil {
+		// Export the image environment unless overridden by the instance config.
+		env, err := instance.OCIEnvironment(config)
 		if err != nil {
 			return "", nil, err
 		}
 
-		var config ociSpecs.Spec
-		err = json.Unmarshal([]byte(data), &config)
-		if err != nil {
-			return "", nil, fmt.Errorf("Failed parsing OCI config: %w", err)
-		}
+		for k, v := range env {
+			_, ok := d.expandedConfig[fmt.Sprintf("environment.%s", k)]
+			if ok {
+				continue
+			}
 
-		if config.Process == nil {
-			return "", nil, errors.New("Failed parsing OCI config: Missing process section")
+			err = lxcSetConfigItem(cc, "lxc.environment", fmt.Sprintf("\"%s=%s\"", k, v))
+			if err != nil {
+				return "", nil, err
+			}
 		}
 
 		// Mark the container as an OCI container if not already set.
@@ -3171,6 +3197,26 @@ func (d *lxc) Start(stateful bool) error {
 		after, ok := strings.CutPrefix(k, "environment.")
 		if ok {
 			envDict[after] = v
+		}
+	}
+
+	// Add the image environment of application containers.
+	spec, err := instance.OCISpec(d.Path())
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
+	ociEnv, err := instance.OCIEnvironment(spec)
+	if err != nil {
+		op.Done(err)
+		return err
+	}
+
+	for k, v := range ociEnv {
+		_, ok := envDict[k]
+		if !ok {
+			envDict[k] = v
 		}
 	}
 
@@ -5200,6 +5246,10 @@ func (d *lxc) Update(args db.InstanceArgs, userRequested bool) error {
 					continue
 				}
 
+				if k == "initial.copy" && newDev["pool"] != "" {
+					continue
+				}
+
 				oldDev, ok := removeDevices[devName]
 				if !ok {
 					return errors.New("New device with initial configuration cannot be added once the instance is created")
@@ -5789,6 +5839,14 @@ func (d *lxc) Update(args db.InstanceArgs, userRequested bool) error {
 
 	// Success, update the closure to mark that the changes should be kept.
 	undoChanges = false
+
+	// Update the security tags in the authorizer.
+	if !d.isSnapshot && slices.Contains(changedConfig, "security.tags") {
+		err = d.state.Authorizer.SetInstanceSecurityTags(d.state.ShutdownCtx, d.project.Name, d.Name(), util.SplitNTrimSpace(d.expandedConfig["security.tags"], ",", -1, true))
+		if err != nil {
+			d.logger.Error("Failed to update instance security tags in authorizer", logger.Ctx{"err": err})
+		}
+	}
 
 	if userRequested {
 		if d.isSnapshot {
