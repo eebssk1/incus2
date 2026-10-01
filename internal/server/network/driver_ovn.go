@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/flosch/pongo2/v6"
@@ -33,6 +34,7 @@ import (
 	"github.com/lxc/incus/v7/internal/server/dnsmasq/dhcpalloc"
 	"github.com/lxc/incus/v7/internal/server/instance"
 	"github.com/lxc/incus/v7/internal/server/ip"
+	"github.com/lxc/incus/v7/internal/server/lifecycle"
 	"github.com/lxc/incus/v7/internal/server/locking"
 	"github.com/lxc/incus/v7/internal/server/network/acl"
 	addressset "github.com/lxc/incus/v7/internal/server/network/address-set"
@@ -116,6 +118,11 @@ type ovn struct {
 
 	// Uplink network of the parent, as a child has none of its own.
 	parentUplink string
+
+	// Track the health state of load balancers (listen address -> online) so that lifecycle events can be
+	// fired when the state changes.
+	loadBalancerHealth     map[string]bool
+	loadBalancerHealthLock sync.Mutex
 }
 
 func (n *ovn) init(s *state.State, id int64, projectName string, netInfo *api.Network, netNodes map[int64]db.NetworkNode) error {
@@ -1505,6 +1512,92 @@ func (n *ovn) parentNetwork() (*ovn, error) {
 	return ovnParent, nil
 }
 
+// refreshParent reloads the parent relationship from the supplied config.
+func (n *ovn) refreshParent(config map[string]string) error {
+	if config["parent"] == "" {
+		n.parentID = 0
+		n.parentUplink = ""
+		n.bgpNextHopConfig = nil
+		return nil
+	}
+
+	parentNet, err := LoadByName(n.state, n.project, config["parent"])
+	if err != nil {
+		return fmt.Errorf("Failed loading parent network %q: %w", config["parent"], err)
+	}
+
+	if parentNet.Type() != "ovn" {
+		return fmt.Errorf("Parent network %q isn't an OVN network", config["parent"])
+	}
+
+	n.parentID = parentNet.ID()
+	n.parentUplink = parentNet.Config()["network"]
+	n.bgpNextHopConfig = parentNet.Config()
+
+	return nil
+}
+
+// checkReparentAllowed returns an error if the network is still in use.
+func (n *ovn) checkReparentAllowed() error {
+	// Refuse to reparent a network used by a running instance with routes, as the instance's routes
+	// would be orphaned on the old logical router.
+	var instancesWithRoutes []string
+	err := UsedByInstanceDevices(n.state, n.Project(), n.Name(), n.Type(), func(inst db.InstanceArgs, nicName string, nicConfig map[string]string) error {
+		if len(n.instanceNICGetRoutes(nicConfig)) == 0 {
+			return nil
+		}
+
+		// Only running instances have their routes programmed on the logical router.
+		loadedInst, err := instance.LoadByProjectAndName(n.state, inst.Project, inst.Name)
+		if err != nil {
+			return err
+		}
+
+		if loadedInst.IsRunning() {
+			instancesWithRoutes = append(instancesWithRoutes, fmt.Sprintf("%s/%s", inst.Project, inst.Name))
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(instancesWithRoutes) > 0 {
+		return fmt.Errorf("Network is used by running instance(s) with routes: %s", strings.Join(instancesWithRoutes, ", "))
+	}
+
+	// Check for load balancers and address forwards.
+	err = n.state.DB.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
+		networkID := n.ID()
+
+		forwards, err := dbCluster.GetNetworkForwards(ctx, tx.Tx(), dbCluster.NetworkForwardFilter{NetworkID: &networkID})
+		if err != nil {
+			return fmt.Errorf("Failed loading network forwards: %w", err)
+		}
+
+		if len(forwards) > 0 {
+			return fmt.Errorf("Network has %d address forward(s)", len(forwards))
+		}
+
+		loadBalancers, err := dbCluster.GetNetworkLoadBalancers(ctx, tx.Tx(), dbCluster.NetworkLoadBalancerFilter{NetworkID: &networkID})
+		if err != nil {
+			return fmt.Errorf("Failed loading network load balancers: %w", err)
+		}
+
+		if len(loadBalancers) > 0 {
+			return fmt.Errorf("Network has %d load balancer(s)", len(loadBalancers))
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // childNetworks returns the networks sharing our logical router as their parent.
 func (n *ovn) childNetworks() ([]*ovn, error) {
 	if n.parentID != 0 {
@@ -2870,6 +2963,15 @@ func (n *ovn) validateUplinkNetwork(p *api.Project, uplinkNetworkName string) (s
 func (n *ovn) validateParentNetwork(config map[string]string) error {
 	if config["parent"] == n.name {
 		return errors.New("Network can't be its own parent")
+	}
+
+	children, err := n.childNetworks()
+	if err != nil {
+		return err
+	}
+
+	if len(children) > 0 {
+		return fmt.Errorf("Network is the parent of %d other network(s)", len(children))
 	}
 
 	for _, key := range []string{"network", "bridge.hwaddr", "bridge.external_interfaces", "bridge.multicast_relay"} {
@@ -4698,6 +4800,9 @@ func (n *ovn) Start() error {
 						online = true
 					}
 
+					// Fire a lifecycle event if the load balancer health state changed.
+					n.loadBalancerHealthEvent(lb, listenAddr.String(), online)
+
 					// Prepare advertisement.
 					ipVersion := uint(4)
 					if listenAddr.To4() == nil {
@@ -4833,11 +4938,13 @@ func (n *ovn) Update(newNetwork api.NetworkPut, targetNode string, clientType re
 		return err
 	}
 
-	if slices.Contains(changedKeys, "parent") {
-		return errors.New(`Option "parent" can't be changed`)
-	}
-
 	if clientType == request.ClientTypeNotifier {
+		// The parent may have changed, so refresh from the incoming config.
+		err = n.refreshParent(newNetwork.Config)
+		if err != nil {
+			n.logger.Warn("Failed refreshing parent network relationship", logger.Ctx{"err": err})
+		}
+
 		// Reload BGP on notifications.
 		err = n.bgpSetup(nil)
 		if err != nil {
@@ -4873,18 +4980,49 @@ func (n *ovn) Update(newNetwork api.NetworkPut, targetNode string, clientType re
 	reverter := revert.New()
 	defer reverter.Fail()
 
+	// The parent network owning our logical router before the change, kept around so
+	// its policies can be refreshed once we are no longer one of its networks.
+	var parentOldNet *ovn
+
+	// The parent network whose logical router we joined during this update, captured
+	// so the revert can remove anything we applied to it.
+	var parentNewNet *ovn
+
 	// Define a function which reverts everything.
 	reverter.Add(func() {
+		// Remove what we applied to the logical router we joined before reverting the config.
+		if parentNewNet != nil {
+			_ = n.deleteRouterNetworkConfig()
+		}
+
 		// Reset changes to all nodes and database.
 		_ = n.update(oldNetwork, targetNode, clientType)
 
+		// Refresh the policies of the logical router we joined so any leftover references are removed.
+		if parentNewNet != nil {
+			_ = parentNewNet.logicalRouterPolicySetup(n.ovnnb)
+		}
+
 		// Reset any change that was made to logical network.
 		if clientType == request.ClientTypeNormal {
+			_ = n.refreshParent(n.config)
 			_ = n.setup(true)
 		}
 
 		_ = n.Start()
 	})
+
+	parentChanged := slices.Contains(changedKeys, "parent")
+	oldParent := oldNetwork.Config["parent"]
+	newParent := newNetwork.Config["parent"]
+
+	// Refuse to reparent a network that is still in use.
+	if parentChanged && oldParent != newParent {
+		err = n.checkReparentAllowed()
+		if err != nil {
+			return err
+		}
+	}
 
 	// Stop network before new config applied if uplink network is changing.
 	if slices.Contains(changedKeys, "network") {
@@ -4898,10 +5036,68 @@ func (n *ovn) Update(newNetwork api.NetworkPut, targetNode string, clientType re
 		delete(newNetwork.Config, ovnVolatileUplinkIPv6)
 	}
 
+	// When the parent is changing, detach from the logical router we are attached to
+	// before the new config is applied.
+	if parentChanged && oldParent != "" {
+		// Remove our ports, routes and NAT rules from the old parent's logical router.
+		err = n.deleteRouterNetworkConfig()
+		if err != nil {
+			return err
+		}
+
+		// Remember the old parent so we can refresh its policies once the config has changed.
+		parentOldNet, err = n.parentNetwork()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Tear down our own logical router and anything tied to it when becoming a child network.
+	if parentChanged && oldParent == "" && newParent != "" {
+		err = n.ovnnb.DeleteLogicalRouter(context.TODO(), n.getRouterName())
+		if err != nil && !errors.Is(err, networkOVN.ErrNotFound) {
+			return err
+		}
+
+		err = n.ovnnb.DeleteLogicalSwitch(context.TODO(), n.getExtSwitchName())
+		if err != nil && !errors.Is(err, networkOVN.ErrNotFound) {
+			return err
+		}
+
+		err = n.ovnnb.DeleteChassisGroup(context.TODO(), n.getChassisGroupName())
+		if err != nil && !errors.Is(err, networkOVN.ErrNotFound) {
+			return err
+		}
+	}
+
 	// Apply changes to all nodes and database.
 	err = n.update(newNetwork, targetNode, clientType)
 	if err != nil {
 		return err
+	}
+
+	// Reload the parent relationship now that the config has been applied so the logical
+	// network is (re)created against the correct router.
+	err = n.refreshParent(n.config)
+	if err != nil {
+		return err
+	}
+
+	// Capture the parent we joined so the revert can clean up after us if needed.
+	if newParent != "" {
+		parentNewNet, err = n.parentNetwork()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Re-apply the policies of the parent network we left, as we are no longer one of the
+	// networks sharing its logical router.
+	if parentOldNet != nil && clientType == request.ClientTypeNormal {
+		err = parentOldNet.logicalRouterPolicySetup(n.ovnnb)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Re-setup the logical network after config applied if needed.
@@ -5241,6 +5437,54 @@ func (n *ovn) Update(newNetwork api.NetworkPut, targetNode string, clientType re
 // getInstanceDevicePortName returns the switch port name to use for an instance device.
 func (n *ovn) getInstanceDevicePortName(instanceUUID string, deviceName string) networkOVN.OVNSwitchPort {
 	return networkOVN.OVNSwitchPort(fmt.Sprintf("%s-%s-%s", n.getIntSwitchInstancePortPrefix(), instanceUUID, deviceName))
+}
+
+// instanceDevicePortSecurity returns the OVN port security entries for an instance NIC (nil if filtering is disabled).
+func (n *ovn) instanceDevicePortSecurity(devConfig deviceConfig.Device, mac net.HardwareAddr, ipv4 net.IP, ipv6 net.IP, routes []*net.IPNet) []string {
+	filterIPv4 := util.IsTrue(devConfig["security.ipv4_filtering"])
+	filterIPv6 := util.IsTrue(devConfig["security.ipv6_filtering"])
+
+	if !filterIPv4 && !filterIPv6 && !util.IsTrue(devConfig["security.mac_filtering"]) {
+		return nil
+	}
+
+	entry := []string{mac.String()}
+
+	// OVN blocks an IP family entirely once the other family is listed, so an unfiltered family gets a wildcard.
+	if filterIPv4 {
+		if ipv4 != nil {
+			entry = append(entry, ipv4.String())
+		}
+
+		for _, route := range routes {
+			if route.IP.To4() != nil {
+				entry = append(entry, route.String())
+			}
+		}
+	} else if filterIPv6 {
+		entry = append(entry, "0.0.0.0/0")
+	}
+
+	if filterIPv6 {
+		if ipv6 != nil {
+			entry = append(entry, ipv6.String())
+		}
+
+		for _, route := range routes {
+			if route.IP.To4() == nil {
+				entry = append(entry, route.String())
+			}
+		}
+	} else if filterIPv4 {
+		entry = append(entry, "::/0")
+	}
+
+	// OVN treats a MAC-only entry as allowing any IP, so list the unusable 0.0.0.0 source to block all IP traffic.
+	if filterIPv4 && filterIPv6 && len(entry) == 1 {
+		entry = append(entry, "0.0.0.0")
+	}
+
+	return []string{strings.Join(entry, " ")}
 }
 
 // instanceDevicePortRoutesParse parses the instance NIC device config for internal routes and external routes.
@@ -5691,6 +5935,13 @@ func (n *ovn) InstanceDevicePortStart(opts *OVNInstanceNICSetupOpts, securityACL
 		if (dnsIPv4 == nil && dhcpv4Subnet != nil) || (dnsIPv6 == nil && dhcpv6Subnet != nil) {
 			return "", nil, errors.New("Insufficient dynamic addresses allocated")
 		}
+	}
+
+	// Apply port security now that the port's addresses are known.
+	portSecurity := n.instanceDevicePortSecurity(opts.DeviceConfig, portOpts.MAC, dnsIPv4, dnsIPv6, slices.Concat(internalRoutes, externalRoutes))
+	err = n.ovnnb.UpdateLogicalSwitchPortSecurity(context.TODO(), instancePortName, portSecurity)
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed setting port security: %w", err)
 	}
 
 	// Remove SNAT rules for external addresses no longer used by the NIC.
@@ -9120,6 +9371,80 @@ func (n *ovn) forPeers(f func(targetOVNNet *ovn) error) error {
 	}
 
 	return nil
+}
+
+// loadBalancerHealthEvent fires a lifecycle event when the health of a load balancer changes.
+func (n *ovn) loadBalancerHealthEvent(lb ovnNB.LoadBalancer, listenAddress string, online bool) {
+	n.loadBalancerHealthLock.Lock()
+
+	if n.loadBalancerHealth == nil {
+		n.loadBalancerHealth = map[string]bool{}
+	}
+
+	// Skip firing an event for the initial state observed.
+	prevOnline, found := n.loadBalancerHealth[listenAddress]
+	n.loadBalancerHealth[listenAddress] = online
+
+	n.loadBalancerHealthLock.Unlock()
+
+	if !found || prevOnline == online {
+		return
+	}
+
+	// Only fire the event on the current cluster leader so that a health change isn't reported once per member.
+	if n.state.ServerClustered {
+		isLeader, err := n.state.Cluster.IsLeader()
+		if err != nil || !isLeader {
+			return
+		}
+	}
+
+	status := "unhealthy"
+	if online {
+		status = "healthy"
+	}
+
+	eventContext := map[string]any{"status": status}
+
+	// Include the status of the service monitors for the load balancer's backends.
+	if lb.Protocol != nil {
+		serviceMonitors := []map[string]any{}
+
+		for listenAddr, targets := range lb.Vips {
+			_, portStr, err := net.SplitHostPort(listenAddr)
+			if err != nil {
+				continue
+			}
+
+			port, err := strconv.Atoi(portStr)
+			if err != nil {
+				continue
+			}
+
+			for target := range strings.SplitSeq(targets, ",") {
+				host, _, err := net.SplitHostPort(target)
+				if err != nil {
+					continue
+				}
+
+				monitorStatus, err := n.ovnsb.GetServiceHealth(context.TODO(), host, *lb.Protocol, port)
+				if err != nil {
+					continue
+				}
+
+				serviceMonitors = append(serviceMonitors, map[string]any{
+					"address":  host,
+					"port":     port,
+					"protocol": *lb.Protocol,
+					"status":   monitorStatus,
+				})
+			}
+		}
+
+		eventContext["service_monitors"] = serviceMonitors
+	}
+
+	n.state.Events.SendLifecycle(n.project, lifecycle.NetworkLoadBalancerHealthChanged.Event(n, listenAddress, nil, eventContext))
 }
 
 // loadBalancerBGPSetupPrefixes exports external load balancer addresses as prefixes.

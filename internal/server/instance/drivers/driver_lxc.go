@@ -3412,7 +3412,7 @@ func (d *lxc) Stop(stateful bool) error {
 	}
 
 	// Setup a new operation
-	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionStop, []operationlock.Action{operationlock.ActionRestart, operationlock.ActionRestore, operationlock.ActionMigrate}, false, true)
+	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionStop, d.stopInheritableActions(), false, true)
 	if err != nil {
 		if errors.Is(err, operationlock.ErrNonReusuableSucceeded) {
 			// An existing matching operation has now succeeded, return.
@@ -4292,6 +4292,7 @@ func (d *lxc) renderState(statusCode api.StatusCode, hostInterfaces []net.Interf
 	}
 
 	status.Disk = d.diskState()
+	status.TPM = d.tpmState()
 
 	d.release()
 
@@ -4641,6 +4642,11 @@ func (d *lxc) Delete(force bool, cleanupDependencies bool) error {
 	// Setup a new operation.
 	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionDelete, nil, false, false)
 	if err != nil {
+		if errors.Is(err, operationlock.ErrNonReusuableSucceeded) {
+			// An existing matching operation has now succeeded, return.
+			return nil
+		}
+
 		return fmt.Errorf("Failed to create instance delete operation: %w", err)
 	}
 
@@ -4703,6 +4709,11 @@ func (d *lxc) delete(force bool, cleanupDependencies bool) error {
 	err := d.warningsDelete()
 	if err != nil {
 		return err
+	}
+
+	// Run device removal function for each device while the instance volume still exists.
+	if !d.IsSnapshot() {
+		d.devicesRemove(d, cleanupDependencies)
 	}
 
 	pool, err := storagePools.LoadByInstance(d.state, d)
@@ -4773,9 +4784,6 @@ func (d *lxc) delete(force bool, cleanupDependencies bool) error {
 				return err
 			}
 		}
-
-		// Run device removal function for each device.
-		d.devicesRemove(d, cleanupDependencies)
 
 		// Clean things up.
 		d.cleanup()
@@ -8538,6 +8546,9 @@ func (d *lxc) cpuState() api.InstanceStateCPU {
 func (d *lxc) diskState() map[string]api.InstanceStateDisk {
 	disk := map[string]api.InstanceStateDisk{}
 
+	// Custom volumes may live in another project, resolve it only if needed.
+	volumeProject := ""
+
 	for _, dev := range d.expandedDevices.Sorted() {
 		if dev.Config["type"] != "disk" {
 			continue
@@ -8545,17 +8556,20 @@ func (d *lxc) diskState() map[string]api.InstanceStateDisk {
 
 		var usage *storagePools.VolumeUsage
 
-		if dev.Config["path"] == "/" {
+		if internalInstance.IsRootDiskDevice(dev.Config) {
 			pool, err := d.getStoragePool()
 			if err != nil {
-				d.logger.Error("Error loading storage pool", logger.Ctx{"err": err})
+				if !d.isBeingDeleted() {
+					d.logger.Warn("Error loading storage pool", logger.Ctx{"err": err})
+				}
+
 				continue
 			}
 
 			usage, err = pool.GetInstanceUsage(d)
 			if err != nil {
-				if !errors.Is(err, storageDrivers.ErrNotSupported) {
-					d.logger.Error("Error getting disk usage", logger.Ctx{"err": err})
+				if !errors.Is(err, storageDrivers.ErrNotSupported) && !d.isBeingDeleted() {
+					d.logger.Warn("Error getting disk usage", logger.Ctx{"err": err})
 				}
 
 				continue
@@ -8563,12 +8577,23 @@ func (d *lxc) diskState() map[string]api.InstanceStateDisk {
 		} else if dev.Config["pool"] != "" {
 			pool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
 			if err != nil {
-				d.logger.Error("Error loading storage pool", logger.Ctx{"poolName": dev.Config["pool"], "err": err})
+				if !d.isBeingDeleted() {
+					d.logger.Warn("Error loading storage pool", logger.Ctx{"poolName": dev.Config["pool"], "err": err})
+				}
+
 				continue
 			}
 
+			if volumeProject == "" {
+				volumeProject, err = project.StorageVolumeProject(d.state.DB.Cluster, d.Project().Name, db.StoragePoolVolumeTypeCustom)
+				if err != nil {
+					d.logger.Error("Error loading storage volume project", logger.Ctx{"err": err})
+					continue
+				}
+			}
+
 			volName, _ := internalInstance.SplitVolumeSource(dev.Config["source"])
-			usage, err = pool.GetCustomVolumeUsage(d.Project().Name, volName)
+			usage, err = pool.GetCustomVolumeUsage(volumeProject, volName)
 			if err != nil {
 				if !errors.Is(err, storageDrivers.ErrNotSupported) {
 					d.logger.Error("Error getting volume usage", logger.Ctx{"volume": dev.Config["source"], "err": err})

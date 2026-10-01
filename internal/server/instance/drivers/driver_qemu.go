@@ -129,6 +129,23 @@ const qemuSparseUSBPorts = 8
 
 var errQemuAgentOffline = errors.New("VM agent isn't currently running")
 
+// errQemuPIDMismatch is returned when the recorded PID no longer belongs to this instance's QEMU.
+var errQemuPIDMismatch = errors.New("PID doesn't match the running process")
+
+// monitorGoneErrors are the errors caused by QEMU having gone away, as happens during a restart.
+var monitorGoneErrors = []error{qmp.ErrMonitorDisconnect, unix.ECONNREFUSED, fs.ErrNotExist, errQemuPIDMismatch}
+
+// isMonitorGoneError returns true when the error is one of monitorGoneErrors.
+func isMonitorGoneError(err error) bool {
+	for _, target := range monitorGoneErrors {
+		if errors.Is(err, target) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // qemuStopHooks tracks instances with a stop hook in progress.
 var qemuStopHooks sync.Map
 
@@ -497,7 +514,7 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 	s := d.state
 
 	return func(event string, data map[string]any) {
-		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventVMReset, qmp.EventAgentStarted, qmp.EventAgentStopped, qmp.EventRTCChange}, event) {
+		if !slices.Contains([]string{qmp.EventVMShutdown, qmp.EventVMReset, qmp.EventAgentStarted, qmp.EventAgentStopped, qmp.EventAgentTemplated, qmp.EventRTCChange}, event) {
 			return // Don't bother loading the instance from DB if we aren't going to handle the event.
 		}
 
@@ -561,6 +578,20 @@ func (d *qemu) getMonitorEventHandler() func(event string, data map[string]any) 
 			}
 
 			s.Events.SendLifecycle(instProject.Name, lifecycle.InstanceAgentStarted.Event(d, nil))
+
+		case qmp.EventAgentTemplated:
+			d.logger.Debug("Instance agent applied templates")
+
+			// Record it now and force a full restart so the coming reboot regenerates the config drive.
+			if d.LocalConfig()["volatile.apply_template"] != "" {
+				err = d.VolatileSet(map[string]string{
+					"volatile.apply_template": "",
+					"volatile.vm.needs_reset": "true",
+				})
+				if err != nil {
+					d.logger.Error("Failed recording template application", logger.Ctx{"err": err})
+				}
+			}
 
 		case qmp.EventAgentStopped:
 			d.logger.Debug("Instance agent stopped")
@@ -3594,14 +3625,24 @@ func (d *qemu) nvramPath() string {
 	return filepath.Join(d.Path(), "qemu.nvram")
 }
 
-// nvramRunPath returns the local copy of the UEFI variables used while the VM runs.
-func (d *qemu) nvramRunPath() (string, error) {
+// nvramFileName returns the name of the UEFI variables file the qemu.nvram symlink points to.
+func (d *qemu) nvramFileName() (string, error) {
 	target, err := os.Readlink(d.nvramPath())
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(d.RunPath(), filepath.Base(target)), nil
+	return filepath.Base(target), nil
+}
+
+// nvramRunPath returns the local copy of the UEFI variables used while the VM runs.
+func (d *qemu) nvramRunPath() (string, error) {
+	name, err := d.nvramFileName()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(d.RunPath(), name), nil
 }
 
 // nvramEditPath returns the copy of the UEFI variables that reads and writes must go through.
@@ -3664,13 +3705,16 @@ func (d *qemu) startNvramMirror(seed bool) error {
 		return err
 	}
 
-	runPath, err := d.nvramRunPath()
+	name, err := d.nvramFileName()
 	if err != nil {
 		return err
 	}
 
+	runPath := filepath.Join(d.RunPath(), name)
+
 	if seed {
-		err = mirror.CopyFile(d.nvramPath(), runPath)
+		// Copy the file itself rather than going through the qemu.nvram symlink.
+		err = mirror.CopyFile(filepath.Join(d.Path(), name), runPath)
 		if err != nil {
 			return fmt.Errorf("Failed copying NVRAM file: %w", err)
 		}
@@ -6539,7 +6583,7 @@ func (d *qemu) pid() (int, error) {
 	isQemu := bytes.Contains(cmdLine, []byte("qemu-system")) || bytes.Contains(cmdLine, []byte("qemu-kvm"))
 	instUUID := []byte(d.localConfig["volatile.uuid"])
 	if !isQemu || !bytes.Contains(cmdLine, instUUID) {
-		return -1, errors.New("PID doesn't match the running process")
+		return -1, errQemuPIDMismatch
 	}
 
 	return pid, nil
@@ -6589,11 +6633,11 @@ func (d *qemu) Stop(stateful bool) error {
 	_, _ = d.ConsoleLog()
 
 	// Setup a new operation.
-	// Allow inheriting of ongoing restart or restore operation (we are called from restartCommon and Restore).
+	// Allow inheriting of ongoing restart, restore or own migrate operation (restartCommon, Restore, migration).
 	// Don't allow reuse when creating a new stop operation. This prevents other operations from interfering.
 	// Allow reuse of a reusable ongoing stop operation as Shutdown() may be called first, which allows reuse
 	// of its operations. This allow for Stop() to inherit from Shutdown() where instance is stuck.
-	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionStop, []operationlock.Action{operationlock.ActionRestart, operationlock.ActionRestore, operationlock.ActionMigrate}, false, true)
+	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionStop, d.stopInheritableActions(), false, true)
 	if err != nil {
 		if errors.Is(err, operationlock.ErrNonReusuableSucceeded) {
 			// An existing matching operation has now succeeded, return.
@@ -7477,6 +7521,7 @@ func (d *qemu) Update(args db.InstanceArgs, userRequested bool) error {
 			"security.protection.start",
 			"security.guestapi",
 			"security.secureboot",
+			"security.tags",
 		}
 
 		liveUpdateKeyPrefixes := []string{
@@ -8105,6 +8150,11 @@ func (d *qemu) Delete(force bool, cleanupDependencies bool) error {
 	// Setup a new operation.
 	op, err := operationlock.CreateWaitGet(d.Project().Name, d.Name(), d.op, operationlock.ActionDelete, nil, false, false)
 	if err != nil {
+		if errors.Is(err, operationlock.ErrNonReusuableSucceeded) {
+			// An existing matching operation has now succeeded, return.
+			return nil
+		}
+
 		return fmt.Errorf("Failed to create instance delete operation: %w", err)
 	}
 
@@ -8162,6 +8212,11 @@ func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 	err := d.warningsDelete()
 	if err != nil {
 		return err
+	}
+
+	// Run device removal function for each device while the instance volume still exists.
+	if !d.IsSnapshot() {
+		d.devicesRemove(d, cleanupDependencies)
 	}
 
 	// Attempt to initialize storage interface for the instance.
@@ -8233,9 +8288,6 @@ func (d *qemu) delete(force bool, cleanupDependencies bool) error {
 				return err
 			}
 		}
-
-		// Run device removal function for each device.
-		d.devicesRemove(d, cleanupDependencies)
 
 		// Clean things up.
 		d.cleanup()
@@ -10629,14 +10681,11 @@ func (d *qemu) renderState(statusCode api.StatusCode) (*api.InstanceState, error
 		StatusCode: statusCode,
 	}
 
+	status.TPM = d.tpmState()
+
 	// If VM is stopped or errored, we're done here.
 	if d.isErrorStatusCode(statusCode) || !d.isRunningStatusCode(statusCode) {
-		diskState, err := d.diskState()
-		if err != nil && !errors.Is(err, storageDrivers.ErrNotSupported) {
-			d.logger.Warn("Error getting disk usage", logger.Ctx{"err": err})
-		}
-
-		status.Disk = diskState
+		status.Disk = d.diskState()
 
 		return status, nil
 	}
@@ -10678,25 +10727,20 @@ func (d *qemu) renderState(statusCode api.StatusCode) (*api.InstanceState, error
 	if status.Memory.Usage <= 0 {
 		monitor, err := d.qmpConnect()
 		if err != nil {
-			d.logger.Warn("Error getting QEMU monitor", logger.Ctx{"err": err})
+			d.logger.WarnOnErrorExcept(err, monitorGoneErrors, "Error getting QEMU monitor for memory metrics")
+		} else {
+			memoryMetrics, err := d.getQemuMemoryMetrics(monitor)
+			if err != nil {
+				d.logger.WarnOnErrorExcept(err, monitorGoneErrors, "Error getting memory metrics")
+			} else {
+				status.Memory.Total = int64(memoryMetrics.MemTotalBytes)
+				status.Memory.Usage = int64(memoryMetrics.MemTotalBytes - memoryMetrics.MemAvailableBytes)
+			}
 		}
-
-		memoryMetrics, err := d.getQemuMemoryMetrics(monitor)
-		if err != nil {
-			d.logger.Warn("Error getting memory metrics", logger.Ctx{"err": err})
-		}
-
-		status.Memory.Total = int64(memoryMetrics.MemTotalBytes)
-		status.Memory.Usage = int64(memoryMetrics.MemTotalBytes - memoryMetrics.MemAvailableBytes)
 	}
 
 	// Populate the disk information.
-	diskState, err := d.diskState()
-	if err != nil && !errors.Is(err, storageDrivers.ErrNotSupported) {
-		d.logger.Warn("Error getting disk usage", logger.Ctx{"err": err})
-	}
-
-	status.Disk = diskState
+	status.Disk = d.diskState()
 
 	// Populate the CPU time allocation.
 	limitsCPU, ok := d.expandedConfig["limits.cpu"]
@@ -10737,10 +10781,13 @@ func (d *qemu) renderState(statusCode api.StatusCode) (*api.InstanceState, error
 	// Populate the process information.
 	pid, _ := d.pid()
 	status.Pid = int64(pid)
-	status.StartedAt, err = d.processStartedAt(d.InitPID())
+
+	startedAt, err := d.processStartedAt(d.InitPID())
 	if err != nil {
 		return status, err
 	}
+
+	status.StartedAt = startedAt
 
 	return status, nil
 }
@@ -10751,30 +10798,105 @@ func (d *qemu) RenderState(hostInterfaces []net.Interface) (*api.InstanceState, 
 }
 
 // diskState gets disk usage info.
-func (d *qemu) diskState() (map[string]api.InstanceStateDisk, error) {
-	pool, err := d.getStoragePool()
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the root disk device config.
-	rootDiskName, _, err := d.getRootDiskDevice()
-	if err != nil {
-		return nil, err
-	}
-
-	usage, err := pool.GetInstanceUsage(d)
-	if err != nil {
-		return nil, err
-	}
-
+func (d *qemu) diskState() map[string]api.InstanceStateDisk {
 	disk := map[string]api.InstanceStateDisk{}
-	disk[rootDiskName] = api.InstanceStateDisk{
-		Usage: usage.Used,
-		Total: usage.Total,
+
+	// Custom volumes may live in another project, resolve it only if needed.
+	volumeProject := ""
+
+	// Get the disk I/O counters from QEMU, best effort as QMP is unavailable when stopped.
+	var blockStats map[string]qmp.BlockStats
+
+	monitor, err := d.qmpConnect()
+	if err != nil {
+		d.logger.Debug("Failed to connect to QMP monitor to get disk I/O counters", logger.Ctx{"err": err})
+	} else {
+		blockStats, err = monitor.GetBlockStats()
+		if err != nil {
+			d.logger.Debug("Failed to get disk I/O counters", logger.Ctx{"err": err})
+		}
 	}
 
-	return disk, nil
+	for _, dev := range d.expandedDevices.Sorted() {
+		if dev.Config["type"] != "disk" {
+			continue
+		}
+
+		var usage *storagePools.VolumeUsage
+
+		if internalInstance.IsRootDiskDevice(dev.Config) {
+			pool, err := d.getStoragePool()
+			if err != nil {
+				if !d.isBeingDeleted() {
+					d.logger.Warn("Error loading storage pool", logger.Ctx{"err": err})
+				}
+
+				continue
+			}
+
+			usage, err = pool.GetInstanceUsage(d)
+			if err != nil {
+				if !errors.Is(err, storageDrivers.ErrNotSupported) && !d.isBeingDeleted() {
+					d.logger.Warn("Error getting disk usage", logger.Ctx{"err": err})
+				}
+
+				continue
+			}
+		} else if dev.Config["pool"] != "" {
+			pool, err := storagePools.LoadByName(d.state, dev.Config["pool"])
+			if err != nil {
+				if !d.isBeingDeleted() {
+					d.logger.Warn("Error loading storage pool", logger.Ctx{"poolName": dev.Config["pool"], "err": err})
+				}
+
+				continue
+			}
+
+			if volumeProject == "" {
+				volumeProject, err = project.StorageVolumeProject(d.state.DB.Cluster, d.Project().Name, db.StoragePoolVolumeTypeCustom)
+				if err != nil {
+					d.logger.Error("Error loading storage volume project", logger.Ctx{"err": err})
+					continue
+				}
+			}
+
+			volName, _ := internalInstance.SplitVolumeSource(dev.Config["source"])
+			usage, err = pool.GetCustomVolumeUsage(volumeProject, volName)
+			if err != nil {
+				if !errors.Is(err, storageDrivers.ErrNotSupported) {
+					d.logger.Error("Error getting volume usage", logger.Ctx{"volume": dev.Config["source"], "err": err})
+				}
+
+				continue
+			}
+		} else {
+			continue
+		}
+
+		diskState := api.InstanceStateDisk{}
+		if usage != nil {
+			diskState.Usage = usage.Used
+			diskState.Total = usage.Total
+		}
+
+		if blockStats != nil {
+			qdevID := qemuDeviceIDPrefix + linux.PathNameEncode(dev.Name)
+
+			stats, ok := blockStats[qdevID]
+			if ok {
+				diskState.Counters = &api.InstanceStateDiskCounters{
+					BytesRead:       int64(stats.BytesRead),
+					BytesWritten:    int64(stats.BytesWritten),
+					ReadsCompleted:  int64(stats.ReadsCompleted),
+					WritesCompleted: int64(stats.WritesCompleted),
+				}
+			}
+		}
+
+		disk[dev.Name] = diskState
+	}
+
+	return disk
 }
 
 // agentGetState connects to the agent inside of the VM and does
@@ -11610,18 +11732,26 @@ func (d *qemu) Metrics(hostInterfaces []net.Interface) (*metrics.MetricSet, erro
 	if d.agentMetricsEnabled() {
 		agentMetrics, err := d.getAgentMetrics()
 		if err != nil {
-			if !errors.Is(err, errQemuAgentOffline) {
-				d.logger.Warn("Could not get VM metrics from agent", logger.Ctx{"err": err})
-			}
+			d.logger.WarnOnErrorExcept(err, append([]error{errQemuAgentOffline}, monitorGoneErrors...), "Could not get VM metrics from agent")
 
 			// Fallback data if agent is not reachable.
-			return d.getQemuMetrics()
+			return d.getQemuMetricsOrStopped()
 		}
 
 		return agentMetrics, nil
 	}
 
-	return d.getQemuMetrics()
+	return d.getQemuMetricsOrStopped()
+}
+
+// getQemuMetricsOrStopped reports a QEMU that went away during collection as a stopped instance.
+func (d *qemu) getQemuMetricsOrStopped() (*metrics.MetricSet, error) {
+	metricSet, err := d.getQemuMetrics()
+	if err != nil && isMonitorGoneError(err) {
+		return nil, ErrInstanceIsStopped
+	}
+
+	return metricSet, err
 }
 
 func (d *qemu) getAgentMetrics() (*metrics.MetricSet, error) {
