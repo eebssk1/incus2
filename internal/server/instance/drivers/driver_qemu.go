@@ -1956,6 +1956,9 @@ func (d *qemu) start(stateful bool, op *operationlock.InstanceOperation) error {
 			return err
 		}
 
+		// Share the guest memory unless the instance prefers transparent huge pages and no device needs it.
+		memoryTopology.Anonymous = !d.sharedMemoryPreferred() && !d.needsSharedMemory(devConfs)
+
 		bs.MemoryTopology = memoryTopology
 	}
 
@@ -2904,7 +2907,7 @@ func (d *qemu) setupNvram() error {
 					return fmt.Errorf("Invalid base64 value for %q: %q", k, value)
 				}
 			} else if strings.HasPrefix(k, "initial.secureboot.") {
-				guid, varName = util.ESLGUIDVar(parts[2])
+				guid, varName = uefi.ESLGUIDVar(parts[2])
 				var esl uefi.ESL
 				if varName == "MokList" {
 					v.Attributes = []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS"}
@@ -3136,6 +3139,22 @@ func (d *qemu) deviceAttachPath(deviceName string, configCopy map[string]string,
 	monitor, err := d.qmpConnect()
 	if err != nil {
 		return fmt.Errorf("Failed to connect to QMP monitor: %w", err)
+	}
+
+	// virtiofs needs the guest memory to be shared, which is only set up when starting with a directory share.
+	memDevs, err := monitor.GetMemdev()
+	if err != nil {
+		return fmt.Errorf("Failed to query memory backends: %w", err)
+	}
+
+	for _, memDev := range memDevs {
+		if memDev.ID != "mem0" && memDev.ID != qemuDefaultRAMObject(d.architecture) {
+			continue
+		}
+
+		if !memDev.Share {
+			return errors.New("VM is currently running without shared memory, stop the VM before adding a virtiofs share")
+		}
 	}
 
 	monHook, err := d.addDriveDirConfigVirtiofs(nil, nil, mount)
@@ -4355,13 +4374,19 @@ func (d *qemu) deviceBootPriorities(base int) (map[string]int, error) {
 	devices := []devicePrios{}
 
 	for _, dev := range d.expandedDevices.Sorted() {
-		if dev.Config["type"] != "disk" && dev.Config["type"] != "nic" {
+		devType := dev.Config["type"]
+		if devType != "disk" && devType != "nic" {
 			continue
 		}
 
 		bootPrio := uint32(0) // Default to lowest priority.
-		if dev.Config["boot.priority"] != "" {
-			prio, err := strconv.ParseInt(dev.Config["boot.priority"], 10, 32)
+		confPrio := dev.Config["boot.priority"]
+		if confPrio == "skip" || confPrio == "" && devType == "nic" {
+			continue
+		}
+
+		if confPrio != "" {
+			prio, err := strconv.ParseInt(confPrio, 10, 32)
 			if err != nil {
 				return nil, fmt.Errorf("Invalid boot.priority for device %q: %w", dev.Name, err)
 			}
@@ -4980,6 +5005,11 @@ func (d *qemu) generateQemuConfig(bs *qemuBootState, mountInfo *storagePools.Mou
 		}
 	}
 
+	// Add `fw_cfg` configuration.
+	conf = append(conf, qemuFWCfg(&qemuFWCfgOpts{
+		pxe: util.IsTrue(d.localConfig["boot.pxe"]),
+	})...)
+
 	// Allocate 8 PCI slots for hotplug devices.
 	for range 8 {
 		bus.allocate(busFunctionGroupNone)
@@ -5136,6 +5166,34 @@ func (d *qemu) getCPUOpts(cpuInfo *qemuCPUTopology, memSizeBytes int64) (*qemuCP
 	return &cpuOpts, nil
 }
 
+// sharedMemoryPreferred returns whether the guest memory should be shared ahead of any device needing it.
+func (d *qemu) sharedMemoryPreferred() bool {
+	// Nested virtualization suffers the most from shared memory not getting transparent huge pages.
+	if util.IsTrue(d.expandedConfig["security.nesting"]) {
+		return false
+	}
+
+	// Nothing can need shared memory when virtiofs can't be used.
+	_, err := device.DiskVMVirtiofsSupported(d)
+
+	return err == nil
+}
+
+// needsSharedMemory returns whether a device needs the guest memory to be shared with the host (vhost-user).
+func (d *qemu) needsSharedMemory(devConfs []*deviceConfig.RunConfig) bool {
+	for _, runConf := range devConfs {
+		for _, mount := range runConf.Mounts {
+			for _, opt := range mount.Opts {
+				if strings.HasPrefix(opt, device.DiskVirtiofsdSockMountOpt+"=") {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 // addCPUMemoryConfig adds the qemu config required for setting the number of virtualised CPUs and memory.
 // If sb is nil then no config is written.
 func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, bs *qemuBootState) error {
@@ -5145,6 +5203,7 @@ func (d *qemu) addCPUMemoryConfig(conf *[]cfg.Section, bs *qemuBootState) error 
 	}
 
 	cpuOpts.cpuMaxCpus = bs.MaxCPUs
+	cpuOpts.sharedMemory = !bs.MemoryTopology.Anonymous
 
 	// A fixed topology is written verbatim, either due to CPU pinning or an explicit topology request.
 	cpuFixedTopology := bs.CPUTopology.VCPUs != nil || bs.CPUTopology.Explicit
@@ -5767,7 +5826,7 @@ func (d *qemu) addDriveConfig(qemuDev map[string]any, bootIndexes map[string]int
 		serialMaxLength = 14
 	}
 
-	qemuDev["serial"] = fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, hashValue(escapedDeviceName, serialMaxLength))
+	qemuDev["serial"] = fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, internalInstance.HashName(escapedDeviceName, serialMaxLength))
 
 	if wwn != "" {
 		wwnID, err := strconv.ParseUint(strings.TrimPrefix(wwn, "0x"), 16, 64)
@@ -7908,6 +7967,10 @@ func (d *qemu) updateMemoryLimit(newLimit string) error {
 				return err
 			}
 
+			if bs.MemoryTopology != nil {
+				memTopology.Anonymous = bs.MemoryTopology.Anonymous
+			}
+
 			bs.MemoryTopology = &memTopology
 
 			err = d.saveBootState(*bs)
@@ -8657,7 +8720,7 @@ func (d *qemu) MigrateSend(args instance.MigrateSendArgs) error {
 
 	// On a cluster move the dependent volumes on shared storage are taken over by the target
 	// rather than transferred, so they're kept out of the offer.
-	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.Project().Name, args.Snapshots, args.Devices, args.SkipDependentVolumes, clusterMove)
+	dependentVolumesOffer, err := storagePools.GenerateDependentVolumesOffer(d.state, srcConfig, d.ExpandedDevices().CloneNative(), d.Project().Name, args.Snapshots, args.Devices, args.SkipDependentVolumes, clusterMove)
 	if err != nil {
 		err := fmt.Errorf("Failed generating instance depending volumes offer: %w", err)
 		op.Done(err)
@@ -11024,7 +11087,7 @@ func (d *qemu) DeviceEventHandler(runConf *deviceConfig.RunConfig) error {
 
 		if mount.Size > 0 {
 			// Update the size.
-			err = m.UpdateBlockSize(strings.SplitN(devID, "-", 2)[1], mount.Size)
+			err = m.UpdateBlockSize(d.blockNodeName(linux.PathNameEncode(mount.DevName)), mount.Size)
 			if err != nil {
 				return fmt.Errorf("Failed updating disk size %q: %w", mount.DevName, err)
 			}
@@ -11881,13 +11944,13 @@ func (d *qemu) deviceDetachUSB(usbDev deviceConfig.USBDeviceItem) error {
 // Block node names may only be up to 31 characters long, so use a hash if longer.
 func (d *qemu) blockNodeName(name string) string {
 	// Apply the prefix.
-	return fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, hashValue(name, 25))
+	return fmt.Sprintf("%s%s", qemuBlockDevIDPrefix, internalInstance.HashName(name, 25))
 }
 
 // Mount tag names may only be up to 31 or 36 characters long, so use a hash if longer.
 func (d *qemu) mountTagName(name string, maxLength int) string {
 	// Apply the prefix.
-	return fmt.Sprintf("%s%s", qemuMountTagPrefix, hashValue(name, maxLength))
+	return fmt.Sprintf("%s%s", qemuMountTagPrefix, internalInstance.HashName(name, maxLength))
 }
 
 func (d *qemu) setCPUs(monitor *qmp.Monitor, count int) error {

@@ -3538,3 +3538,22 @@ This adds the `security.mac_filtering`, `security.ipv4_filtering` and `security.
 They are implemented through OVN port security on the instance's logical switch port,
 restricting the source MAC address and, when IP filtering is enabled, the IP addresses
 (including any static routes) the instance may use.
+
+## `authorization_scriptlet_request`
+
+This adds the following fields to the `details` argument of the authorization scriptlet:
+
+* `URL`, holding the raw client request URL (`<path>?<query>`)
+* `Path`, holding the API path requested by the client
+* `Query`, holding the dictionary of query parameters (note: the values are lists of strings and not single strings)
+* `Method`, holding the HTTP method used in the request
+
+## `vm_boot_priority_skip`
+
+This adds the ability to define `boot.priority` to `skip` on NIC and disk devices, to skip them from the boot sequence. The new default for NICs is to be skipped.
+This additionally adds a `boot.pxe` VM configuration key, defaulting to `false`, to enable PXE on all the NICs included in the boot sequence. This doesn’t affect HTTP boot, which is always enabled for those NICs.
+
+## `network_ovn_nat_address_l2proxy`
+
+Allows `ipv4.nat.address` and `ipv6.nat.address` on an `ovn` network whose uplink uses
+`ovn.ingress_mode=l2proxy`, previously only supported with `ovn.ingress_mode=routed`.
