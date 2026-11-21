@@ -74,6 +74,7 @@ import (
 	"github.com/lxc/incus/v7/internal/server/storage/linstor"
 	"github.com/lxc/incus/v7/internal/server/sys"
 	"github.com/lxc/incus/v7/internal/server/syslog"
+	systemdreport "github.com/lxc/incus/v7/internal/server/systemd-report"
 	"github.com/lxc/incus/v7/internal/server/task"
 	"github.com/lxc/incus/v7/internal/server/ucred"
 	localUtil "github.com/lxc/incus/v7/internal/server/util"
@@ -188,6 +189,9 @@ type Daemon struct {
 	// ACME challenge listener used by non-leader cluster members.
 	acmeListener   *http.Server
 	acmeListenerMu sync.Mutex
+
+	// Systemd-report server.
+	systemdReportServer *systemdreport.Server
 }
 
 // DaemonConfig holds configuration values for Daemon.
@@ -1456,7 +1460,7 @@ func (d *Daemon) init() error {
 
 	// Mount the storage pools.
 	logger.Infof("Initializing storage pools")
-	err = storageStartup(d.State())
+	err = storageStartup(d.State)
 	if err != nil {
 		return err
 	}
@@ -1635,7 +1639,7 @@ func (d *Daemon) init() error {
 	if !d.serverClustered || !d.db.Cluster.LocalNodeIsEvacuated() {
 		logger.Infof("Initializing networks")
 
-		err = networkStartup(d.State())
+		err = networkStartup(d.State)
 		if err != nil {
 			return err
 		}
@@ -1729,6 +1733,13 @@ func (d *Daemon) init() error {
 		return fmt.Errorf("Failed deleting volatile.last_state.ready: %w", err)
 	}
 
+	if !d.os.MockMode && systemdreport.Supported() {
+		d.systemdReportServer, err = systemdreport.Start(systemdreport.SocketPath, d.systemdReportSnapshot)
+		if err != nil {
+			logger.Warn("Failed starting systemd-report metrics", logger.Ctx{"err": err})
+		}
+	}
+
 	close(d.setupChan)
 
 	_ = d.db.Cluster.Transaction(context.TODO(), func(ctx context.Context, tx *db.ClusterTx) error {
@@ -1790,6 +1801,9 @@ func (d *Daemon) init() error {
 
 		// Remove expired tokens (hourly)
 		d.tasks.Add(autoRemoveExpiredTokensTask(d))
+
+		// Cancel operations whose requestor lost access (every 30 seconds)
+		d.tasks.Add(operationsRecheckAccessTask(d))
 	}
 
 	// Start all background tasks
@@ -1898,6 +1912,13 @@ func (d *Daemon) Stop(ctx context.Context, sig os.Signal) error {
 
 	// Cancelling the context will make everyone aware that we're shutting down.
 	d.shutdownCancel()
+
+	if d.systemdReportServer != nil {
+		err := d.systemdReportServer.Close()
+		if err != nil {
+			logger.Warn("Failed to stop systemd-report metrics", logger.Ctx{"err": err})
+		}
+	}
 
 	if d.loggingController != nil {
 		d.loggingController.Shutdown()

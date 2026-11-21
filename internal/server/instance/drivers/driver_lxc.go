@@ -348,47 +348,50 @@ func lxcCreate(s *state.State, args db.InstanceArgs, p api.Project, partialDevic
 	}
 
 	// Setup the initial idmap config, keeping the allocation locked until it's persisted.
-	err = func() error {
-		idmapLock.Lock()
-		defer idmapLock.Unlock()
+	// Snapshots keep the map they were taken with rather than allocating their own.
+	if !d.IsSnapshot() {
+		err = func() error {
+			idmapLock.Lock()
+			defer idmapLock.Unlock()
 
-		var idmapSet *idmap.Set
-		base := int64(0)
-		if !d.IsPrivileged() {
-			idmapSet, base, err = d.findIdmap()
-			if err != nil {
-				return err
+			var idmapSet *idmap.Set
+			base := int64(0)
+			if !d.IsPrivileged() {
+				idmapSet, base, err = d.findIdmap()
+				if err != nil {
+					return err
+				}
 			}
-		}
 
-		idmapSetJSON, err := idmapSet.ToJSON()
+			idmapSetJSON, err := idmapSet.ToJSON()
+			if err != nil {
+				return fmt.Errorf("Failed to encode ID map: %w", err)
+			}
+
+			v := map[string]string{
+				"volatile.idmap.next": idmapSetJSON,
+				"volatile.idmap.base": fmt.Sprintf("%v", base),
+			}
+
+			// Invalidate the idmap cache.
+			d.idmapset = nil
+
+			// Set last_state if not currently set.
+			if d.localConfig["volatile.last_state.idmap"] == "" {
+				v["volatile.last_state.idmap"] = "[]"
+			}
+
+			return d.VolatileSet(v)
+		}()
 		if err != nil {
-			return fmt.Errorf("Failed to encode ID map: %w", err)
+			return nil, nil, err
 		}
 
-		v := map[string]string{
-			"volatile.idmap.next": idmapSetJSON,
-			"volatile.idmap.base": fmt.Sprintf("%v", base),
+		// Re-run init to update the idmap.
+		err = d.init()
+		if err != nil {
+			return nil, nil, err
 		}
-
-		// Invalidate the idmap cache.
-		d.idmapset = nil
-
-		// Set last_state if not currently set.
-		if d.localConfig["volatile.last_state.idmap"] == "" {
-			v["volatile.last_state.idmap"] = "[]"
-		}
-
-		return d.VolatileSet(v)
-	}()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Re-run init to update the idmap.
-	err = d.init()
-	if err != nil {
-		return nil, nil, err
 	}
 
 	if !d.IsSnapshot() {
@@ -2171,7 +2174,7 @@ func (d *lxc) selinuxLabelFiles(contextIsNew bool) error {
 		return fmt.Errorf("Invalid security.selinux.label_rootfs value: %q", rootfsMode)
 	}
 
-	fileCtx := selinux.InstanceFileContext(ctx, instancetype.Container, d.expandedConfig)
+	fileCtx := selinux.InstanceFileContext(d.state.OS, ctx, instancetype.Container, d.expandedConfig)
 	if fileCtx == "" {
 		return fmt.Errorf("Failed to derive file context from %q", ctx)
 	}
@@ -3630,11 +3633,8 @@ func (d *lxc) Stop(stateful bool) error {
 			return err
 		}
 
-		// Give onStop some time to complete the operation, it may never run if the daemon is shutting down.
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		waitErr := op.Wait(ctx)
+		// Let onStop finish the cleanup.
+		waitErr := d.waitStopHook(op)
 		if waitErr != nil {
 			op.Done(err)
 			return err
@@ -3665,6 +3665,20 @@ func (d *lxc) Stop(stateful bool) error {
 	}
 
 	return nil
+}
+
+// waitStopHook waits for onStop to complete the stop operation of an instance that already exited.
+func (d *lxc) waitStopHook(op *operationlock.InstanceOperation) error {
+	// The hook may never run during daemon shutdown as the database gets closed, so don't wait long then.
+	timeout := 5 * time.Minute
+	if d.state.ShutdownCtx.Err() != nil {
+		timeout = 30 * time.Second
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	return op.Wait(ctx)
 }
 
 // Shutdown stops the instance.
@@ -3759,6 +3773,11 @@ func (d *lxc) Shutdown(timeout time.Duration) error {
 	// onStop which picks up the same lock and then marks it as Done after the instance stops and the devices
 	// have been cleaned up. However if the operation has failed for another reason we collect the error here.
 	err = op.Wait(ctx)
+	if err != nil && !cc.Running() {
+		// The instance exited in time, let onStop finish the cleanup.
+		err = d.waitStopHook(op)
+	}
+
 	status := d.statusCode()
 	if status != api.Stopped {
 		errPrefix := fmt.Errorf("Failed shutting down instance, status is %q", status)
@@ -4606,7 +4625,7 @@ func (d *lxc) Restore(sourceContainer instance.Instance, stateful bool, diskOnly
 		// Restore the configuration.
 		args = db.InstanceArgs{
 			Architecture: sourceContainer.Architecture(),
-			Config:       sourceContainer.LocalConfig(),
+			Config:       maps.Clone(sourceContainer.LocalConfig()),
 			Description:  sourceContainer.Description(),
 			Devices:      sourceContainer.LocalDevices(),
 			Ephemeral:    sourceContainer.IsEphemeral(),
@@ -4614,6 +4633,16 @@ func (d *lxc) Restore(sourceContainer instance.Instance, stateful bool, diskOnly
 			Project:      sourceContainer.Project().Name,
 			Type:         sourceContainer.Type(),
 			Snapshot:     sourceContainer.IsSnapshot(),
+		}
+
+		// Keep the instance's idmap allocation, the snapshot only describes the on-disk state.
+		for _, key := range []string{"volatile.idmap.base", "volatile.idmap.current", "volatile.idmap.next"} {
+			value, ok := d.localConfig[key]
+			if ok {
+				args.Config[key] = value
+			} else {
+				delete(args.Config, key)
+			}
 		}
 	} else {
 		args = db.InstanceArgs{
@@ -9715,9 +9744,9 @@ func (d *lxc) Metrics() (*metrics.MetricSet, error) {
 	oomKills, err := cg.GetOOMKills()
 	if err != nil {
 		d.logger.Warn("Failed to get oom kills", logger.Ctx{"err": err})
+	} else {
+		out.AddSamples(metrics.MemoryOOMKillsTotal, metrics.Sample{Value: float64(oomKills)})
 	}
-
-	out.AddSamples(metrics.MemoryOOMKillsTotal, metrics.Sample{Value: float64(oomKills)})
 
 	// Handle swap.
 	if cgroup.Supports(cgroup.MemorySwap) {
@@ -10120,6 +10149,21 @@ func (d *lxc) CreateQcow2Snapshot(devPath string, devName string, snapName strin
 
 // DeleteQcow2Snapshot deletes a qcow2 snapshot for a running instance. Not supported by containers.
 func (d *lxc) DeleteQcow2Snapshot(devName string, snapshotIndex int, backingFilename string) error {
+	return instance.ErrNotImplemented
+}
+
+// RenameQcow2Snapshot points the child of a renamed qcow2 snapshot at its new path. Not supported by containers.
+func (d *lxc) RenameQcow2Snapshot(devName string, snapshotIndex int, backingFilename string) error {
+	return instance.ErrNotImplemented
+}
+
+// PrepareQcow2Snapshot attaches a qcow2 overlay to a running instance. Not supported by containers.
+func (d *lxc) PrepareQcow2Snapshot(diskPath string, devName string) (instance.Qcow2SnapshotSwitch, revert.Hook, error) {
+	return instance.Qcow2SnapshotSwitch{}, nil, instance.ErrNotImplemented
+}
+
+// SwitchQcow2Snapshots puts prepared qcow2 overlays on top of their disks. Not supported by containers.
+func (d *lxc) SwitchQcow2Snapshots(switches []instance.Qcow2SnapshotSwitch) error {
 	return instance.ErrNotImplemented
 }
 

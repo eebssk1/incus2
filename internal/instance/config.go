@@ -3,6 +3,7 @@ package instance
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -49,6 +50,9 @@ func isResolvConfValue(value string) error {
 // ConfigVolatilePrefix indicates the prefix used for volatile config keys.
 const ConfigVolatilePrefix = "volatile."
 
+// volatileRebarSizeKey matches the volatile keys recording the original size of a resizable BAR.
+var volatileRebarSizeKey = regexp.MustCompile(`\.last_state\.rebar\.[0-5]\.size$`)
+
 // HugePageSizeKeys is a list of known hugepage size configuration keys.
 var HugePageSizeKeys = [...]string{"limits.hugepages.64KB", "limits.hugepages.1MB", "limits.hugepages.2MB", "limits.hugepages.1GB"}
 
@@ -74,7 +78,7 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	"boot.autostart": validate.Optional(validate.Or(validate.IsBool, validate.IsOneOf("last-state"))),
 
 	// gendoc:generate(entity=instance, group=boot, key=boot.autostart.delay)
-	// The number of seconds to wait after the instance started before starting the next one.
+	// The number of seconds to wait after the instance started before starting the next one in its project.
 	// ---
 	//  type: integer
 	//  defaultdesc: 0
@@ -86,6 +90,7 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	// The instance with the highest value is started first.
 	// Instances without a priority set will be started (with some parallelism) ahead of
 	// instances with a priority set.
+	// The order only applies within a project, projects are started in parallel.
 	// ---
 	//  type: integer
 	//  liveupdate: no
@@ -94,6 +99,7 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 
 	// gendoc:generate(entity=instance, group=boot, key=boot.stop.priority)
 	// The instance with the highest value is shut down first.
+	// The order only applies within a project, projects are shut down in parallel.
 	// ---
 	//  type: integer
 	//  defaultdesc: 0
@@ -383,7 +389,7 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	// Override the SELinux file type used for labeling instance storage.
 	// ---
 	//	type: string
-	//	defaultdesc: auto-detected (`container_file_t` for containers, `qemu_image_t` for VMs)
+	//	defaultdesc: auto-detected (`container_file_t` for containers, `qemu_image_t` or `svirt_image_t` for VMs)
 	//	liveupdate: no
 	//	condition: container or virtual machine
 	//	shortdesc: SELinux file type override
@@ -393,7 +399,7 @@ var InstanceConfigKeysAny = map[string]func(value string) error{
 	// Override the SELinux process domain for the instance.
 	// ---
 	//	type: string
-	//	defaultdesc: auto-detected (`container_init_t` for containers, `qemu_t` for VMs)
+	//	defaultdesc: auto-detected (`container_init_t` or `spc_t` for containers, `qemu_t` or `svirt_t` for VMs)
 	//	liveupdate: no
 	//	condition: container or virtual machine
 	//	shortdesc: SELinux process domain override
@@ -1845,6 +1851,15 @@ func ConfigKeyChecker(key string, instanceType api.InstanceType) (func(value str
 			if strings.HasSuffix(key, "."+devKey) {
 				return validator, nil
 			}
+		}
+
+		// gendoc:generate(entity=instance, group=volatile, key=volatile.<name>.last_state.rebar.<N>.size)
+		// The original size in bytes of resizable BAR `N` of the PCI device.
+		// ---
+		//  type: string
+		//  shortdesc: PCI original resizable BAR size
+		if volatileRebarSizeKey.MatchString(key) {
+			return validate.IsAny, nil
 		}
 	}
 

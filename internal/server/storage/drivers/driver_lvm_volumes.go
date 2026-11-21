@@ -211,6 +211,14 @@ func (d *lvm) CreateVolumeFromMigration(vol Volume, conn io.ReadWriteCloser, vol
 			return err
 		}
 
+		// The source keeps using the volume until the live migration completes.
+		if volTargetArgs.Live && d.exclusiveVolume(vol) {
+			err := d.activateVolumeShared(vol)
+			if err != nil {
+				return err
+			}
+		}
+
 		if vol.IsVMBlock() {
 			fsVol := vol.NewVMBlockFilesystemVolume()
 			err := d.CreateVolumeFromMigration(fsVol, conn, volTargetArgs, preFiller, op)
@@ -1312,17 +1320,23 @@ func (d *lvm) RenameVolume(vol Volume, newVolName string, op *operations.Operati
 				return err
 			}
 
-			releaseSnap, err := d.acquireExclusive(snapVol)
+			wasActive, err := d.lvActive(snapVol)
+			if err != nil {
+				return err
+			}
+
+			_, err = d.acquireExclusive(snapVol)
 			if err != nil {
 				return err
 			}
 
 			err = d.renameLogicalVolume(snapVolPath, newSnapVolPath)
 			if err != nil {
+				d.restoreActivation(snapVol, wasActive)
 				return err
 			}
 
-			releaseSnap()
+			d.restoreActivation(NewVolume(d, d.name, vol.volType, vol.contentType, newSnapVolName, snapVol.config, snapVol.poolConfig), wasActive)
 
 			reverter.Add(func() { _ = d.renameLogicalVolume(newSnapVolPath, snapVolPath) })
 		}
@@ -1376,54 +1390,97 @@ func (d *lvm) RenameVolume(vol Volume, newVolName string, op *operations.Operati
 	}, false, op)
 }
 
+// SetVolumeAccessMode switches the lock of an active volume to the given access mode.
+func (d *lvm) SetVolumeAccessMode(vol Volume, mode VolumeAccessMode) error {
+	if !d.clustered || !d.exclusiveVolume(vol) {
+		return nil
+	}
+
+	activation := "ey"
+	revertActivation := "sy"
+	if mode == VolumeAccessModeShared {
+		activation = "sy"
+		revertActivation = "ey"
+	}
+
+	// Switch the VM's config volume before its block volume.
+	vols := []Volume{vol}
+	if vol.IsVMBlock() {
+		vols = []Volume{vol.NewVMBlockFilesystemVolume(), vol}
+	}
+
+	lvmActivation.Lock()
+	defer lvmActivation.Unlock()
+
+	reverter := revert.New()
+	defer reverter.Fail()
+
+	for _, v := range vols {
+		volPath := d.lvmPath(d.config["lvm.vg_name"], v.volType, v.contentType, v.name)
+		volDevPath, err := d.lvmDevPath(volPath)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+
+		if volDevPath == "" {
+			continue
+		}
+
+		_, err = subprocess.RunCommand("lvchange", "--activate", activation, "--ignoreactivationskip", volPath)
+		if err != nil {
+			return fmt.Errorf("Failed to switch lock mode of LVM logical volume %q: %w", volPath, err)
+		}
+
+		reverter.Add(func() {
+			_, _ = subprocess.RunCommand("lvchange", "--activate", revertActivation, "--ignoreactivationskip", volPath)
+		})
+	}
+
+	reverter.Success()
+
+	return nil
+}
+
+// IsVolumeLocked checks whether a volume is locked by another cluster member.
+func (d *lvm) IsVolumeLocked(vol Volume) (bool, error) {
+	if !d.clustered {
+		return false, nil
+	}
+
+	vols := []Volume{vol}
+	if vol.IsVMBlock() {
+		vols = append(vols, vol.NewVMBlockFilesystemVolume())
+	}
+
+	lvmActivation.Lock()
+	defer lvmActivation.Unlock()
+
+	for _, v := range vols {
+		volPath := d.lvmPath(d.config["lvm.vg_name"], v.volType, v.contentType, v.name)
+
+		// A local shared activation doesn't tell whether another member also holds the volume.
+		_, err := subprocess.RunCommand("lvchange", "--activate", "ey", "--ignoreactivationskip", volPath)
+		if err != nil {
+			runError, ok := errors.AsType[subprocess.RunError](err)
+			if ok && strings.Contains(runError.StdErr().String(), "locked by other host") {
+				return true, nil
+			}
+
+			return false, fmt.Errorf("Failed to activate LVM logical volume %q: %w", volPath, err)
+		}
+
+		_, err = subprocess.TryRunCommand("lvchange", "--activate", "n", "--ignoreactivationskip", volPath)
+		if err != nil {
+			return false, fmt.Errorf("Failed to deactivate LVM logical volume %q: %w", volPath, err)
+		}
+	}
+
+	return false, nil
+}
+
 // MigrateVolume sends a volume for migration.
 func (d *lvm) MigrateVolume(vol Volume, conn io.ReadWriteCloser, volSrcArgs *migration.VolumeSourceArgs, op *operations.Operation) error {
 	if d.clustered && volSrcArgs.ClusterMove && !volSrcArgs.StorageMove {
-		// Ensure the volume allows shared access.
-		if vol.volType == VolumeTypeVM || vol.IsCustomBlock() {
-			lvmActivation.Lock()
-			defer lvmActivation.Unlock()
-
-			// Block volume.
-			volPath := d.lvmPath(d.config["lvm.vg_name"], vol.volType, vol.contentType, vol.Name())
-			volDevPath, err := d.lvmDevPath(volPath)
-			if err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
-			}
-
-			if volDevPath != "" {
-				if vol.Type() == VolumeTypeVM || vol.ContentType() == ContentTypeBlock || vol.ContentType() == ContentTypeISO {
-					_, err := subprocess.RunCommand("lvchange", "--activate", "sy", "--ignoreactivationskip", volPath)
-					if err != nil {
-						return err
-					}
-				} else {
-					_, err := subprocess.RunCommand("lvchange", "--activate", "ey", "--ignoreactivationskip", volPath)
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			// Filesystem volume.
-			if vol.IsVMBlock() {
-				fsVol := vol.NewVMBlockFilesystemVolume()
-
-				volPath := d.lvmPath(d.config["lvm.vg_name"], fsVol.volType, fsVol.contentType, fsVol.Name())
-				volDevPath, err := d.lvmDevPath(volPath)
-				if err != nil && !errors.Is(err, os.ErrNotExist) {
-					return err
-				}
-
-				if volDevPath != "" {
-					_, err := subprocess.RunCommand("lvchange", "--activate", "sy", "--ignoreactivationskip", volPath)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-
 		return nil // When performing a cluster member move don't do anything on the source member.
 	}
 
@@ -2074,7 +2131,7 @@ func (d *lvm) RestoreVolume(vol Volume, snapshotName string, op *operations.Oper
 
 		// Only resize when needed as newer LVM fails to grow snapshots already at full CoW capacity.
 		if needsGrow {
-			_, err = subprocess.TryRunCommand("lvresize", "-l", "+100%ORIGIN", "-f", snapLVPath)
+			_, err = lvmTryRunCommand("lvresize", "-l", "+100%ORIGIN", "-f", snapLVPath)
 			if err != nil {
 				return err
 			}
@@ -2090,7 +2147,7 @@ func (d *lvm) RestoreVolume(vol Volume, snapshotName string, op *operations.Oper
 
 		// Only resize when needed as newer LVM fails to grow snapshots already at full CoW capacity.
 		if needsGrow {
-			_, err = subprocess.TryRunCommand("lvresize", "-l", "+100%ORIGIN", "-f", snapLVPath)
+			_, err = lvmTryRunCommand("lvresize", "-l", "+100%ORIGIN", "-f", snapLVPath)
 			if err != nil {
 				return err
 			}
@@ -2159,12 +2216,19 @@ func (d *lvm) RenameVolumeSnapshot(snapVol Volume, newSnapshotName string, op *o
 	newSnapVolName := GetSnapshotVolumeName(parentName, newSnapshotName)
 	newVolPath := d.lvmPath(d.config["lvm.vg_name"], snapVol.volType, snapVol.contentType, newSnapVolName)
 
-	release, err := d.acquireExclusive(snapVol)
+	wasActive, err := d.lvActive(snapVol)
 	if err != nil {
 		return err
 	}
 
-	defer release()
+	_, err = d.acquireExclusive(snapVol)
+	if err != nil {
+		return err
+	}
+
+	// The lock is released under whichever name the volume ends up with.
+	lockedVol := snapVol
+	defer func() { d.restoreActivation(lockedVol, wasActive) }()
 
 	reverter := revert.New()
 	defer reverter.Fail()
@@ -2174,7 +2238,11 @@ func (d *lvm) RenameVolumeSnapshot(snapVol Volume, newSnapshotName string, op *o
 		return fmt.Errorf("Error renaming LVM logical volume: %w", err)
 	}
 
-	reverter.Add(func() { _ = d.renameLogicalVolume(newVolPath, volPath) })
+	lockedVol = NewVolume(d, d.name, snapVol.volType, snapVol.contentType, newSnapVolName, snapVol.config, snapVol.poolConfig)
+	reverter.Add(func() {
+		_ = d.renameLogicalVolume(newVolPath, volPath)
+		lockedVol = snapVol
+	})
 
 	oldPath := snapVol.MountPath()
 	newPath := GetVolumeMountPath(d.name, snapVol.volType, newSnapVolName)
@@ -2188,12 +2256,19 @@ func (d *lvm) RenameVolumeSnapshot(snapVol Volume, newSnapshotName string, op *o
 		reverter.Add(func() { _ = os.Rename(newPath, oldPath) })
 	}
 
-	// For VMs, also rename the snapshot filesystem volume.
+	// For VMs, also rename the snapshot filesystem volume (qcow2 snapshots have none, their config is a subvolume of the parent's).
 	if snapVol.IsVMBlock() {
 		fsVol := snapVol.NewVMBlockFilesystemVolume()
-		err = d.RenameVolumeSnapshot(fsVol, newSnapshotName, op)
+		fsVolExists, err := d.logicalVolumeExists(d.lvmPath(d.config["lvm.vg_name"], fsVol.volType, fsVol.contentType, fsVol.name))
 		if err != nil {
 			return err
+		}
+
+		if fsVolExists {
+			err = d.RenameVolumeSnapshot(fsVol, newSnapshotName, op)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

@@ -19,10 +19,12 @@ import (
 
 	"github.com/lxc/incus/v7/internal/migration"
 	localMigration "github.com/lxc/incus/v7/internal/server/migration"
+	"github.com/lxc/incus/v7/internal/version"
 	"github.com/lxc/incus/v7/shared/api"
 	"github.com/lxc/incus/v7/shared/logger"
 	"github.com/lxc/incus/v7/shared/revert"
 	"github.com/lxc/incus/v7/shared/subprocess"
+	"github.com/lxc/incus/v7/shared/units"
 	"github.com/lxc/incus/v7/shared/util"
 )
 
@@ -383,6 +385,11 @@ func (d *linstor) deleteResourceGroup() error {
 	return nil
 }
 
+// queryContext returns a context bounding a LINSTOR query so lookups fail rather than hang on a stalled controller.
+func (d *linstor) queryContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Minute)
+}
+
 // getVolumeResourceDefinitions returns all Linstor resource definitions matching a given volume.
 func (d *linstor) getVolumeResourceDefinitions(vol Volume, fetchVolumeDefinitions bool) ([]linstorClient.ResourceDefinitionWithVolumeDefinition, error) {
 	l := logger.AddContext(logger.Ctx{"vol": vol.name, "volType": vol.volType, "contentType": vol.contentType})
@@ -391,8 +398,11 @@ func (d *linstor) getVolumeResourceDefinitions(vol Volume, fetchVolumeDefinition
 		return nil, err
 	}
 
+	ctx, cancel := d.queryContext()
+	defer cancel()
+
 	// Query resource definitions that match the desired volume by its name.
-	resourceDefinitions, err := linstor.Client.ResourceDefinitions.GetAll(context.TODO(), linstorClient.RDGetAllRequest{
+	resourceDefinitions, err := linstor.Client.ResourceDefinitions.GetAll(ctx, linstorClient.RDGetAllRequest{
 		Props: []string{
 			LinstorAuxName + "=" + d.config[LinstorVolumePrefixConfigKey] + vol.name,
 			LinstorAuxType + "=" + string(vol.volType),
@@ -433,6 +443,20 @@ func (d *linstor) getResourceDefinition(vol Volume, fetchVolumeDefinitions bool)
 	}
 
 	return filteredResourceDefinitions[0], nil
+}
+
+// checkVolumeAbsent fails when a resource definition already exists for the volume.
+func (d *linstor) checkVolumeAbsent(vol Volume) error {
+	exists, err := d.HasVolume(vol)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("A resource definition already exists for volume %q", vol.name)
+	}
+
+	return nil
 }
 
 // getLinstorDevPath return the device path for a given `vol` in the current node.
@@ -481,8 +505,11 @@ func (d *linstor) deleteDisklessResource(vol Volume) error {
 		return err
 	}
 
+	ctx, cancel := d.queryContext()
+	defer cancel()
+
 	// Fetch all resources for the given volume in the current node.
-	resources, err := linstor.Client.Resources.GetResourceView(context.TODO(), &linstorClient.ListOpts{
+	resources, err := linstor.Client.Resources.GetResourceView(ctx, &linstorClient.ListOpts{
 		Resource: []string{resourceDefinition.Name},
 		Node:     []string{d.getSatelliteName()},
 	})
@@ -496,7 +523,7 @@ func (d *linstor) deleteDisklessResource(vol Volume) error {
 	for _, r := range resources {
 		if slices.Contains(r.Flags, "DISKLESS") {
 			l.Debug("Deleting diskless resource")
-			err := linstor.Client.Resources.Delete(context.TODO(), r.Name, r.NodeName)
+			err := linstor.Client.Resources.Delete(ctx, r.Name, r.NodeName)
 			if err != nil {
 				return err
 			}
@@ -513,48 +540,24 @@ func (d *linstor) getVolumeUsage(vol Volume) (int64, error) {
 	l := d.logger.AddContext(logger.Ctx{"volume": vol.Name()})
 	l.Debug("Getting volume usage")
 
-	linstor, err := d.state.Linstor()
-	if err != nil {
-		return 0, err
-	}
-
-	usage, ok := d.getCachedVolumeUsage(vol)
-	if ok {
-		return usage, nil
-	}
-
-	resourceDefinition, err := d.getResourceDefinition(vol, false)
-	if err != nil {
-		return 0, err
-	}
-
-	// Fetch all resources for the given volume.
-	resources, err := linstor.Client.Resources.GetResourceView(context.TODO(), &linstorClient.ListOpts{
-		Resource: []string{resourceDefinition.Name},
-	})
-	if err != nil {
-		return 0, fmt.Errorf("Unable to get the resources for the resource definition: %w", err)
-	}
-
-	var resource *linstorClient.ResourceWithVolumes
-
-	// Find the first non DISKLESS resource.
-	for _, r := range resources {
-		l.Debug("Volume flags", logger.Ctx{"node": r.NodeName, "flags": r.Flags})
-		if !slices.Contains(r.Flags, "DISKLESS") {
-			resource = &r
+	// Ambiguous resource definitions need a direct lookup.
+	resourceDefinitionName, ok := d.getCachedResourceDefinitionName(vol)
+	if !ok {
+		resourceDefinition, err := d.getResourceDefinition(vol, false)
+		if err != nil {
+			return 0, err
 		}
+
+		resourceDefinitionName = resourceDefinition.Name
 	}
 
-	// If no diskful resource is found, usage cannot be determined.
-	if resource == nil {
-		l.Warn("No diskful resource found for volume")
-		return 0, nil
+	// Only go through the cache, a miss means the controller couldn't be queried or there is no diskful resource.
+	usage, ok := d.getCachedVolumeUsage(resourceDefinitionName, vol)
+	if !ok {
+		return 0, errors.New("Volume usage unavailable")
 	}
 
-	volumes := resource.Volumes
-
-	return volumes[d.getVolumeIndex(vol, len(volumes))].AllocatedSizeKib, nil
+	return usage, nil
 }
 
 // getVolumeIndex returns the index of the volume within its LINSTOR resource.
@@ -1059,14 +1062,29 @@ func (d *linstor) copyVolume(vol Volume, srcVol Volume) error {
 		return err
 	}
 
-	// The controller may have created the target even when the request fails, so clean up on any error from here.
-	rev.Add(func() { _ = linstor.Client.ResourceDefinitions.Delete(context.TODO(), targetResourceDefinitionName) })
-
-	_, err = linstor.Client.ResourceDefinitions.Clone(context.TODO(), srcResourceDefinition.Name, linstorClient.ResourceDefinitionCloneRequest{
+	cloneRequest := linstorClient.ResourceDefinitionCloneRequest{
 		Name:               targetResourceDefinitionName,
 		ResourceGroup:      d.config[LinstorResourceGroupNameConfigKey],
 		GenericPropsModify: linstorClient.GenericPropsModify{OverrideProps: overrideProps},
-	})
+	}
+
+	// Grow the volume as part of the clone when the controller supports it, as a later
+	// resize has to wait for the clone to finish syncing.
+	growBytes, err := d.cloneGrowSize(vol, srcVol)
+	if err != nil {
+		return err
+	}
+
+	if growBytes > 0 {
+		// The exact size property prevents resizing and is dropped by any resize anyway.
+		cloneRequest.VolumeSizes = []int64{growBytes / 1024}
+		cloneRequest.DeleteProps = []string{"DrbdOptions/ExactSize"}
+	}
+
+	// The controller may have created the target even when the request fails, so clean up on any error from here.
+	rev.Add(func() { _ = linstor.Client.ResourceDefinitions.Delete(context.TODO(), targetResourceDefinitionName) })
+
+	_, err = linstor.Client.ResourceDefinitions.Clone(context.TODO(), srcResourceDefinition.Name, cloneRequest)
 	if err != nil {
 		return fmt.Errorf("Unable to start cloning resource definition: %w", err)
 	}
@@ -1119,9 +1137,75 @@ loop:
 		}
 	}
 
+	// A grown VM disk needs its GPT alt header moved to the new end of the disk.
+	if growBytes > 0 && vol.IsVMBlock() {
+		devPath, err := d.getLinstorDevPath(vol)
+		if err != nil {
+			return err
+		}
+
+		err = d.moveGPTAltHeader(devPath)
+		if err != nil {
+			return err
+		}
+	}
+
 	rev.Success()
 
 	return nil
+}
+
+// cloneGrowSize returns the size in bytes to grow a clone of srcVol to during the clone, or 0 to keep the source size.
+func (d *linstor) cloneGrowSize(vol Volume, srcVol Volume) (int64, error) {
+	if vol.config["size"] == "" || vol.config["size"] == "0" {
+		return 0, nil
+	}
+
+	sizeBytes, err := units.ParseByteSizeString(vol.config["size"])
+	if err != nil {
+		return 0, err
+	}
+
+	if sizeBytes <= 0 {
+		return 0, nil
+	}
+
+	sizeBytes, err = d.roundVolumeBlockSizeBytes(vol, sizeBytes)
+	if err != nil {
+		return 0, err
+	}
+
+	srcSizeBytes, err := d.getVolumeSize(srcVol)
+	if err != nil {
+		return 0, err
+	}
+
+	// Shrinking is left to the regular resize so it reports the usual error.
+	if sizeBytes <= srcSizeBytes {
+		return 0, nil
+	}
+
+	// Resizing during the clone needs LINSTOR 1.35.0.
+	linstor, err := d.state.Linstor()
+	if err != nil {
+		return 0, err
+	}
+
+	controller, err := linstor.Client.Controller.GetVersion(context.TODO())
+	if err != nil {
+		return 0, fmt.Errorf("Unable to get the controller version: %w", err)
+	}
+
+	ver, err := version.Parse(controller.Version)
+	if err != nil {
+		return 0, nil
+	}
+
+	if ver.Major < 1 || (ver.Major == 1 && ver.Minor < 35) {
+		return 0, nil
+	}
+
+	return sizeBytes, nil
 }
 
 func (d *linstor) getVolumeSize(vol Volume) (int64, error) {

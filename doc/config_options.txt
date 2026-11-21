@@ -464,6 +464,13 @@ With VMs, this option supports mounting file system disk devices and paths withi
 
 ```
 
+```{config:option} rebar.<N>.size devices-gpu_physical
+:required: "no"
+:shortdesc: "Size to set resizable BAR `N` to before passing the GPU to the VM, for example `8GiB` (VM only)"
+:type: "string"
+
+```
+
 ```{config:option} uid devices-gpu_physical
 :default: "0"
 :required: "no"
@@ -1983,6 +1990,13 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 
 ```
 
+```{config:option} rebar.<N>.size devices-pci
+:required: "no"
+:shortdesc: "Size to set resizable BAR `N` to before passing the device to the VM (for example `8GiB`)"
+:type: "string"
+
+```
+
 <!-- config group devices-pci end -->
 <!-- config group devices-proxy start -->
 ```{config:option} bind devices-proxy
@@ -2304,6 +2318,17 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 ```
 
 <!-- config group image-requirements end -->
+<!-- config group image-volume start -->
+```{config:option} volume.size_hint image-volume
+:shortdesc: "Size of the cached image volume"
+:type: "string"
+Size of the cached image volume. For a container image on a block backed storage pool, it is used
+when it is smaller than the pool's `volume.size` (or the default size). For a virtual machine image,
+it is used when it is larger than that size, so the volume doesn't need a resize after unpacking.
+It is ignored if invalid or smaller than the image file, and doesn't affect instance volume sizes.
+```
+
+<!-- config group image-volume end -->
 <!-- config group instance-boot start -->
 ```{config:option} boot.autorestart instance-boot
 :liveupdate: "no"
@@ -2324,7 +2349,7 @@ If unset or set to `last-state`, restores the last state.
 :liveupdate: "no"
 :shortdesc: "Delay after starting the instance"
 :type: "integer"
-The number of seconds to wait after the instance started before starting the next one.
+The number of seconds to wait after the instance started before starting the next one in its project.
 ```
 
 ```{config:option} boot.autostart.priority instance-boot
@@ -2334,6 +2359,7 @@ The number of seconds to wait after the instance started before starting the nex
 The instance with the highest value is started first.
 Instances without a priority set will be started (with some parallelism) ahead of
 instances with a priority set.
+The order only applies within a project, projects are started in parallel.
 ```
 
 ```{config:option} boot.host_shutdown_action instance-boot
@@ -2368,6 +2394,7 @@ Number of seconds to wait for the instance to shut down before it is force-stopp
 :shortdesc: "What order to shut down the instances in"
 :type: "integer"
 The instance with the highest value is shut down first.
+The order only applies within a project, projects are shut down in parallel.
 ```
 
 <!-- config group instance-boot end -->
@@ -3159,7 +3186,7 @@ When disabling this option, consider enabling {config:option}`instance-security:
 
 ```{config:option} security.selinux.domain instance-security
 :condition: "container or virtual machine"
-:defaultdesc: "auto-detected (`container_init_t` for containers, `qemu_t` for VMs)"
+:defaultdesc: "auto-detected (`container_init_t` or `spc_t` for containers, `qemu_t` or `svirt_t` for VMs)"
 :liveupdate: "no"
 :shortdesc: "SELinux process domain override"
 :type: "string"
@@ -3194,7 +3221,7 @@ Values set via profiles are ignored.
 
 ```{config:option} security.selinux.type instance-security
 :condition: "container or virtual machine"
-:defaultdesc: "auto-detected (`container_file_t` for containers, `qemu_image_t` for VMs)"
+:defaultdesc: "auto-detected (`container_file_t` for containers, `qemu_image_t` or `svirt_image_t` for VMs)"
 :liveupdate: "no"
 :shortdesc: "SELinux file type override"
 :type: "string"
@@ -3512,6 +3539,12 @@ The parent host device used when allocating a PCI device to an instance.
 :shortdesc: "PCI parent slot name"
 :type: "string"
 The parent host device PCI slot name.
+```
+
+```{config:option} volatile.<name>.last_state.rebar.<N>.size instance-volatile
+:shortdesc: "PCI original resizable BAR size"
+:type: "string"
+The original size in bytes of resizable BAR `N` of the PCI device.
 ```
 
 ```{config:option} volatile.<name>.last_state.representor instance-volatile

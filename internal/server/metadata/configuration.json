@@ -494,6 +494,14 @@
 						}
 					},
 					{
+						"rebar.\u003cN\u003e.size": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Size to set resizable BAR `N` to before passing the GPU to the VM, for example `8GiB` (VM only)",
+							"type": "string"
+						}
+					},
+					{
 						"uid": {
 							"default": "0",
 							"longdesc": "",
@@ -2238,6 +2246,14 @@
 							"shortdesc": "Whether to expose the device's option ROM to the VM",
 							"type": "bool"
 						}
+					},
+					{
+						"rebar.\u003cN\u003e.size": {
+							"longdesc": "",
+							"required": "no",
+							"shortdesc": "Size to set resizable BAR `N` to before passing the device to the VM (for example `8GiB`)",
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -2619,6 +2635,17 @@
 						}
 					}
 				]
+			},
+			"volume": {
+				"keys": [
+					{
+						"volume.size_hint": {
+							"longdesc": "Size of the cached image volume. For a container image on a block backed storage pool, it is used\nwhen it is smaller than the pool's `volume.size` (or the default size). For a virtual machine image,\nit is used when it is larger than that size, so the volume doesn't need a resize after unpacking.\nIt is ignored if invalid or smaller than the image file, and doesn't affect instance volume sizes.",
+							"shortdesc": "Size of the cached image volume",
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"instance": {
@@ -2644,7 +2671,7 @@
 						"boot.autostart.delay": {
 							"defaultdesc": "0",
 							"liveupdate": "no",
-							"longdesc": "The number of seconds to wait after the instance started before starting the next one.",
+							"longdesc": "The number of seconds to wait after the instance started before starting the next one in its project.",
 							"shortdesc": "Delay after starting the instance",
 							"type": "integer"
 						}
@@ -2652,7 +2679,7 @@
 					{
 						"boot.autostart.priority": {
 							"liveupdate": "no",
-							"longdesc": "The instance with the highest value is started first.\nInstances without a priority set will be started (with some parallelism) ahead of\ninstances with a priority set.",
+							"longdesc": "The instance with the highest value is started first.\nInstances without a priority set will be started (with some parallelism) ahead of\ninstances with a priority set.\nThe order only applies within a project, projects are started in parallel.",
 							"shortdesc": "What order to start the instances in",
 							"type": "integer"
 						}
@@ -2688,7 +2715,7 @@
 						"boot.stop.priority": {
 							"defaultdesc": "0",
 							"liveupdate": "no",
-							"longdesc": "The instance with the highest value is shut down first.",
+							"longdesc": "The instance with the highest value is shut down first.\nThe order only applies within a project, projects are shut down in parallel.",
 							"shortdesc": "What order to shut down the instances in",
 							"type": "integer"
 						}
@@ -3506,7 +3533,7 @@
 					{
 						"security.selinux.domain": {
 							"condition": "container or virtual machine",
-							"defaultdesc": "auto-detected (`container_init_t` for containers, `qemu_t` for VMs)",
+							"defaultdesc": "auto-detected (`container_init_t` or `spc_t` for containers, `qemu_t` or `svirt_t` for VMs)",
 							"liveupdate": "no",
 							"longdesc": "Override the SELinux process domain for the instance.",
 							"shortdesc": "SELinux process domain override",
@@ -3536,7 +3563,7 @@
 					{
 						"security.selinux.type": {
 							"condition": "container or virtual machine",
-							"defaultdesc": "auto-detected (`container_file_t` for containers, `qemu_image_t` for VMs)",
+							"defaultdesc": "auto-detected (`container_file_t` for containers, `qemu_image_t` or `svirt_image_t` for VMs)",
 							"liveupdate": "no",
 							"longdesc": "Override the SELinux file type used for labeling instance storage.",
 							"shortdesc": "SELinux file type override",
@@ -3873,6 +3900,13 @@
 						"volatile.\u003cname\u003e.last_state.pci.slot.name": {
 							"longdesc": "The parent host device PCI slot name.",
 							"shortdesc": "PCI parent slot name",
+							"type": "string"
+						}
+					},
+					{
+						"volatile.\u003cname\u003e.last_state.rebar.\u003cN\u003e.size": {
+							"longdesc": "The original size in bytes of resizable BAR `N` of the PCI device.",
+							"shortdesc": "PCI original resizable BAR size",
 							"type": "string"
 						}
 					},

@@ -423,8 +423,8 @@ func restoreRestrictedVolatileConfig(project api.Project, instanceType instancet
 			continue
 		}
 
-		// Idmap keys describe the on-disk state of the snapshot and so must come from it.
-		if strings.HasPrefix(key, "volatile.idmap.") || key == "volatile.last_state.idmap" {
+		// The on-disk idmap state must come from the snapshot, its allocation is replaced on restore.
+		if key == "volatile.last_state.idmap" {
 			continue
 		}
 
@@ -1213,6 +1213,7 @@ func isContainerLowLevelOptionForbidden(key string) bool {
 	}
 
 	if slices.Contains([]string{
+		"boot.autostart.delay",
 		"boot.host_shutdown_action",
 		"boot.host_shutdown_timeout",
 		"linux.kernel_modules",
@@ -1240,6 +1241,7 @@ func isContainerLowLevelOptionForbidden(key string) bool {
 // Return true if a low-level VM option is forbidden.
 func isVMLowLevelOptionForbidden(key string) bool {
 	return slices.Contains([]string{
+		"boot.autostart.delay",
 		"boot.host_shutdown_action",
 		"boot.host_shutdown_timeout",
 		"limits.memory.hugepages",
@@ -1719,14 +1721,24 @@ func fetchProject(tx *db.ClusterTx, projectName string, skipIfNoLimits bool) (*p
 		dbInstanceIDs = append(dbInstanceIDs, dbInstance.ID)
 	}
 
+	dbInstanceConfigs, err := cluster.GetConfig(ctx, tx.Tx(), "instances", "instance", cluster.ConfigFilter{ReferenceID: dbInstanceIDs})
+	if err != nil {
+		return nil, fmt.Errorf("Fetch instance configs from database: %w", err)
+	}
+
 	dbInstanceDevices, err := cluster.GetDevices(ctx, tx.Tx(), "instances", "instance", cluster.DeviceFilter{ReferenceID: dbInstanceIDs})
 	if err != nil {
 		return nil, fmt.Errorf("Fetch instance devices from database: %w", err)
 	}
 
+	dbInstanceProfiles, err := cluster.GetAllInstanceProfiles(ctx, tx.Tx())
+	if err != nil {
+		return nil, fmt.Errorf("Fetch instance profiles from database: %w", err)
+	}
+
 	instances := make([]api.Instance, 0, len(dbInstances))
 	for _, inst := range dbInstances {
-		apiInstance, err := inst.ToAPI(ctx, tx.Tx(), dbInstanceDevices, dbProfileConfigs, dbProfileDevices)
+		apiInstance, err := inst.ToAPI(ctx, tx.Tx(), dbInstanceConfigs, dbInstanceDevices, dbInstanceProfiles, dbProfileConfigs, dbProfileDevices)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to get API data for instance %q in project %q: %w", inst.Name, inst.Project, err)
 		}
