@@ -1870,6 +1870,13 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 
 ```
 
+```{config:option} failover devices-nic_sriov
+:required: "no"
+:shortdesc: "Failover bridge to use when live-migrating the NIC"
+:type: "string"
+
+```
+
 ```{config:option} hwaddr devices-nic_sriov
 :default: "randomly assigned"
 :managed: "no"
@@ -1935,6 +1942,13 @@ The custom policy routing table ID to add IPv6 static routes to (in addition to 
 :managed: "no"
 :shortdesc: "Allows the instance to configure the NIC in ways that may negatively impact security."
 :type: "bool"
+
+```
+
+```{config:option} variant devices-nic_sriov
+:required: "no"
+:shortdesc: "VFIO variant to use (registers the NIC with the generic `vfio-pci` driver if unset, or with `mlx5_vfio_pci` if set to `mlx5`)"
+:type: "string"
 
 ```
 
@@ -3428,6 +3442,12 @@ The disk quota is applied the next time the instance starts.
 
 ```
 
+```{config:option} volatile.<name>.failover.host_name instance-volatile
+:shortdesc: "Network device name on the host for the failover interface"
+:type: "string"
+
+```
+
 ```{config:option} volatile.<name>.host_name instance-volatile
 :shortdesc: "Network device name on the host"
 :type: "string"
@@ -3464,6 +3484,12 @@ The original MAC that was used when moving a physical device into an instance.
 Comma-separated list of the last used IP addresses of the network device.
 ```
 
+```{config:option} volatile.<name>.last_state.migratable instance-volatile
+:shortdesc: "NIC original migratable capability"
+:type: "string"
+The original NIC migratable capability
+```
+
 ```{config:option} volatile.<name>.last_state.mtu instance-volatile
 :shortdesc: "Network device original MTU"
 :type: "string"
@@ -3486,6 +3512,42 @@ The parent host device used when allocating a PCI device to an instance.
 :shortdesc: "PCI parent slot name"
 :type: "string"
 The parent host device PCI slot name.
+```
+
+```{config:option} volatile.<name>.last_state.representor instance-volatile
+:shortdesc: "Representor name"
+:type: "string"
+The representor port name
+```
+
+```{config:option} volatile.<name>.last_state.representor.mtu instance-volatile
+:shortdesc: "Representor original MTU"
+:type: "string"
+The original representor MTU
+```
+
+```{config:option} volatile.<name>.last_state.representor.pvid instance-volatile
+:shortdesc: "Representor original PVID"
+:type: "string"
+The original representor PVID
+```
+
+```{config:option} volatile.<name>.last_state.representor.tagged instance-volatile
+:shortdesc: "Representor original tagged VLANs"
+:type: "string"
+The original representor tagged VLANs
+```
+
+```{config:option} volatile.<name>.last_state.representor.untagged instance-volatile
+:shortdesc: "Representor original untagged VLANs"
+:type: "string"
+The original representor untagged VLANs
+```
+
+```{config:option} volatile.<name>.last_state.representor.up instance-volatile
+:shortdesc: "Representor original state"
+:type: "string"
+The original representor state
 ```
 
 ```{config:option} volatile.<name>.last_state.usb.bus instance-volatile
@@ -3845,6 +3907,15 @@ User keys can be used in search.
 
 <!-- config group network_bridge-bgp end -->
 <!-- config group network_bridge-common start -->
+```{config:option} bgp.communities network_bridge-common
+:condition: "BGP server"
+:default: "-"
+:scope: "global"
+:shortdesc: "Comma-separated BGP communities to attach to advertised prefixes"
+:type: "string"
+
+```
+
 ```{config:option} bgp.ipv4.instances network_bridge-common
 :condition: "BGP server"
 :default: "`false`"
@@ -4464,6 +4535,14 @@ User keys can be used in search.
 
 <!-- config group network_macvlan-common end -->
 <!-- config group network_ovn-common start -->
+```{config:option} bgp.communities network_ovn-common
+:condition: "BGP server"
+:default: "-"
+:shortdesc: "Comma-separated BGP communities to attach to advertised prefixes"
+:type: "string"
+
+```
+
 ```{config:option} bridge.external_interfaces network_ovn-common
 :scope: "local"
 :shortdesc: "Comma-separated list of unconfigured network interfaces to include in the bridge"
@@ -4965,6 +5044,14 @@ User keys can be used in search.
 
 <!-- config group network_physical-ovn end -->
 <!-- config group network_sriov-common start -->
+```{config:option} failover network_sriov-common
+:condition: "-"
+:scope: "local"
+:shortdesc: "Failover bridge to use when live-migrating `sriov` NICs"
+:type: "string"
+
+```
+
 ```{config:option} mtu network_sriov-common
 :condition: "-"
 :shortdesc: "The MTU of the new interface"
@@ -4983,6 +5070,12 @@ User keys can be used in search.
 ```{config:option} user.* network_sriov-common
 :condition: "-"
 :shortdesc: "User-provided free-form key/value pairs"
+:type: "string"
+
+```
+
+```{config:option} variant network_sriov-common
+:shortdesc: "VFIO variant to use (registers `sriov` NICs with the generic `vfio-pci` driver if unset, or with `mlx5_vfio_pci` if set to `mlx5`)"
 :type: "string"
 
 ```
@@ -5611,6 +5704,15 @@ When using scriptlet-based authorization, this option stores the scriptlet.
 
 <!-- config group server-authorization end -->
 <!-- config group server-cluster start -->
+```{config:option} cluster.healing_delay server-cluster
+:defaultdesc: "`0`"
+:scope: "global"
+:shortdesc: "Delay between detecting an offline cluster member and evacuating it"
+:type: "integer"
+Specify the number of seconds to wait between an offline cluster member being detected and its evacuation.
+The `cluster-member-offline` event is sent at the start of that delay, giving external tooling time to power off the member.
+```
+
 ```{config:option} cluster.healing_threshold server-cluster
 :defaultdesc: "`0`"
 :scope: "global"
@@ -5872,7 +5974,10 @@ Set this option to `true` to enable the syslog unixgram socket to receive log me
 :scope: "global"
 :shortdesc: "Whether to automatically trust clients signed by the CA"
 :type: "bool"
-
+This only applies when a `server.ca` file is present.
+When enabled, any valid client certificate issued by the CA and not listed in `ca.crl` is trusted without being added to the trust store.
+Such certificates get full access to the server unless they are added to the trust store as restricted certificates.
+When disabled, certificates issued by the CA still need to be added to the trust store.
 ```
 
 <!-- config group server-core end -->
@@ -6101,6 +6206,16 @@ container instead, using more system resources but reducing the impact
 of a crash.
 ```
 
+```{config:option} instances.migration.bwlimit server-miscellaneous
+:defaultdesc: "`128MiB` (QEMU default)"
+:scope: "global"
+:shortdesc: "Bandwidth limit for virtual machine live migrations"
+:type: "string"
+The upper limit to be placed on the bandwidth used by the memory and state
+transfer of each virtual machine live migration.
+When unset, the QEMU default of 128MiB/s (about 1Gbit/s) applies.
+```
+
 ```{config:option} instances.nic.host_name server-miscellaneous
 :defaultdesc: "`random`"
 :scope: "global"
@@ -6261,13 +6376,14 @@ Beware of the birthday paradox! A single `xx` block leads to a 10% collision pro
 :shortdesc: "Expected audience value for the application"
 :type: "string"
 This value is required by some providers.
+Opaque access tokens are rejected when set as the audience can't be verified on those.
 ```
 
 ```{config:option} oidc.claim server-oidc
 :scope: "global"
 :shortdesc: "OpenID Connect claim to use as the username"
 :type: "string"
-Note that the claim must be contained in the access token.
+Note that the claim must be contained in the access token or, for opaque access tokens, in the ID token.
 ```
 
 ```{config:option} oidc.client.id server-oidc
@@ -6908,6 +7024,14 @@ has completed.
 
 ```
 
+```{config:option} migration.follow_instance storage_volume_btrfs-common
+:condition: "custom volume"
+:default: "`false`"
+:shortdesc: "Move the volume along with the virtual machine it's attached to when it moves to another cluster member"
+:type: "bool"
+
+```
+
 ```{config:option} security.shared storage_volume_btrfs-common
 :condition: "custom block volume"
 :default: "same as `volume.security.shared` or `false`"
@@ -7202,6 +7326,14 @@ has completed.
 
 ```
 
+```{config:option} migration.follow_instance storage_volume_dir-common
+:condition: "custom volume"
+:default: "`false`"
+:shortdesc: "Move the volume along with the virtual machine it's attached to when it moves to another cluster member"
+:type: "bool"
+
+```
+
 ```{config:option} security.shared storage_volume_dir-common
 :condition: "custom block volume"
 :default: "same as `volume.security.shared` or `false`"
@@ -7493,6 +7625,14 @@ has completed.
 
 ```
 
+```{config:option} migration.follow_instance storage_volume_lvm-common
+:condition: "custom volume"
+:default: "`false`"
+:shortdesc: "Move the volume along with the virtual machine it's attached to when it moves to another cluster member"
+:type: "bool"
+
+```
+
 ```{config:option} security.shared storage_volume_lvm-common
 :condition: "custom block volume"
 :default: "same as `volume.security.shared` or `false`"
@@ -7741,6 +7881,14 @@ has completed.
 :default: "same as `volume.initial.uid` or `0`"
 :shortdesc: "UID of the volume owner in the instance"
 :type: "int"
+
+```
+
+```{config:option} migration.follow_instance storage_volume_zfs-common
+:condition: "custom volume"
+:default: "`false`"
+:shortdesc: "Move the volume along with the virtual machine it's attached to when it moves to another cluster member"
+:type: "bool"
 
 ```
 

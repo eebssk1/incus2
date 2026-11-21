@@ -589,6 +589,16 @@ var APIExtensions = []string{
 	"authorization_scriptlet_request",
 	"vm_boot_priority_skip",
 	"network_ovn_nat_address_l2proxy",
+	"oidc_id_token",
+	"certificate_ca_trust",
+	"network_bgp_communities",
+	"instances_migration_bwlimit",
+	"backup_s3_region",
+	"nic_sriov_migration",
+	"auth_tls_jwt_cookie",
+	"cluster_healing_delay",
+	"storage_volume_migration_follow_instance",
+	"nic_sriov_migration_native",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

@@ -811,7 +811,7 @@ func (d *nicOVN) validateEnvironment() error {
 
 	integrationBridge := d.state.GlobalConfig.NetworkOVNIntegrationBridge()
 
-	if !util.PathExists(fmt.Sprintf("/sys/class/net/%s", integrationBridge)) {
+	if !network.InterfaceExists(integrationBridge) {
 		return fmt.Errorf("OVS integration bridge device %q doesn't exist", integrationBridge)
 	}
 
@@ -920,7 +920,7 @@ func (d *nicOVN) Start() (*deviceConfig.RunConfig, error) {
 			}
 
 			// Claim the SR-IOV virtual function (VF) on the parent (PF) and get the PCI information.
-			vfPCIDev, pciIOMMUGroup, err = networkSRIOVSetupVF(d.deviceCommon, vfParent, vfDev, vfID, saveData)
+			vfPCIDev, pciIOMMUGroup, err = networkSRIOVSetupVF(d.deviceCommon, vfParent, vfDev, vfID, saveData, "vfio-pci")
 			if err != nil {
 				network.SRIOVVirtualFunctionMutex.Unlock()
 				return nil, fmt.Errorf("Failed setting up VF: %w", err)
@@ -981,7 +981,7 @@ func (d *nicOVN) Start() (*deviceConfig.RunConfig, error) {
 			}
 
 			// Claim the SR-IOV virtual function (VF) on the parent (PF) and get the PCI information.
-			vfPCIDev, pciIOMMUGroup, err = networkSRIOVSetupVF(d.deviceCommon, vfParent, vfDev, vfID, saveData)
+			vfPCIDev, pciIOMMUGroup, err = networkSRIOVSetupVF(d.deviceCommon, vfParent, vfDev, vfID, saveData, "vfio-pci")
 			if err != nil {
 				network.SRIOVVirtualFunctionMutex.Unlock()
 				return nil, err
@@ -1443,17 +1443,24 @@ func (d *nicOVN) Stop() (*deviceConfig.RunConfig, error) {
 func (d *nicOVN) postStop() error {
 	defer func() {
 		_ = d.volatileSet(map[string]string{
-			"host_name":                "",
-			"last_state.hwaddr":        "",
-			"last_state.mtu":           "",
-			"last_state.created":       "",
-			"last_state.vdpa.name":     "",
-			"last_state.vf.parent":     "",
-			"last_state.vf.id":         "",
-			"last_state.vf.hwaddr":     "",
-			"last_state.vf.vlan":       "",
-			"last_state.vf.spoofcheck": "",
-			"last_state.pci.driver":    "",
+			"host_name":                       "",
+			"last_state.hwaddr":               "",
+			"last_state.mtu":                  "",
+			"last_state.created":              "",
+			"last_state.vdpa.name":            "",
+			"last_state.vf.parent":            "",
+			"last_state.vf.id":                "",
+			"last_state.vf.hwaddr":            "",
+			"last_state.vf.vlan":              "",
+			"last_state.vf.spoofcheck":        "",
+			"last_state.pci.driver":           "",
+			"last_state.representor":          "",
+			"last_state.representor.mtu":      "",
+			"last_state.representor.pvid":     "",
+			"last_state.representor.tagged":   "",
+			"last_state.representor.untagged": "",
+			"last_state.representor.up":       "",
+			"last_state.migratable":           "",
 		})
 	}()
 
@@ -1508,7 +1515,7 @@ func (d *nicOVN) postStop() error {
 		if err != nil {
 			return fmt.Errorf("Failed to bring down the host interface %q: %w", d.config["host_name"], err)
 		}
-	} else if d.config["host_name"] != "" && util.PathExists(fmt.Sprintf("/sys/class/net/%s", d.config["host_name"])) {
+	} else if d.config["host_name"] != "" && network.InterfaceExists(d.config["host_name"]) {
 		// Removing host-side end of veth pair will delete the peer end too.
 		err := network.InterfaceRemove(d.config["host_name"])
 		if err != nil {

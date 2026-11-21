@@ -3557,3 +3557,59 @@ This additionally adds a `boot.pxe` VM configuration key, defaulting to `false`,
 
 Allows `ipv4.nat.address` and `ipv6.nat.address` on an `ovn` network whose uplink uses
 `ovn.ingress_mode=l2proxy`, previously only supported with `ovn.ingress_mode=routed`.
+
+## `oidc_id_token`
+
+This adds support for OIDC providers that issue opaque (non-JWT) access tokens.
+
+When the access token isn't a JWT, Incus verifies the ID token instead, checking that it was issued by the configured issuer for the configured client ID.
+Clients send the ID token alongside the opaque access token through the `X-Incus-OIDC-idtoken` header.
+
+## `certificate_ca_trust`
+
+A CA certificate added to the trust store now also trusts the client certificates it issued.
+Those clients are identified by the CA entry's fingerprint and inherit its type, restrictions and projects.
+
+## `network_bgp_communities`
+This adds a `bgp.communities` network configuration key for `bridge` and `ovn` networks.
+It takes a comma-separated list of standard BGP communities (`ASN:value`)
+which are attached to all prefixes advertised by the network.
+
+## `instances_migration_bwlimit`
+This adds the `instances.migration.bwlimit` server configuration key which limits
+the bandwidth used by the memory and state transfer of each virtual machine live migration.
+
+## `backup_s3_region`
+This adds a `region` field to the S3 backup target used when uploading
+instance or volume backups, for S3 compatible stores whose region can't
+be derived from their URL.
+
+## `nic_sriov_migration`
+
+This adds a new `failover` configuration key to both `sriov` networks and NICs, accepting a bridge network name (managed or not), which controls the creation of a so-called failover `virtio-net` NIC on said bridge. This failover NIC is used to live-migrate an SR-IOV NIC through the `virtio-net` failover mechanism on guests supporting the feature.
+
+## `auth_tls_jwt_cookie`
+
+This adds the `/tls/login` and `/tls/logout` endpoints for browser based clients.
+
+A `POST` to `/tls/login` with a valid TLS `JWT` in the `Authorization` header
+stores that token in a `tls_jwt` cookie which is then accepted by all API
+endpoints and WebSocket connections. The cookie is `Secure`, `HttpOnly` and
+`SameSite=Strict` and expires with the token. `/tls/logout` clears the cookie.
+
+## `cluster_healing_delay`
+
+This adds the `cluster.healing_delay` server configuration key and the `cluster-member-offline` event.
+
+When cluster healing detects an offline member, the event is sent immediately and the evacuation only starts once the delay has elapsed, giving external tooling time to power the member off.
+
+## `storage_volume_migration_follow_instance`
+
+This adds a `migration.follow_instance` configuration key for custom storage volumes.
+
+When set on a volume in a local storage pool that's attached to a single virtual machine, the volume
+is moved along with the virtual machine when it moves to another cluster member.
+
+## `nic_sriov_migration_native`
+
+This adds a new `variant` configuration key to both `sriov` networks and NICs, allowing to set the VFIO driver to use (either no value to keep the generic `vfio-pci` driver, or `mlx5` for `mlx5_vfio_pci`). This allows native VFIO live-migration of SR-IOV NICs.

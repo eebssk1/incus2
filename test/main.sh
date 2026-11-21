@@ -209,6 +209,7 @@ run_test() {
 run_standalone_core() {
     run_test test_certificate_edit "Certificate edit"
     run_test test_config_profiles "profiles and configuration"
+    run_test test_config_device_names "device names"
     run_test test_database_no_disk_space "database out of disk space"
     run_test test_database_restore "database restore"
     run_test test_filtering "API filtering"
@@ -258,6 +259,7 @@ run_standalone_core() {
     run_test test_tls_jwt "JWT authentication"
     run_test test_tls_restrictions "TLS restrictions"
     run_test test_warnings "Warnings"
+    run_test test_warnings_forced_stop "Warnings on forced stops"
 }
 
 # Tests related to storage and storage drivers (will be run on all drivers).
@@ -354,8 +356,11 @@ run_standalone_network() {
     run_test test_oidc "OpenID Connect"
     run_test test_openfga "OpenFGA"
     run_test test_remote_admin "remote administration"
+    run_test test_remote_generate_certificate "remote certificate generation"
     run_test test_remote_url "remote url handling"
+    run_test test_remote_url_with_token "remote url handling with tokens"
     run_test test_remote_usage "remote usage"
+    run_test test_remote_keepalive "remote keepalive proxy"
     run_test test_list_all_remotes "list all remotes"
     run_test test_syslog_socket "Syslog socket"
 }
@@ -419,6 +424,7 @@ run_cluster() {
     run_test test_clustering_failure_domains "clustering failure domains"
     run_test test_clustering_image_refresh "clustering image refresh"
     run_test test_clustering_evacuation "clustering evacuation"
+    run_test test_clustering_healing "clustering healing"
     run_test test_clustering_instance_placement_scriptlet "clustering instance placement scriptlet"
     run_test test_clustering_move "clustering move"
     run_test test_clustering_edit_configuration "clustering config edit"

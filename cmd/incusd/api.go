@@ -123,6 +123,10 @@ func restServer(d *Daemon) *http.Server {
 		d.oidcVerifier.Logout(w, r)
 	})
 
+	// TLS JWT browser login (cookie based).
+	router.HandleFunc("/tls/login", d.tlsJWTLogin)
+	router.HandleFunc("/tls/logout", d.tlsJWTLogout)
+
 	router.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -384,7 +388,7 @@ func serveLocalBucket(d *Daemon, w http.ResponseWriter, r *http.Request, bucket 
 		}
 	}()
 
-	srv := local.NewServer(bucketDir, creds)
+	srv := local.NewServer(bucketDir, bucket.Name, creds)
 
 	// Migrate any data left over from the legacy minio layout, but only
 	// once the request has cleared authentication. This is a no-op once

@@ -51,7 +51,7 @@ func qemuMachineType(architecture int) string {
 	switch architecture {
 	case osarch.ARCH_64BIT_INTEL_X86:
 		machineType = "q35"
-	case osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN:
+	case osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN, osarch.ARCH_64BIT_LOONGARCH:
 		machineType = "virt"
 	case osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN:
 		machineType = "pseries"
@@ -70,6 +70,8 @@ func qemuDefaultRAMObject(architecture int) string {
 		return "pc.ram"
 	case osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN:
 		return "mach-virt.ram"
+	case osarch.ARCH_64BIT_LOONGARCH:
+		return "loongarch.ram"
 	case osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN:
 		return "ppc_spapr.ram"
 	case osarch.ARCH_64BIT_S390_BIG_ENDIAN:
@@ -348,13 +350,43 @@ func qemuPCIe(opts *qemuPCIeOpts) []cfg.Section {
 	}}
 }
 
-func qemuSCSI(opts *qemuDevOpts, numQueues int) []cfg.Section {
+// qemuIOThreadCount is the number of iothreads the virtio disks run through.
+const qemuIOThreadCount = 1
+
+// qemuIOThreadPrefix is the object name prefix of the iothreads.
+const qemuIOThreadPrefix = "qemu_iothread"
+
+// qemuIOThreadName returns the object name of an iothread.
+func qemuIOThreadName(index int) string {
+	return fmt.Sprintf("%s%d", qemuIOThreadPrefix, index)
+}
+
+func qemuIOThreads(count int) []cfg.Section {
+	sections := make([]cfg.Section, 0, count)
+	for i := range count {
+		sections = append(sections, cfg.Section{
+			Name:    fmt.Sprintf(`object "%s"`, qemuIOThreadName(i)),
+			Comment: "Disk I/O thread",
+			Entries: map[string]string{
+				"qom-type": "iothread",
+			},
+		})
+	}
+
+	return sections
+}
+
+func qemuSCSI(opts *qemuDevOpts, numQueues int, ioThread string) []cfg.Section {
 	entries := qemuDeviceEntries(&qemuDevEntriesOpts{
 		dev:     *opts,
 		pciName: "virtio-scsi-pci",
 		ccwName: "virtio-scsi-ccw",
 	})
 	entries["num_queues"] = fmt.Sprintf("%d", numQueues)
+
+	if ioThread != "" {
+		entries["iothread"] = ioThread
+	}
 
 	return []cfg.Section{{
 		Name:    `device "qemu_scsi"`,
@@ -370,10 +402,14 @@ func qemuBalloon(opts *qemuDevOpts) []cfg.Section {
 		ccwName: "virtio-balloon-ccw",
 	}
 
+	// Let the guest hand freed memory back to the host.
+	entries := qemuDeviceEntries(&entriesOpts)
+	entries["free-page-reporting"] = "on"
+
 	return []cfg.Section{{
 		Name:    `device "qemu_balloon"`,
 		Comment: "Balloon driver",
-		Entries: qemuDeviceEntries(&entriesOpts),
+		Entries: entries,
 	}}
 }
 

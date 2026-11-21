@@ -152,6 +152,7 @@ iSCSI
 JIT
 jq
 JSON
+JWT
 kB
 kbit
 KiB
@@ -185,6 +186,7 @@ MiB
 Mibit
 MicroCeph
 MicroCloud
+migratable
 misconfigured
 MCS
 MII
@@ -251,8 +253,10 @@ pre
 preselects
 preseed
 proxied
+Proxmox
 proxying
 PTS
+PVID
 PXE
 qdisc
 QEMU
@@ -265,6 +269,7 @@ RBD
 RDNSS
 README
 reconfiguring
+representor
 requestor
 resolvers
 RESTful
@@ -355,6 +360,7 @@ unixgram
 unmanaged
 unmount
 unmounting
+untagged
 uplink
 uptime
 URI
@@ -363,7 +369,9 @@ userspace
 UUID
 vCPU
 vCPUs
+VE
 VDPA
+VFIO
 VFs
 VFS
 VirtIO
@@ -392,3 +400,4 @@ Zettabyte
 ZFS
 zpool
 zpools
+Fibre

@@ -60,6 +60,14 @@ definitions:
                 example: S3
                 type: string
                 x-go-name: Protocol
+            region:
+                description: |-
+                    Region is the S3 region, derived from the URL when empty
+
+                    API extension: backup_s3_region
+                example: eu-west-1
+                type: string
+                x-go-name: Region
             secret_key:
                 description: SecretKey is the S3 API access key
                 example: secret123
@@ -797,6 +805,39 @@ definitions:
                 type: string
                 x-go-name: Name
         title: DebugKernelModule represents a loaded kernel module.
+        type: object
+        x-go-package: github.com/lxc/incus-os/incus-osd/api
+    DebugReport:
+        properties:
+            media_type:
+                type: string
+                x-go-name: MediaType
+            metrics:
+                items:
+                    $ref: '#/definitions/DebugReportMetric'
+                type: array
+                x-go-name: Metrics
+            timestamp:
+                type: string
+                x-go-name: Timestamp
+        title: DebugReport represents a systemd-report report.
+        type: object
+        x-go-package: github.com/lxc/incus-os/incus-osd/api
+    DebugReportMetric:
+        properties:
+            fields:
+                additionalProperties: {}
+                type: object
+                x-go-name: Fields
+            name:
+                type: string
+                x-go-name: Name
+            object:
+                type: string
+                x-go-name: Object
+            value:
+                x-go-name: Value
+        title: DebugReportMetric represents a single metric from a systemd-report report.
         type: object
         x-go-package: github.com/lxc/incus-os/incus-osd/api
     DevicesMap:
@@ -7939,6 +7980,13 @@ definitions:
                     specified timeout has elapsed unless those changes are confirmed before then.
                 type: string
                 x-go-name: ConfirmationTimeout
+            default_confirmation_timeout:
+                description: |-
+                    If defined and no confirmation timeout provided, automatically roll
+                    back the new network changes after the specified timeout has elapsed unless those
+                    changes are confirmed before then.
+                type: string
+                x-go-name: DefaultConfirmationTimeout
             dns:
                 $ref: '#/definitions/SystemNetworkDNS'
             interfaces:
@@ -8690,6 +8738,10 @@ definitions:
                 format: int64
                 type: integer
                 x-go-name: SeekErrorRate
+            temperature_celsius:
+                format: int64
+                type: integer
+                x-go-name: TemperatureCelsius
         title: SystemStorageDriveSMART defines a struct to return basic SMART information about a specific device.
         type: object
         x-go-package: github.com/lxc/incus-os/incus-osd/api
@@ -8814,6 +8866,9 @@ definitions:
             encryption_key:
                 type: string
                 x-go-name: EncryptionKey
+            force:
+                type: boolean
+                x-go-name: Force
             name:
                 type: string
                 x-go-name: Name
@@ -9520,7 +9575,7 @@ paths:
                 - application/json
             description: |-
                 Adds a certificate to the trust store as an untrusted user.
-                In this mode, the `token` property must be set to the correct value.
+                In this mode, the `trust_token` property must be set to the correct value.
 
                 The `certificate` field can be omitted in which case the TLS client
                 certificate in use for the connection will be retrieved and added to the
@@ -13345,7 +13400,7 @@ paths:
     /1.0/instances/{name}/nbd:
         get:
             description: |-
-                Upgrades the request to an NBD connection exposing all of the instance's block devices.
+                Upgrades the request to an NBD connection exposing the instance's root disk and dependent disks.
                 Each disk is exported under an NBD export named after its Incus device name.
 
                 This is only available on running virtual machines. For stopped instances, access the disks
@@ -13386,7 +13441,7 @@ paths:
                     $ref: '#/responses/Conflict'
                 "500":
                     $ref: '#/responses/InternalServerError'
-            summary: Get an NBD connection for all of the instance's disks
+            summary: Get an NBD connection for the instance's root and dependent disks
             tags:
                 - instances
     /1.0/instances/{name}/nvram:

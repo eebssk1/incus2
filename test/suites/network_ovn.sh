@@ -67,6 +67,19 @@ test_network_ovn_basic() {
     sleep 2
     incus network list | grep ovn-virtual-network
 
+    echo "==> Check the network is still listed when OVN can't be reached"
+    ovnRemote="$(ovs-vsctl get open_vswitch . external_ids:ovn-remote)"
+    ovs-vsctl remove open_vswitch . external_ids ovn-remote
+    shutdown_incus "${INCUS_DIR}"
+    respawn_incus "${INCUS_DIR}" true
+    incus network list -f csv -c ns | grep -xF "ovn-virtual-network,UNAVAILABLE"
+    incus network show ovn-virtual-network | grep -xF "status: Unavailable"
+    ! incus network info ovn-virtual-network || false
+    ovs-vsctl set open_vswitch . external_ids:ovn-remote="${ovnRemote}"
+    shutdown_incus "${INCUS_DIR}"
+    respawn_incus "${INCUS_DIR}" true
+    incus network list -f csv -c ns | grep -xF "ovn-virtual-network,CREATED"
+
     echo "==> Check we can get the network state (MAC address and MTU are reported in network info)"
     incus network info ovn-virtual-network | grep -P 'MAC address: [0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}'
     incus network info ovn-virtual-network | grep -P 'MTU: \d+'
@@ -287,8 +300,14 @@ test_network_ovn_basic() {
     incus project unset testovn restricted.networks.access
     incus network delete incusbr-shared --project default
 
-    # Test physical uplink with external IPs.
+    # Deleting a network removes the VLAN interface created from the extended external interface syntax.
     ip link add dummy0 type dummy
+    incus network create ovn-ext --type=ovn network=none bridge.external_interfaces=ovnvlan222/dummy0/222 ipv4.address=10.222.222.1/24 ipv4.nat=false ipv6.address=none
+    ip link show ovnvlan222
+    incus network delete ovn-ext
+    ! ip link show ovnvlan222 || false
+
+    # Test physical uplink with external IPs.
     incus network create dummy --type=physical --project default \
         parent=dummy0 \
         ipv4.gateway=192.0.2.1/24 \
@@ -2067,6 +2086,17 @@ test_network_ovn_acl() {
     incus network acl rule add ingress-ping ingress action=allow protocol=icmp4 destination=10.10.10.1-10.10.11.1
     ! incus exec c2 -- ping -c1 -w5 -4 10.10.11.2 || false
 
+    # Test address set subjects aren't treated as referenced ACLs.
+    incus network address-set create pingset
+    incus network address-set add pingset 10.10.11.2
+    # shellcheck disable=2016
+    incus network acl rule add ingress-ping ingress action=allow protocol=icmp4 destination='\$pingset'
+    incus exec c2 -- ping -c1 -w5 -4 10.10.11.2
+    ! ovn-nbctl --bare --column=name --format=csv find port_group | grep -q incus_acl0_ || false
+    # shellcheck disable=2016
+    incus network acl rule remove ingress-ping ingress action=allow protocol=icmp4 destination='\$pingset'
+    incus network address-set delete pingset
+
     # Test ACL rule referencing our own ACL name as source in rule.
     incus network acl rule remove ingress-ping ingress action=allow protocol=icmp4 destination=10.10.10.1-10.10.11.1
     incus network acl rule add ingress-ping ingress action=allow protocol=icmp4 source=ingress-ping
@@ -2484,6 +2514,63 @@ test_network_ovn_parent() {
     [ "$(incus network info ovn2 | awk '/Logical router:/ {print $NF}')" = "${parentRouter}" ]
     [ "$(ovn-nbctl --format=csv --bare --columns=name find logical_router_port | grep -cE "^${parentRouter}-lrp-int")" = "2" ]
     ovn-nbctl --bare --format=csv --columns=logical_ip,type find nat | grep -xF "10.10.12.0/24,snat"
+
+    echo "==> Check forwards and load balancers follow a network changing its parent"
+    incus network forward create ovn2 10.10.13.50 target_address=10.10.12.2
+    incus network forward port add ovn2 10.10.13.50 tcp 80 10.10.12.3
+    incus network load-balancer create ovn2 10.10.13.51
+    incus network load-balancer backend add ovn2 10.10.13.51 b1 10.10.12.2
+    incus network load-balancer port add ovn2 10.10.13.51 tcp 80 b1
+    [ "$(ovn-nbctl lr-lb-list "${parentRouter}" | grep -c '10.10.13.5[01]:80')" = "2" ]
+
+    # A child can't move to a network without an uplink.
+    incus network create ovn5 --type=ovn network=none ipv4.address=10.10.17.1/24 ipv6.address=none
+    ! incus network set ovn2 parent=ovn5 network= || false
+    [ "$(incus network info ovn2 | awk '/Logical router:/ {print $NF}')" = "${parentRouter}" ]
+    [ "$(ovn-nbctl lr-lb-list "${parentRouter}" | grep -c '10.10.13.5[01]:80')" = "2" ]
+    incus network delete ovn5
+
+    # Moving to another parent re-applies everything on the new logical router.
+    incus network set ovn2 parent=ovn4
+    sleep 2
+    newRouter="$(incus network info ovn4 | awk '/Logical router:/ {print $NF}')"
+    [ "$(incus network info ovn2 | awk '/Logical router:/ {print $NF}')" = "${newRouter}" ]
+    [ "$(ovn-nbctl lr-lb-list "${newRouter}" | grep -c '10.10.13.5[01]:80')" = "2" ]
+    [ "$(ovn-nbctl lr-lb-list "${parentRouter}" | grep -c '10.10.13.5[01]:80')" = "0" ]
+    ovn-nbctl --bare --format=csv --columns=external_ip,type find nat | grep -xF "10.10.13.50,dnat"
+    ovn-nbctl lr-route-list "${newRouter}" | grep -F "10.10.13.50"
+    ovn-nbctl lr-route-list "${newRouter}" | grep -F "10.10.13.51"
+    ! ovn-nbctl lr-route-list "${parentRouter}" | grep -F "10.10.13.5" || false
+
+    # Leaving the parent gives the network its own logical router back.
+    incus network set ovn2 parent= network=incusbr0
+    sleep 2
+    ownRouter="$(incus network info ovn2 | awk '/Logical router:/ {print $NF}')"
+    [ "${ownRouter}" != "${newRouter}" ]
+    [ "$(ovn-nbctl lr-lb-list "${ownRouter}" | grep -c '10.10.13.5[01]:80')" = "2" ]
+    [ "$(ovn-nbctl lr-lb-list "${newRouter}" | grep -c '10.10.13.5[01]:80')" = "0" ]
+    ovn-nbctl lr-route-list "${ownRouter}" | grep -F "10.10.13.50"
+    ! ovn-nbctl lr-route-list "${newRouter}" | grep -F "10.10.13.5" || false
+
+    # Move back below the original parent.
+    incus network set ovn2 parent=ovn1 network=
+    sleep 2
+    [ "$(incus network info ovn2 | awk '/Logical router:/ {print $NF}')" = "${parentRouter}" ]
+    [ "$(ovn-nbctl lr-lb-list "${parentRouter}" | grep -c '10.10.13.5[01]:80')" = "2" ]
+    [ "$(ovn-nbctl lr-lb-list "${ownRouter}" | grep -c '10.10.13.5[01]:80')" = "0" ]
+
+    incus network forward delete ovn2 10.10.13.50
+    incus network load-balancer delete ovn2 10.10.13.51
+
+    echo "==> Check a network with peerings can't change its parent"
+    incus network create ovn6 --type=ovn network=incusbr0 ipv4.address=10.10.18.1/24 ipv4.nat=true ipv6.address=none
+    incus network peer create ovn4 peer6 ovn6
+    incus network peer create ovn6 peer4 ovn4
+    ! incus network set ovn4 parent=ovn1 network= || false
+    ! incus network set ovn6 parent=ovn1 network= || false
+    incus network peer delete ovn4 peer6
+    incus network peer delete ovn6 peer4
+    incus network delete ovn6
 
     echo "==> Check reparenting a network with instances attached"
     incus init "${instanceImage}" u1 -s "${poolName}" -n ovn2

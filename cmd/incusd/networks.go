@@ -8,6 +8,7 @@ import (
 	"maps"
 	"net"
 	"net/http"
+	"os"
 	"runtime"
 	"slices"
 	"strconv"
@@ -404,6 +405,12 @@ func networksPost(d *Daemon, r *http.Request) response.Response {
 	s := d.State()
 
 	projectName, reqProject, err := project.NetworkProject(s.DB.Cluster, request.ProjectParam(r))
+	if err != nil {
+		return response.SmartError(err)
+	}
+
+	// Authorize against the project the network is actually created in.
+	err = s.Authorizer.CheckPermission(r.Context(), r, auth.ObjectProject(projectName), auth.EntitlementCanCreateNetworks)
 	if err != nil {
 		return response.SmartError(err)
 	}
@@ -1113,13 +1120,50 @@ func doNetworkGet(s *state.State, r *http.Request, allNodes bool, projectName st
 	}
 
 	// Get some information.
+	var netID int64
+	var netInfo *api.Network
+
 	n, err := network.LoadByName(s, projectName, networkName)
-	if err != nil && !api.StatusErrorCheck(err, http.StatusNotFound) {
-		return api.Network{}, fmt.Errorf("Failed loading network: %w", err)
+	if err == nil {
+		netID = n.ID()
+		netInfo = &api.Network{
+			NetworkPut: api.NetworkPut{
+				Description: n.Description(),
+				Config:      n.Config(),
+			},
+			Name:      n.Name(),
+			Type:      n.Type(),
+			Locations: n.Locations(),
+		}
+
+		if allNodes {
+			netInfo.Status = n.Status()
+		} else {
+			netInfo.Status = n.LocalStatus()
+		}
+	} else if !api.StatusErrorCheck(err, http.StatusNotFound) {
+		// The driver failed to initialize, report the network as unavailable from its database record.
+		loadErr := err
+		err = s.DB.Cluster.Transaction(r.Context(), func(ctx context.Context, tx *db.ClusterTx) error {
+			var err error
+
+			netID, netInfo, _, err = tx.GetNetworkInAnyState(ctx, projectName, networkName)
+
+			return err
+		})
+		if err != nil {
+			if api.StatusErrorCheck(err, http.StatusNotFound) {
+				return api.Network{}, err
+			}
+
+			return api.Network{}, fmt.Errorf("Failed loading network: %w", loadErr)
+		}
+
+		netInfo.Status = api.NetworkStatusUnavailable
 	}
 
 	// Validate access.
-	ok, err := canAccessNetwork(s, r, projectName, reqProjectConfig, networkName, n != nil)
+	ok, err := canAccessNetwork(s, r, projectName, reqProjectConfig, networkName, netInfo != nil)
 	if err != nil {
 		return api.Network{}, err
 	}
@@ -1128,11 +1172,12 @@ func doNetworkGet(s *state.State, r *http.Request, allNodes bool, projectName st
 		return api.Network{}, api.StatusErrorf(http.StatusNotFound, "Network not found")
 	}
 
-	// Get OS network details.
-	osInfo, _ := net.InterfaceByName(networkName)
+	// Check for a host interface through sysfs rather than a netlink dump.
+	osExists := network.InterfaceExists(networkName)
+	linkType, _ := os.ReadFile(fmt.Sprintf("/sys/class/net/%s/type", networkName))
 
 	// Quick check.
-	if osInfo == nil && n == nil {
+	if !osExists && netInfo == nil {
 		return api.Network{}, api.StatusErrorf(http.StatusNotFound, "Network not found")
 	}
 
@@ -1144,26 +1189,27 @@ func doNetworkGet(s *state.State, r *http.Request, allNodes bool, projectName st
 	apiNet.Project = projectName
 
 	// Set the device type as needed.
-	if n != nil {
+	if netInfo != nil {
 		apiNet.Managed = true
-		apiNet.Description = n.Description()
-		apiNet.Type = n.Type()
+		apiNet.Description = netInfo.Description
+		apiNet.Type = netInfo.Type
 
 		err = s.Authorizer.CheckPermission(r.Context(), r, auth.ObjectNetwork(projectName, networkName), auth.EntitlementCanEdit)
 		if err == nil {
 			// Only allow admins to see network config as sensitive info can be stored there.
-			apiNet.Config = n.Config()
+			apiNet.Config = netInfo.Config
 		} else if !api.StatusErrorCheck(err, http.StatusForbidden) {
 			return api.Network{}, err
 		}
 
 		// If no member is specified, we omit the node-specific fields.
 		if allNodes {
-			apiNet.Config = db.StripNodeSpecificNetworkConfig(n.Type(), apiNet.Config)
+			apiNet.Config = db.StripNodeSpecificNetworkConfig(netInfo.Type, apiNet.Config)
 		}
-	} else if osInfo != nil && int(osInfo.Flags&net.FlagLoopback) > 0 {
+	} else if strings.TrimSpace(string(linkType)) == "772" {
+		// ARPHRD_LOOPBACK.
 		apiNet.Type = "loopback"
-	} else if util.PathExists(fmt.Sprintf("/sys/class/net/%s/bridge", apiNet.Name)) {
+	} else if network.IsNativeBridge(apiNet.Name) {
 		apiNet.Type = "bridge"
 	} else if util.PathExists(fmt.Sprintf("/proc/net/vlan/%s", apiNet.Name)) {
 		apiNet.Type = "vlan"
@@ -1187,12 +1233,7 @@ func doNetworkGet(s *state.State, r *http.Request, allNodes bool, projectName st
 
 	// Look for instances using the interface.
 	if apiNet.Type != "loopback" {
-		var networkID int64
-		if n != nil {
-			networkID = n.ID()
-		}
-
-		usedBy, err := network.UsedBy(s, projectName, networkID, apiNet.Name, apiNet.Type, false)
+		usedBy, err := network.UsedBy(s, projectName, netID, apiNet.Name, apiNet.Type, false)
 		if err != nil {
 			return api.Network{}, err
 		}
@@ -1200,14 +1241,9 @@ func doNetworkGet(s *state.State, r *http.Request, allNodes bool, projectName st
 		apiNet.UsedBy = project.FilterUsedBy(s.Authorizer, r, usedBy)
 	}
 
-	if n != nil {
-		if allNodes {
-			apiNet.Status = n.Status()
-		} else {
-			apiNet.Status = n.LocalStatus()
-		}
-
-		apiNet.Locations = n.Locations()
+	if netInfo != nil {
+		apiNet.Status = netInfo.Status
+		apiNet.Locations = netInfo.Locations
 	}
 
 	return apiNet, nil
